@@ -1,0 +1,32 @@
+.heading {
+  margin-bottom: 48px;
+  max-width: 24ch;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--gap-card);
+}
+
+.card {
+  background: var(--milk);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.quote {
+  font-size: var(--size-body);
+  line-height: 1.65;
+  margin: 0;
+  color: var(--ink);
+}
+
+.attribution {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  margin-top: auto;
+}

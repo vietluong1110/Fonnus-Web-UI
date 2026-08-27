@@ -1,0 +1,100 @@
+.inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(32px, 6vw, 80px);
+  align-items: start;
+}
+
+.heading {
+  margin-bottom: 24px;
+  max-width: 22ch;
+}
+
+.lede {
+  margin-bottom: 32px;
+  max-width: 48ch;
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+}
+
+.directLine {
+  margin-top: 40px;
+  padding-top: 32px;
+  box-shadow: inset 0 1px 0 var(--border-hairline);
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  font-size: var(--size-body-sm);
+}
+
+.directLabel {
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+
+.directNum {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.formCard {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 36px);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.formNote {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Success state keeps the card's height so the page does not jump on submit. */
+.sent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  min-height: 300px;
+  justify-content: center;
+}
+
+.sentTick {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--sage);
+  display: grid;
+  place-items: center;
+  color: var(--success);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.sentTitle {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--size-heading);
+  line-height: 1.3;
+}
+
+.sentBody {
+  font-size: var(--size-body);
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0;
+}

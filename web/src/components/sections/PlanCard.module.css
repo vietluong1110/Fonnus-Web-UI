@@ -1,0 +1,175 @@
+/*
+ * All four cards share one column layout with `margin-top: auto` on the CTA,
+ * so their heights match no matter how many feature bullets a plan carries.
+ */
+.card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+/* "Not yet" — the free trial is a dashed outline with no fill. */
+.trial {
+  composes: card;
+  background: transparent;
+  border: 1px dashed var(--border-dashed);
+  box-shadow: none;
+}
+
+/* Exactly one card in the row is filled terracotta. */
+.featured {
+  composes: card;
+  background: var(--action-primary);
+  color: var(--cream);
+  box-shadow: none;
+}
+
+/* Set by Pricing when a plan is the configured highlight. */
+.highlighted {
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+/*
+ * The badge straddles the card's top edge — half out, half in — so the title
+ * below keeps the same baseline as every other card's title.
+ */
+.badge {
+  position: absolute;
+  top: 0;
+  right: 20px;
+  transform: translateY(-50%);
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--cream);
+  background: var(--terracotta-deep);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(38, 31, 24, 0.18);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--size-subheading);
+  margin-bottom: 4px;
+}
+
+.blurb {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.blurbOnFill {
+  composes: blurb;
+  color: inherit;
+  opacity: 0.86;
+}
+
+.priceRow {
+  margin: 22px 0 4px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.price {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 34px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.priceOnFill {
+  composes: price;
+  color: inherit;
+}
+
+/* The trial shows a word where the others show a number. */
+.priceFree {
+  composes: price;
+  margin: 22px 0 4px;
+}
+
+.per {
+  font-size: var(--size-body-sm);
+  color: var(--ink-soft);
+}
+
+.perOnFill {
+  composes: per;
+  color: inherit;
+  opacity: 0.86;
+}
+
+/* Reserved so switching billing period never changes the card's height. */
+.note {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  min-height: 18px;
+}
+
+.noteOnFill {
+  composes: note;
+  color: inherit;
+  opacity: 0.86;
+}
+
+.rule {
+  display: block;
+  height: 1px;
+  background: var(--border-hairline);
+  margin: 20px 0;
+}
+
+.ruleOnFill {
+  composes: rule;
+  background: rgba(255, 246, 232, 0.25);
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: var(--size-body-sm);
+  color: var(--ink-soft);
+}
+
+.featuresOnFill {
+  composes: features;
+  color: inherit;
+  opacity: 0.94;
+}
+
+.feature {
+  display: flex;
+  gap: 10px;
+}
+
+.featureDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  margin-top: 8px;
+  flex: 0 0 auto;
+}
+
+.featureDotOnFill {
+  composes: featureDot;
+  background: rgba(255, 246, 232, 0.7);
+}
+
+.cta {
+  margin-top: auto;
+  padding-top: 24px;
+  text-decoration: none;
+}

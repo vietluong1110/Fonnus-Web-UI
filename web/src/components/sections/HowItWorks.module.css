@@ -1,0 +1,67 @@
+.heading {
+  margin-bottom: 56px;
+  max-width: 22ch;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(24px, 3vw, 40px);
+}
+
+/* Icon plus the dashed thread running to the next step. */
+.rail {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.bullet {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--blush);
+  color: var(--terracotta-deep);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+/* Only the last step — the one that is live from then on — is filled. */
+.bulletLive {
+  composes: bullet;
+  background: var(--action-primary);
+  color: var(--cream);
+}
+
+.thread {
+  flex: 1;
+  height: 0;
+  border-top: 2px dashed var(--border-dashed);
+  margin-left: 14px;
+}
+
+.stepEyebrow {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--terracotta);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--size-subheading);
+  line-height: 1.3;
+  margin: 0 0 10px;
+}
+
+.stepBody {
+  font-size: var(--size-body-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 40ch;
+}

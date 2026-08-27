@@ -1,0 +1,297 @@
+/*
+ * The call screen. Three things and nothing else: the orb, a way to type, and
+ * a way out. The orb itself is not rendered here — it flies in from the page
+ * and lands on `.spot`.
+ */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--paper);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 20px clamp(16px, 4vw, 40px) clamp(20px, 4vh, 40px);
+  animation: fnFadeIn 320ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.whoDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+
+.exit {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 17px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.exit:hover {
+  background: var(--terracotta-deep);
+}
+
+.stage {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 26px;
+}
+
+/* Empty box the orb measures itself against — see useOrbPlacement. */
+.spot {
+  width: clamp(200px, 32vh, 320px);
+  height: clamp(200px, 32vh, 320px);
+}
+
+.state {
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  font-weight: 500;
+  color: var(--ink-soft);
+  min-height: 22px;
+}
+
+/* Reserves room under the orb for the controls, which are fixed. */
+.controlsSpacer {
+  height: 170px;
+}
+
+/*
+ * Controls sit above the screen in their own stacking context so the voice
+ * menu can never be painted under the orb. They fade in — no slide, which
+ * read as "frozen mid-air" during the orb's flight.
+ */
+.controls {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(20px, 4vh, 40px);
+  transform: translateX(-50%);
+  z-index: 80;
+  width: min(760px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  animation: fnFadeIn 420ms cubic-bezier(0.2, 0.7, 0.3, 1) 120ms both;
+}
+
+.chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 4px;
+  white-space: nowrap;
+}
+
+.chip {
+  flex: 0 0 auto;
+  background: var(--milk);
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  border-radius: var(--radius-pill);
+  padding: 10px 16px;
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.chip:hover {
+  background: var(--action-secondary-hover);
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--milk);
+  border-radius: var(--radius-pill);
+  padding: 10px 12px 10px 22px;
+  box-shadow:
+    inset 0 0 0 1px var(--border-hairline),
+    var(--shadow-overlay);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+}
+
+.roundButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.idle {
+  composes: roundButton;
+  background: var(--milk);
+  color: var(--ink);
+}
+
+.active {
+  composes: roundButton;
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.send {
+  composes: roundButton;
+  background: var(--action-primary);
+  color: var(--cream);
+}
+
+.send:hover {
+  background: var(--action-primary-hover);
+}
+
+.voiceAnchor {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.voiceMenu {
+  position: absolute;
+  bottom: 52px;
+  right: 0;
+  width: 296px;
+  background: var(--milk);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow-overlay),
+    inset 0 0 0 1px var(--border-hairline);
+  padding: 8px;
+  animation: fnRise 200ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.voiceMenuTitle {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding: 10px 12px 8px;
+}
+
+.voiceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--ink);
+  transition: background 120ms ease-out;
+  width: 100%;
+  border: none;
+  text-align: left;
+  font: inherit;
+}
+
+.voiceRow:hover {
+  background: var(--action-ghost-hover);
+}
+
+.voiceRowSelected {
+  composes: voiceRow;
+  background: var(--action-primary);
+  color: var(--cream);
+}
+
+.voiceRowSelected:hover {
+  background: var(--action-primary);
+}
+
+.voiceText {
+  flex: 1;
+  min-width: 0;
+}
+
+.voiceName {
+  display: block;
+  font-weight: 600;
+  font-size: var(--size-body-sm);
+  line-height: 1.4;
+}
+
+.voiceDesc {
+  display: block;
+  font-size: var(--size-ui);
+  opacity: 0.72;
+  line-height: 1.4;
+}
+
+.voiceTick {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.voicePlay {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--blush);
+  color: var(--terracotta-deep);
+}
+
+.voicePlaySelected {
+  composes: voicePlay;
+  background: rgba(255, 246, 232, 0.2);
+  color: var(--cream);
+}
+
+.footnote {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  margin: 0;
+  text-align: center;
+}

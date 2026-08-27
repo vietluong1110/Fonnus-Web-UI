@@ -1,0 +1,105 @@
+/*
+ * Shared section chrome. Every landing section sits on the same rhythm:
+ * a clamped vertical band, a 1280px inner column, an eyebrow, a display heading.
+ */
+
+.section {
+  padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px);
+  scroll-margin-top: 72px;
+}
+
+.paper {
+  background: var(--paper);
+}
+
+.milk {
+  background: var(--milk);
+}
+
+.blush {
+  background: var(--blush);
+}
+
+.inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--terracotta);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* On blush grounds the eyebrow steps down to the 6.5:1 deep tone. */
+.eyebrowDeep {
+  composes: eyebrow;
+  color: var(--terracotta-deep);
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(30px, 3.8vw, 44px);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+  margin: 0;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.lede {
+  font-size: var(--size-body-lg);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* A checkmark line: "✓ Không cần tải gì" */
+.check {
+  display: flex;
+  gap: 10px;
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+}
+
+.checkMark {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.checkList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: var(--size-body-sm);
+}
+
+/* Two-up split used by the hero, the demo section and the contact section. */
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
+}
+
+.card {
+  background: var(--milk);
+  border-radius: var(--radius-card);
+  padding: var(--pad-card);
+}
+
+.panel {
+  background: var(--milk);
+  border-radius: var(--radius-lg);
+  padding: var(--pad-card);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}

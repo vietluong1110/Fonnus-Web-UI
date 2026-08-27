@@ -1,0 +1,10 @@
+.heading {
+  margin-bottom: 64px;
+  max-width: 22ch;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(40px, 7vh, 88px);
+}

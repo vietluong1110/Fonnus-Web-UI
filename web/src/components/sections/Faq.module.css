@@ -1,0 +1,76 @@
+.inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.heading {
+  margin-bottom: 48px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item {
+  background: var(--milk);
+  border-radius: var(--radius-card);
+  padding: 4px 24px;
+}
+
+.question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 20px 0;
+  cursor: pointer;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--size-body-lg);
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.sign {
+  color: var(--terracotta);
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+
+/*
+ * Animating grid-template-rows between 0fr and 1fr gives a real height
+ * transition without measuring the answer first.
+ */
+.answerWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 320ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    opacity 320ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.answerWrapOpen {
+  composes: answerWrap;
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.answerClip {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.answer {
+  font-size: var(--size-body);
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0 0 22px;
+  max-width: 64ch;
+}

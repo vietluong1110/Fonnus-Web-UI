@@ -1,0 +1,130 @@
+/* Full viewport height minus the fixed header — the hero owns the first screen. */
+.hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
+  align-content: center;
+  min-height: calc(100vh - 64px);
+  padding: clamp(48px, 8vh, 96px) clamp(20px, 5vw, 64px) clamp(64px, 10vh, 112px);
+  max-width: 1280px;
+  margin: 0 auto;
+  scroll-margin-top: 72px;
+  box-sizing: border-box;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(40px, 5.6vw, 64px);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+  margin: 0 0 24px;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.lede {
+  font-size: var(--size-body-lg);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0 0 32px;
+  max-width: 52ch;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.reassurance {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  margin: 18px 0 0;
+}
+
+/* Right column: a sample of what the owner sees the morning after. */
+.sample {
+  background: var(--milk);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.sampleHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sampleTime {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-num);
+  color: var(--ink-soft);
+}
+
+.sampleRows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.callRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.callIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--rose);
+  display: grid;
+  place-items: center;
+  color: var(--error);
+}
+
+.callNumber {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-num);
+  font-weight: 500;
+}
+
+.callMeta {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.script {
+  background: var(--blush);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: var(--size-body-sm);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.outcome {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--sage);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+}
+
+.tick {
+  color: var(--success);
+  font-weight: 600;
+}

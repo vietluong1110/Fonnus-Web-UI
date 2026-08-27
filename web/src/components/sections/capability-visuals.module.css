@@ -1,0 +1,267 @@
+/* The four illustrative panels beside each capability. */
+
+.panel {
+  background: var(--milk);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.panelLabel {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.panelNum {
+  composes: panelLabel;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Đặt lịch tự động --- */
+
+.windowDots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dotBlush {
+  composes: dot;
+  background: var(--blush);
+}
+
+.dotSage {
+  composes: dot;
+  background: var(--sage);
+}
+
+.dotIdle {
+  composes: dot;
+  background: var(--border-hairline);
+}
+
+.slotRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body-sm);
+}
+
+.slotRowFirst {
+  composes: slotRow;
+  margin-bottom: 14px;
+}
+
+.slotRowSecond {
+  composes: slotRow;
+  margin-bottom: 18px;
+}
+
+.slot {
+  padding: 12px 0;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.slotFree {
+  composes: slot;
+  background: var(--sage);
+  color: var(--ink);
+}
+
+.slotTaken {
+  composes: slot;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  color: var(--ink-soft);
+}
+
+/* The booked slot and its confirmation share one colour so the eye links them. */
+.slotBooked {
+  composes: slot;
+  background: var(--terracotta-deep);
+  color: var(--cream);
+}
+
+.confirmation {
+  background: var(--terracotta-deep);
+  color: var(--cream);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: var(--size-body-sm);
+}
+
+.confirmationTick {
+  font-weight: 600;
+}
+
+/* --- Speech bubbles, shared by the FAQ and handoff panels --- */
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bubble {
+  padding: 14px 16px;
+  font-size: var(--size-body-sm);
+  line-height: 1.6;
+  max-width: 85%;
+}
+
+/* Caller: paper ground, right-aligned — the tail sits bottom-right. */
+.caller {
+  composes: bubble;
+  background: var(--paper);
+  border-radius: 12px 12px 4px 12px;
+  color: var(--ink-soft);
+  align-self: flex-end;
+  text-align: right;
+}
+
+/* Fonnus: blush ground, left-aligned — the assistant speech colour. */
+.agent {
+  composes: bubble;
+  background: var(--blush);
+  border-radius: 12px 12px 12px 4px;
+  align-self: flex-start;
+}
+
+/* --- Chuyển cho nhân viên --- */
+
+.flow {
+  display: flex;
+  flex-direction: column;
+}
+
+.flowHead {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.speaker {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.speakerCaller {
+  composes: speaker;
+  align-self: flex-end;
+}
+
+.flowBubble {
+  padding: 14px 16px;
+  font-size: var(--size-body-sm);
+  line-height: 1.6;
+  max-width: 88%;
+}
+
+.flowCaller {
+  composes: flowBubble;
+  background: var(--paper);
+  border-radius: 12px 12px 4px 12px;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.flowAgent {
+  composes: flowBubble;
+  background: var(--blush);
+  border-radius: 12px 12px 12px 4px;
+  align-self: flex-start;
+}
+
+.connector {
+  width: 2px;
+  height: 18px;
+  background: var(--border-dashed);
+  align-self: center;
+  margin: 6px 0;
+}
+
+.handoff {
+  background: var(--sage);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: var(--size-body-sm);
+  font-weight: 500;
+}
+
+.handoffIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--milk);
+  display: grid;
+  place-items: center;
+  color: var(--success);
+  flex: 0 0 auto;
+}
+
+/* --- Nhật ký cuộc gọi --- */
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.logRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.logIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--rose);
+  display: grid;
+  place-items: center;
+  color: var(--terracotta-deep);
+}
+
+.logText {
+  flex: 1;
+}
+
+.logNumber {
+  display: block;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-num);
+  font-weight: 500;
+}
+
+.logMeta {
+  display: block;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}

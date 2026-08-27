@@ -1,0 +1,44 @@
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+}
+
+/*
+ * Alternating rows flip via `direction: rtl` rather than `order`, so that when
+ * auto-fit wraps to one column the copy still lands above its visual.
+ */
+.reversed {
+  composes: row;
+  direction: rtl;
+}
+
+.reversed > * {
+  direction: ltr;
+}
+
+.eyebrow {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--terracotta);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--size-heading);
+  line-height: 1.3;
+  margin: 0 0 14px;
+}
+
+.body {
+  font-size: var(--size-body);
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+  max-width: var(--capability-measure, 42ch);
+}
