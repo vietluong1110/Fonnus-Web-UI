@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/tokens/shape.css">
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/tokens/motion.css">
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/tokens/base.css">
+  <link rel="stylesheet" href="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/styles.css">
+  <script src="_ds/fonnus-design-system-fc5f6dc5-3140-4c0b-a397-533bc14b9ca5/_ds_bundle.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-ui); }
+    a { color: var(--text-link); text-decoration: none; }
+    a:hover { color: var(--terracotta-deep); text-decoration: underline; }
+    @keyframes fnSpeak { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+    @keyframes fnRing { 0% { transform: scale(1); opacity: .5; } 100% { transform: scale(1.7); opacity: 0; } }
+    @keyframes fnPriceIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fnPriceIn2 { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fnFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fnRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</helmet>
+
+<div style="background: var(--paper); min-height: 100vh; position: relative; overflow-x: hidden;">
+
+  <header style="position: fixed; top: 0; left: 0; right: 0; z-index: 40; height: 64px; display: flex; align-items: center; gap: 20px; padding: 0 clamp(16px, 4vw, 64px); background: rgba(247, 239, 225, .88); backdrop-filter: blur(8px); box-shadow: inset 0 -1px 0 var(--border-hairline);">
+    <a href="#hero" style="display: flex; align-items: center; flex: 0 0 auto;">
+      <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Logo" variant="horizontal" height="{{ logoH }}" asset-base="assets" hint-size="120px,28px"></x-import>
+    </a>
+    <sc-if value="{{ wideNav }}" hint-placeholder-val="{{ true }}">
+      <nav style="display: flex; gap: clamp(14px, 1.8vw, 24px); margin-left: auto; align-items: center; font-size: var(--size-ui); font-weight: var(--weight-ui); white-space: nowrap;">
+        <a href="#nghe-thu" style="color: var(--ink-soft);">Nghe thử</a>
+        <a href="#vi-sao" style="color: var(--ink-soft);">Vì sao</a>
+        <a href="#cach-hoat-dong" style="color: var(--ink-soft);">Cách hoạt động</a>
+        <a href="#kha-nang" style="color: var(--ink-soft);">Khả năng</a>
+        <a href="#bang-gia" style="color: var(--ink-soft);">Bảng giá</a>
+        <a href="#faq" style="color: var(--ink-soft);">FAQ</a>
+        <a href="#bao-mat" style="color: var(--ink-soft);">Bảo mật</a>
+      </nav>
+      <a href="#lien-he" style="text-decoration: none; flex: 0 0 auto;">
+        <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" size="sm" hint-size="auto,36px">Tham gia pilot</x-import>
+      </a>
+    </sc-if>
+    <sc-if value="{{ narrowNav }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+        <a href="#lien-he" style="text-decoration: none;">
+          <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" size="sm" hint-size="auto,36px">Tham gia pilot</x-import>
+        </a>
+        <button onClick="{{ toggleMenu }}" aria-label="Mở menu" style="width: 44px; height: 44px; border-radius: 12px; border: none; background: transparent; box-shadow: inset 0 0 0 1px var(--border-strong); color: var(--ink); cursor: pointer; display: grid; place-items: center;" style-hover="background: rgba(184, 92, 43, .08);">
+          <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="{{ menuIcon }}" size="{{ i20 }}" hint-size="20px,20px"></x-import>
+        </button>
+      </div>
+    </sc-if>
+  </header>
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; top: 64px; left: 0; right: 0; z-index: 39; background: var(--milk); border-radius: 0 0 20px 20px; box-shadow: 0 12px 32px rgba(38, 31, 24, .14); padding: 8px 20px 16px; display: flex; flex-direction: column; animation: fnRise 200ms cubic-bezier(.2,.7,.3,1);">
+      <a href="#nghe-thu" onClick="{{ closeMenu }}" style="color: var(--ink); padding: 14px 4px; box-shadow: inset 0 -1px 0 var(--border-hairline); font-size: var(--size-body-sm); font-weight: 500;">Nghe thử</a>
+      <a href="#vi-sao" onClick="{{ closeMenu }}" style="color: var(--ink); padding: 14px 4px; box-shadow: inset 0 -1px 0 var(--border-hairline); font-size: var(--size-body-sm); font-weight: 500;">Vì sao</a>
+      <a href="#cach-hoat-dong" onClick="{{ closeMenu }}" style="color: var(--ink); padding: 14px 4px; box-shadow: inset 0 -1px 0 var(--border-hairline); font-size: var(--size-body-sm); font-weight: 500;">Cách hoạt động</a>
+      <a href="#kha-nang" onClick="{{ closeMenu }}" style="color: var(--ink); padding: 14px 4px; box-shadow: inset 0 -1px 0 var(--border-hairline); font-size: var(--size-body-sm); font-weight: 500;">Khả năng</a>
+      <a href="#bang-gia" onClick="{{ closeMenu }}" style="color: var(--ink); padding: 14px 4px; box-shadow: inset 0 -1px 0 var(--border-hairline); font-size: var(--size-body-sm); font-weight: 500;">Bảng giá</a>
+      <a href="#faq" onClick="{{ closeMenu }}" style="color: var(--ink); padding: 14px 4px; box-shadow: inset 0 -1px 0 var(--border-hairline); font-size: var(--size-body-sm); font-weight: 500;">FAQ</a>
+      <a href="#bao-mat" onClick="{{ closeMenu }}" style="color: var(--ink); padding: 14px 4px; font-size: var(--size-body-sm); font-weight: 500;">Bảo mật &amp; dữ liệu</a>
+    </div>
+  </sc-if>
+  <div style="height: 64px;"></div>
+
+  <section id="hero" data-reveal="0" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(32px, 6vw, 80px); align-items: center; align-content: center; min-height: calc(100vh - 64px); padding: clamp(48px, 8vh, 96px) clamp(20px, 5vw, 64px) clamp(64px, 10vh, 112px); max-width: 1280px; margin: 0 auto; scroll-margin-top: 72px; box-sizing: border-box;">
+    <div>
+      <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Trợ lý nghe máy cho phòng khám</div>
+      <h1 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(40px, 5.6vw, 64px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 24px; color: var(--ink); text-wrap: pretty;">Không cuộc gọi nào bị bỏ lỡ.</h1>
+      <p style="font-size: var(--size-body-lg); line-height: 1.6; color: var(--ink-soft); margin: 0 0 32px; max-width: 52ch;">Fonnus nghe máy trên chính số điện thoại phòng khám đang dùng. Trả lời bằng tiếng Việt, báo giá, giữ lịch hẹn, chuyển cho nhân viên khi cần — kể cả 10 giờ đêm hay ngày Tết.</p>
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <a href="#lien-he" style="text-decoration: none;">
+          <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" size="lg" hint-size="auto,52px">Tham gia danh sách pilot</x-import>
+        </a>
+        <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="secondary" size="lg" on-click="{{ openCall }}" hint-size="auto,52px">Nghe thử ngay</x-import>
+      </div>
+      <p style="font-size: var(--size-ui); color: var(--ink-soft); margin: 18px 0 0;">Không cần cài đặt. Nghe thử trực tiếp trên trang này.</p>
+    </div>
+
+    <div style="background: var(--milk); border-radius: var(--radius-lg, 20px); padding: 24px; box-shadow: inset 0 0 0 1px var(--border-hairline);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); color: var(--ink-soft);">21:47 · Thứ Bảy</span>
+        <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Badge" tone="success" dot="{{ true }}" hint-size="auto,26px">Đã nghe máy</x-import>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 12px; align-items: center; background: var(--paper); border-radius: 12px; padding: 14px 16px;">
+          <span style="width: 34px; height: 34px; border-radius: 10px; background: var(--rose); display: grid; place-items: center; color: var(--error);"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-incoming" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+          <div>
+            <div style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); font-weight: 500;">0903 ••• 217</div>
+            <div style="font-size: var(--size-ui); color: var(--ink-soft);">Cuộc gọi đến, ngoài giờ làm</div>
+          </div>
+        </div>
+        <div style="background: var(--blush); border-radius: 12px; padding: 14px 16px; font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink);">“Phòng khám Nha khoa Minh Anh xin nghe. Em là Fonnus, trợ lý AI của phòng khám. Anh chị cần đặt lịch hay hỏi thông tin ạ?”</div>
+        <div style="display: flex; gap: 10px; align-items: center; background: var(--sage); border-radius: 12px; padding: 14px 16px; font-size: var(--size-body-sm); color: var(--ink);">
+          <span style="color: var(--success); font-weight: 600;">✓</span> Đã giữ lịch 9:00 Chủ nhật · tư vấn niềng răng
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="nghe-thu" data-reveal="0" style="background: var(--blush); padding: clamp(64px, 10vh, 112px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(32px, 6vw, 72px); align-items: center;">
+      <div>
+        <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta-deep); font-weight: 600; margin-bottom: 20px;">Nghe thử</div>
+        <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 20px; color: var(--ink);">Nghe một lần rồi quyết định</h2>
+        <p style="font-size: var(--size-body-lg); line-height: 1.6; color: var(--ink-soft); margin: 0 0 28px; max-width: 48ch;">Bấm nút, Fonnus sẽ nói trước. Bạn hỏi giá, hỏi giờ mở cửa, hay xin một lịch hẹn — bằng giọng nói hoặc gõ chữ. Fonnus luôn trả lời bằng giọng nói.</p>
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px;">
+          <div style="display: flex; gap: 10px; font-size: var(--size-body-sm); color: var(--ink);"><span style="color: var(--success); font-weight: 600;">✓</span> Không cần tải gì, không cần đăng ký</div>
+          <div style="display: flex; gap: 10px; font-size: var(--size-body-sm); color: var(--ink);"><span style="color: var(--success); font-weight: 600;">✓</span> Nói tiếng Việt tự nhiên, ngắt lời được</div>
+          <div style="display: flex; gap: 10px; font-size: var(--size-body-sm); color: var(--ink);"><span style="color: var(--success); font-weight: 600;">✓</span> Thoát lúc nào cũng được</div>
+        </div>
+      </div>
+
+      <div style="display: grid; place-items: center;">
+        <div ref="{{ orbDockRef }}" aria-hidden="true" style="width: clamp(220px, 26vw, 300px); height: clamp(220px, 26vw, 300px); border-radius: 50%;"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vi-sao" data-reveal="0" style="padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+      <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Cái giá của một cuộc gọi nhỡ</div>
+      <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 24px; max-width: 26ch; color: var(--ink); text-wrap: pretty;">Người gọi không để lại lời nhắn. Họ gọi phòng khám tiếp theo.</h2>
+      <p style="font-size: var(--size-body-lg); line-height: 1.6; color: var(--ink-soft); margin: 0 0 48px; max-width: 60ch;">Một cuộc gọi không ai nghe không để lại dấu vết nào trên phần mềm quản lý.</p>
+
+      <div data-reveal="1" style="background: var(--milk); border-radius: var(--radius-lg, 20px); padding: clamp(20px, 3vw, 32px); margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;">
+          <span style="font-size: var(--size-body-sm); font-weight: 600; color: var(--ink);">Một ngày của điện thoại phòng khám</span>
+          <span style="display: flex; gap: 18px; font-size: var(--size-ui); color: var(--ink-soft);">
+            <span style="display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;"><span style="width: 10px; height: 10px; border-radius: 50%; background: var(--sage); box-shadow: inset 0 0 0 1px rgba(62, 123, 71, .4);"></span> Có người nghe</span>
+            <span style="display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;"><span style="width: 10px; height: 10px; border-radius: 50%; background: var(--rose); box-shadow: inset 0 0 0 1px rgba(178, 58, 46, .4);"></span> Không ai nghe</span>
+          </span>
+        </div>
+        <div style="overflow-x: auto;">
+          <div style="min-width: 640px; position: relative; height: 138px;">
+            <span style="position: absolute; left: 13.3%; top: 0; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft); white-space: nowrap;">9:00</span>
+            <span style="position: absolute; left: 30%; top: 0; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft); white-space: nowrap;">11:30</span>
+            <span style="position: absolute; left: 50%; top: 0; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft); white-space: nowrap;">14:30 · máy bận</span>
+            <span style="position: absolute; left: 76.7%; top: 0; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft); white-space: nowrap;">18:30</span>
+            <span style="position: absolute; left: 93.3%; top: 0; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft); white-space: nowrap;">21:00</span>
+            <span style="position: absolute; left: 13.3%; top: 20px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--sage); color: var(--success); display: grid; place-items: center;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-incoming" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+            <span style="position: absolute; left: 30%; top: 20px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--sage); color: var(--success); display: grid; place-items: center;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-incoming" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+            <span style="position: absolute; left: 50%; top: 20px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--rose); color: var(--error); display: grid; place-items: center;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-missed" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+            <span style="position: absolute; left: 76.7%; top: 20px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--rose); color: var(--error); display: grid; place-items: center;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-missed" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+            <span style="position: absolute; left: 93.3%; top: 20px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--rose); color: var(--error); display: grid; place-items: center;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-missed" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+            <span style="position: absolute; left: 13.3%; top: 56px; width: 2px; height: 14px; background: var(--border-strong);"></span>
+            <span style="position: absolute; left: 30%; top: 56px; width: 2px; height: 14px; background: var(--border-strong);"></span>
+            <span style="position: absolute; left: 50%; top: 56px; width: 2px; height: 14px; background: var(--border-strong);"></span>
+            <span style="position: absolute; left: 76.7%; top: 56px; width: 2px; height: 14px; background: var(--border-strong);"></span>
+            <span style="position: absolute; left: 93.3%; top: 56px; width: 2px; height: 14px; background: var(--border-strong);"></span>
+            <span style="position: absolute; left: 0; right: 0; top: 70px; height: 10px; border-radius: 5px; background: var(--paper);"></span>
+            <span style="position: absolute; left: 6.7%; width: 60%; top: 70px; height: 10px; border-radius: 5px; background: var(--sage);"></span>
+            <span style="position: absolute; left: 66.7%; right: 0; top: 70px; height: 10px; border-radius: 5px; background: var(--rose);"></span>
+            <span style="position: absolute; left: 6.7%; width: 60%; top: 90px; text-align: center; font-size: var(--size-ui); color: var(--ink-soft);">Giờ mở cửa · 8:00 – 17:00</span>
+            <span style="position: absolute; left: 66.7%; right: 0; top: 90px; text-align: center; font-size: var(--size-ui); color: var(--ink-soft);">Ngoài giờ</span>
+            <span style="position: absolute; left: 6.7%; top: 112px; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft); white-space: nowrap;">8:00</span>
+            <span style="position: absolute; left: 66.7%; top: 112px; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft); white-space: nowrap;">17:00</span>
+            <span style="position: absolute; right: 0; top: 112px; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--ink-soft);">22:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 32px;">
+        <div data-reveal="2" style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 24px; display: flex; gap: 16px; align-items: center;">
+          <span style="width: 44px; height: 44px; border-radius: 12px; background: var(--rose); color: var(--error); display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="clock" size="{{ i20 }}" hint-size="20px,20px"></x-import></span>
+          <div>
+            <div style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); color: var(--terracotta-deep); font-weight: 500; margin-bottom: 4px;">Sau 5 giờ chiều</div>
+            <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3;">Phòng khám đóng cửa, điện thoại vẫn reo</div>
+          </div>
+        </div>
+        <div data-reveal="3" style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 24px; display: flex; gap: 16px; align-items: center;">
+          <span style="width: 44px; height: 44px; border-radius: 12px; background: var(--rose); color: var(--error); display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-call" size="{{ i20 }}" hint-size="20px,20px"></x-import></span>
+          <div>
+            <div style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); color: var(--terracotta-deep); font-weight: 500; margin-bottom: 4px;">Trong giờ làm</div>
+            <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3;">Tay đang làm, máy vẫn reo</div>
+          </div>
+        </div>
+      </div>
+
+      <div data-reveal="4" style="background: var(--sage); border-radius: var(--radius-card, 16px); padding: 28px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; justify-content: space-between;">
+        <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-heading); line-height: 1.3; max-width: 34ch;">Fonnus nghe máy 24/7, từ 2.500.000 đ mỗi tháng.</div>
+        <a href="#bang-gia" style="text-decoration: none;">
+          <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="secondary" hint-size="auto,44px">Xem bảng giá</x-import>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="cach-hoat-dong" data-reveal="0" style="background: var(--milk); padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+      <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Cách hoạt động</div>
+      <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 56px; max-width: 22ch; color: var(--ink); text-wrap: pretty;">Sẵn sàng nhận cuộc gọi trong chưa đầy 5 phút</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(24px, 3vw, 40px);">
+        <div data-reveal="1">
+          <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <span style="width: 56px; height: 56px; border-radius: 50%; background: var(--blush); color: var(--terracotta-deep); display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="settings" size="{{ i22 }}" hint-size="22px,22px"></x-import></span>
+            <span style="flex: 1; height: 0; border-top: 2px dashed rgba(184, 92, 43, .4); margin-left: 14px;"></span>
+          </div>
+          <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 10px;">Bước 1 · 2 phút</div>
+          <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3; margin: 0 0 10px;">Đăng ký và thiết lập trợ lý</h3>
+          <p style="font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink-soft); margin: 0; max-width: 40ch;">Tạo tài khoản, khai thông tin phòng khám và bảng giá dịch vụ — trợ lý trả lời đúng theo dữ liệu của bạn.</p>
+        </div>
+        <div data-reveal="2">
+          <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <span style="width: 56px; height: 56px; border-radius: 50%; background: var(--blush); color: var(--terracotta-deep); display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-call" size="{{ i22 }}" hint-size="22px,22px"></x-import></span>
+            <span style="flex: 1; height: 0; border-top: 2px dashed rgba(184, 92, 43, .4); margin-left: 14px;"></span>
+          </div>
+          <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 10px;">Bước 2 · 3 phút</div>
+          <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3; margin: 0 0 10px;">Cài số điện thoại</h3>
+          <p style="font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink-soft); margin: 0; max-width: 40ch;">Dùng số Fonnus cấp, hoặc chuyển tiếp cuộc gọi từ số hiện tại của phòng khám sang Fonnus.</p>
+        </div>
+        <div data-reveal="3">
+          <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <span style="width: 56px; height: 56px; border-radius: 50%; background: var(--action-primary); color: var(--cream); display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="calendar-check" size="{{ i22 }}" hint-size="22px,22px"></x-import></span>
+          </div>
+          <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 10px;">Bước 3 · từ đây, 24/7</div>
+          <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3; margin: 0 0 10px;">Bệnh nhân gọi, Fonnus trả lời</h3>
+          <p style="font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink-soft); margin: 0; max-width: 40ch;">Đặt lịch, báo giá và hỗ trợ 24/7 bằng tiếng Việt tự nhiên.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kha-nang" data-reveal="0" style="padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+      <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Khả năng</div>
+      <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 64px; max-width: 22ch; color: var(--ink);">Một lễ tân không nghỉ, không quên</h2>
+
+      <div style="display: flex; flex-direction: column; gap: clamp(40px, 7vh, 88px);">
+
+        <div data-reveal="1" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(28px, 5vw, 64px); align-items: center;">
+          <div>
+            <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 16px;">Đặt lịch tự động</div>
+            <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-heading); line-height: 1.3; margin: 0 0 14px;">Hiểu “3 giờ chiều thứ Năm tuần sau”</h3>
+            <p style="font-size: var(--size-body); line-height: 1.65; color: var(--ink-soft); margin: 0 0 20px; max-width: 44ch;">Fonnus hiểu ngày giờ nói theo kiểu tiếng Việt, đối chiếu lịch trống và xác nhận ngay trong cuộc gọi.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm);">
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Kiểm tra lịch trống theo thời gian thực</div>
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Xác nhận bằng giọng nói, không cần gọi lại</div>
+            </div>
+          </div>
+          <div style="background: var(--milk); border-radius: var(--radius-lg, 20px); padding: 24px; box-shadow: inset 0 0 0 1px var(--border-hairline);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+              <div style="display: flex; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: var(--blush);"></span><span style="width: 10px; height: 10px; border-radius: 50%; background: var(--sage);"></span><span style="width: 10px; height: 10px; border-radius: 50%; background: var(--border-hairline);"></span></div>
+              <span style="font-size: var(--size-ui); color: var(--ink-soft);">Lịch · Thứ Năm</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-body-sm);">
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; background: var(--sage); color: var(--ink);">9:00</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--border-hairline); color: var(--ink-soft);">10:00</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; background: var(--sage); color: var(--ink);">11:00</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--border-hairline); color: var(--ink-soft);">14:00</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; background: var(--terracotta-deep); color: var(--cream);">15:00</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-body-sm);">
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--border-hairline); color: var(--ink-soft);">9:30</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; background: var(--sage); color: var(--ink);">10:30</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--border-hairline); color: var(--ink-soft);">13:30</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--border-hairline); color: var(--ink-soft);">14:30</span>
+              <span style="padding: 12px 0; text-align: center; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--border-hairline); color: var(--ink-soft);">15:30</span>
+            </div>
+            <div style="background: var(--terracotta-deep); color: var(--cream); border-radius: 12px; padding: 14px 16px; display: flex; gap: 10px; align-items: center; font-size: var(--size-body-sm);"><span style="font-weight: 600;">✓</span> Đã xác nhận: tư vấn niềng răng, thứ Năm 15:00</div>
+          </div>
+        </div>
+
+        <div data-reveal="1" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(28px, 5vw, 64px); align-items: center; direction: rtl;">
+          <div style="direction: ltr;">
+            <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 16px;">Trả lời câu hỏi chung</div>
+            <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-heading); line-height: 1.3; margin: 0 0 14px;">Giá, giờ, địa chỉ — trả lời thẳng</h3>
+            <p style="font-size: var(--size-body); line-height: 1.65; color: var(--ink-soft); margin: 0 0 20px; max-width: 42ch;">Câu trả lời lấy từ bảng giá và thông tin bạn khai, không phải Fonnus tự nghĩ ra. Không biết thì nói không biết, rồi ghi lại để bạn trả lời.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm);">
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Dùng đúng bảng giá của phòng khám</div>
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Không tự suy diễn khi thiếu dữ liệu</div>
+            </div>
+          </div>
+          <div style="background: var(--milk); border-radius: var(--radius-lg, 20px); padding: 24px; box-shadow: inset 0 0 0 1px var(--border-hairline); direction: ltr;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+              <span style="font-size: var(--size-ui); color: var(--ink-soft);">Câu hỏi thường gặp trong cuộc gọi</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="background: var(--paper); border-radius: 12px 12px 4px 12px; padding: 14px 16px; font-size: var(--size-body-sm); color: var(--ink-soft); align-self: flex-end; text-align: right; max-width: 85%;">“Cạo vôi răng bao nhiêu tiền?”</div>
+              <div style="background: var(--blush); border-radius: 12px 12px 12px 4px; padding: 14px 16px; font-size: var(--size-body-sm); line-height: 1.6; align-self: flex-start; max-width: 85%;">“Cạo vôi răng tại phòng khám là 300.000 đ. Chị muốn em giữ lịch 9 giờ sáng thứ Bảy không?”</div>
+              <div style="background: var(--paper); border-radius: 12px 12px 4px 12px; padding: 14px 16px; font-size: var(--size-body-sm); color: var(--ink-soft); align-self: flex-end; text-align: right; max-width: 85%;">“Chủ nhật có mở không?”</div>
+              <div style="background: var(--blush); border-radius: 12px 12px 12px 4px; padding: 14px 16px; font-size: var(--size-body-sm); line-height: 1.6; align-self: flex-start; max-width: 85%;">“Chủ nhật phòng khám làm từ 8 giờ đến 12 giờ ạ.”</div>
+            </div>
+          </div>
+        </div>
+
+        <div data-reveal="1" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(28px, 5vw, 64px); align-items: center;">
+          <div>
+            <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 16px;">Chuyển cho nhân viên khi cần</div>
+            <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-heading); line-height: 1.3; margin: 0 0 14px;">Luôn có người thật cách một bước</h3>
+            <p style="font-size: var(--size-body); line-height: 1.65; color: var(--ink-soft); margin: 0 0 20px; max-width: 42ch;">Câu hỏi thuộc chuyên môn y khoa, ca gấp, hoặc khách muốn gặp người thật: Fonnus nối máy sang nhân viên, hoặc ghi lời nhắn để gọi lại.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm);">
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Nối máy trực tiếp cho nhân viên</div>
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Ghi lời nhắn kèm số để gọi lại</div>
+            </div>
+          </div>
+          <div style="background: var(--milk); border-radius: var(--radius-lg, 20px); padding: 24px; box-shadow: inset 0 0 0 1px var(--border-hairline);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><span style="font-size: var(--size-ui); color: var(--ink-soft);">Luồng cuộc gọi</span></div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: var(--size-ui); color: var(--ink-soft); align-self: flex-end; margin-bottom: 6px;">Người gọi</span>
+              <div style="background: var(--paper); border-radius: 12px 12px 4px 12px; padding: 14px 16px; font-size: var(--size-body-sm); line-height: 1.6; align-self: flex-end; text-align: right; max-width: 88%;">“Mắt tôi đang bị đỏ và đau quá, tôi cần uống thuốc gì?”</div>
+              <span style="width: 2px; height: 18px; background: var(--border-dashed); align-self: center; margin: 6px 0;"></span>
+              <span style="font-size: var(--size-ui); color: var(--ink-soft); margin-bottom: 6px;">Fonnus</span>
+              <div style="background: var(--blush); border-radius: 12px 12px 12px 4px; padding: 14px 16px; font-size: var(--size-body-sm); line-height: 1.6; align-self: flex-start; max-width: 88%;">“Dạ, để em kết nối mình với bộ phận tư vấn trực tiếp ngay ạ.”</div>
+              <span style="width: 2px; height: 18px; background: var(--border-dashed); align-self: center; margin: 6px 0;"></span>
+              <div style="background: var(--sage); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; font-size: var(--size-body-sm); font-weight: 500;">
+                <span style="width: 34px; height: 34px; border-radius: 10px; background: var(--milk); display: grid; place-items: center; color: var(--success); flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-call" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+                Chuyển đến lễ tân · đang đổ chuông
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div data-reveal="1" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(28px, 5vw, 64px); align-items: center; direction: rtl;">
+          <div style="direction: ltr;">
+            <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 16px;">Nhật ký cuộc gọi đầy đủ</div>
+            <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-heading); line-height: 1.3; margin: 0 0 14px;">Mọi cuộc gọi đều được ghi lại</h3>
+            <p style="font-size: var(--size-body); line-height: 1.65; color: var(--ink-soft); margin: 0 0 20px; max-width: 42ch;">Xem lại bản ghi âm, nội dung và kết quả từng cuộc gọi trên bảng điều khiển — kèm tóm tắt qua Zalo mỗi tối.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm);">
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Bản ghi âm và nội dung đầy đủ</div>
+              <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Tóm tắt mỗi ngày qua Zalo</div>
+            </div>
+          </div>
+          <div style="background: var(--milk); border-radius: var(--radius-lg, 20px); padding: 24px; box-shadow: inset 0 0 0 1px var(--border-hairline); direction: ltr;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+              <span style="font-size: var(--size-ui); color: var(--ink-soft);">Hôm nay</span>
+              <span style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-ui); color: var(--ink-soft);">14 cuộc gọi</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 14px; background: var(--paper); border-radius: 12px; padding: 14px 16px;">
+                <span style="width: 34px; height: 34px; border-radius: 10px; background: var(--rose); display: grid; place-items: center; color: var(--terracotta-deep);"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-incoming" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+                <span style="flex: 1;"><span style="display: block; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); font-weight: 500;">0903 ••• 217</span><span style="display: block; font-size: var(--size-ui); color: var(--ink-soft);">2 phút · tư vấn niềng răng</span></span>
+                <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Badge" tone="success" hint-size="auto,26px">Đã đặt lịch</x-import>
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px; background: var(--paper); border-radius: 12px; padding: 14px 16px;">
+                <span style="width: 34px; height: 34px; border-radius: 10px; background: var(--rose); display: grid; place-items: center; color: var(--terracotta-deep);"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-incoming" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+                <span style="flex: 1;"><span style="display: block; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); font-weight: 500;">0938 ••• 044</span><span style="display: block; font-size: var(--size-ui); color: var(--ink-soft);">1 phút · hỏi bảng giá</span></span>
+                <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Badge" hint-size="auto,26px">Đã trả lời</x-import>
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px; background: var(--paper); border-radius: 12px; padding: 14px 16px;">
+                <span style="width: 34px; height: 34px; border-radius: 10px; background: var(--rose); display: grid; place-items: center; color: var(--terracotta-deep);"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-incoming" size="{{ i18 }}" hint-size="18px,18px"></x-import></span>
+                <span style="flex: 1;"><span style="display: block; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); font-weight: 500;">0911 ••• 882</span><span style="display: block; font-size: var(--size-ui); color: var(--ink-soft);">3 phút · đặt lịch ngoài giờ</span></span>
+                <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Badge" tone="success" hint-size="auto,26px">Đã đặt lịch</x-import>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="bang-gia" data-reveal="0" style="background: var(--milk); padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap; margin-bottom: 48px;">
+        <div>
+          <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Bảng giá</div>
+          <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0; max-width: 24ch; color: var(--ink);">Trả theo tháng, tính tiền theo giây</h2>
+        </div>
+        <div style="background: var(--paper); border-radius: var(--radius-pill, 999px); padding: 10px 18px;">
+          <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Switch" label="Trả năm, giảm 15%" checked="{{ annual }}" on-change="{{ toggleAnnual }}" hint-size="220px,32px"></x-import>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div data-reveal="1" style="border-radius: var(--radius-lg, 20px); padding: 28px 24px; border: 1px dashed var(--border-dashed); display: flex; flex-direction: column;">
+          <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); margin-bottom: 4px;">Dùng thử</div>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft);">Nghe thử trên số thật, 14 ngày</div>
+          <div style="margin: 22px 0 4px; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 34px; font-weight: 500; color: var(--ink); line-height: 1.2;">Miễn phí</div>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft); min-height: 18px;">không cần thẻ, dừng khi hết phút</div>
+          <span style="display: block; height: 1px; background: var(--border-hairline); margin: 20px 0;"></span>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm); color: var(--ink-soft);">
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>100 phút dùng thử</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>1 số máy</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>1 cuộc gọi cùng lúc</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>1 giọng nói</div>
+          </div>
+          <a href="#lien-he" style="margin-top: auto; padding-top: 24px; text-decoration: none;">
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="secondary" full-width="{{ true }}" hint-size="100%,44px">Dùng thử</x-import>
+          </a>
+        </div>
+
+        <div data-reveal="2" style="border-radius: var(--radius-lg, 20px); padding: 28px 24px; background: var(--paper); display: flex; flex-direction: column; box-shadow: inset 0 0 0 1px {{ b1 }};">
+          <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); margin-bottom: 4px;">Cơ bản</div>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft);">Một phòng khám, một số máy chính</div>
+          <div style="margin: 22px 0 4px; display: flex; align-items: baseline; gap: 6px; animation: {{ priceAnim }};">
+            <span style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 34px; font-weight: 500; color: var(--ink); line-height: 1.2;">{{ p1 }}</span>
+            <span style="font-size: var(--size-body-sm); color: var(--ink-soft);">đ/tháng</span>
+          </div>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft); min-height: 18px; animation: {{ priceAnim }};">{{ n1 }}</div>
+          <span style="display: block; height: 1px; background: var(--border-hairline); margin: 20px 0;"></span>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm); color: var(--ink-soft);">
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>1.000 phút mỗi tháng</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>Vượt gói 3.000 đ/phút</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>2 số máy · 2 cuộc gọi cùng lúc</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>Sổ lịch và kho kiến thức tự học</div>
+          </div>
+          <a href="#lien-he" style="margin-top: auto; padding-top: 24px; text-decoration: none;">
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="secondary" full-width="{{ true }}" hint-size="100%,44px">Chọn Cơ bản</x-import>
+          </a>
+        </div>
+
+        <div data-reveal="3" style="position: relative; border-radius: var(--radius-lg, 20px); padding: 28px 24px; background: var(--action-primary); color: var(--cream); display: flex; flex-direction: column;">
+          <span style="position: absolute; top: 0; right: 20px; transform: translateY(-50%); font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; font-weight: 600; color: var(--cream); background: var(--terracotta-deep); border-radius: var(--radius-pill, 999px); padding: 6px 14px; white-space: nowrap; box-shadow: 0 4px 14px rgba(38, 31, 24, .18);">Phổ biến nhất</span>
+          <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); margin-bottom: 4px;">Tiêu chuẩn</div>
+          <div style="font-size: var(--size-ui); opacity: .86;">Phòng khám 1–2 cơ sở</div>
+          <div style="margin: 22px 0 4px; display: flex; align-items: baseline; gap: 6px; animation: {{ priceAnim }};">
+            <span style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 34px; font-weight: 500; line-height: 1.2;">{{ p2 }}</span>
+            <span style="font-size: var(--size-body-sm); opacity: .86;">đ/tháng</span>
+          </div>
+          <div style="font-size: var(--size-ui); opacity: .86; min-height: 18px; animation: {{ priceAnim }};">{{ n2 }}</div>
+          <span style="display: block; height: 1px; background: rgba(255, 246, 232, .25); margin: 20px 0;"></span>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm); opacity: .94;">
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 246, 232, .7); margin-top: 8px; flex: 0 0 auto;"></span>2.500 phút mỗi tháng</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 246, 232, .7); margin-top: 8px; flex: 0 0 auto;"></span>Vượt gói 2.500 đ/phút</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 246, 232, .7); margin-top: 8px; flex: 0 0 auto;"></span>5 số máy · 10 cuộc gọi cùng lúc</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 246, 232, .7); margin-top: 8px; flex: 0 0 auto;"></span>Giọng nói riêng</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 246, 232, .7); margin-top: 8px; flex: 0 0 auto;"></span>Kết nối lịch</div>
+          </div>
+          <a href="#lien-he" style="margin-top: auto; padding-top: 24px; text-decoration: none;">
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="inverse" full-width="{{ true }}" hint-size="100%,44px">Chọn Tiêu chuẩn</x-import>
+          </a>
+        </div>
+
+        <div data-reveal="4" style="border-radius: var(--radius-lg, 20px); padding: 28px 24px; background: var(--paper); display: flex; flex-direction: column; box-shadow: inset 0 0 0 1px {{ b3 }};">
+          <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); margin-bottom: 4px;">Nâng cao</div>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft);">Nhiều cơ sở, nhiều máy cùng đổ chuông</div>
+          <div style="margin: 22px 0 4px; display: flex; align-items: baseline; gap: 6px; animation: {{ priceAnim }};">
+            <span style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 34px; font-weight: 500; color: var(--ink); line-height: 1.2;">{{ p3 }}</span>
+            <span style="font-size: var(--size-body-sm); color: var(--ink-soft);">đ/tháng</span>
+          </div>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft); min-height: 18px; animation: {{ priceAnim }};">{{ n3 }}</div>
+          <span style="display: block; height: 1px; background: var(--border-hairline); margin: 20px 0;"></span>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: var(--size-body-sm); color: var(--ink-soft);">
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>6.000 phút mỗi tháng</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>Vượt gói 2.200 đ/phút</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>10 số máy · 25 cuộc gọi cùng lúc</div>
+            <div style="display: flex; gap: 10px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta); margin-top: 8px; flex: 0 0 auto;"></span>Quản lý tài khoản riêng</div>
+          </div>
+          <a href="#lien-he" style="margin-top: auto; padding-top: 24px; text-decoration: none;">
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="secondary" full-width="{{ true }}" hint-size="100%,44px">Chọn Nâng cao</x-import>
+          </a>
+        </div>
+      </div>
+
+      <div data-reveal="1" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 24px;">
+        <div style="background: var(--paper); border-radius: var(--radius-lg, 20px); padding: 28px; box-shadow: inset 0 0 0 1px var(--border-hairline); display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+          <span style="width: 48px; height: 48px; border-radius: 14px; background: var(--blush); color: var(--terracotta-deep); display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="settings" size="{{ i20 }}" hint-size="20px,20px"></x-import></span>
+          <div style="flex: 1; min-width: 220px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
+              <span style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading);">Guided Setup</span>
+              <span style="font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: var(--size-num); font-weight: 500; color: var(--terracotta-deep);">2.000.000 đ · một lần</span>
+            </div>
+            <p style="font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink-soft); margin: 0;">Chúng tôi cùng bạn khai bảng giá, lời chào và chạy thử đến khi ưng ý. Tuỳ chọn — bạn tự cấu hình cũng được, không mất thêm phí.</p>
+          </div>
+        </div>
+        <div style="background: var(--night, #221B14); color: var(--cream-night, #F3E9DA); border-radius: var(--radius-lg, 20px); padding: 28px; display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 220px;">
+            <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); margin-bottom: 8px;">Doanh nghiệp</div>
+            <p style="font-size: var(--size-body-sm); line-height: 1.6; margin: 0; color: rgba(243, 233, 218, .72);">Chuỗi phòng khám và bệnh viện, nhiều cơ sở, nhiều cuộc gọi cùng lúc — báo giá riêng.</p>
+          </div>
+          <a href="#lien-he" style="text-decoration: none; flex: 0 0 auto;">
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="inverse" hint-size="auto,44px">Liên hệ báo giá</x-import>
+          </a>
+        </div>
+      </div>
+      <p style="font-size: var(--size-ui); color: var(--ink-soft); margin: 20px 0 0;">Tính tiền theo giây, tối thiểu 30 giây mỗi cuộc gọi được nghe. Cuộc gọi nhỡ hoặc lỗi không tính tiền.</p>
+
+      <div data-reveal="1" style="margin-top: 40px;">
+        <button onClick="{{ toggleMatrix }}" style="background: none; border: none; padding: 0; cursor: pointer; font-family: var(--font-ui); font-size: var(--size-body-sm); font-weight: 500; color: var(--text-accent); display: inline-flex; align-items: center; gap: 8px;">
+          <span>{{ matrixLabel }}</span><span style="font-size: 11px;">▾</span>
+        </button>
+        <sc-if value="{{ matrixOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top: 24px; overflow-x: auto;">
+            <div style="min-width: 720px;">
+              <div style="display: grid; grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(96px, 1fr)); gap: 0; padding: 14px 16px; background: var(--paper); border-radius: 12px 12px 0 0; font-size: var(--size-ui); font-weight: 600;">
+                <span></span><span style="text-align: center;">Dùng thử</span><span style="text-align: center;">Cơ bản</span><span style="text-align: center;">Tiêu chuẩn</span><span style="text-align: center;">Nâng cao</span>
+              </div>
+              <sc-for list="{{ matrix }}" as="row" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(96px, 1fr)); padding: 12px 16px; box-shadow: inset 0 -1px 0 var(--border-hairline); font-size: var(--size-body-sm); align-items: center; background: {{ row.bg }}; transition: background 120ms ease-out;" style-hover="background: rgba(184, 92, 43, .08);">
+                  <span style="color: {{ row.labelColor }}; font-weight: {{ row.labelWeight }}; letter-spacing: {{ row.labelTracking }}; text-transform: {{ row.labelCase }}; font-size: {{ row.labelSize }};">{{ row.label }}</span>
+                  <span style="text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink-soft);">{{ row.c1 }}</span>
+                  <span style="text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink-soft);">{{ row.c2 }}</span>
+                  <span style="text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink-soft);">{{ row.c3 }}</span>
+                  <span style="text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink-soft);">{{ row.c4 }}</span>
+                </div>
+              </sc-for>
+              <p style="font-size: var(--size-ui); color: var(--ink-soft); margin: 16px 0 0;">Cổng đồng ý, câu công bố trợ lý AI và việc chuyển cho người thật có ở mọi gói, kể cả Dùng thử. Trả tháng và trả năm khác nhau ở giá, không khác ở tính năng.</p>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" data-reveal="0" style="padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Câu hỏi thường gặp</div>
+      <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 48px; color: var(--ink);">Những điều chủ phòng khám hỏi trước</h2>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <sc-for list="{{ faqs }}" as="item" hint-placeholder-count="6">
+          <div style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 4px 24px;">
+            <button onClick="{{ item.toggle }}" style="width: 100%; background: none; border: none; padding: 20px 0; cursor: pointer; display: flex; gap: 16px; align-items: center; justify-content: space-between; text-align: left; font-family: var(--font-display); font-weight: 600; font-size: var(--size-body-lg); line-height: 1.4; color: var(--ink);">
+              <span>{{ item.q }}</span><span style="color: var(--terracotta); font-size: 13px; flex: 0 0 auto;">{{ item.sign }}</span>
+            </button>
+            <div style="display: grid; grid-template-rows: {{ item.rows }}; opacity: {{ item.opacity }}; transition: grid-template-rows 320ms cubic-bezier(.2,.7,.3,1), opacity 320ms cubic-bezier(.2,.7,.3,1);">
+              <div style="overflow: hidden; min-height: 0;">
+                <p style="font-size: var(--size-body); line-height: 1.65; color: var(--ink-soft); margin: 0 0 22px; max-width: 64ch;">{{ item.a }}</p>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="bao-mat" data-reveal="0" style="background: var(--blush); padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+      <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta-deep); font-weight: 600; margin-bottom: 20px;">Bảo mật &amp; dữ liệu</div>
+      <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 24px; max-width: 26ch; color: var(--ink);">Người gọi biết mình đang nói với trợ lý AI</h2>
+      <p style="font-size: var(--size-body-lg); line-height: 1.6; color: var(--ink-soft); margin: 0 0 48px; max-width: 62ch;">Câu công bố nằm trong câu đầu tiên của mỗi cuộc gọi, và phòng khám không tắt được. Đây là yêu cầu pháp luật, không phải tuỳ chọn.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+        <div data-reveal="1" style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 24px;">
+          <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3; margin-bottom: 10px;">Xin phép trước khi ghi âm</div>
+          <p style="font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink-soft); margin: 0;">Fonnus chia sẻ minh bạch cuộc gọi được xử lý bởi AI và được ghi âm. Người gọi đồng ý thì Fonnus mới tiếp tục.</p>
+        </div>
+        <div data-reveal="2" style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 24px;">
+          <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3; margin-bottom: 10px;">Dữ liệu là của phòng khám</div>
+          <p style="font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink-soft); margin: 0;">Bản ghi âm và nội dung cuộc gọi chỉ tài khoản phòng khám xem được. Bạn yêu cầu xoá, chúng tôi xoá.</p>
+        </div>
+        <div data-reveal="3" style="background: var(--sage); border-radius: var(--radius-card, 16px); padding: 24px;">
+          <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3; margin-bottom: 10px;">Chuyên môn y khoa: chuyển cho bác sĩ</div>
+          <p style="font-size: var(--size-body-sm); line-height: 1.6; color: var(--ink-soft); margin: 0;">Fonnus trả lời giá, giờ, lịch hẹn và thông tin phòng khám. Câu hỏi thuộc chuyên môn luôn được chuyển cho bác sĩ.</p>
+        </div>
+      </div>
+      <p style="font-size: var(--size-ui); color: var(--ink-soft); margin: 24px 0 0; max-width: 74ch;">Cơ sở pháp lý chúng tôi làm theo: Luật 91/2025/QH15 về bảo vệ dữ liệu cá nhân và Luật 134/2025/QH15 về công bố nội dung do AI tạo, hiệu lực tháng 3 năm 2026.</p>
+    </div>
+  </section>
+
+  <section id="phong-kham" data-reveal="0" style="padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+      <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Phòng khám đang dùng</div>
+      <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 48px; max-width: 24ch; color: var(--ink);">Mười phòng khám đầu tiên</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        <div data-reveal="1" style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+          <p style="font-size: var(--size-body); line-height: 1.65; margin: 0; color: var(--ink);">“Tối nào cũng có người gọi sau chín giờ. Trước đây mình để máy reo, giờ sáng ra mở bảng điều khiển là thấy đã có ba lịch hẹn.”</p>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft); margin-top: auto;">Chủ phòng khám nha khoa · Quận 7, TP.HCM</div>
+        </div>
+        <div data-reveal="2" style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+          <p style="font-size: var(--size-body); line-height: 1.65; margin: 0; color: var(--ink);">“Lễ tân của mình bớt phải trả lời câu hỏi giờ mở cửa cả ngày. Cô ấy ở lại với bệnh nhân đang ngồi trước mặt.”</p>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft); margin-top: auto;">Chủ phòng khám thẩm mỹ · Cầu Giấy, Hà Nội</div>
+        </div>
+        <div data-reveal="3" style="background: var(--milk); border-radius: var(--radius-card, 16px); padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+          <p style="font-size: var(--size-body); line-height: 1.65; margin: 0; color: var(--ink);">“Cái mình cần là biết ai đã gọi. Bản ghi và tóm tắt mỗi tối giải quyết đúng chuyện đó.”</p>
+          <div style="font-size: var(--size-ui); color: var(--ink-soft); margin-top: auto;">Chủ hai cơ sở nha khoa · Hải Châu, Đà Nẵng</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lien-he" data-reveal="0" style="background: var(--milk); padding: clamp(64px, 11vh, 128px) clamp(20px, 5vw, 64px); scroll-margin-top: 72px;">
+    <div style="max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(32px, 6vw, 80px); align-items: start;">
+      <div>
+        <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta); font-weight: 600; margin-bottom: 20px;">Liên hệ</div>
+        <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.2; letter-spacing: var(--tracking-display); margin: 0 0 24px; max-width: 22ch; color: var(--ink);">Tham gia danh sách pilot</h2>
+        <p style="font-size: var(--size-body-lg); line-height: 1.6; color: var(--ink-soft); margin: 0 0 32px; max-width: 48ch;">Chúng tôi nhận mười phòng khám cho đợt pilot cuối năm 2026. Để lại số điện thoại, chúng tôi gọi lại trong 24 giờ để xem phòng khám bạn có phù hợp không.</p>
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: var(--size-body-sm); color: var(--ink);">
+          <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Chúng tôi làm cùng bạn phần chuyển hướng cuộc gọi</div>
+          <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Dùng thử 14 ngày trước khi trả tiền</div>
+          <div style="display: flex; gap: 10px;"><span style="color: var(--success); font-weight: 600;">✓</span> Không ràng buộc hợp đồng dài hạn</div>
+        </div>
+        <div style="margin-top: 40px; padding-top: 32px; box-shadow: inset 0 1px 0 var(--border-hairline); display: flex; gap: 32px; flex-wrap: wrap; font-size: var(--size-body-sm);">
+          <div><div style="color: var(--ink-soft); margin-bottom: 4px;">Điện thoại · Zalo</div><a href="tel:+84914378064" style="font-family: var(--font-num); font-variant-numeric: tabular-nums;">+84 914 378 064</a></div>
+          <div><div style="color: var(--ink-soft); margin-bottom: 4px;">Email</div><a href="mailto:xinchao@fonnus.ai">xinchao@fonnus.ai</a></div>
+        </div>
+      </div>
+
+      <div style="background: var(--paper); border-radius: var(--radius-lg, 20px); padding: clamp(24px, 3vw, 36px);">
+        <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start; min-height: 300px; justify-content: center;">
+            <span style="width: 48px; height: 48px; border-radius: 50%; background: var(--sage); display: grid; place-items: center; color: var(--success); font-size: 22px; font-weight: 600;">✓</span>
+            <div style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-heading); line-height: 1.3;">Đã nhận thông tin</div>
+            <p style="font-size: var(--size-body); line-height: 1.65; color: var(--ink-soft); margin: 0;">Chúng tôi sẽ gọi lại trong 24 giờ. Nếu cần gấp, gọi trực tiếp +84 914 378 064.</p>
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" variant="ghost" on-click="{{ resetForm }}" hint-size="auto,40px">Gửi thông tin khác</x-import>
+          </div>
+        </sc-if>
+        <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 18px;">
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Input" label="Tên phòng khám" placeholder="Nha khoa Minh Anh" value="{{ clinic }}" on-change="{{ setClinic }}" hint-size="100%,70px"></x-import>
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Input" label="Tên bạn" placeholder="Nguyễn Minh Anh" value="{{ name }}" on-change="{{ setName }}" hint-size="100%,70px"></x-import>
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Input" label="Số điện thoại" placeholder="090 123 45 67" numeric="{{ true }}" value="{{ phone }}" on-change="{{ setPhone }}" hint="Chúng tôi chỉ gọi, không nhắn tin quảng cáo." hint-size="100%,92px"></x-import>
+            <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Button" size="lg" full-width="{{ true }}" on-click="{{ submit }}" hint-size="100%,52px">Gửi thông tin</x-import>
+            <p style="font-size: var(--size-ui); color: var(--ink-soft); margin: 0;">Hoặc nghe thử trước: <a href="#nghe-thu">gọi thử Fonnus</a>.</p>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background: var(--night); color: var(--cream-night); padding: clamp(48px, 8vh, 80px) clamp(20px, 5vw, 64px) 40px;">
+    <div style="max-width: 1280px; margin: 0 auto; display: flex; gap: 40px; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;">
+      <div style="max-width: 34ch;">
+        <img src="assets/SVG/fonnus-mark-dark.svg" alt="Fonnus" style="height: 36px; width: auto; display: block; margin-bottom: 20px;">
+        <p style="font-family: var(--font-display); font-weight: 600; font-size: var(--size-subheading); line-height: 1.3; margin: 0 0 12px;">Không cuộc gọi nào bị bỏ lỡ.</p>
+        <p style="font-size: var(--size-body-sm); line-height: 1.6; color: rgba(243, 233, 218, .66); margin: 0;">Fonnus trở thành hệ thống lễ tân đáng tin cậy của nền kinh tế Việt Nam.</p>
+      </div>
+      <div style="display: flex; gap: clamp(32px, 5vw, 72px); flex-wrap: wrap; font-size: var(--size-body-sm);">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta-night);">Trang</span>
+          <a href="#nghe-thu" style="color: var(--cream-night);">Nghe thử</a>
+          <a href="#cach-hoat-dong" style="color: var(--cream-night);">Cách hoạt động</a>
+          <a href="#bang-gia" style="color: var(--cream-night);">Bảng giá</a>
+          <a href="#bao-mat" style="color: var(--cream-night);">Bảo mật &amp; dữ liệu</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--terracotta-night);">Liên hệ</span>
+          <a href="tel:+84914378064" style="color: var(--cream-night); font-family: var(--font-num); font-variant-numeric: tabular-nums;">+84 914 378 064</a>
+          <a href="mailto:xinchao@fonnus.ai" style="color: var(--cream-night);">xinchao@fonnus.ai</a>
+          <span style="color: rgba(243, 233, 218, .66);">fonnus.ai</span>
+        </div>
+      </div>
+    </div>
+    <div style="max-width: 1280px; margin: 40px auto 0; padding-top: 24px; box-shadow: inset 0 1px 0 var(--border-on-inverse); font-size: var(--size-ui); color: rgba(243, 233, 218, .66);">© 2026 Fonnus</div>
+  </footer>
+
+  <sc-if value="{{ overlay }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 60; background: var(--paper); display: grid; grid-template-rows: auto 1fr auto; padding: 20px clamp(16px, 4vw, 40px) clamp(20px, 4vh, 40px); animation: fnFadeIn 320ms cubic-bezier(.2,.7,.3,1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; font-size: var(--size-ui); color: var(--ink-soft);">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--terracotta);"></span>
+          <span>Nha khoa Minh Anh · bản mô phỏng</span>
+        </div>
+        <button onClick="{{ closeCall }}" aria-label="Thoát cuộc gọi thử" style="width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--ink); color: var(--cream); font-size: 17px; cursor: pointer; display: grid; place-items: center;" style-hover="background: var(--terracotta-deep);">✕</button>
+      </div>
+
+      <div style="display: grid; place-items: center; align-content: center; gap: 26px;">
+        <div ref="{{ callSpotRef }}" aria-hidden="true" style="width: clamp(200px, 32vh, 320px); height: clamp(200px, 32vh, 320px);"></div>
+        <div style="font-family: var(--font-ui); font-size: var(--size-body-sm); font-weight: 500; color: var(--ink-soft); min-height: 22px;">{{ stateLabel }}</div>
+      </div>
+
+      <div style="height: 170px;"></div>
+    </div>
+    <div style="position: fixed; left: 50%; bottom: clamp(20px, 4vh, 40px); transform: translateX(-50%); z-index: 80; width: min(760px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 16px; align-items: center; animation: fnFadeIn 420ms cubic-bezier(.2,.7,.3,1) 120ms both;">
+        <div style="display: flex; gap: 10px; flex-wrap: nowrap; justify-content: flex-start; max-width: 100%; overflow-x: auto; padding: 4px; white-space: nowrap;">
+          <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="3">
+            <button onClick="{{ chip.pick }}" style="flex: 0 0 auto; background: var(--milk); border: none; box-shadow: inset 0 0 0 1px var(--border-strong); border-radius: var(--radius-pill, 999px); padding: 10px 16px; font-family: var(--font-ui); font-size: var(--size-ui); font-weight: 500; color: var(--ink); cursor: pointer; transition: background var(--duration-fast) var(--ease-out);" style-hover="background: var(--action-secondary-hover);">{{ chip.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; width: 100%; background: var(--milk); border-radius: var(--radius-pill, 999px); padding: 10px 12px 10px 22px; box-shadow: inset 0 0 0 1px var(--border-hairline), var(--shadow-overlay, 0 12px 32px rgba(38, 31, 24, .14));">
+          <input placeholder="Gõ câu hỏi nếu bạn không muốn nói…" value="{{ typed }}" onChange="{{ setTyped }}" onKeyDown="{{ typedKey }}" style="flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: var(--font-ui); font-size: var(--size-body-sm); color: var(--ink);">
+          <button onClick="{{ toggleMic }}" aria-label="Bật tắt micro" style="width: 40px; height: 40px; border-radius: 50%; border: none; background: {{ micBg }}; color: {{ micFg }}; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="{{ micIcon }}" size="{{ i18 }}" hint-size="18px,18px"></x-import></button>
+          <span style="position: relative; display: inline-flex; flex: 0 0 auto;">
+            <button onClick="{{ toggleVoices }}" aria-label="Chọn giọng nói của trợ lý" style="width: 40px; height: 40px; border-radius: 50%; border: none; background: {{ voiceBtnBg }}; color: {{ voiceBtnFg }}; cursor: pointer; display: grid; place-items: center;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="user-round" size="{{ i18 }}" hint-size="18px,18px"></x-import></button>
+            <sc-if value="{{ voiceOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; bottom: 52px; right: 0; width: 296px; background: var(--milk); border-radius: 16px; box-shadow: 0 12px 32px rgba(38, 31, 24, .14), inset 0 0 0 1px var(--border-hairline); padding: 8px; animation: fnRise 200ms cubic-bezier(.2,.7,.3,1);">
+                <div style="font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-soft); font-weight: 600; padding: 10px 12px 8px;">Giọng của trợ lý</div>
+                <sc-for list="{{ voices }}" as="v" hint-placeholder-count="5">
+                  <div onClick="{{ v.select }}" role="button" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; background: {{ v.bg }}; color: {{ v.fg }}; transition: background 120ms ease-out;">
+                    <span style="flex: 1; min-width: 0;">
+                      <span style="display: block; font-weight: 600; font-size: var(--size-body-sm); line-height: 1.4;">{{ v.name }}</span>
+                      <span style="display: block; font-size: var(--size-ui); opacity: .72; line-height: 1.4;">{{ v.desc }}</span>
+                    </span>
+                    <sc-if value="{{ v.selected }}" hint-placeholder-val="{{ false }}"><span style="font-weight: 600; font-size: 13px;">✓</span></sc-if>
+                    <button onClick="{{ v.play }}" aria-label="Nghe thử giọng" style="width: 34px; height: 34px; border-radius: 50%; border: none; background: {{ v.playBg }}; color: {{ v.playFg }}; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="play" size="{{ i14 }}" hint-size="14px,14px"></x-import></button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </span>
+          <button onClick="{{ sendTyped }}" aria-label="Gửi" style="width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--action-primary); color: var(--cream); cursor: pointer; display: grid; place-items: center; flex: 0 0 auto;"><x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="arrow-up" size="{{ i18 }}" hint-size="18px,18px"></x-import></button>
+        </div>
+        <p style="font-size: var(--size-ui); color: var(--ink-soft); margin: 0; text-align: center;">Fonnus luôn trả lời bằng giọng nói. Bấm ✕ để thoát.</p>
+      </div>
+    </sc-if></div>
+  
+
+  <button ref="{{ orbRef }}" onClick="{{ orbClick }}" aria-label="Gọi thử Fonnus" style="position: fixed; left: 0; top: 0; width: 280px; height: 280px; z-index: 30; border: none; background: transparent; padding: 0; opacity: 0; pointer-events: none; cursor: pointer; transform-origin: 0 0; will-change: transform;">
+    <span ref="{{ ring1Ref }}" style="position: absolute; inset: -8%; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(184, 92, 43, .35); visibility: hidden; animation: fnRing 2600ms cubic-bezier(.2,.7,.3,1) infinite;"></span>
+    <span ref="{{ ring2Ref }}" style="position: absolute; inset: -8%; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(184, 92, 43, .28); visibility: hidden; animation: fnRing 2600ms cubic-bezier(.2,.7,.3,1) 1300ms infinite;"></span>
+    <span style="position: absolute; inset: 0; border-radius: 50%; display: block; animation: {{ orbAnim }};">
+      <span style="position: absolute; inset: -16%; border-radius: 50%; background: radial-gradient(circle, rgba(184, 92, 43, .3) 0%, rgba(184, 92, 43, 0) 70%); filter: blur(10px);"></span>
+      <span style="position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: linear-gradient(180deg, #8A4118 0%, #B85C2B 34%, #CE8352 56%, #EFC5A4 76%, #FBEDDD 92%, #FFF6E8 100%); box-shadow: 0 20px 70px rgba(184, 92, 43, .32);">
+        <canvas ref="{{ orbCanvasRef }}" width="144" height="144" style="position: absolute; left: -4%; top: -4%; width: 108%; height: 108%; filter: blur(7px);"></canvas>
+        <span style="position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 32%, rgba(255, 246, 232, .12) 0%, rgba(255, 246, 232, 0) 55%);"></span>
+      </span>
+      <span ref="{{ orbLabelRef }}" style="position: absolute; inset: 0; display: grid; place-items: center; color: var(--cream); text-shadow: 0 1px 3px rgba(138, 65, 24, .55), 0 2px 18px rgba(138, 65, 24, .6); transition: opacity 320ms ease-out;">
+        <span style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <x-import component-from-global-scope="FonnusDesignSystem_fc5f6d.Icon" name="phone-call" size="{{ i30 }}" hint-size="30px,30px"></x-import>
+          <span style="font-family: var(--font-display); font-weight: 600; font-size: 27px; line-height: 1.2;">Gọi thử</span>
+          <span style="font-size: var(--size-ui); opacity: .85;">Miễn phí · 1 phút</span>
+        </span>
+      </span>
+    </span>
+  </button>
+
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;reveal&quot;,&quot;tắt&quot;],&quot;default&quot;:&quot;reveal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Chuyển động&quot;},&quot;pricingHighlight&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Cơ bản&quot;,&quot;Tiêu chuẩn&quot;,&quot;Nâng cao&quot;],&quot;default&quot;:&quot;Tiêu chuẩn&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Bảng giá&quot;},&quot;matrixDefaultOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bảng giá&quot;}}">
+const MONTHLY = ["2.500.000", "4.900.000", "9.900.000"];
+const ANNUAL = ["2.125.000", "4.165.000", "8.415.000"];
+const ANNUAL_ONCE = ["thanh toán một lần 25.500.000 đ", "thanh toán một lần 49.980.000 đ", "thanh toán một lần 100.980.000 đ"];
+const MONTHLY_NOTE = ["hoặc trả năm 2.125.000 đ/tháng", "hoặc trả năm 4.165.000 đ/tháng", "hoặc trả năm 8.415.000 đ/tháng"];
+
+const FAQ = [
+  ["Fonnus có thay lễ tân của tôi không?", "Không. Fonnus nhận những cuộc gọi mà hiện tại không ai nghe: ngoài giờ, lúc máy đang bận, lúc lễ tân đang đứng với bệnh nhân. Việc cần con người vẫn do con người làm."],
+  ["Người gọi có biết mình đang nói với AI không?", "Có, ngay câu đầu tiên: “Em là Fonnus, trợ lý AI của phòng khám.” Đây là yêu cầu pháp luật và phòng khám không tắt được."],
+  ["Tôi có phải đổi số điện thoại không?", "Không. Bạn giữ nguyên số khách đã quen. Nhà mạng chuyển những cuộc gọi không ai nghe sang Fonnus, chúng tôi làm cùng bạn bước này."],
+  ["Nếu Fonnus không biết câu trả lời?", "Fonnus nói là chưa có thông tin, ghi lại câu hỏi kèm số điện thoại để bạn gọi lại, hoặc nối máy cho nhân viên ngay nếu bạn bật chuyển máy."],
+  ["Cài đặt mất bao lâu?", "Phần khai thông tin phòng khám — bảng giá, giờ, dịch vụ, cách xưng hô — thường mất một đến hai buổi. Chúng tôi không cho số máy chạy thật khi thông tin còn thiếu."],
+  ["Cuộc gọi được tính tiền thế nào?", "Theo giây, tối thiểu 30 giây cho mỗi cuộc gọi được nghe. Cuộc gọi nhỡ hoặc lỗi không tính tiền. Vượt số phút của gói thì tính theo giá vượt phút của gói đó."]
+];
+
+const CHIPS = [
+  ["Cạo vôi răng bao nhiêu?", 4200],
+  ["9h sáng thứ Bảy còn trống không?", 4600],
+  ["Phòng khám ở đâu?", 3800]
+];
+
+const VOICES = [
+  ["Linh", "Nữ · miền Nam, ấm áp"],
+  ["Mai", "Nữ · miền Bắc, nhẹ nhàng"],
+  ["An", "Nữ · trẻ trung, rõ ràng"],
+  ["Minh", "Nam · trầm, điềm tĩnh"],
+  ["Quân", "Nam · miền Nam, thân thiện"]
+];
+
+const ROWS = [
+  ["g", "Sử dụng"],
+  ["r", "Số phút bao gồm", "100", "1.000", "2.500", "6.000"],
+  ["r", "Giá thực tế mỗi phút", "—", "2.500 đ", "1.960 đ", "1.650 đ"],
+  ["r", "Giá vượt phút", "Dừng", "3.000 đ", "2.500 đ", "2.200 đ"],
+  ["r", "Cuộc gọi cùng lúc", "1", "2", "10", "25"],
+  ["r", "Số máy bao gồm", "1", "2", "5", "10"],
+  ["r", "Thêm số máy, mỗi tháng", "—", "500.000 đ", "500.000 đ", "500.000 đ"],
+  ["g", "Trợ lý"],
+  ["r", "Kho giọng nói", "1", "50+", "50+", "50+"],
+  ["r", "Giọng nói riêng", "✕", "✕", "✓", "✓"],
+  ["g", "Kỹ năng và cấu hình"],
+  ["r", "Cấu hình lời dẫn của trợ lý", "✓", "✓", "✓", "✓"],
+  ["r", "Chuyển cuộc gọi cho nhân viên", "✓", "✓", "✓", "✓"],
+  ["r", "Từ điển thuật ngữ riêng", "✓", "✓", "✓", "✓"],
+  ["r", "Điều chỉnh tốc độ nói", "✓", "✓", "✓", "✓"],
+  ["r", "Điều chỉnh độ nhạy", "✓", "✓", "✓", "✓"],
+  ["r", "Điều chỉnh phong cách trả lời", "✓", "✓", "✓", "✓"],
+  ["r", "Âm nền cuộc gọi", "✓", "✓", "✓", "✓"],
+  ["r", "Sổ lịch trống", "✕", "✓", "✓", "✓"],
+  ["r", "Kho kiến thức tự học", "✕", "✓", "✓", "✓"],
+  ["r", "Tra cứu Internet", "✕", "✓", "✓", "✓"],
+  ["g", "Nền tảng"],
+  ["r", "Ghi âm cuộc gọi", "✓", "✓", "✓", "✓"],
+  ["r", "Bảng điều khiển", "✓", "✓", "✓", "✓"],
+  ["r", "Kết nối lịch", "✕", "✓", "✓", "✓"],
+  ["g", "Vận hành và hỗ trợ"],
+  ["r", "Onboarding Academy (video)", "✓", "✓", "✓", "✓"],
+  ["r", "Guided Setup, một lần", "—", "2.000.000 đ", "2.000.000 đ", "2.000.000 đ"],
+  ["r", "Quản lý tài khoản riêng", "✕", "✕", "✕", "✓"]
+];
+
+const ORB_BASE = 280;
+const ORB_EASE = "cubic-bezier(.2,.7,.3,1)";
+
+class Component extends DCLogic {
+  state = {
+    annual: false,
+    matrixOpen: false,
+    overlay: false,
+    orb: "ringing",
+    mic: true,
+    typed: "",
+    faq: 0,
+    clinic: "",
+    name: "",
+    phone: "",
+    sent: false,
+    narrow: typeof window !== "undefined" ? window.innerWidth < 1060 : false,
+    menu: false,
+    voice: 0,
+    voiceOpen: false
+  };
+
+  componentDidMount() {
+    this.setState({ matrixOpen: !!this.props.matrixDefaultOpen });
+    if ((this.props.motion || "reveal") !== "tắt") this.initReveal();
+    this.onResize = () => {
+      const n = window.innerWidth < 1060;
+      if (n !== this.state.narrow) this.setState({ narrow: n, menu: false });
+      this.orbPass(true);
+    };
+    window.addEventListener("resize", this.onResize);
+    this.onOrbScroll = () => {
+      if (this.orbRaf) return;
+      this.orbRaf = requestAnimationFrame(() => { this.orbRaf = 0; this.orbPass(false); });
+    };
+    window.addEventListener("scroll", this.onOrbScroll, { passive: true });
+    // recapture position as async components/fonts settle layout
+    this.orbTimers = [60, 300, 800, 1600, 3200].map((t) => setTimeout(() => this.orbPass(true), t));
+    this.onKey = (e) => { if (e.key === "Escape" && this.state.overlay) this.closeCall(); };
+    document.addEventListener("keydown", this.onKey);
+    this.startOrbField();
+  }
+
+  startOrbField() {
+    const cv = this.orbCanvas;
+    if (!cv || cv === this.fieldCv) return;
+    this.fieldCv = cv;
+    cancelAnimationFrame(this.fieldRaf);
+    const ctx = cv.getContext("2d");
+    const W = cv.width, H = cv.height;
+    const img = ctx.createImageData(W, H);
+    const px = img.data;
+    // color LUT: deep brown -> clay -> cream -> blush -> milk
+    const stops = [[0, 138, 65, 24], [.3, 184, 92, 43], [.52, 208, 138, 85], [.7, 239, 197, 164], [.84, 248, 227, 223], [1, 255, 251, 242]];
+    const LUT = new Uint8ClampedArray(512 * 3);
+    for (let i = 0; i < 512; i++) {
+      const t = i / 511;
+      let a = stops[0], b = stops[stops.length - 1];
+      for (let s = 0; s < stops.length - 1; s++) { if (t >= stops[s][0] && t <= stops[s + 1][0]) { a = stops[s]; b = stops[s + 1]; break; } }
+      const f = (t - a[0]) / Math.max(1e-6, b[0] - a[0]), g = f * f * (3 - 2 * f);
+      LUT[i * 3] = a[1] + (b[1] - a[1]) * g; LUT[i * 3 + 1] = a[2] + (b[2] - a[2]) * g; LUT[i * 3 + 2] = a[3] + (b[3] - a[3]) * g;
+    }
+    const T = 44, TAU = Math.PI * 2, sin = Math.sin, cos = Math.cos;
+    // every temporal frequency is an integer multiple of TAU/T -> the loop closes seamlessly
+    const draw = (ms) => {
+      const th = ((ms / 1000) % T) / T * TAU;
+      const lob = [
+        [.62 * cos(th + .4), .62 * sin(2 * th + 1.1), 1.05, 1.05],
+        [.66 * cos(2 * th + 2.6), .66 * sin(th + 4.2), .95, .8],
+        [.58 * cos(th + 3.6), .58 * sin(3 * th + .7), .9, -1.15],
+        [.5 * cos(3 * th + 5.1), .5 * sin(2 * th + 2.9), .85, -.8],
+        [.72 * cos(2 * th + 5.8), .72 * sin(3 * th + 3.3), .9, .7]
+      ];
+      const pA = 2 * cos(th + .9), pB = 2 * cos(2 * th + 3.7), pC = 2 * sin(th + 5.2), pD = 2 * sin(2 * th + 1.6), pE = 1.5 * cos(3 * th + .3);
+      let o = 0;
+      for (let j = 0; j < H; j++) {
+        const y = (j / (H - 1)) * 2 - 1;
+        for (let i = 0; i < W; i++, o += 4) {
+          const x = (i / (W - 1)) * 2 - 1;
+          if (x * x + y * y > 1.15) { px[o + 3] = 0; continue; }
+          const u = x + .45 * sin(1.9 * y + pA) + .3 * sin(2.8 * x + 1.7 * y + pB);
+          const v = y + .45 * sin(2.2 * x + pC) + .3 * sin(2.4 * y - 1.6 * x + pD);
+          let f = .5 * sin(1.5 * u + 1.2 * v + pB) + .4 * sin(1.9 * v - 1.4 * u + pC) + .25 * sin(3.1 * u * v + pE);
+          for (let k = 0; k < 5; k++) {
+            const L = lob[k], dx = u - L[0], dy = v - L[1], d = 1 - (dx * dx + dy * dy) * L[2];
+            if (d > 0) f += L[3] * d * d;
+          }
+          const n = f / (1 + Math.abs(f));
+          const idx = ((0.5 + 0.5 * n) * 511) | 0;
+          px[o] = LUT[idx * 3]; px[o + 1] = LUT[idx * 3 + 1]; px[o + 2] = LUT[idx * 3 + 2]; px[o + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { draw(9000); return; }
+    let last = 0;
+    const tick = (now) => {
+      this.fieldRaf = requestAnimationFrame(tick);
+      if (now - last < 33) return;
+      last = now;
+      draw(now);
+    };
+    this.fieldRaf = requestAnimationFrame(tick);
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.fieldRaf);
+    window.removeEventListener("resize", this.onResize);
+    window.removeEventListener("scroll", this.onOrbScroll);
+    if (this.onRevealScroll) { window.removeEventListener("scroll", this.onRevealScroll); window.removeEventListener("resize", this.onRevealScroll); }
+    if (this.onBeforePrint) window.removeEventListener("beforeprint", this.onBeforePrint);
+    clearTimeout(this.revealWatchdog);
+    (this.orbTimers || []).forEach(clearTimeout);
+    clearTimeout(this.orbSettle);
+    document.removeEventListener("keydown", this.onKey);
+    clearTimeout(this.orbTimer);
+  }
+
+  initReveal() {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const els = Array.prototype.slice.call(document.querySelectorAll("[data-reveal]"));
+    els.forEach((el) => {
+      el.style.opacity = "0";
+      if (!reduce) el.style.transform = "translateY(18px)";
+      el.style.transition = "opacity 520ms cubic-bezier(.2,.7,.3,1), transform 520ms cubic-bezier(.2,.7,.3,1)";
+      el.style.willChange = "opacity, transform";
+    });
+    const shown = new WeakSet();
+    const show = (el, delay) => {
+      if (shown.has(el)) return;
+      shown.add(el);
+      const d = delay === 0 ? 0 : (Number(el.getAttribute("data-reveal")) || 0) * 90;
+      setTimeout(() => { el.style.opacity = "1"; el.style.transform = "none"; el.style.willChange = "auto"; }, d);
+    };
+    this.revealPass = () => {
+      const limit = window.innerHeight * 0.92;
+      els.forEach((el) => { if (el.getBoundingClientRect().top < limit) show(el); });
+    };
+    this.onRevealScroll = () => {
+      if (this.revealRaf) return;
+      this.revealRaf = requestAnimationFrame(() => { this.revealRaf = 0; this.revealPass(); });
+    };
+    window.addEventListener("scroll", this.onRevealScroll, { passive: true });
+    window.addEventListener("resize", this.onRevealScroll);
+    this.revealPass();
+    this.revealWatchdog = setTimeout(() => els.forEach((el) => show(el, 0)), 4000);
+    this.onBeforePrint = () => els.forEach((el) => show(el, 0));
+    window.addEventListener("beforeprint", this.onBeforePrint);
+  }
+
+  // The single orb: docked in #nghe-thu, pinned bottom-right after scrolling past,
+  // hidden above the section, morphs into the call screen when the demo opens.
+  orbPass(force) {
+    const orb = this.orbEl, dock = this.orbDock;
+    if (!orb || !dock) return;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let mode, x, y, s;
+    if (this.state.overlay) {
+      mode = "call";
+      const spot = this.callSpot;
+      if (spot) {
+        const r = spot.getBoundingClientRect();
+        x = r.left; y = r.top; s = r.width / ORB_BASE;
+      } else {
+        const size = Math.min(320, Math.max(200, vh * 0.32));
+        s = size / ORB_BASE; x = (vw - size) / 2; y = vh * 0.44 - size / 2;
+      }
+    } else {
+      const r = dock.getBoundingClientRect();
+      if (r.bottom < 120) {
+        mode = "pinned";
+        const size = 84;
+        s = size / ORB_BASE; x = vw - size - 24; y = vh - size - 28;
+      } else if (r.top > vh) {
+        mode = "hidden";
+        s = r.width / ORB_BASE; x = r.left; y = r.top;
+      } else {
+        mode = "docked";
+        s = r.width / ORB_BASE; x = r.left; y = r.top;
+      }
+    }
+    const prev = this.orbMode;
+    const changed = mode !== prev;
+    if (!changed && mode !== "docked" && !force) return;
+    // hidden <-> docked/pinned and the first pass jump instantly (fade only); flights retarget smoothly while settling
+    const instantJump = changed && (!prev || mode === "hidden" || prev === "hidden") && mode !== "call" && prev !== "call";
+    const settling = !changed && mode === "docked" && Date.now() - (this.orbMovedAt || 0) < 560;
+    orb.style.transition = instantJump
+      ? "opacity 360ms " + ORB_EASE
+      : (changed || mode !== "docked" || settling)
+        ? "transform 520ms " + ORB_EASE + ", opacity 360ms " + ORB_EASE
+        : "none";
+    orb.style.transform = "translate(" + x + "px," + y + "px) scale(" + s + ")";
+    orb.style.opacity = mode === "hidden" ? "0" : "1";
+    orb.style.pointerEvents = (mode === "hidden" || mode === "call") ? "none" : "auto";
+    orb.style.zIndex = mode === "call" ? "70" : "30";
+    if (this.orbLabel) this.orbLabel.style.opacity = mode === "docked" ? "1" : "0";
+    const rings = mode === "call" ? "visible" : "hidden";
+    if (this.ring1) this.ring1.style.visibility = rings;
+    if (this.ring2) this.ring2.style.visibility = rings;
+    if (changed) {
+      this.orbMovedAt = Date.now();
+      clearTimeout(this.orbSettle);
+      this.orbSettle = setTimeout(() => this.orbPass(true), 600);
+    }
+    this.orbMode = mode;
+  }
+
+  openCall = () => {
+    this.setState({ overlay: true, orb: "ringing", typed: "", voiceOpen: false });
+    document.body.style.overflow = "hidden";
+    setTimeout(() => this.orbPass(true), 30);
+    setTimeout(() => this.orbPass(true), 260);
+    this.queue("speaking", 1600, 5200);
+  };
+
+  closeCall = () => {
+    clearTimeout(this.orbTimer);
+    document.body.style.overflow = "";
+    this.setState({ overlay: false, orb: "ringing", voiceOpen: false });
+    setTimeout(() => this.orbPass(true), 30);
+  };
+
+  queue(to, delay, hold) {
+    clearTimeout(this.orbTimer);
+    this.orbTimer = setTimeout(() => {
+      this.setState({ orb: to });
+      this.orbTimer = setTimeout(() => this.setState({ orb: "listening" }), hold);
+    }, delay);
+  }
+
+  speak(ms) { this.setState({ orb: "speaking" }); this.queue("speaking", 0, ms); }
+
+  submit = () => { this.setState({ sent: true }); };
+  resetForm = () => { this.setState({ sent: false, clinic: "", name: "", phone: "" }); };
+
+  renderVals() {
+    const s = this.state;
+    const prices = s.annual ? ANNUAL : MONTHLY;
+    const notes = s.annual ? ANNUAL_ONCE : MONTHLY_NOTE;
+    const highlight = this.props.pricingHighlight || "Tiêu chuẩn";
+
+    const matrix = ROWS.map((r) => r[0] === "g"
+      ? { label: r[1], c1: "", c2: "", c3: "", c4: "", bg: "var(--paper)", labelColor: "var(--terracotta-deep)", labelWeight: "600", labelTracking: "var(--tracking-eyebrow)", labelCase: "uppercase", labelSize: "var(--size-eyebrow)" }
+      : { label: r[1], c1: r[2], c2: r[3], c3: r[4], c4: r[5], bg: "transparent", labelColor: "var(--ink)", labelWeight: "400", labelTracking: "0", labelCase: "none", labelSize: "var(--size-body-sm)" });
+
+    const faqs = FAQ.map((f, i) => ({
+      q: f[0], a: f[1], open: s.faq === i, sign: s.faq === i ? "—" : "+",
+      rows: s.faq === i ? "1fr" : "0fr", opacity: s.faq === i ? "1" : "0",
+      toggle: () => this.setState({ faq: s.faq === i ? -1 : i })
+    }));
+
+    const chips = CHIPS.map((c) => ({ label: c[0], pick: () => this.speak(c[1]) }));
+
+    const voices = VOICES.map((v, i) => {
+      const sel = s.voice === i;
+      return {
+        name: v[0], desc: v[1], selected: sel,
+        bg: sel ? "var(--action-primary)" : "transparent",
+        fg: sel ? "var(--cream)" : "var(--ink)",
+        playBg: sel ? "rgba(255, 246, 232, .2)" : "var(--blush)",
+        playFg: sel ? "var(--cream)" : "var(--terracotta-deep)",
+        select: () => this.setState({ voice: i }),
+        play: (e) => { e.stopPropagation(); this.speak(2600); }
+      };
+    });
+
+    const speaking = s.orb === "speaking";
+    const ringing = s.orb === "ringing";
+
+    return {
+      logoH: 28,
+      i14: 14, i18: 18, i20: 20, i22: 22, i30: 30,
+      wideNav: !s.narrow,
+      narrowNav: s.narrow,
+      menuOpen: s.narrow && s.menu,
+      menuIcon: s.menu ? "x" : "menu",
+      toggleMenu: () => this.setState({ menu: !s.menu }),
+      closeMenu: () => this.setState({ menu: false }),
+      micIcon: s.mic ? "mic" : "mic-off",
+      annual: s.annual,
+      toggleAnnual: () => this.setState({ annual: !s.annual }),
+      p1: prices[0], p2: prices[1], p3: prices[2],
+      n1: notes[0], n2: notes[1], n3: notes[2],
+      priceAnim: s.annual ? "fnPriceIn 360ms cubic-bezier(.2,.7,.3,1)" : "fnPriceIn2 360ms cubic-bezier(.2,.7,.3,1)",
+      b1: highlight === "Cơ bản" ? "var(--terracotta)" : "var(--border-hairline)",
+      b3: highlight === "Nâng cao" ? "var(--terracotta)" : "var(--border-hairline)",
+      matrix,
+      matrixOpen: s.matrixOpen,
+      matrixLabel: s.matrixOpen ? "Thu gọn bảng so sánh đầy đủ" : "Xem bảng so sánh đầy đủ",
+      toggleMatrix: () => this.setState({ matrixOpen: !s.matrixOpen }),
+      faqs,
+      chips,
+      voices,
+      voiceOpen: s.voiceOpen,
+      toggleVoices: () => this.setState({ voiceOpen: !s.voiceOpen }),
+      voiceBtnBg: s.voiceOpen ? "var(--ink)" : "var(--milk)",
+      voiceBtnFg: s.voiceOpen ? "var(--cream)" : "var(--ink)",
+      overlay: s.overlay,
+      openCall: this.openCall,
+      closeCall: this.closeCall,
+      orbClick: () => { if (!s.overlay) this.openCall(); },
+      orbRef: (el) => { this.orbEl = el; },
+      orbCanvasRef: (el) => { if (el) { this.orbCanvas = el; this.startOrbField(); } },
+      orbDockRef: (el) => { this.orbDock = el; },
+      callSpotRef: (el) => { this.callSpot = el; },
+      orbLabelRef: (el) => { this.orbLabel = el; },
+      ring1Ref: (el) => { this.ring1 = el; },
+      ring2Ref: (el) => { this.ring2 = el; },
+      orbAnim: speaking ? "fnSpeak 1500ms cubic-bezier(.2,.7,.3,1) infinite" : "none",
+      stateLabel: ringing ? "Đang kết nối…" : speaking ? "Fonnus đang nói" : s.mic ? "Fonnus đang nghe" : "Micro đang tắt — bạn có thể gõ chữ",
+      typed: s.typed,
+      setTyped: (e) => this.setState({ typed: e.target.value }),
+      typedKey: (e) => { if (e.key === "Enter") { e.preventDefault(); if (s.typed.trim()) { this.setState({ typed: "" }); this.speak(4400); } } },
+      sendTyped: () => { if (s.typed.trim()) { this.setState({ typed: "" }); this.speak(4400); } },
+      toggleMic: () => this.setState({ mic: !s.mic }),
+      micBg: s.mic ? "var(--milk)" : "var(--ink)",
+      micFg: s.mic ? "var(--ink)" : "var(--cream)",
+      clinic: s.clinic, name: s.name, phone: s.phone,
+      setClinic: (e) => this.setState({ clinic: e.target.value }),
+      setName: (e) => this.setState({ name: e.target.value }),
+      setPhone: (e) => this.setState({ phone: e.target.value }),
+      submit: this.submit,
+      resetForm: this.resetForm,
+      sent: s.sent,
+      notSent: !s.sent
+    };
+  }
+}
+</script>
+</body>
+</html>
