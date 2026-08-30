@@ -44,6 +44,15 @@
   flex: 0 0 auto;
 }
 
+/* Sign-in beside sign-up: secondary first, so the primary sits at the edge
+   where the eye finishes the row. */
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
 .narrowActions {
   margin-left: auto;
   display: flex;
@@ -95,4 +104,11 @@
 
 .drawerLink:last-child {
   box-shadow: none;
+}
+
+/* Sign-in leads the drawer — it is the one thing in there that is not a jump
+   to a section further down this page. */
+.drawerSignIn {
+  color: var(--text-accent);
+  font-weight: 600;
 }

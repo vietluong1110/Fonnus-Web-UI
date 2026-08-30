@@ -1,5 +1,6 @@
 import { Button } from '../../design-system'
 import type { Plan } from '../../data/pricing'
+import { hrefFor } from '../../hooks/useRoute'
 import styles from './PlanCard.module.css'
 
 interface PlanCardProps {
@@ -59,7 +60,9 @@ export function PlanCard({ plan, annual, highlighted, priceAnimation, revealOrde
         ))}
       </div>
 
-      <a href="#lien-he" className={styles.cta}>
+      {/* Every plan starts the same way: create an account and pick the plan
+          inside. Only the enterprise tier still goes to the contact form. */}
+      <a href={hrefFor('signup')} className={styles.cta}>
         <Button variant={plan.featured ? 'inverse' : 'secondary'} fullWidth>
           {plan.cta}
         </Button>

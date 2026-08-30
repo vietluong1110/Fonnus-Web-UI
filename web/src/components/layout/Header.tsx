@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react'
 import { Button, Icon, Logo } from '../../design-system'
 import { NAV_LINKS } from '../../data/content'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { hrefFor } from '../../hooks/useRoute'
 import styles from './Header.module.css'
 
 /**
  * Frozen to the top of the viewport at every scroll position.
  *
  * Responsiveness is a swap, not a shrink: below 1060px the seven links move
- * into a drawer rather than being squeezed off the row one at a time. The
- * "Tham gia pilot" CTA survives both layouts — it is the one action the page
- * is asking for.
+ * into a drawer rather than being squeezed off the row one at a time. Sign-up
+ * survives both layouts — it is the one action the page is asking for; sign-in
+ * gives up its spot to the menu button and moves to the top of the drawer.
  */
 export function Header() {
   const narrow = useIsNarrow()
@@ -30,8 +31,8 @@ export function Header() {
 
         {narrow ? (
           <div className={styles.narrowActions}>
-            <a href="#lien-he" className={styles.cta}>
-              <Button size="sm">Tham gia pilot</Button>
+            <a href={hrefFor('signup')} className={styles.cta}>
+              <Button size="sm">Dùng thử miễn phí</Button>
             </a>
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -51,15 +52,29 @@ export function Header() {
                 </a>
               ))}
             </nav>
-            <a href="#lien-he" className={styles.cta}>
-              <Button size="sm">Tham gia pilot</Button>
-            </a>
+            <div className={styles.actions}>
+              <a href={hrefFor('signin')} className={styles.cta}>
+                <Button variant="secondary" size="sm">
+                  Đăng nhập
+                </Button>
+              </a>
+              <a href={hrefFor('signup')} className={styles.cta}>
+                <Button size="sm">Dùng thử miễn phí</Button>
+              </a>
+            </div>
           </>
         )}
       </header>
 
       {narrow && menuOpen ? (
         <div className={styles.drawer}>
+          <a
+            href={hrefFor('signin')}
+            onClick={() => setMenuOpen(false)}
+            className={`${styles.drawerLink} ${styles.drawerSignIn}`}
+          >
+            Đăng nhập
+          </a>
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}

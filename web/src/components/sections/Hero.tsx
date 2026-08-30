@@ -1,4 +1,8 @@
-import { Badge, Button, Icon } from '../../design-system'
+import { useState } from 'react'
+import { Badge, Button, Icon, Input } from '../../design-system'
+import { stashPhone } from '../../auth/handoff'
+import { formatPhone, isValidPhone, normalizePhone } from '../../auth/phone'
+import { navigate } from '../../hooks/useRoute'
 import section from '../../styles/section.module.css'
 import styles from './Hero.module.css'
 
@@ -7,6 +11,18 @@ interface HeroProps {
 }
 
 export function Hero({ onTryCall }: HeroProps) {
+  const [phone, setPhone] = useState('')
+
+  /*
+   * Taking the number here removes a whole screen from the primary sign-up
+   * path: sign-up picks it up and opens straight on the SMS code. Submitting
+   * empty is fine too — that just opens sign-up at its first step.
+   */
+  function startSignUp() {
+    if (isValidPhone(phone)) stashPhone(phone)
+    navigate('signup')
+  }
+
   return (
     <section id="hero" data-reveal="0" className={styles.hero}>
       <div>
@@ -16,15 +32,37 @@ export function Hero({ onTryCall }: HeroProps) {
           Fonnus nghe máy trên chính số điện thoại phòng khám đang dùng. Trả lời bằng tiếng Việt, báo giá, giữ
           lịch hẹn, chuyển cho nhân viên khi cần — kể cả 10 giờ đêm hay ngày Tết.
         </p>
-        <div className={styles.actions}>
-          <a href="#lien-he" style={{ textDecoration: 'none' }}>
-            <Button size="lg">Tham gia danh sách pilot</Button>
-          </a>
+
+        <form
+          className={styles.actions}
+          onSubmit={(e) => {
+            e.preventDefault()
+            startSignUp()
+          }}
+        >
+          <div className={styles.startRow}>
+            <div className={styles.phoneField}>
+              <Input
+                label="Số điện thoại của bạn"
+                placeholder="090 123 45 67"
+                value={formatPhone(phone)}
+                onChange={(e) => setPhone(normalizePhone(e.target.value).slice(0, 10))}
+                numeric
+                inputMode="tel"
+                autoComplete="tel"
+              />
+            </div>
+            <Button type="submit" size="lg">
+              Dùng thử miễn phí
+            </Button>
+          </div>
+
           <Button variant="secondary" size="lg" onClick={onTryCall}>
             Nghe thử ngay
           </Button>
-        </div>
-        <p className={styles.reassurance}>Không cần cài đặt. Nghe thử trực tiếp trên trang này.</p>
+        </form>
+
+        <p className={styles.reassurance}>Miễn phí 14 ngày · Không cần thẻ ngân hàng · Xong trong 2 phút</p>
       </div>
 
       <div className={styles.sample}>

@@ -1,0 +1,73 @@
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-hairline);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--milk);
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.option:hover {
+  background: var(--action-secondary-hover);
+}
+
+.googleG {
+  font-weight: 700;
+  font-size: 15px;
+  background: linear-gradient(90deg, #4285f4, #ea4335, #fbbc05, #34a853);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Footer link between the two doors: "already have an account?" / "no account?" */
+.swap {
+  padding-top: 6px;
+  border-top: 1px solid var(--border-hairline);
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.terms {
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.trialNote {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}

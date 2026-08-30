@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button, Input } from '../../design-system'
 import { CONTACT } from '../../data/content'
+import { hrefFor } from '../../hooks/useRoute'
 import section from '../../styles/section.module.css'
 import styles from './Contact.module.css'
 
@@ -13,8 +14,12 @@ const POINTS = [
 const EMPTY = { clinic: '', name: '', phone: '' }
 
 /**
- * The one action the page is asking for. Nothing is posted anywhere yet — the
- * form moves to its success state locally, ready for a real endpoint later.
+ * The slower door, for owners who want a person before they want an account:
+ * chains and hospitals on a quoted plan, and anyone who would rather be walked
+ * through call forwarding than click "Dùng thử miễn phí".
+ *
+ * Nothing is posted anywhere yet — the form moves to its success state locally,
+ * ready for a real endpoint later.
  */
 export function Contact() {
   const [fields, setFields] = useState(EMPTY)
@@ -28,10 +33,10 @@ export function Contact() {
       <div className={styles.inner}>
         <div>
           <div className={section.eyebrow}>Liên hệ</div>
-          <h2 className={`${section.heading} ${styles.heading}`}>Tham gia danh sách pilot</h2>
+          <h2 className={`${section.heading} ${styles.heading}`}>Cần tư vấn trước khi bắt đầu?</h2>
           <p className={`${section.lede} ${styles.lede}`}>
-            Chúng tôi nhận mười phòng khám cho đợt pilot cuối năm 2026. Để lại số điện thoại, chúng tôi gọi
-            lại trong 24 giờ để xem phòng khám bạn có phù hợp không.
+            Để lại số điện thoại, chúng tôi gọi lại trong 24 giờ — xem phòng khám bạn cần gì và cài đặt cùng
+            bạn. Chuỗi phòng khám và bệnh viện cũng liên hệ ở đây để nhận báo giá riêng.
           </p>
           <div className={styles.points}>
             {POINTS.map((point) => (
@@ -106,7 +111,8 @@ export function Contact() {
                 Gửi thông tin
               </Button>
               <p className={styles.formNote}>
-                Hoặc nghe thử trước: <a href="#nghe-thu">gọi thử Fonnus</a>.
+                Không cần chờ gọi lại: <a href={hrefFor('signup')}>dùng thử miễn phí 14 ngày</a> hoặc{' '}
+                <a href="#nghe-thu">nghe thử ngay</a>.
               </p>
             </form>
           )}
