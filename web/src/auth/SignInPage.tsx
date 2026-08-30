@@ -84,7 +84,7 @@ export function SignInPage() {
   switch (step) {
     case 'phone':
       return (
-        <AuthShell variant="signin" centred>
+        <AuthShell variant="signin">
           <AuthHeading title="Đăng nhập">
             Nhập số điện thoại đã đăng ký — mã xác nhận gửi qua SMS.
           </AuthHeading>
@@ -133,7 +133,7 @@ export function SignInPage() {
 
     case 'phone-otp':
       return (
-        <AuthShell variant="signin" centred>
+        <AuthShell variant="signin">
           <AuthHeading title="Nhập mã 6 số">
             Đã gửi SMS tới <span className={styles.num}>{formatPhone(phone)}</span> ·{' '}
             <button type="button" className={styles.inlineButton} onClick={() => goTo('phone')}>
@@ -168,7 +168,6 @@ export function SignInPage() {
       return (
         <AuthShell
           variant="signin"
-          centred
           overlay={<GoogleChooser onPick={enterApp} onDismiss={() => goTo('phone')} />}
         >
           <div className={styles.behindOverlay} aria-hidden="true">
@@ -180,7 +179,7 @@ export function SignInPage() {
 
     case 'email':
       return (
-        <AuthShell variant="signin" centred>
+        <AuthShell variant="signin">
           <AuthHeading title="Đăng nhập bằng email" />
 
           <form
@@ -216,7 +215,7 @@ export function SignInPage() {
 
     case 'email-otp':
       return (
-        <AuthShell variant="signin" centred>
+        <AuthShell variant="signin">
           <AuthHeading title="Kiểm tra hộp thư">
             Mã 6 số đã gửi tới <b style={{ color: 'var(--ink)' }}>{email}</b> ·{' '}
             <button type="button" className={styles.inlineButton} onClick={() => goTo('email')}>

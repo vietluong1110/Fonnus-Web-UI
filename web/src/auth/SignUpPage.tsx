@@ -256,7 +256,6 @@ export function SignUpPage() {
       return (
         <AuthShell
           variant="signup"
-          centred
           overlay={
             <GoogleChooser
               onPick={(account) => {
@@ -396,7 +395,7 @@ export function SignUpPage() {
     // the code is already on its way and the screen quietly becomes sign-in.
     case 'existing-otp':
       return (
-        <AuthShell variant="signin" centred>
+        <AuthShell variant="signin">
           <div className={styles.notice}>
             <span className={styles.noticeTick} aria-hidden="true">
               ✓
@@ -439,7 +438,7 @@ export function SignUpPage() {
 
     case 'done':
       return (
-        <AuthShell variant="signup" centred>
+        <AuthShell variant="signup">
           <div className={styles.done}>
             <span className={styles.doneTick} aria-hidden="true">
               ✓

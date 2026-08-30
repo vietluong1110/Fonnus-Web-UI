@@ -22,7 +22,7 @@ export function Pricing({ highlight = 'Tiêu chuẩn', matrixDefaultOpen = false
         <div className={styles.head}>
           <div>
             <div className={section.eyebrow}>Bảng giá</div>
-            <h2 className={`${section.heading} ${styles.heading}`}>Trả theo tháng, tính tiền theo giây</h2>
+            <h2 className={`${section.heading} ${styles.heading}`}>Giá minh bạch, không ràng buộc</h2>
           </div>
           <div className={styles.switchWrap}>
             <Switch

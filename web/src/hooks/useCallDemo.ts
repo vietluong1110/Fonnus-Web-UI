@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { TYPED_SPEAK_MS, VOICE_PREVIEW_MS } from '../data/callDemo'
+import { useGreetingAudio } from './useGreetingAudio'
 
 /**
  * State machine behind the "Nghe thử" mockup. No microphone is opened and
@@ -8,7 +9,11 @@ import { TYPED_SPEAK_MS, VOICE_PREVIEW_MS } from '../data/callDemo'
  */
 export type AgentState = 'ringing' | 'speaking' | 'listening'
 
-/** Delay before the agent picks up, and how long the greeting runs. */
+/**
+ * Fallback timings, used only when the browser refuses to play the greeting
+ * (autoplay policy, no codec). With audio, the recording's own length decides
+ * how long the agent speaks.
+ */
 const GREETING_DELAY_MS = 1600
 const GREETING_HOLD_MS = 5200
 
@@ -40,29 +45,47 @@ export function useCallDemo() {
     [clearTimers],
   )
 
-  const speak = useCallback((ms: number) => {
-    setAgent('speaking')
-    clearTimeout(timer.current)
-    clearTimeout(holdTimer.current)
-    holdTimer.current = setTimeout(() => setAgent('listening'), ms)
-  }, [])
+  // Real audio, so the greeting's length is the recording's, not a guess.
+  const greeting = useGreetingAudio(useCallback(() => setAgent('listening'), []))
+
+  const speak = useCallback(
+    (ms: number) => {
+      // Asking something cuts the greeting off rather than talking over it.
+      greeting.stop()
+      setAgent('speaking')
+      clearTimeout(timer.current)
+      clearTimeout(holdTimer.current)
+      holdTimer.current = setTimeout(() => setAgent('listening'), ms)
+    },
+    [greeting],
+  )
 
   const openCall = useCallback(() => {
     setOpen(true)
-    setAgent('ringing')
     setTyped('')
     setVoiceOpen(false)
     document.body.style.overflow = 'hidden'
-    queue('speaking', GREETING_DELAY_MS, GREETING_HOLD_MS)
-  }, [queue])
+
+    // Linh greets straight away — the click that opened this screen is the
+    // gesture that lets the audio play, so there is nothing left to ask for.
+    clearTimers()
+    setAgent('speaking')
+    void greeting.play().then((started) => {
+      if (started) return
+      // Refused: fall back to the scripted ring-then-speak beat.
+      setAgent('ringing')
+      queue('speaking', GREETING_DELAY_MS, GREETING_HOLD_MS)
+    })
+  }, [queue, clearTimers, greeting])
 
   const closeCall = useCallback(() => {
     clearTimers()
+    greeting.stop()
     document.body.style.overflow = ''
     setOpen(false)
     setAgent('ringing')
     setVoiceOpen(false)
-  }, [clearTimers])
+  }, [clearTimers, greeting])
 
   const send = useCallback(() => {
     if (!typed.trim()) return
@@ -103,6 +126,8 @@ export function useCallDemo() {
     open,
     agent,
     speaking: agent === 'speaking',
+    /** Live loudness of the greeting for the orb's waves; null when silent. */
+    getAmplitude: greeting.getAmplitude,
     stateLabel,
     mic,
     toggleMic: () => setMic((m) => !m),

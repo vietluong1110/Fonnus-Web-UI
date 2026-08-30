@@ -117,9 +117,36 @@ The orb is the page's signature and the fiddliest part of it. Three pieces:
   is animated. Every temporal frequency is a multiple of `TAU / 44s`, so the
   loop closes with no visible reset.
 
-`useCallDemo.ts` holds the demo's state machine. Nothing about the demo is real:
-no microphone is opened, no audio plays, nothing is sent. A chip or a typed
-question only decides how long the agent stays in its "speaking" state.
+`useCallDemo.ts` holds the demo's state machine. No microphone is opened and
+nothing is sent anywhere. A chip or a typed question only decides how long the
+agent stays in its "speaking" state — but the opening greeting is real audio.
+
+### The greeting and the sound waves
+
+Opening the call screen plays `public/audio/linh-greeting.wav` at once. No
+button to press: the click that opened the screen is the gesture browsers
+require for autoplay, so `useGreetingAudio.ts` simply calls `play()` and awaits
+it. If it is refused anyway, the demo falls back to the old scripted
+ring-then-speak timings, so the screen is never silent *and* frozen.
+
+While it plays, the greeting also drives the orb. `useGreetingAudio` taps the
+element through a Web Audio `AnalyserNode`, takes the RMS of the waveform each
+frame and shapes it into an envelope with a fast attack and a slow release —
+so the waves snap open on a syllable and settle through a pause rather than
+flickering. `Orb.tsx` runs one `requestAnimationFrame` loop that writes that
+number to a single CSS custom property, `--amp`, on the orb's root; the wave
+brightness and spread, the sphere's swell and the halo are all `calc()`s off
+it. Nothing about the envelope touches React state, so a 60fps signal costs
+zero re-renders.
+
+The waves themselves are driven by two things at once: `fnWave` keyframes carry
+each of the three rings outward on a steady beat, and `--amp` decides how bright
+and how far each one gets. The ripple never stutters, but its strength tracks
+the voice. When no waveform is available — a chip reply, or a browser without
+Web Audio — the loop substitutes a slow sine so the orb still breathes.
+
+Replacing the greeting is a file swap: drop a new clip at that path. The agent
+speaks for exactly as long as the recording lasts, so no timing needs updating.
 
 ## Page settings
 
