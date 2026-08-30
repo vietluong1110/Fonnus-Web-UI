@@ -30,8 +30,8 @@ type OrbMode = 'hidden' | 'docked' | 'pinned' | 'call'
 export interface OrbPlacement {
   orbRef: RefObject<HTMLButtonElement | null>
   labelRef: RefObject<HTMLSpanElement | null>
-  ring1Ref: RefObject<HTMLSpanElement | null>
-  ring2Ref: RefObject<HTMLSpanElement | null>
+  /** Wrapper around the sound waves — only shown on the call screen. */
+  wavesRef: RefObject<HTMLSpanElement | null>
   /** Placeholder in the "Nghe thử" section that defines the docked position. */
   dockRef: RefObject<HTMLDivElement | null>
   /** Placeholder in the call overlay that defines the call position. */
@@ -42,8 +42,7 @@ export interface OrbPlacement {
 export function useOrbPlacement(overlayOpen: boolean): OrbPlacement {
   const orbRef = useRef<HTMLButtonElement>(null)
   const labelRef = useRef<HTMLSpanElement>(null)
-  const ring1Ref = useRef<HTMLSpanElement>(null)
-  const ring2Ref = useRef<HTMLSpanElement>(null)
+  const wavesRef = useRef<HTMLSpanElement>(null)
   const dockRef = useRef<HTMLDivElement>(null)
   const callSpotRef = useRef<HTMLDivElement>(null)
 
@@ -119,9 +118,7 @@ export function useOrbPlacement(overlayOpen: boolean): OrbPlacement {
     orb.style.zIndex = mode === 'call' ? '70' : '30'
 
     if (labelRef.current) labelRef.current.style.opacity = mode === 'docked' ? '1' : '0'
-    const ringVisibility = mode === 'call' ? 'visible' : 'hidden'
-    if (ring1Ref.current) ring1Ref.current.style.visibility = ringVisibility
-    if (ring2Ref.current) ring2Ref.current.style.visibility = ringVisibility
+    if (wavesRef.current) wavesRef.current.style.visibility = mode === 'call' ? 'visible' : 'hidden'
 
     if (changed) {
       movedAtRef.current = Date.now()
@@ -167,5 +164,5 @@ export function useOrbPlacement(overlayOpen: boolean): OrbPlacement {
     }
   }, [overlayOpen, refresh])
 
-  return { orbRef, labelRef, ring1Ref, ring2Ref, dockRef, callSpotRef, refresh }
+  return { orbRef, labelRef, wavesRef, dockRef, callSpotRef, refresh }
 }

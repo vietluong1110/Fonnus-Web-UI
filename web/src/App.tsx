@@ -58,7 +58,12 @@ export function App({
         section, the pinned corner and the call screen. Keeping it mounted is
         what lets it fly between them without restarting its animation.
       */}
-      <Orb placement={placement} speaking={demo.speaking} onClick={demo.openCall} />
+      <Orb
+        placement={placement}
+        speaking={demo.speaking}
+        getAmplitude={demo.getAmplitude}
+        onClick={demo.openCall}
+      />
     </div>
   )
 }

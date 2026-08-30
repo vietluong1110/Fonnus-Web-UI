@@ -4,6 +4,9 @@
  * whole thing stays sharp at every scale.
  */
 .orb {
+  /* Live loudness, 0–1, written every frame by Orb.tsx. Everything below that
+     reacts to the voice is a calc() off this one value. */
+  --amp: 0;
   position: fixed;
   left: 0;
   top: 0;
@@ -20,45 +23,50 @@
   will-change: transform;
 }
 
-/* Two rings, half a cycle apart, only visible on the call screen. */
-.ring {
+/*
+ * Sound waves. Two forces act on them at once: the keyframes carry each ring
+ * outward on its own steady beat, and --amp decides how bright and how far it
+ * gets. So the ripple never stutters, but its strength tracks the voice —
+ * loud syllables throw wide bright rings, pauses let them fade to nothing.
+ *
+ * Only shown on the call screen; useOrbPlacement toggles visibility here.
+ */
+.waves {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  opacity: var(--amp);
+  transform: scale(calc(1 + var(--amp) * 0.14));
+}
+
+.wave {
   position: absolute;
   inset: -8%;
   border-radius: 50%;
-  visibility: hidden;
-  animation: fnRing 2600ms cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+  box-shadow: inset 0 0 0 2px rgba(184, 92, 43, 0.5);
+  animation: fnWave 2600ms cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
 }
 
-.ring1 {
-  composes: ring;
-  box-shadow: inset 0 0 0 1.5px rgba(184, 92, 43, 0.35);
-}
-
-.ring2 {
-  composes: ring;
-  box-shadow: inset 0 0 0 1.5px rgba(184, 92, 43, 0.28);
-  animation-delay: 1300ms;
-}
-
-/* Wrapper that carries the "breathing" pulse while the agent speaks. */
+/* Wrapper that carries the breathing pulse while the agent speaks. Scaled
+   straight off the amplitude rather than by a keyframe, so the sphere swells on
+   the actual syllable instead of on a fixed 1.5s loop. */
 .body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   display: block;
+  transform: scale(calc(1 + var(--amp) * 0.075));
 }
 
-.speaking {
-  animation: fnSpeak 1500ms cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
-}
-
-/* Ambient light bleeding past the sphere's edge. */
+/* Ambient light bleeding past the sphere's edge, brightening with the voice. */
 .halo {
   position: absolute;
   inset: -16%;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(184, 92, 43, 0.3) 0%, rgba(184, 92, 43, 0) 70%);
   filter: blur(10px);
+  opacity: calc(1 + var(--amp) * 0.9);
+  transform: scale(calc(1 + var(--amp) * 0.1));
 }
 
 /* The sphere: a vertical clay → milk base with the animated field on top. */
@@ -125,4 +133,14 @@
 .labelNote {
   font-size: var(--size-ui);
   opacity: 0.85;
+}
+
+/* global.css already freezes the keyframes; this stops the amplitude-driven
+   transforms from pumping the sphere for anyone who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .waves,
+  .body,
+  .halo {
+    transform: none;
+  }
 }

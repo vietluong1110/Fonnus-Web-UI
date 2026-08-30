@@ -1,7 +1,7 @@
 .shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 390px 1fr;
+  grid-template-columns: 33.333% 1fr;
   background: var(--surface-page);
 }
 
@@ -27,6 +27,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* A third of a wide screen is a lot of room; cap the measure so the promise
+     still reads as a paragraph rather than a banner. */
+  max-width: 460px;
 }
 
 /* Sign-in centres its welcome instead of sitting it on the floor. */
@@ -36,6 +39,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  max-width: 460px;
 }
 
 /* base.css sets an explicit colour on h1–h4, so the dark panel has to state
@@ -67,6 +71,7 @@
 
 .stats {
   margin-top: 40px;
+  max-width: 460px;
   padding-top: 26px;
   border-top: 1px solid var(--border-on-inverse);
   display: flex;
@@ -99,19 +104,18 @@
   color: var(--ink-soft);
 }
 
-/* Right column: stepper pinned to the top, the form block below it. */
+/* Right column: stepper above the form, the pair centred as one block. The
+   steps are short and uneven in height, so top-aligning them left the screen
+   bottom-heavy with empty space. */
 .content {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 40px;
   padding: 44px clamp(20px, 5vw, 64px);
   box-sizing: border-box;
-}
-
-.contentCentred {
-  justify-content: center;
 }
 
 .form {

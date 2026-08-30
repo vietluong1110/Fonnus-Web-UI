@@ -58,7 +58,9 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 26px;
+  /* Wide enough that the sound waves finish fading before they reach the
+     label — at 26px they crossed straight through it. */
+  gap: 60px;
 }
 
 /* Empty box the orb measures itself against — see useOrbPlacement. */
