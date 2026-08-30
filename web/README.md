@@ -21,10 +21,12 @@ Output is a fully static site — `dist/` can be dropped on any host.
 
 ```
 src/
-  App.tsx                  page composition + the three page-level settings
+  Root.tsx                 picks the page for the current route
+  App.tsx                  landing page composition + the three page-level settings
   design-system/           Button, Icon, Badge, Input, Switch, Logo
   data/                    all copy and pricing, no markup
-  hooks/                   useReveal, useIsNarrow, useCallDemo
+  hooks/                   useReveal, useIsNarrow, useCallDemo, useRoute
+  auth/                    the sign-up and sign-in flows
   components/
     layout/                Header (+ drawer), Footer
     sections/              one component per landing section
@@ -53,6 +55,50 @@ the design system specifies. The bundle fetched them from a CDN at runtime;
 here they are vendored into `public/icons/`, so the page makes no network
 requests of its own. Web fonts still come from Google Fonts, via
 `styles/tokens/fonts.css` — self-host those before production.
+
+## Routing
+
+Three pages, three hash routes, no router dependency:
+
+| Route          | Page                       |
+| -------------- | -------------------------- |
+| `#` (anything) | landing                    |
+| `#/dang-ky`    | sign-up                    |
+| `#/dang-nhap`  | sign-in                    |
+
+Hash routing rather than the History API because the build ships with
+`base: './'` and `dist/` is meant to drop on any host — history routes would
+need an SPA fallback rule configured on each one. Only hashes starting with
+`#/` are routes, so the landing page's section anchors (`#bang-gia`,
+`#lien-he`, …) are untouched. See `hooks/useRoute.ts`.
+
+## Sign-up and sign-in
+
+`src/auth/` implements the twelve auth screens from the design bundle's
+`Fonnus App Hi-fi.dc.html`. Three ways in, deliberately different lengths:
+
+| Method | Steps                                              |
+| ------ | -------------------------------------------------- |
+| Phone  | number → SMS code → name (skippable)               |
+| Google | account picker → in                                |
+| Email  | email → code in inbox → name + optional number     |
+
+There are no passwords anywhere. The phone number is verified only in the flow
+where it *is* the login identity; elsewhere it is an ordinary profile field.
+The clinic's own hotline is never asked for during sign-up — that belongs in
+setup, next to call forwarding. A number that already has an account silently
+becomes a sign-in with a code rather than an error, which is the single biggest
+drop-off in phone-first flows.
+
+Entering a number in the landing hero hands it to sign-up through
+`auth/handoff.ts` (sessionStorage, so it stays out of the URL) and opens
+straight on the code step.
+
+**Nothing here talks to a server.** `auth/mockAuth.ts` stands in for every call,
+each marked with a `TODO` naming the endpoint it should become; any six digits
+verify except `000000`, which is reserved so the wrong-code state stays
+reachable. Both flows end by calling `navigate('landing')` — replace that with
+the redirect into the app shell (Tổng quan) once it exists.
 
 ## The orb
 

@@ -34,9 +34,34 @@
 
 .actions {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+/* Number and its button are one gesture, so they share a row; the demo call is
+   a different offer and sits under it. The hero column is too narrow at this
+   breakpoint for all three side by side. */
+.startRow {
+  display: flex;
   gap: 12px;
-  align-items: center;
+  /* The field carries a label, so it is taller than the button: the row lines
+     up on its bottom edge rather than its middle. */
+  align-items: flex-end;
   flex-wrap: wrap;
+  width: 100%;
+}
+
+.phoneField {
+  flex: 1 1 240px;
+  max-width: 320px;
+}
+
+@media (max-width: 560px) {
+  .phoneField {
+    flex-basis: 100%;
+    max-width: none;
+  }
 }
 
 .reassurance {
