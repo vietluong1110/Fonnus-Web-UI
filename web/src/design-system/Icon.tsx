@@ -10,11 +10,13 @@ import type { CSSProperties, HTMLAttributes } from 'react'
  * network dependency. Icon names are lucide-static file names.
  */
 export type IconName =
+  | 'arrow-right'
   | 'arrow-up'
   | 'calendar-check'
   | 'clock'
   | 'list-checks'
   | 'menu'
+  | 'moon'
   | 'mic'
   | 'mic-off'
   | 'phone-call'
@@ -24,6 +26,7 @@ export type IconName =
   | 'settings'
   | 'shield-check'
   | 'user-round'
+  | 'user-round-x'
   | 'x'
 
 export interface IconProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {

@@ -36,6 +36,9 @@ export function Hero({ dockRef }: HeroProps) {
       <div aria-hidden="true" className={styles.glow} />
       <div aria-hidden="true" className={styles.glowSoft} />
 
+      {/* Same 1280px inner column every other section uses, so the headline
+          lines up with the sections below instead of sitting further left. */}
+      <div className={styles.inner}>
       <div className={styles.claim}>
         <h1 className={styles.title}>
           Không cuộc gọi
@@ -99,6 +102,7 @@ export function Hero({ dockRef }: HeroProps) {
           <br />
           Không cần cài đặt, không cần để lại số.
         </p>
+      </div>
       </div>
     </section>
   )

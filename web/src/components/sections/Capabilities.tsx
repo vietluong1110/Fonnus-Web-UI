@@ -1,7 +1,10 @@
 import section from '../../styles/section.module.css'
 import styles from './Capabilities.module.css'
 import { CapabilityRow } from './CapabilityRow'
-import { CallLogVisual, FaqVisual, HandoffVisual, ScheduleVisual } from './capability-visuals'
+import { CallLogVisual } from './capability-visuals'
+import { CallDemoPlayer } from './CallDemoPlayer'
+import { BookingAction, PriceAction, TransferAction } from './capability-actions'
+import { BOOKING_DEMO, FAQ_DEMO, HANDOFF_DEMO } from '../../data/callDemos'
 
 export function Capabilities() {
   return (
@@ -9,6 +12,9 @@ export function Capabilities() {
       <div className={section.inner}>
         <div className={section.eyebrow}>Khả năng</div>
         <h2 className={`${section.heading} ${styles.heading}`}>Một lễ tân không nghỉ, không quên</h2>
+        <p className={`${section.lede} ${styles.lede}`}>
+          Ba cuộc gọi mẫu, phát lại ngay tại đây — bấm nghe và xem Fonnus làm gì sau mỗi câu.
+        </p>
 
         <div className={styles.rows}>
           <CapabilityRow
@@ -17,7 +23,7 @@ export function Capabilities() {
             body="Fonnus hiểu ngày giờ nói theo kiểu tiếng Việt, đối chiếu lịch trống và xác nhận ngay trong cuộc gọi."
             measure="44ch"
             points={['Kiểm tra lịch trống theo thời gian thực', 'Xác nhận bằng giọng nói, không cần gọi lại']}
-            visual={<ScheduleVisual />}
+            visual={<CallDemoPlayer demo={BOOKING_DEMO} action={<BookingAction />} />}
           />
 
           <CapabilityRow
@@ -26,7 +32,7 @@ export function Capabilities() {
             title="Giá, giờ, địa chỉ — trả lời thẳng"
             body="Câu trả lời lấy từ bảng giá và thông tin bạn khai, không phải Fonnus tự nghĩ ra. Không biết thì nói không biết, rồi ghi lại để bạn trả lời."
             points={['Dùng đúng bảng giá của phòng khám', 'Không tự suy diễn khi thiếu dữ liệu']}
-            visual={<FaqVisual />}
+            visual={<CallDemoPlayer demo={FAQ_DEMO} action={<PriceAction />} />}
           />
 
           <CapabilityRow
@@ -34,7 +40,7 @@ export function Capabilities() {
             title="Luôn có người thật cách một bước"
             body="Câu hỏi thuộc chuyên môn y khoa, ca gấp, hoặc khách muốn gặp người thật: Fonnus nối máy sang nhân viên, hoặc ghi lời nhắn để gọi lại."
             points={['Nối máy trực tiếp cho nhân viên', 'Ghi lời nhắn kèm số để gọi lại']}
-            visual={<HandoffVisual />}
+            visual={<CallDemoPlayer demo={HANDOFF_DEMO} action={<TransferAction />} />}
           />
 
           <CapabilityRow

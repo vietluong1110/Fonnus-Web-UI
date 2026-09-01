@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Icon, Switch } from '../../design-system'
+import { Button, Switch } from '../../design-system'
 import { PLANS } from '../../data/pricing'
 import type { PlanName } from '../../data/pricing'
 import section from '../../styles/section.module.css'
@@ -51,40 +51,17 @@ export function Pricing({ highlight = 'Tiêu chuẩn', matrixDefaultOpen = false
           ))}
         </div>
 
-        <div data-reveal="1" className={styles.extras}>
-          <div className={styles.setup}>
-            <span className={styles.setupIcon}>
-              <Icon name="settings" size={20} />
-            </span>
-            <div className={styles.setupBody}>
-              <div className={styles.setupHead}>
-                <span className={styles.setupTitle}>Guided Setup</span>
-                <span className={styles.setupPrice}>2.000.000 đ · một lần</span>
-              </div>
-              <p className={styles.setupText}>
-                Chúng tôi cùng bạn khai bảng giá, lời chào và chạy thử đến khi ưng ý. Tuỳ chọn — bạn tự cấu
-                hình cũng được, không mất thêm phí.
-              </p>
-            </div>
+        <div data-reveal="1" className={styles.enterprise}>
+          <div className={styles.enterpriseBody}>
+            <div className={styles.enterpriseTitle}>Doanh nghiệp</div>
+            <p className={styles.enterpriseText}>
+              Chuỗi phòng khám và bệnh viện, nhiều cơ sở, nhiều cuộc gọi cùng lúc — báo giá riêng.
+            </p>
           </div>
-
-          <div className={styles.enterprise}>
-            <div className={styles.enterpriseBody}>
-              <div className={styles.enterpriseTitle}>Doanh nghiệp</div>
-              <p className={styles.enterpriseText}>
-                Chuỗi phòng khám và bệnh viện, nhiều cơ sở, nhiều cuộc gọi cùng lúc — báo giá riêng.
-              </p>
-            </div>
-            <a href="#lien-he" style={{ textDecoration: 'none', flex: '0 0 auto' }}>
-              <Button variant="inverse">Liên hệ báo giá</Button>
-            </a>
-          </div>
+          <a href="#lien-he" style={{ textDecoration: 'none', flex: '0 0 auto' }}>
+            <Button variant="inverse">Liên hệ báo giá</Button>
+          </a>
         </div>
-
-        <p className={styles.billingNote}>
-          Tính tiền theo giây, tối thiểu 30 giây mỗi cuộc gọi được nghe. Cuộc gọi nhỡ hoặc lỗi không tính
-          tiền.
-        </p>
 
         <ComparisonMatrix defaultOpen={matrixDefaultOpen} />
       </div>

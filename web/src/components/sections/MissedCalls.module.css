@@ -1,59 +1,188 @@
 .heading {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   max-width: 26ch;
 }
 
 .lede {
-  margin-bottom: 48px;
+  margin-bottom: 44px;
   max-width: 60ch;
 }
 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--gap-card);
+/*
+ * Two tracks stacked, deliberately the same shape so the only thing that
+ * differs is the ending. Reading one after the other IS the argument.
+ */
+.tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   margin-bottom: 32px;
 }
 
-.card {
-  background: var(--milk);
+.track {
   border-radius: var(--radius-card);
-  padding: 24px;
-  display: flex;
-  gap: 16px;
-  align-items: center;
+  padding: clamp(20px, 3vw, 28px);
 }
 
-.cardIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  background: var(--rose);
-  color: var(--error);
+/* Today: flat and unlit — nothing here is working for the clinic. */
+.trackToday {
+  composes: track;
+  background: var(--milk);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+/* With Fonnus: warm ground, the only lit path on the page. */
+.trackFonnus {
+  composes: track;
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1px rgba(184, 92, 43, 0.18);
+}
+
+.trackLabel {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-ui);
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 20px;
+}
+
+.trackDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+}
+
+.trackFonnus .trackLabel {
+  color: var(--terracotta-deep);
+}
+
+.trackFonnus .trackDot {
+  background: var(--terracotta);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/*
+ * Each step is its own grid: icon, time, label — so the three steps line up
+ * row-for-row across both tracks and the eye can compare them straight down.
+ */
+.step {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  justify-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 0 clamp(6px, 2vw, 18px);
+}
+
+.stepIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-  flex: 0 0 auto;
+  background: var(--paper);
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
-.when {
+/* The moment it goes wrong, and the moment it goes right: both get the accent. */
+.step:nth-child(2) .stepIcon {
+  background: var(--surface-rose);
+  color: var(--error);
+  box-shadow: none;
+}
+
+.step:nth-child(3) .stepIcon {
+  color: var(--ink-soft);
+  border: 1.5px dashed var(--border-strong);
+  box-shadow: none;
+  background: transparent;
+}
+
+.trackFonnus .stepIcon {
+  background: var(--milk);
+  color: var(--terracotta-deep);
+  box-shadow: inset 0 0 0 1px rgba(184, 92, 43, 0.2);
+}
+
+.trackFonnus .step:nth-child(2) .stepIcon,
+.trackFonnus .step:nth-child(3) .stepIcon {
+  background: var(--action-primary);
+  color: var(--cream);
+  border: none;
+  box-shadow: 0 8px 20px rgba(160, 78, 31, 0.24);
+}
+
+.stepWhen {
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--size-num);
-  color: var(--terracotta-deep);
+  font-size: var(--size-ui);
   font-weight: 500;
-  margin-bottom: 4px;
+  color: var(--ink-soft);
 }
 
-.what {
+.trackFonnus .stepWhen {
+  color: var(--terracotta-deep);
+}
+
+.stepWhat {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: var(--size-subheading);
+  font-size: clamp(16px, 1.5vw, 20px);
   line-height: 1.3;
+  color: var(--ink);
+  text-wrap: balance;
 }
 
-/* The answer, on the sage "resolution" ground. */
+/* Sits in the gutter between steps, centred on the icon row. */
+.arrow {
+  position: absolute;
+  top: 28px;
+  right: -12px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  color: var(--border-strong);
+}
+
+.trackFonnus .arrow {
+  color: rgba(184, 92, 43, 0.5);
+}
+
+.outcome {
+  margin: 22px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-hairline);
+  font-size: var(--size-body);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.trackFonnus .outcome {
+  border-top-color: rgba(184, 92, 43, 0.18);
+  color: var(--ink);
+  font-weight: 500;
+}
+
 .answer {
-  background: var(--sage);
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1px rgba(184, 92, 43, 0.18);
   border-radius: var(--radius-card);
   padding: 28px;
   display: flex;
@@ -69,4 +198,52 @@
   font-size: var(--size-heading);
   line-height: 1.3;
   max-width: 34ch;
+}
+
+/* Tablet: the three steps stay in a row but tighten. */
+@media (max-width: 900px) {
+  .step {
+    padding: 0 4px;
+  }
+
+  .arrow {
+    right: -9px;
+  }
+
+  .stepIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Phone: a row of three is unreadable, so the track becomes a vertical list
+   and the arrows turn to point down. */
+@media (max-width: 620px) {
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+
+  .step {
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    justify-items: start;
+    text-align: left;
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 2px;
+    padding: 0;
+  }
+
+  .stepIcon {
+    grid-row: span 2;
+  }
+
+  .arrow {
+    top: auto;
+    right: auto;
+    bottom: -20px;
+    left: 28px;
+    transform: translateX(-50%) rotate(90deg);
+  }
 }

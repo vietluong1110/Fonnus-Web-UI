@@ -1,0 +1,246 @@
+.player {
+  background: var(--milk);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    inset 0 0 0 1px var(--border-hairline),
+    0 14px 40px rgba(38, 31, 24, 0.07);
+  overflow: hidden;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
+.play {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: var(--action-primary);
+  color: var(--cream);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(160, 78, 31, 0.28);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.play:hover {
+  background: var(--action-primary-hover);
+}
+
+.play:active {
+  transform: scale(var(--press-scale));
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.callerLine {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body-sm);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.liveDot[data-on] {
+  background: var(--terracotta);
+  animation: fnSpeakDot 1200ms var(--ease-in-out) infinite;
+}
+
+@keyframes fnSpeakDot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.title {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* Waveform: bars behind the playhead are clay, ahead of it are muted. */
+.wave {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.bar_ {
+  flex: 1 1 0;
+  min-width: 2px;
+  border-radius: 999px;
+  transform-origin: center;
+}
+
+.barPlayed {
+  composes: bar_;
+  background: var(--terracotta);
+}
+
+.barAhead {
+  composes: bar_;
+  background: rgba(38, 31, 24, 0.16);
+}
+
+.barPlayed[data-playing],
+.barAhead[data-playing] {
+  animation: fnWaveBar 900ms var(--ease-in-out) infinite;
+}
+
+@keyframes fnWaveBar {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.45);
+  }
+}
+
+.time {
+  flex: 0 0 auto;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.progressTrack {
+  height: 2px;
+  background: var(--border-hairline);
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  background: var(--terracotta);
+  transition: width 100ms linear;
+}
+
+.stream {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hint {
+  margin: 0;
+  padding: 10px 2px;
+  font-size: var(--size-body-sm);
+  color: var(--ink-soft);
+}
+
+/* Each turn rises in as it is "spoken". */
+.turn {
+  border-radius: var(--radius-md);
+  padding: 13px 15px;
+  max-width: 92%;
+  animation: fnRise 320ms var(--ease-out) both;
+}
+
+.turnCaller {
+  composes: turn;
+  align-self: flex-start;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.turnLinh {
+  composes: turn;
+  align-self: flex-end;
+  background: var(--surface-warm);
+}
+
+.who {
+  display: block;
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+.turnLinh .who {
+  color: var(--terracotta-deep);
+}
+
+.said {
+  margin: 0;
+  font-size: var(--size-body-sm);
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.action {
+  margin-top: 4px;
+  animation: fnRise 420ms var(--ease-out) both;
+}
+
+/* The sequence is the content, so it still rolls; only the motion goes. */
+@media (prefers-reduced-motion: reduce) {
+  .turn,
+  .action {
+    animation: none;
+  }
+
+  .barPlayed[data-playing],
+  .barAhead[data-playing],
+  .liveDot[data-on] {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .bar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* The waveform is the first thing to go: the transcript is the point. */
+  .wave {
+    display: none;
+  }
+
+  .meta {
+    flex: 1 1 auto;
+  }
+
+  .turnCaller,
+  .turnLinh {
+    max-width: 100%;
+  }
+}

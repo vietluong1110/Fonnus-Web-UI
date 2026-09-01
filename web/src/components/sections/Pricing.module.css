@@ -23,71 +23,17 @@
   gap: var(--gap-card);
 }
 
-.extras {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--gap-card);
-  margin-top: 24px;
-}
 
-.setup {
-  background: var(--paper);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  box-shadow: inset 0 0 0 1px var(--border-hairline);
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
 
-.setupIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: var(--blush);
-  color: var(--terracotta-deep);
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-}
 
-.setupBody {
-  flex: 1;
-  min-width: 220px;
-}
 
-.setupHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
 
-.setupTitle {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--size-subheading);
-}
 
-.setupPrice {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--size-num);
-  font-weight: 500;
-  color: var(--terracotta-deep);
-}
 
-.setupText {
-  font-size: var(--size-body-sm);
-  line-height: 1.6;
-  color: var(--ink-soft);
-  margin: 0;
-}
 
+/* Full width now that Guided Setup is gone: one clear enterprise line. */
 .enterprise {
+  margin-top: var(--gap-card);
   background: var(--night);
   color: var(--cream-night);
   border-radius: var(--radius-lg);
@@ -118,8 +64,3 @@
   color: rgba(243, 233, 218, 0.72);
 }
 
-.billingNote {
-  font-size: var(--size-ui);
-  color: var(--ink-soft);
-  margin: 20px 0 0;
-}
