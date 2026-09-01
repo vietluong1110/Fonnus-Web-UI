@@ -11,5 +11,12 @@
 .rows {
   display: flex;
   flex-direction: column;
-  gap: clamp(40px, 7vh, 88px);
+}
+
+/* Spacing lives on the divider rather than in a gap, so the rule sits exactly
+   halfway between two capabilities. */
+.rows > * + * {
+  margin-top: clamp(40px, 7vh, 80px);
+  padding-top: clamp(40px, 7vh, 80px);
+  border-top: 1.5px dashed var(--border-dashed);
 }

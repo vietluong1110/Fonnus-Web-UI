@@ -5,9 +5,9 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'inverse'
 type Size = 'sm' | 'md' | 'lg'
 
 const sizes: Record<Size, { padding: string; fontSize: string; radius: string; gap: string; icon: number }> = {
-  sm: { padding: '8px 14px', fontSize: 'var(--size-ui)', radius: 'var(--radius-sm)', gap: '6px', icon: 16 },
-  md: { padding: '11px 20px', fontSize: 'var(--size-body-sm)', radius: 'var(--radius-md)', gap: '8px', icon: 18 },
-  lg: { padding: '15px 26px', fontSize: 'var(--size-body)', radius: 'var(--radius-md)', gap: '10px', icon: 20 },
+  sm: { padding: '8px 16px', fontSize: 'var(--size-ui)', radius: 'var(--radius-pill)', gap: '6px', icon: 16 },
+  md: { padding: '11px 22px', fontSize: 'var(--size-body-sm)', radius: 'var(--radius-pill)', gap: '8px', icon: 18 },
+  lg: { padding: '15px 28px', fontSize: 'var(--size-body)', radius: 'var(--radius-pill)', gap: '10px', icon: 20 },
 }
 
 /* Primary uses Nút #A04E1F (5.4:1) with Kem text — never plain Đất nung behind small text. */

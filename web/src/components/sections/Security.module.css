@@ -20,10 +20,18 @@
   padding: 24px;
 }
 
-/* The clinical-handoff card sits on blush: the warm "resolution" ground. */
-.cardSage {
+/*
+ * The clinical-handoff promise is the one that matters most here, so it is
+ * ringed in clay rather than tinted — the section is already blush, and a
+ * blush card on a blush ground vanished.
+ */
+.cardRinged {
   composes: card;
-  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.cardRinged .cardTitle {
+  color: var(--terracotta-deep);
 }
 
 .cardTitle {

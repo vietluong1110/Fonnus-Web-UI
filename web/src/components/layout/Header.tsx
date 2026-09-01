@@ -100,13 +100,13 @@ export function Header({ onTryCall }: HeaderProps) {
           <div className={styles.actions}>
             {narrow ? null : (
               <a href={hrefFor('signin')} className={styles.cta}>
-                <Button variant="secondary" size="sm" style={{ borderRadius: 999 }}>
+                <Button variant="secondary" size="sm">
                   Đăng nhập
                 </Button>
               </a>
             )}
             <a href={hrefFor('signup')} className={styles.cta}>
-              <Button size="sm" style={{ borderRadius: 999 }}>
+              <Button size="sm">
                 {narrow ? 'Dùng thử' : 'Dùng thử miễn phí'}
               </Button>
             </a>

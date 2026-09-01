@@ -1,44 +1,76 @@
 .heading {
-  margin-bottom: 56px;
+  margin-bottom: clamp(32px, 5vh, 56px);
   max-width: 22ch;
 }
 
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: clamp(24px, 3vw, 40px);
-}
-
-/* Icon plus the dashed thread running to the next step. */
-.rail {
+.stack {
   display: flex;
-  align-items: center;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: clamp(28px, 5vh, 48px);
 }
 
-.bullet {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--blush);
-  color: var(--terracotta-deep);
-  display: grid;
-  place-items: center;
+/*
+ * Each slot pins 14px lower than the one before it, which is what leaves the
+ * sliver of the card underneath and makes the stack legible as a stack.
+ * `top` clears the floating pill navbar.
+ */
+.slot {
+  position: sticky;
+  top: calc(112px + var(--i) * 14px);
+}
+
+/*
+ * Scroll runway under the last card. It has to be a real element, not padding
+ * on .stack: sticky items are bounded by their parent's CONTENT box, which
+ * padding does not extend — so with padding alone the third card never
+ * reaches its pin and the first releases early.
+ */
+.runway {
+  height: clamp(180px, 50vh, 520px);
   flex: 0 0 auto;
 }
 
-/* Only the last step — the one that is live from then on — is filled. */
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+  min-height: 420px;
+  padding: clamp(24px, 3.5vw, 40px);
+  box-sizing: border-box;
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  /* The upward shadow is what makes an incoming card read as sliding OVER the
+     one beneath instead of merging into it. */
+  box-shadow:
+    inset 0 0 0 1px var(--border-hairline),
+    0 -14px 34px rgba(38, 31, 24, 0.1),
+    0 24px 60px rgba(38, 31, 24, 0.1);
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bullet {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-warm);
+  color: var(--terracotta-deep);
+  margin-bottom: 22px;
+}
+
+/* The step where Fonnus is actually live gets the filled mark. */
 .bulletLive {
   composes: bullet;
   background: var(--action-primary);
   color: var(--cream);
-}
-
-.thread {
-  flex: 1;
-  height: 0;
-  border-top: 2px dashed var(--border-dashed);
-  margin-left: 14px;
+  box-shadow: 0 10px 24px rgba(160, 78, 31, 0.28);
 }
 
 .stepEyebrow {
@@ -47,21 +79,75 @@
   text-transform: uppercase;
   color: var(--terracotta);
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .stepTitle {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: var(--size-subheading);
-  line-height: 1.3;
-  margin: 0 0 10px;
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  letter-spacing: var(--tracking-display);
+  margin: 0 0 14px;
+  text-wrap: balance;
 }
 
 .stepBody {
-  font-size: var(--size-body-sm);
-  line-height: 1.6;
+  font-size: var(--size-body);
+  line-height: 1.65;
   color: var(--ink-soft);
   margin: 0;
-  max-width: 40ch;
+  max-width: 38ch;
+}
+
+.count {
+  margin-top: auto;
+  padding-top: 24px;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.visual {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Without this the scene sizes to its content and the pane collapses to a
+   narrow strip in the middle of a wide column. */
+.visual > * {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Tablet: the halves stack inside the card, and the card stops pinning — a
+   card taller than the viewport cannot stick without cropping itself. */
+@media (max-width: 900px) {
+  .slot {
+    position: static;
+  }
+
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    min-height: 0;
+  }
+
+  .copy {
+    align-items: flex-start;
+  }
+
+  .count {
+    margin-top: 18px;
+    padding-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot {
+    position: static;
+  }
 }

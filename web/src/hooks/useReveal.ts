@@ -7,7 +7,11 @@ import { useEffect } from 'react'
  * when async design-system components settled the layout.
  *
  * Elements opt in with `data-reveal="<order>"`; the order is a stagger index,
- * 90ms apart. A watchdog reveals everything after 4s no matter what, so a
+ * 90ms apart. `data-reveal-from="left|right"` slides it in from that side
+ * instead of lifting it — used where a row's two halves should arrive from
+ * their own edges. That only applies on wide viewports: in a stacked
+ * single-column layout a sideways slide means nothing and pushes content past
+ * the screen edge. A watchdog reveals everything after 4s no matter what, so a
  * missed pass can never leave the page blank.
  */
 export function useReveal(enabled: boolean) {
@@ -15,11 +19,15 @@ export function useReveal(enabled: boolean) {
     if (!enabled) return
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const sideways = window.matchMedia('(min-width: 900px)').matches
     const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'))
 
     els.forEach((el) => {
+      const from = sideways ? el.getAttribute('data-reveal-from') : null
+      const offset =
+        from === 'left' ? 'translateX(-28px)' : from === 'right' ? 'translateX(28px)' : 'translateY(18px)'
       el.style.opacity = '0'
-      if (!reduce) el.style.transform = 'translateY(18px)'
+      if (!reduce) el.style.transform = offset
       el.style.transition =
         'opacity 520ms cubic-bezier(.2,.7,.3,1), transform 520ms cubic-bezier(.2,.7,.3,1)'
       el.style.willChange = 'opacity, transform'

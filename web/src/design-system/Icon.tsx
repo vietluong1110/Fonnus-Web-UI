@@ -17,6 +17,7 @@ export type IconName =
   | 'list-checks'
   | 'menu'
   | 'moon'
+  | 'pause'
   | 'mic'
   | 'mic-off'
   | 'phone-call'
