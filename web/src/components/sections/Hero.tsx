@@ -31,7 +31,7 @@ export function Hero({ dockRef }: HeroProps) {
   }
 
   return (
-    <section id="hero" data-reveal="0" className={styles.hero}>
+    <section id="hero" className={styles.hero}>
       {/* Warm glow anchoring the orb's half of the composition. */}
       <div aria-hidden="true" className={styles.glow} />
       <div aria-hidden="true" className={styles.glowSoft} />

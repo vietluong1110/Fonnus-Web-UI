@@ -8,11 +8,13 @@ import { BOOKING_DEMO, FAQ_DEMO, HANDOFF_DEMO } from '../../data/callDemos'
 
 export function Capabilities() {
   return (
-    <section id="kha-nang" data-reveal="0" className={section.section}>
+    <section id="kha-nang" className={section.section}>
       <div className={section.inner}>
-        <div className={section.eyebrow}>Khả năng</div>
-        <h2 className={`${section.heading} ${styles.heading}`}>Một lễ tân không nghỉ, không quên</h2>
-        <p className={`${section.lede} ${styles.lede}`}>
+        <div data-reveal="0" className={section.eyebrow}>Khả năng</div>
+        <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
+          Một lễ tân không nghỉ, không quên
+        </h2>
+        <p data-reveal="2" className={`${section.lede} ${styles.lede}`}>
           Ba cuộc gọi mẫu, phát lại ngay tại đây — bấm nghe và xem Fonnus làm gì sau mỗi câu.
         </p>
 
