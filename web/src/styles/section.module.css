@@ -68,7 +68,7 @@
 }
 
 .checkMark {
-  color: var(--success);
+  color: var(--terracotta-deep);
   font-weight: 600;
 }
 

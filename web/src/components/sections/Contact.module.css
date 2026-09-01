@@ -77,10 +77,10 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--sage);
+  background: var(--surface-warm);
   display: grid;
   place-items: center;
-  color: var(--success);
+  color: var(--terracotta-deep);
   font-size: 22px;
   font-weight: 600;
 }

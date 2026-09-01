@@ -20,10 +20,10 @@
   padding: 24px;
 }
 
-/* The clinical-handoff card sits on sage: the "resolution" ground. */
+/* The clinical-handoff card sits on blush: the warm "resolution" ground. */
 .cardSage {
   composes: card;
-  background: var(--sage);
+  background: var(--surface-warm);
 }
 
 .cardTitle {

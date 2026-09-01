@@ -2,7 +2,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: clamp(28px, 5vw, 64px);
-  align-items: center;
+  /* The call players grow as a call rolls; centring would make the copy
+     drift up and down beside them. */
+  align-items: start;
 }
 
 /*
@@ -41,4 +43,12 @@
   color: var(--ink-soft);
   margin: 0 0 20px;
   max-width: var(--capability-measure, 42ch);
+}
+
+/* Tablet and below: one column, so the call player gets the full measure. */
+@media (max-width: 900px) {
+  .row,
+  .reversed {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

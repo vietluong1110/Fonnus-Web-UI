@@ -118,6 +118,31 @@ The proof row's clinic marks in `sections/clinic-logos.tsx` are **placeholders**
 for invented clinics. Swap them for real customer logos before launch, and only
 with each clinic's permission: a real logo there reads as an endorsement.
 
+## Interactive call demos
+
+Three of the four capabilities carry a `CallDemoPlayer` instead of a static
+picture: press play and the call replays turn by turn, ending in the action
+Fonnus took — the appointment landing in a calendar, the matching row lighting
+up in the clinic's price list, the call hopping to a named doctor.
+
+`data/callDemos.ts` holds the scripts; `capability-actions.tsx` holds the three
+endings. The scripts are SAMPLE calls for a fictional clinic — prices and staff
+names are illustrative. `audioSrc` is optional and currently unset, so the
+transcript rolls silently; drop a recording in `public/audio/`, point
+`audioSrc` at it, and the same widget plays it in step with the turns.
+
+Only one player runs at a time: each registers a stopper in a module-level set
+and clears the others before starting.
+
+## Colour
+
+The landing page is clay, brown, cream and ink. Lá sả (`--sage`,
+`--lemongrass`, `--success`) is in the palette but is neither primary nor
+secondary, and it was carrying structural weight — every checkmark, every
+"resolved" ground — which pulled focus off clay. It is out of the landing page
+entirely; the tokens remain for the app, where a genuine success state earns a
+different hue. Red survives in exactly one place: the missed call.
+
 ## The navigation
 
 A floating glass pill, centred and sticky, that tightens and goes more opaque

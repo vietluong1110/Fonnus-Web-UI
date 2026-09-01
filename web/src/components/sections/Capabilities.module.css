@@ -1,6 +1,11 @@
 .heading {
-  margin-bottom: 64px;
+  margin-bottom: 16px;
   max-width: 22ch;
+}
+
+.lede {
+  margin-bottom: 64px;
+  max-width: 56ch;
 }
 
 .rows {

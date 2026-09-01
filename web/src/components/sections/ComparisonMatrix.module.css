@@ -22,6 +22,37 @@
   transform: rotate(180deg);
 }
 
+/*
+ * Collapsed to a zero-height row and eased open, rather than mounted on click.
+ * `min-height: 0` on the inner track is what makes 0fr actually collapse.
+ */
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--duration-slow) var(--ease-out),
+    opacity var(--duration-base) var(--ease-out);
+}
+
+.revealOpen {
+  composes: reveal;
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.revealInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .revealOpen {
+    transition: none;
+  }
+}
+
 .scroller {
   margin-top: 24px;
   overflow-x: auto;
@@ -31,8 +62,31 @@
   min-width: 720px;
 }
 
+/* Positioning context for the featured-column band. */
+.grid {
+  position: relative;
+}
+
+.columns {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  /* Must match .head and .row exactly, padding included, or the band drifts. */
+  grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(96px, 1fr));
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+/* The same clay the "Tiêu chuẩn" plan card uses, carried down the column. */
+.colOn {
+  background: rgba(184, 92, 43, 0.09);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1.5px rgba(184, 92, 43, 0.28);
+}
+
 /* One grid template shared by the header and every row keeps the columns true. */
 .head {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(96px, 1fr));
   padding: 14px 16px;
@@ -46,7 +100,13 @@
   text-align: center;
 }
 
+.headCellOn {
+  composes: headCell;
+  color: var(--terracotta-deep);
+}
+
 .row {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(96px, 1fr));
   padding: 12px 16px;
@@ -58,7 +118,7 @@
 }
 
 .row:hover {
-  background: var(--action-ghost-hover);
+  background: rgba(184, 92, 43, 0.05);
 }
 
 /* Group headers sit on paper and are not hover targets. */
@@ -88,6 +148,13 @@
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
+}
+
+/* Featured column reads a shade stronger than the ones beside it. */
+.cellOn {
+  composes: cell;
+  color: var(--ink);
+  font-weight: 500;
 }
 
 .footnote {
