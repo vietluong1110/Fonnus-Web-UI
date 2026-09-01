@@ -2,7 +2,7 @@ import { CONTACT } from '../../data/content'
 import styles from './Footer.module.css'
 
 const PAGE_LINKS = [
-  { href: '#nghe-thu', label: 'Nghe thử' },
+  { href: '#hero', label: 'Nghe thử' },
   { href: '#cach-hoat-dong', label: 'Cách hoạt động' },
   { href: '#bang-gia', label: 'Bảng giá' },
   { href: '#bao-mat', label: 'Bảo mật & dữ liệu' },

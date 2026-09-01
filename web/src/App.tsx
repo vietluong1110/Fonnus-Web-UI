@@ -1,7 +1,6 @@
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { Hero } from './components/sections/Hero'
-import { TryIt } from './components/sections/TryIt'
 import { MissedCalls } from './components/sections/MissedCalls'
 import { HowItWorks } from './components/sections/HowItWorks'
 import { Capabilities } from './components/sections/Capabilities'
@@ -36,10 +35,9 @@ export function App({
 
   return (
     <div className={styles.page}>
-      <Header />
+      <Header onTryCall={demo.openCall} />
 
-      <Hero onTryCall={demo.openCall} />
-      <TryIt dockRef={placement.dockRef} />
+      <Hero dockRef={placement.dockRef} />
       <MissedCalls />
       <HowItWorks />
       <Capabilities />

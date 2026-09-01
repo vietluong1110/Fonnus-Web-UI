@@ -65,7 +65,7 @@ export function Orb({ placement, speaking, getAmplitude, onClick }: OrbProps) {
   }, [speaking, getAmplitude, orbRef])
 
   return (
-    <button ref={orbRef} onClick={onClick} aria-label="Gọi thử Fonnus" className={styles.orb}>
+    <button ref={orbRef} onClick={onClick} aria-label="Nghe thử Fonnus" className={styles.orb}>
       <span ref={placement.wavesRef} className={styles.waves} aria-hidden="true">
         {WAVES.map((i) => (
           <span key={i} className={styles.wave} style={{ animationDelay: `${i * 900}ms` }} />
@@ -81,8 +81,8 @@ export function Orb({ placement, speaking, getAmplitude, onClick }: OrbProps) {
         <span ref={placement.labelRef} className={styles.label}>
           <span className={styles.labelStack}>
             <Icon name="phone-call" size={30} />
-            <span className={styles.labelTitle}>Gọi thử</span>
-            <span className={styles.labelNote}>Miễn phí · 1 phút</span>
+            <span className={styles.labelTitle}>Nghe thử</span>
+            <span className={styles.labelNote}>Miễn phí</span>
           </span>
         </span>
       </span>

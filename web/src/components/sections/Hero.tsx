@@ -1,22 +1,29 @@
 import { useState } from 'react'
-import { Badge, Button, Icon, Input } from '../../design-system'
+import type { RefObject } from 'react'
+import { Button } from '../../design-system'
 import { stashPhone } from '../../auth/handoff'
 import { formatPhone, isValidPhone, normalizePhone } from '../../auth/phone'
 import { navigate } from '../../hooks/useRoute'
-import section from '../../styles/section.module.css'
+import { CLINIC_LOGOS, ClinicMark } from './clinic-logos'
 import styles from './Hero.module.css'
 
 interface HeroProps {
-  onTryCall: () => void
+  /** Placeholder the shared orb docks onto; owned by useOrbPlacement. */
+  dockRef: RefObject<HTMLDivElement | null>
 }
 
-export function Hero({ onTryCall }: HeroProps) {
+/**
+ * Three things and nothing else: the claim, one control to sign up, and the
+ * orb — which is the product, not an illustration of it. The orb docks here
+ * and flies to the bottom-right corner once this section scrolls away.
+ */
+export function Hero({ dockRef }: HeroProps) {
   const [phone, setPhone] = useState('')
 
   /*
-   * Taking the number here removes a whole screen from the primary sign-up
-   * path: sign-up picks it up and opens straight on the SMS code. Submitting
-   * empty is fine too — that just opens sign-up at its first step.
+   * Taking the number here removes a whole screen from the sign-up path: it is
+   * handed over and sign-up opens straight on the SMS code. Submitting empty is
+   * fine — that just opens sign-up at its first step.
    */
   function startSignUp() {
     if (isValidPhone(phone)) stashPhone(phone)
@@ -25,71 +32,73 @@ export function Hero({ onTryCall }: HeroProps) {
 
   return (
     <section id="hero" data-reveal="0" className={styles.hero}>
-      <div>
-        <div className={section.eyebrow}>Trợ lý nghe máy cho phòng khám</div>
-        <h1 className={styles.title}>Không cuộc gọi nào bị bỏ lỡ.</h1>
-        <p className={styles.lede}>
-          Fonnus nghe máy trên chính số điện thoại phòng khám đang dùng. Trả lời bằng tiếng Việt, báo giá, giữ
-          lịch hẹn, chuyển cho nhân viên khi cần — kể cả 10 giờ đêm hay ngày Tết.
-        </p>
+      {/* Warm glow anchoring the orb's half of the composition. */}
+      <div aria-hidden="true" className={styles.glow} />
+      <div aria-hidden="true" className={styles.glowSoft} />
 
+      <div className={styles.claim}>
+        <h1 className={styles.title}>
+          Không cuộc gọi
+          <br />
+          nào bị <span className={styles.titleAccent}>bỏ lỡ.</span>
+        </h1>
+
+        <p className={styles.lede}>Lễ tân AI nghe máy cho phòng khám của bạn 24/7, bằng tiếng Việt.</p>
+
+        {/* One control, not four: prefix, field and action share a single pill. */}
         <form
-          className={styles.actions}
+          className={styles.signup}
           onSubmit={(e) => {
             e.preventDefault()
             startSignUp()
           }}
         >
-          <div className={styles.startRow}>
-            <div className={styles.phoneField}>
-              <Input
-                label="Số điện thoại của bạn"
-                placeholder="090 123 45 67"
-                value={formatPhone(phone)}
-                onChange={(e) => setPhone(normalizePhone(e.target.value).slice(0, 10))}
-                numeric
-                inputMode="tel"
-                autoComplete="tel"
-              />
-            </div>
-            <Button type="submit" size="lg">
-              Dùng thử miễn phí
-            </Button>
-          </div>
-
-          <Button variant="secondary" size="lg" onClick={onTryCall}>
-            Nghe thử ngay
+          <span className={styles.prefix}>+84</span>
+          <span aria-hidden="true" className={styles.divider} />
+          {/* Raw field, not the design-system Input: that one draws its own
+              bordered box, and here the pill IS the box. */}
+          <input
+            aria-label="Số điện thoại của bạn"
+            placeholder="90 123 45 67"
+            value={formatPhone(phone)}
+            onChange={(e) => setPhone(normalizePhone(e.target.value).slice(0, 10))}
+            inputMode="tel"
+            autoComplete="tel"
+            className={styles.field}
+          />
+          <Button type="submit" size="md" style={{ borderRadius: 999, flex: '0 0 auto' }}>
+            Dùng thử miễn phí
           </Button>
         </form>
 
-        <p className={styles.reassurance}>Miễn phí 14 ngày · Không cần thẻ ngân hàng · Xong trong 2 phút</p>
+        <p className={styles.reassurance}>Miễn phí 14 ngày · Không cần thẻ ngân hàng</p>
+
+        <div className={styles.proof}>
+          <div className={styles.marks}>
+            {CLINIC_LOGOS.map((logo) => (
+              <span key={logo.name} className={styles.mark}>
+                <ClinicMark logo={logo} size={30} />
+              </span>
+            ))}
+          </div>
+          <span className={styles.proofText}>
+            50+ phòng khám ở TP.HCM và Hà Nội đang để Fonnus nghe máy
+          </span>
+        </div>
       </div>
 
-      <div className={styles.sample}>
-        <div className={styles.sampleHead}>
-          <span className={styles.sampleTime}>21:47 · Thứ Bảy</span>
-          <Badge tone="success" dot>
-            Đã nghe máy
-          </Badge>
-        </div>
-        <div className={styles.sampleRows}>
-          <div className={styles.callRow}>
-            <span className={styles.callIcon}>
-              <Icon name="phone-incoming" size={18} />
-            </span>
-            <div>
-              <div className={styles.callNumber}>0903 ••• 217</div>
-              <div className={styles.callMeta}>Cuộc gọi đến, ngoài giờ làm</div>
-            </div>
-          </div>
-          <div className={styles.script}>
-            “Phòng khám Nha khoa Minh Anh xin nghe. Em là Fonnus, trợ lý AI của phòng khám. Anh chị cần đặt
-            lịch hay hỏi thông tin ạ?”
-          </div>
-          <div className={styles.outcome}>
-            <span className={styles.tick}>✓</span> Đã giữ lịch 9:00 Chủ nhật · tư vấn niềng răng
-          </div>
-        </div>
+      <div className={styles.stage}>
+        {/*
+          Empty placeholder, not the orb. The orb is a single fixed element
+          shared by this dock, the pinned corner and the call screen; this box
+          only tells it where "docked" is and how big to be.
+        */}
+        <div ref={dockRef} aria-hidden="true" className={styles.dock} />
+        <p className={styles.orbNote}>
+          Bấm để nghe Linh trả lời ngay trên trình duyệt.
+          <br />
+          Không cần cài đặt, không cần để lại số.
+        </p>
       </div>
     </section>
   )

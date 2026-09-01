@@ -1,155 +1,272 @@
-/* Full viewport height minus the fixed header — the hero owns the first screen. */
+/* The hero owns the first screen; the pill navbar floats over its top edge. */
 .hero {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: clamp(32px, 6vw, 80px);
+  grid-template-columns: minmax(0, 640px) minmax(0, 1fr);
   align-items: center;
-  align-content: center;
-  min-height: calc(100vh - 64px);
-  padding: clamp(48px, 8vh, 96px) clamp(20px, 5vw, 64px) clamp(64px, 10vh, 112px);
-  max-width: 1280px;
+  gap: clamp(32px, 5vw, 72px);
+  min-height: 100vh;
+  padding: 140px clamp(20px, 5vw, 100px) 72px clamp(20px, 6vw, 120px);
+  max-width: 1560px;
   margin: 0 auto;
-  scroll-margin-top: 72px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-.title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(40px, 5.6vw, 64px);
-  line-height: 1.2;
-  letter-spacing: var(--tracking-display);
-  margin: 0 0 24px;
-  color: var(--ink);
-  text-wrap: pretty;
+/* Two soft washes, both clay — the only "decoration" on the section. */
+.glow,
+.glowSoft {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.lede {
-  font-size: var(--size-body-lg);
-  line-height: 1.6;
-  color: var(--ink-soft);
-  margin: 0 0 32px;
-  max-width: 52ch;
+.glow {
+  right: -140px;
+  top: -60px;
+  width: 1020px;
+  height: 1020px;
+  background: radial-gradient(
+    circle,
+    rgba(184, 92, 43, 0.15) 0%,
+    rgba(184, 92, 43, 0.06) 42%,
+    rgba(184, 92, 43, 0) 68%
+  );
 }
 
-.actions {
+.glowSoft {
+  left: -220px;
+  bottom: -320px;
+  width: 760px;
+  height: 760px;
+  background: radial-gradient(circle, rgba(243, 220, 201, 0.55) 0%, rgba(243, 220, 201, 0) 70%);
+}
+
+.claim {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
 }
 
-/* Number and its button are one gesture, so they share a row; the demo call is
-   a different offer and sits under it. The hero column is too narrow at this
-   breakpoint for all three side by side. */
-.startRow {
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(40px, 4.7vw, 68px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.titleAccent {
+  color: var(--terracotta);
+}
+
+.lede {
+  margin: 26px 0 0;
+  font-size: var(--size-body-lg);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 30ch;
+}
+
+/* Prefix + field + action in one pill: one control instead of four. */
+.signup {
   display: flex;
-  gap: 12px;
-  /* The field carries a label, so it is taller than the button: the row lines
-     up on its bottom edge rather than its middle. */
-  align-items: flex-end;
-  flex-wrap: wrap;
-  width: 100%;
+  align-items: center;
+  gap: 10px;
+  width: min(528px, 100%);
+  margin: 40px 0 0;
+  padding: 7px 7px 7px 22px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--milk);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(38, 31, 24, 0.14),
+    0 10px 28px rgba(38, 31, 24, 0.07);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
 }
 
-.phoneField {
-  flex: 1 1 240px;
-  max-width: 320px;
+.signup:focus-within {
+  box-shadow:
+    inset 0 0 0 2px var(--focus-ring),
+    0 10px 28px rgba(38, 31, 24, 0.07);
 }
 
-@media (max-width: 560px) {
-  .phoneField {
-    flex-basis: 100%;
-    max-width: none;
-  }
+.prefix {
+  flex: 0 0 auto;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body);
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.divider {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 22px;
+  background: rgba(38, 31, 24, 0.14);
+}
+
+.field {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body);
+  color: var(--ink);
+}
+
+.field::placeholder {
+  color: #9a8f82;
 }
 
 .reassurance {
+  margin: 16px 0 0;
   font-size: var(--size-ui);
   color: var(--ink-soft);
-  margin: 18px 0 0;
 }
 
-/* Right column: a sample of what the owner sees the morning after. */
-.sample {
-  background: var(--milk);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: inset 0 0 0 1px var(--border-hairline);
-}
-
-.sampleHead {
+/* Proof sits with the CTA, which is where it does the most work. */
+.proof {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 12px;
+  width: min(528px, 100%);
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-hairline);
 }
 
-.sampleTime {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--size-num);
+/* Spaced, not stacked: these are clinic logos, and an avatar-style overlap
+   hides the very glyphs that identify them. */
+.marks {
+  display: flex;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.mark {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+.proofText {
+  font-size: var(--size-ui);
+  line-height: 1.5;
   color: var(--ink-soft);
 }
 
-.sampleRows {
+.stage {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.callRow {
-  display: flex;
-  gap: 12px;
   align-items: center;
-  background: var(--paper);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
+  gap: 26px;
+  justify-self: center;
 }
 
-.callIcon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: var(--rose);
-  display: grid;
-  place-items: center;
-  color: var(--error);
+/*
+ * Empty placeholder, not the orb. The orb is one fixed element shared by this
+ * dock, the pinned corner and the call screen; this box only says where
+ * "docked" is and how big to be.
+ */
+.dock {
+  width: clamp(260px, 30vw, 430px);
+  height: clamp(260px, 30vw, 430px);
+  border-radius: 50%;
 }
 
-.callNumber {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--size-num);
-  font-weight: 500;
-}
-
-.callMeta {
-  font-size: var(--size-ui);
+.orbNote {
+  margin: 0;
+  max-width: 42ch;
+  text-align: center;
+  font-size: var(--size-body-sm);
+  line-height: 1.6;
   color: var(--ink-soft);
 }
 
-.script {
-  background: var(--blush);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  font-size: var(--size-body-sm);
-  line-height: 1.6;
-  color: var(--ink);
+/*
+ * Stacked, and deliberately re-ordered: claim → ORB → sign-up. On a phone the
+ * orb is what stops the scroll, so it goes above the form rather than below it.
+ * `display: contents` dissolves the claim wrapper so its children become grid
+ * items the orb can be ordered between; gap is 0 so each element keeps the
+ * vertical rhythm its own margin already sets.
+ */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+    gap: 0;
+    padding: 116px 20px 64px;
+    min-height: auto;
+  }
+
+  .claim {
+    display: contents;
+  }
+
+  .title {
+    order: 1;
+  }
+  .lede {
+    order: 2;
+    margin-top: 18px;
+  }
+  .stage {
+    order: 3;
+    margin: 26px 0 0;
+  }
+  .signup {
+    order: 4;
+    margin-top: 30px;
+  }
+  .reassurance {
+    order: 5;
+  }
+  .proof {
+    order: 6;
+    justify-content: center;
+    margin-top: 28px;
+  }
+
+  .glow,
+  .glowSoft {
+    display: none;
+  }
 }
 
-.outcome {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  background: var(--sage);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  font-size: var(--size-body-sm);
-  color: var(--ink);
-}
+/* Below 560px the pill cannot hold field and button on one line. */
+@media (max-width: 560px) {
+  .signup {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 28px;
+  }
 
-.tick {
-  color: var(--success);
-  font-weight: 600;
+  .prefix {
+    padding-left: 10px;
+  }
+
+  .field {
+    /* Keeps prefix + divider + field on the first row, button on the second. */
+    flex: 1 1 120px;
+  }
+
+  .signup > button {
+    flex: 1 1 100% !important;
+    width: 100%;
+  }
 }

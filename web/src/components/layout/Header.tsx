@@ -1,94 +1,244 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Icon, Logo } from '../../design-system'
-import { NAV_LINKS } from '../../data/content'
-import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { NAV_GROUPS } from '../../data/content'
+import type { NavGroup, NavItem } from '../../data/content'
 import { hrefFor } from '../../hooks/useRoute'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
 import styles from './Header.module.css'
 
+/** Below this the four menus cannot sit in the pill; it becomes brand + CTA + drawer. */
+const HEADER_NARROW = 900
+/** Past this scroll the pill tightens and its glass goes more opaque. */
+const CONDENSE_AT = 24
+/** Grace period so the pointer can cross the gap into an open menu. */
+const CLOSE_DELAY_MS = 140
+
+interface HeaderProps {
+  /** "Nghe thử Linh" opens the call demo rather than scrolling anywhere. */
+  onTryCall: () => void
+}
+
 /**
- * Frozen to the top of the viewport at every scroll position.
+ * A floating glass pill, centred and stuck to the top at every scroll position.
  *
- * Responsiveness is a swap, not a shrink: below 1060px the seven links move
- * into a drawer rather than being squeezed off the row one at a time. Sign-up
- * survives both layouts — it is the one action the page is asking for; sign-in
- * gives up its spot to the menu button and moves to the top of the drawer.
+ * The glass is tinted cream (--milk), not grey — that tint is what keeps it
+ * reading as Fonnus rather than as a generic SaaS bar. Responsiveness is a
+ * swap, not a shrink: below 900px the menus move into a drawer and the pill
+ * keeps only the brand, the primary CTA and the toggle.
  */
-export function Header() {
-  const narrow = useIsNarrow()
+export function Header({ onTryCall }: HeaderProps) {
+  const narrow = useIsNarrow(HEADER_NARROW)
+  const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > CONDENSE_AT)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Widening the window while the drawer is open would strand it on screen.
   useEffect(() => {
     if (!narrow) setMenuOpen(false)
+    else setOpen(null)
   }, [narrow])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpen(null)
+      setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  useEffect(() => () => clearTimeout(closeTimer.current), [])
+
+  const hold = (label: string) => {
+    clearTimeout(closeTimer.current)
+    setOpen(label)
+  }
+  const release = () => {
+    clearTimeout(closeTimer.current)
+    closeTimer.current = setTimeout(() => setOpen(null), CLOSE_DELAY_MS)
+  }
+
+  const pick = (item: NavItem) => {
+    setOpen(null)
+    setMenuOpen(false)
+    if (item.demo) onTryCall()
+  }
 
   return (
     <>
-      <header className={styles.header}>
-        <a href="#hero" className={styles.logoLink}>
-          <Logo variant="horizontal" height={28} />
-        </a>
+      <div className={styles.rail}>
+        <div className={`${styles.pill} ${scrolled ? styles.pillScrolled : ''}`}>
+          <a href="#hero" className={styles.logoLink} aria-label="Fonnus — về đầu trang">
+            <Logo variant="horizontal" height={scrolled ? 23 : 26} />
+          </a>
 
-        {narrow ? (
-          <div className={styles.narrowActions}>
-            <a href={hrefFor('signup')} className={styles.cta}>
-              <Button size="sm">Dùng thử miễn phí</Button>
-            </a>
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
-              aria-expanded={menuOpen}
-              className={styles.menuButton}
-            >
-              <Icon name={menuOpen ? 'x' : 'menu'} size={20} />
-            </button>
-          </div>
-        ) : (
-          <>
-            <nav className={styles.nav}>
-              {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className={styles.navLink}>
-                  {link.label}
-                </a>
+          {narrow ? null : (
+            <nav className={styles.nav} onMouseLeave={release}>
+              {NAV_GROUPS.map((group) => (
+                <GroupTrigger
+                  key={group.label}
+                  group={group}
+                  open={open === group.label}
+                  onHold={() => hold(group.label)}
+                  onRelease={release}
+                  onToggle={() => setOpen((v) => (v === group.label ? null : group.label))}
+                  onPick={pick}
+                />
               ))}
             </nav>
-            <div className={styles.actions}>
+          )}
+
+          <div className={styles.actions}>
+            {narrow ? null : (
               <a href={hrefFor('signin')} className={styles.cta}>
-                <Button variant="secondary" size="sm">
+                <Button variant="secondary" size="sm" style={{ borderRadius: 999 }}>
                   Đăng nhập
                 </Button>
               </a>
-              <a href={hrefFor('signup')} className={styles.cta}>
-                <Button size="sm">Dùng thử miễn phí</Button>
-              </a>
-            </div>
-          </>
-        )}
-      </header>
+            )}
+            <a href={hrefFor('signup')} className={styles.cta}>
+              <Button size="sm" style={{ borderRadius: 999 }}>
+                {narrow ? 'Dùng thử' : 'Dùng thử miễn phí'}
+              </Button>
+            </a>
+            {narrow ? (
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
+                aria-expanded={menuOpen}
+                className={styles.menuButton}
+              >
+                <Icon name={menuOpen ? 'x' : 'menu'} size={19} />
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </div>
 
       {narrow && menuOpen ? (
         <div className={styles.drawer}>
-          <a
-            href={hrefFor('signin')}
-            onClick={() => setMenuOpen(false)}
-            className={`${styles.drawerLink} ${styles.drawerSignIn}`}
-          >
+          {NAV_GROUPS.map((group) =>
+            group.items ? (
+              <div key={group.label} className={styles.drawerGroup}>
+                <span className={styles.drawerGroupLabel}>{group.label}</span>
+                {group.items.map((item) => (
+                  <DrawerItem key={item.label} item={item} onPick={pick} />
+                ))}
+              </div>
+            ) : (
+              <a
+                key={group.label}
+                href={group.href}
+                onClick={() => setMenuOpen(false)}
+                className={styles.drawerLink}
+              >
+                {group.label}
+              </a>
+            ),
+          )}
+          <a href={hrefFor('signin')} className={styles.drawerSignIn}>
             Đăng nhập
           </a>
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className={styles.drawerLink}
-            >
-              {link.drawerLabel ?? link.label}
-            </a>
+        </div>
+      ) : null}
+    </>
+  )
+}
+
+interface TriggerProps {
+  group: NavGroup
+  open: boolean
+  onHold: () => void
+  onRelease: () => void
+  onToggle: () => void
+  onPick: (item: NavItem) => void
+}
+
+function GroupTrigger({ group, open, onHold, onRelease, onToggle, onPick }: TriggerProps) {
+  if (!group.items) {
+    return (
+      <a href={group.href} className={styles.navLink} onMouseEnter={onRelease}>
+        {group.label}
+      </a>
+    )
+  }
+
+  return (
+    <div className={styles.navGroup} onMouseEnter={onHold} onMouseLeave={onRelease}>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className={`${styles.navLink} ${open ? styles.navLinkOpen : ''}`}
+      >
+        {group.label}
+        <svg
+          width="11"
+          height="11"
+          viewBox="0 0 24 24"
+          fill="none"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={open ? styles.chevronOpen : styles.chevron}
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {open ? (
+        <div className={styles.panel} role="menu">
+          {group.items.map((item) => (
+            <PanelItem key={item.label} item={item} onPick={onPick} />
           ))}
         </div>
       ) : null}
+    </div>
+  )
+}
 
-      <div className={styles.spacer} />
+function PanelItem({ item, onPick }: { item: NavItem; onPick: (i: NavItem) => void }) {
+  const body = (
+    <>
+      <span className={styles.panelIcon} aria-hidden="true">
+        <Icon name={item.icon} size={17} />
+      </span>
+      <span className={styles.panelText}>
+        <span className={styles.panelLabel}>{item.label}</span>
+        <span className={styles.panelDesc}>{item.desc}</span>
+      </span>
     </>
+  )
+
+  return item.demo ? (
+    <button type="button" role="menuitem" onClick={() => onPick(item)} className={styles.panelRowDemo}>
+      {body}
+    </button>
+  ) : (
+    <a href={item.href} role="menuitem" onClick={() => onPick(item)} className={styles.panelRow}>
+      {body}
+    </a>
+  )
+}
+
+function DrawerItem({ item, onPick }: { item: NavItem; onPick: (i: NavItem) => void }) {
+  return item.demo ? (
+    <button type="button" onClick={() => onPick(item)} className={styles.drawerItemDemo}>
+      {item.label}
+    </button>
+  ) : (
+    <a href={item.href} onClick={() => onPick(item)} className={styles.drawerItem}>
+      {item.label}
+    </a>
   )
 }
