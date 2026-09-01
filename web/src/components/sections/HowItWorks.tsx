@@ -43,15 +43,17 @@ const STEPS: Step[] = [
  * instead of being handed all three at once, and each card's right half plays
  * out what that step actually looks like.
  *
- * Below 900px the stacking is dropped — a card taller than the viewport cannot
- * pin, and on a phone the scroll is better spent on the content itself.
+ * The stack holds all the way down to a phone: below 900px the card's two
+ * halves go one above the other and the card is capped to something that fits
+ * the screen, because a card taller than the viewport cannot pin. Only screens
+ * too short for even that fall back to a plain scrolling list.
  */
 export function HowItWorks() {
   return (
-    <section id="cach-hoat-dong" data-reveal="0" className={`${section.section} ${section.milk}`}>
+    <section id="cach-hoat-dong" className={`${section.section} ${section.milk}`}>
       <div className={section.inner}>
-        <div className={section.eyebrow}>Cách hoạt động</div>
-        <h2 className={`${section.heading} ${styles.heading}`}>
+        <div data-reveal="0" className={section.eyebrow}>Cách hoạt động</div>
+        <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
           Sẵn sàng nhận cuộc gọi trong chưa đầy 5 phút
         </h2>
 
