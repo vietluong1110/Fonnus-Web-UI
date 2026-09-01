@@ -110,7 +110,7 @@ export function CallDemoPlayer({ demo, action }: CallDemoPlayerProps) {
           className={styles.play}
           aria-label={playing ? `Tạm dừng ${demo.title}` : `Phát ${demo.title}`}
         >
-          <Icon name={playing ? 'mic' : finished ? 'arrow-right' : 'play'} size={18} />
+          <Icon name={playing ? 'pause' : finished ? 'arrow-right' : 'play'} size={18} />
         </button>
 
         <span className={styles.meta}>

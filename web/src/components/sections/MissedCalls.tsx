@@ -45,7 +45,7 @@ export function MissedCalls() {
             variant="today"
             label="Hôm nay"
             steps={TODAY}
-            outcome="Mất một bệnh nhân — và không có gì ghi lại để bạn biết."
+            outcome="Bỏ lỡ 1 khách hàng — và không có gì ghi lại để bạn biết."
           />
           <Track
             variant="fonnus"
@@ -58,7 +58,7 @@ export function MissedCalls() {
         <div data-reveal="4" className={styles.answer}>
           <div className={styles.answerText}>Fonnus nghe máy 24/7, từ 2.500.000 đ mỗi tháng.</div>
           <a href="#bang-gia" style={{ textDecoration: 'none' }}>
-            <Button variant="secondary">Xem bảng giá</Button>
+            <Button variant="inverse">Xem bảng giá</Button>
           </a>
         </div>
       </div>

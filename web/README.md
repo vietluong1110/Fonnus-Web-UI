@@ -118,6 +118,33 @@ The proof row's clinic marks in `sections/clinic-logos.tsx` are **placeholders**
 for invented clinics. Swap them for real customer logos before launch, and only
 with each clinic's permission: a real logo there reads as an endorsement.
 
+## Shape
+
+One rule, so radii stop disagreeing: **controls are pills, containers are
+rounded rectangles.** Every `Button` is `--radius-pill` (that lives in the
+component, not in per-call-site overrides), as are the navbar and the hero's
+sign-up control; cards, panels and sections stay on `--radius-lg`. Before this
+the navbar and hero buttons were pilled inline while every other button was
+12px — buttons disagreeing with each other, which was the actual inconsistency.
+
+## The sticky step stack
+
+`HowItWorks` is a sticky card stack: each step pins under the navbar and the
+next slides up over it, leaving a 14px sliver of the one below. Two things it
+is easy to break:
+
+- `.page` uses `overflow-x: clip`, **not** `hidden`. `hidden` makes an ancestor
+  the scroll container and silently kills `position: sticky`.
+- The runway under the last card is a real element, not padding on the stack.
+  Sticky items are bounded by their parent's *content* box, which padding does
+  not extend — with padding alone the third card never reaches its pin and the
+  first releases early.
+
+Each card's right half plays a small scene once, when it first settles on
+screen (`usePlayedOnce`): the clinic's details being typed in, the forwarding
+wire drawing and the switch flipping, a call arriving and being booked. Below
+900px the pinning is dropped — a card taller than the viewport cannot stick.
+
 ## Interactive call demos
 
 Three of the four capabilities carry a `CallDemoPlayer` instead of a static
@@ -133,6 +160,18 @@ transcript rolls silently; drop a recording in `public/audio/`, point
 
 Only one player runs at a time: each registers a stopper in a module-level set
 and clears the others before starting.
+
+## Motion
+
+Deliberately restrained; the audience is clinic owners, not designers. The
+whole vocabulary is: sections lift in on scroll (`useReveal`), capability rows
+slide in from their own side on wide screens only, the step cards pin and
+stack, the call players roll their transcripts, the navbar condenses past 24px,
+and the orb breathes. Everything honours `prefers-reduced-motion`.
+
+`data-reveal-from="left|right"` opts an element into a sideways entrance
+instead of a lift — ignored below 900px, where a stacked column makes a
+sideways slide meaningless and pushes content past the screen edge.
 
 ## Colour
 

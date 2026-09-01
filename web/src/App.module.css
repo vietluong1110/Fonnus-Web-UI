@@ -2,5 +2,7 @@
   background: var(--paper);
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
+  /* `clip`, not `hidden`: hidden would make this the scroll container and
+     break the sticky card stack in Cách hoạt động. */
+  overflow-x: clip;
 }

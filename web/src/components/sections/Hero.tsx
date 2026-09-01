@@ -69,7 +69,7 @@ export function Hero({ dockRef }: HeroProps) {
             autoComplete="tel"
             className={styles.field}
           />
-          <Button type="submit" size="md" style={{ borderRadius: 999, flex: '0 0 auto' }}>
+          <Button type="submit" size="md" style={{ flex: '0 0 auto' }}>
             Dùng thử miễn phí
           </Button>
         </form>

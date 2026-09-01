@@ -1,0 +1,503 @@
+/*
+ * Three small scenes that play once, when their card first settles on screen.
+ * Everything is held at its start state and only animates under [data-played],
+ * so nothing moves before the card is actually being looked at.
+ */
+.scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.pane {
+  width: 100%;
+  background: var(--milk);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow:
+    inset 0 0 0 1px var(--border-hairline),
+    0 16px 40px rgba(38, 31, 24, 0.08);
+  box-sizing: border-box;
+}
+
+.paneHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--terracotta-deep);
+  margin-bottom: 16px;
+}
+
+/* ---------- shared entrance ---------- */
+
+@keyframes hwRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reveals the text left-to-right behind a caret — reads as typing without
+   needing a character count per string. */
+@keyframes hwType {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes hwCaret {
+  0%,
+  100% {
+    border-right-color: var(--terracotta);
+  }
+  50% {
+    border-right-color: transparent;
+  }
+}
+
+/* ---------- step 1: setup form ---------- */
+
+.field {
+  margin-bottom: 12px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+.fieldBox {
+  display: block;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  overflow: hidden;
+}
+
+.typed {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: bottom;
+  font-size: var(--size-body-sm);
+  font-weight: 500;
+  color: var(--ink);
+  width: 0;
+  border-right: 1.5px solid transparent;
+  padding-right: 2px;
+}
+
+[data-played] .typed {
+  animation:
+    hwType 900ms var(--ease-out) var(--delay) both,
+    hwCaret 620ms steps(1) var(--delay) 3;
+}
+
+.tableHead {
+  margin: 18px 0 8px;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tableRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+  opacity: 0;
+}
+
+[data-played] .tableRow {
+  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+}
+
+.price {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--terracotta-deep);
+}
+
+/* ---------- step 2: call forwarding ---------- */
+
+.hop {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.nodeBase {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 13px;
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  opacity: 0;
+}
+
+.node {
+  composes: nodeBase;
+}
+
+/* The Fonnus end lights up once the wire reaches it. */
+.nodeOn {
+  composes: nodeBase;
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+[data-played] .node,
+[data-played] .nodeOn {
+  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+}
+
+.nodeLabel {
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.nodeOn .nodeLabel {
+  color: var(--terracotta-deep);
+}
+
+.nodeNum {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.nodeNote {
+  font-size: var(--size-ui);
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.wire {
+  flex: 0 0 44px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.wireLine {
+  position: absolute;
+  left: 0;
+  right: 14px;
+  height: 1.5px;
+  background: var(--terracotta);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+[data-played] .wireLine {
+  animation: hwDraw 500ms var(--ease-out) var(--delay) both;
+}
+
+@keyframes hwDraw {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.wireHead {
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--terracotta);
+  opacity: 0;
+}
+
+[data-played] .wireHead {
+  animation: hwRise 300ms var(--ease-out) var(--delay) both;
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 13px;
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  opacity: 0;
+}
+
+[data-played] .switchRow {
+  animation: hwRise 400ms var(--ease-out) var(--delay) both;
+}
+
+.switchLabel {
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+}
+
+.switchTrack {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  padding: 3px;
+  box-sizing: border-box;
+  display: flex;
+}
+
+[data-played] .switchTrack {
+  animation: hwSwitchOn 320ms var(--ease-out) calc(var(--delay) + 320ms) both;
+}
+
+@keyframes hwSwitchOn {
+  to {
+    background: var(--action-primary);
+  }
+}
+
+.switchKnob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--milk);
+  box-shadow: 0 1px 3px rgba(38, 31, 24, 0.25);
+}
+
+[data-played] .switchKnob {
+  animation: hwKnob 320ms var(--ease-out) calc(var(--delay) + 320ms) both;
+}
+
+@keyframes hwKnob {
+  to {
+    transform: translateX(18px);
+  }
+}
+
+.liveChip,
+.doneChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--action-primary);
+  color: var(--cream);
+  font-size: var(--size-body-sm);
+  font-weight: 500;
+  opacity: 0;
+}
+
+[data-played] .liveChip,
+[data-played] .doneChip {
+  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+}
+
+/* ---------- step 3: a live call ---------- */
+
+.callRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  opacity: 0;
+}
+
+[data-played] .callRow {
+  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+}
+
+.ring {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-warm);
+  color: var(--terracotta-deep);
+}
+
+[data-played] .ring {
+  animation: hwPulse 1400ms var(--ease-in-out) 3;
+}
+
+@keyframes hwPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.callWho {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.callNum {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body-sm);
+  font-weight: 600;
+}
+
+.callMeta {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.answering {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 13px;
+  border-radius: var(--radius-md);
+  background: var(--surface-warm);
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+  opacity: 0;
+}
+
+[data-played] .answering {
+  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+}
+
+.answerBars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.answerBars span {
+  width: 3px;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--terracotta);
+  transform: scaleY(0.35);
+}
+
+[data-played] .answerBars span {
+  animation: hwTalk 900ms var(--ease-in-out) infinite;
+}
+
+@keyframes hwTalk {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.saidRow {
+  margin-top: 10px;
+  padding: 13px;
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  font-size: var(--size-body-sm);
+  line-height: 1.55;
+  color: var(--ink);
+  opacity: 0;
+}
+
+[data-played] .saidRow {
+  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+}
+
+/* Everything lands, nothing travels. */
+@media (prefers-reduced-motion: reduce) {
+  [data-played] .typed {
+    animation: none;
+    width: auto;
+  }
+
+  [data-played] .tableRow,
+  [data-played] .node,
+  [data-played] .nodeOn,
+  [data-played] .wireHead,
+  [data-played] .switchRow,
+  [data-played] .liveChip,
+  [data-played] .doneChip,
+  [data-played] .callRow,
+  [data-played] .answering,
+  [data-played] .saidRow {
+    animation: none;
+    opacity: 1;
+  }
+
+  [data-played] .wireLine {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  [data-played] .switchTrack {
+    animation: none;
+    background: var(--action-primary);
+  }
+
+  [data-played] .switchKnob {
+    animation: none;
+    transform: translateX(18px);
+  }
+
+  [data-played] .ring,
+  [data-played] .answerBars span {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .hop {
+    flex-direction: column;
+  }
+
+  .wire {
+    flex: 0 0 24px;
+    transform: rotate(90deg);
+  }
+}

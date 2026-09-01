@@ -25,11 +25,10 @@ export function CapabilityRow({
 }: CapabilityRowProps) {
   return (
     <div
-      data-reveal="1"
       className={reversed ? styles.reversed : styles.row}
       style={measure ? ({ '--capability-measure': measure } as CSSProperties) : undefined}
     >
-      <div>
+      <div data-reveal="0" data-reveal-from={reversed ? 'right' : 'left'}>
         <div className={styles.eyebrow}>{eyebrow}</div>
         <h3 className={styles.title}>{title}</h3>
         <p className={styles.body}>{body}</p>
@@ -41,7 +40,9 @@ export function CapabilityRow({
           ))}
         </div>
       </div>
-      {visual}
+      <div data-reveal="1" data-reveal-from={reversed ? 'left' : 'right'}>
+        {visual}
+      </div>
     </div>
   )
 }

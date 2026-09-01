@@ -4,7 +4,8 @@ import styles from './Security.module.css'
 interface Promise_ {
   title: string
   body: string
-  sage?: boolean
+  /** The promise this section is really built around. */
+  ringed?: boolean
 }
 
 const PROMISES: Promise_[] = [
@@ -19,7 +20,7 @@ const PROMISES: Promise_[] = [
   {
     title: 'Chuyên môn y khoa: chuyển cho bác sĩ',
     body: 'Fonnus trả lời giá, giờ, lịch hẹn và thông tin phòng khám. Câu hỏi thuộc chuyên môn luôn được chuyển cho bác sĩ.',
-    sage: true,
+    ringed: true,
   },
 ]
 
@@ -41,7 +42,7 @@ export function Security() {
             <div
               key={promise.title}
               data-reveal={String(i + 1)}
-              className={promise.sage ? styles.cardSage : styles.card}
+              className={promise.ringed ? styles.cardRinged : styles.card}
             >
               <div className={styles.cardTitle}>{promise.title}</div>
               <p className={styles.cardBody}>{promise.body}</p>
