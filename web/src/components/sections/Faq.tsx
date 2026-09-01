@@ -9,12 +9,14 @@ export function Faq() {
   const baseId = useId()
 
   return (
-    <section id="faq" data-reveal="0" className={section.section}>
+    <section id="faq" className={section.section}>
       <div className={styles.inner}>
-        <div className={section.eyebrow}>Câu hỏi thường gặp</div>
-        <h2 className={`${section.heading} ${styles.heading}`}>Những điều chủ phòng khám hỏi trước</h2>
+        <div data-reveal="0" className={section.eyebrow}>Câu hỏi thường gặp</div>
+        <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
+          Những điều chủ phòng khám hỏi trước
+        </h2>
 
-        <div className={styles.list}>
+        <div data-reveal="2" className={styles.list}>
           {FAQS.map((item, i) => {
             const open = openIndex === i
             const panelId = `${baseId}-panel-${i}`

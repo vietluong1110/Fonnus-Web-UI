@@ -17,14 +17,16 @@ export function Pricing({ highlight = 'Tiêu chuẩn', matrixDefaultOpen = false
   const [annual, setAnnual] = useState(false)
 
   return (
-    <section id="bang-gia" data-reveal="0" className={`${section.section} ${section.milk}`}>
+    <section id="bang-gia" className={`${section.section} ${section.milk}`}>
       <div className={section.inner}>
         <div className={styles.head}>
           <div>
-            <div className={section.eyebrow}>Bảng giá</div>
-            <h2 className={`${section.heading} ${styles.heading}`}>Giá minh bạch, không ràng buộc</h2>
+            <div data-reveal="0" className={section.eyebrow}>Bảng giá</div>
+            <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
+              Giá minh bạch, không ràng buộc
+            </h2>
           </div>
-          <div className={styles.switchWrap}>
+          <div data-reveal="2" className={styles.switchWrap}>
             <Switch
               label="Trả năm, giảm 15%"
               checked={annual}
@@ -46,12 +48,12 @@ export function Pricing({ highlight = 'Tiêu chuẩn', matrixDefaultOpen = false
                   ? 'fnPriceIn 360ms cubic-bezier(.2,.7,.3,1)'
                   : 'fnPriceIn2 360ms cubic-bezier(.2,.7,.3,1)'
               }
-              revealOrder={i + 1}
+              revealOrder={i}
             />
           ))}
         </div>
 
-        <div data-reveal="1" className={styles.enterprise}>
+        <div data-reveal="0" className={styles.enterprise}>
           <div className={styles.enterpriseBody}>
             <div className={styles.enterpriseTitle}>Doanh nghiệp</div>
             <p className={styles.enterpriseText}>

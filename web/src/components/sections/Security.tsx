@@ -26,13 +26,13 @@ const PROMISES: Promise_[] = [
 
 export function Security() {
   return (
-    <section id="bao-mat" data-reveal="0" className={`${section.section} ${section.blush}`}>
+    <section id="bao-mat" className={`${section.section} ${section.blush}`}>
       <div className={section.inner}>
-        <div className={section.eyebrowDeep}>Bảo mật &amp; dữ liệu</div>
-        <h2 className={`${section.heading} ${styles.heading}`}>
+        <div data-reveal="0" className={section.eyebrowDeep}>Bảo mật &amp; dữ liệu</div>
+        <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
           Người gọi biết mình đang nói với trợ lý AI
         </h2>
-        <p className={`${section.lede} ${styles.lede}`}>
+        <p data-reveal="2" className={`${section.lede} ${styles.lede}`}>
           Câu công bố nằm trong câu đầu tiên của mỗi cuộc gọi, và phòng khám không tắt được. Đây là yêu cầu
           pháp luật, không phải tuỳ chọn.
         </p>
@@ -41,7 +41,7 @@ export function Security() {
           {PROMISES.map((promise, i) => (
             <div
               key={promise.title}
-              data-reveal={String(i + 1)}
+              data-reveal={String(i)}
               className={promise.ringed ? styles.cardRinged : styles.card}
             >
               <div className={styles.cardTitle}>{promise.title}</div>
@@ -50,7 +50,7 @@ export function Security() {
           ))}
         </div>
 
-        <p className={styles.legal}>
+        <p data-reveal="0" className={styles.legal}>
           Cơ sở pháp lý chúng tôi làm theo: Luật 91/2025/QH15 về bảo vệ dữ liệu cá nhân và Luật
           134/2025/QH15 về công bố nội dung do AI tạo, hiệu lực tháng 3 năm 2026.
         </p>

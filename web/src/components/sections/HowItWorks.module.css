@@ -3,20 +3,32 @@
   max-width: 22ch;
 }
 
+/*
+ * One height for all three cards. A stack whose cards are different heights
+ * shows a different amount of each one underneath, and the ragged bottom edge
+ * is what made the pinned stack read as untidy rather than as a deck. The
+ * floor is the tallest scene's content at the narrowest two-column width, with
+ * air to spare; above that the card takes a share of the viewport so it still
+ * pins with the navbar cleared.
+ */
 .stack {
+  --hw-card-h: clamp(570px, 62vh, 605px);
+  --hw-card-step: 14px;
+  --hw-pin-top: 112px;
+
   display: flex;
   flex-direction: column;
   gap: clamp(28px, 5vh, 48px);
 }
 
 /*
- * Each slot pins 14px lower than the one before it, which is what leaves the
- * sliver of the card underneath and makes the stack legible as a stack.
+ * Each slot pins one step lower than the one before it, which is what leaves
+ * the sliver of the card underneath and makes the stack legible as a stack.
  * `top` clears the floating pill navbar.
  */
 .slot {
   position: sticky;
-  top: calc(112px + var(--i) * 14px);
+  top: calc(var(--hw-pin-top) + var(--i) * var(--hw-card-step));
 }
 
 /*
@@ -31,11 +43,12 @@
 }
 
 .card {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
   gap: clamp(24px, 4vw, 48px);
-  align-items: center;
-  min-height: 420px;
+  align-items: stretch;
+  height: var(--hw-card-h);
   padding: clamp(24px, 3.5vw, 40px);
   box-sizing: border-box;
   background: var(--paper);
@@ -52,6 +65,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
 }
 
 .bullet {
@@ -63,6 +77,7 @@
   background: var(--surface-warm);
   color: var(--terracotta-deep);
   margin-bottom: 22px;
+  flex: 0 0 auto;
 }
 
 /* The step where Fonnus is actually live gets the filled mark. */
@@ -113,7 +128,7 @@
   min-width: 0;
   height: 100%;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 /* Without this the scene sizes to its content and the pane collapses to a
@@ -123,26 +138,168 @@
   min-width: 0;
 }
 
-/* Tablet: the halves stack inside the card, and the card stops pinning — a
-   card taller than the viewport cannot stick without cropping itself. */
-@media (max-width: 900px) {
+/*
+ * One column, still a stack. The halves sit one above the other and the card
+ * shrinks to a height that fits a phone screen, because a card taller than the
+ * viewport cannot pin — its lower half would never be reachable once the next
+ * card slid over it. That height cap is why the panes tighten up here too.
+ */
+@media (max-width: 1023px) {
+  .stack {
+    /*
+     * The deepest card pins at --hw-pin-top plus two steps, so that plus the
+     * card has to clear the screen. The spare 8px is all the slack there is:
+     * every pixel here is one the scene inside the card gets to use.
+     */
+    --hw-card-h: min(700px, calc(100dvh - var(--hw-pin-top) - 2 * var(--hw-card-step) - 8px));
+    --hw-card-step: 10px;
+    --hw-pin-top: 76px;
+    gap: 20px;
+  }
+
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .copy {
+    justify-content: flex-start;
+    padding-right: 44px;
+  }
+
+  .bullet {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+  }
+
+  .stepEyebrow {
+    margin-bottom: 8px;
+  }
+
+  .stepTitle {
+    font-size: clamp(20px, 5.4vw, 26px);
+    margin-bottom: 10px;
+  }
+
+  .stepBody {
+    font-size: var(--size-body-sm);
+    line-height: 1.55;
+  }
+
+  /*
+   * The counter moves into the card's corner rather than costing a line at the
+   * bottom. Every pixel of the card's height is spent buying the stack: the
+   * card has to fit inside the viewport or it cannot pin.
+   */
+  .count {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/*
+ * Tablet-ish widths get a shorter card than a phone does. One column on a wide
+ * pane means most rows fit on one line, so the scenes are shorter here than
+ * they are on a phone, where the hop stacks and the copy wraps — one cap for
+ * both would leave this range half-empty or crop the phone.
+ */
+@media (min-width: 561px) and (max-width: 1023px) {
+  .stack {
+    --hw-card-h: 670px;
+  }
+}
+
+/* Nothing that tall pins on a short tablet, so there it is a plain list. */
+@media (min-width: 561px) and (max-width: 1023px) and (max-height: 780px) {
+  .slot {
+    position: static;
+  }
+}
+
+/*
+ * Phone: the step mark moves up onto the eyebrow's line instead of sitting on
+ * its own. It buys back about 30px of card height, and those go straight into
+ * the scene below — which is the half of the card worth the room.
+ */
+@media (max-width: 560px) {
+  .card {
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .count {
+    top: 16px;
+    right: 16px;
+  }
+
+  .copy {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+  }
+
+  .bullet {
+    grid-column: 1;
+    grid-row: 1;
+    width: 38px;
+    height: 38px;
+    margin-bottom: 0;
+  }
+
+  .stepEyebrow {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 0;
+  }
+
+  .stepTitle {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 14px;
+  }
+
+  .stepBody {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
+/*
+ * Under about 360px the scenes no longer fit a card that a phone screen can
+ * also pin, so the deck flattens rather than cropping itself.
+ */
+@media (max-width: 359px) {
   .slot {
     position: static;
   }
 
   .card {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
-    min-height: 0;
+    height: auto;
   }
+}
 
-  .copy {
-    align-items: flex-start;
+/*
+ * Short screens — a landscape phone, a small phone in portrait, a laptop
+ * window with little height — cannot fit a whole card, so the deck flattens
+ * into an ordinary list rather than pinning something whose bottom you could
+ * never read. The cards keep their shared height; they just stop stacking.
+ */
+@media (max-height: 700px) {
+  .slot {
+    position: static;
   }
+}
 
-  .count {
-    margin-top: 18px;
-    padding-top: 0;
+@media (max-width: 1023px) and (max-height: 700px) {
+  .card {
+    height: auto;
   }
 }
 

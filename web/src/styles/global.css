@@ -27,6 +27,68 @@ a:hover {
   text-decoration: underline;
 }
 
+/*
+ * ---------------------------------------------------------------------------
+ * Scroll reveal
+ * ---------------------------------------------------------------------------
+ * Blocks lift and settle as they come into view. The hidden state lives here,
+ * in CSS, so it is already in place on the first paint — setting it from JS
+ * after mount is what made the top of the page flash on load.
+ *
+ * `data-reveal-armed` is written on <html> by `useReveal` in a layout effect,
+ * before the browser paints. Nothing is hidden unless that ran, so a page with
+ * no JS (or with reduced motion asked for) renders settled instead of blank.
+ *
+ * Elements opt in with `data-reveal="<order>"`; the order is a stagger index
+ * within its group, --reveal-stagger apart. `data-reveal-from="left|right"`
+ * brings it in from that edge instead of lifting it — only on wide viewports,
+ * where a row genuinely has two sides.
+ */
+
+:root {
+  --reveal-shift: 26px;
+  --reveal-slide: 40px;
+  --reveal-duration: 760ms;
+  --reveal-stagger: 110ms;
+}
+
+[data-reveal-armed] [data-reveal] {
+  opacity: 0;
+  transform: translate3d(var(--reveal-x, 0px), var(--reveal-y, var(--reveal-shift)), 0);
+  /* --ease-arc is the brand's rising arc: it keeps moving through the middle of
+     the run instead of racing to the end, which is what makes the reveal
+     something you can actually watch rather than a flicker. */
+  transition:
+    opacity var(--reveal-duration) var(--ease-arc) var(--reveal-delay, 0ms),
+    transform var(--reveal-duration) var(--ease-arc) var(--reveal-delay, 0ms);
+}
+
+[data-reveal-armed] [data-reveal][data-revealed] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (min-width: 900px) {
+  [data-reveal-armed] [data-reveal][data-reveal-from='left'] {
+    --reveal-x: calc(var(--reveal-slide) * -1);
+    --reveal-y: 0px;
+  }
+
+  [data-reveal-armed] [data-reveal][data-reveal-from='right'] {
+    --reveal-x: var(--reveal-slide);
+    --reveal-y: 0px;
+  }
+}
+
+/* Belt and braces: the hook already declines to arm under reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-armed] [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @keyframes fnWave {
   0% {
     transform: scale(1);

@@ -29,9 +29,9 @@ export function Contact() {
     setFields((f) => ({ ...f, [key]: e.target.value }))
 
   return (
-    <section id="lien-he" data-reveal="0" className={`${section.section} ${section.milk}`}>
+    <section id="lien-he" className={`${section.section} ${section.milk}`}>
       <div className={styles.inner}>
-        <div>
+        <div data-reveal="0" data-reveal-from="left">
           <div className={section.eyebrow}>Liên hệ</div>
           <h2 className={`${section.heading} ${styles.heading}`}>Cần tư vấn trước khi bắt đầu?</h2>
           <p className={`${section.lede} ${styles.lede}`}>
@@ -60,7 +60,7 @@ export function Contact() {
           </div>
         </div>
 
-        <div className={styles.formCard}>
+        <div data-reveal="1" data-reveal-from="right" className={styles.formCard}>
           {sent ? (
             <div className={styles.sent}>
               <span className={styles.sentTick}>✓</span>

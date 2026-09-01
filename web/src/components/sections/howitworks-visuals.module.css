@@ -5,13 +5,21 @@
  */
 .scene {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   height: 100%;
 }
 
+/*
+ * The pane fills the card's visual column rather than sizing to its content:
+ * three panes sharing one outer box is what lets the three cards share one
+ * height, which is what makes the stack read as a stack. The head stays pinned
+ * at the top and the body spreads through whatever room is left.
+ */
 .pane {
   width: 100%;
+  display: flex;
+  flex-direction: column;
   background: var(--milk);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -33,6 +41,19 @@
   margin-bottom: 16px;
 }
 
+/*
+ * The rows spread through the pane rather than clustering in the middle of it.
+ * Each scene also carries enough of its own step to earn the height — the
+ * shorter two used to be a couple of rows floating in a mostly empty box.
+ */
+.paneBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 /* ---------- shared entrance ---------- */
 
 @keyframes hwRise {
@@ -46,24 +67,12 @@
   }
 }
 
-/* Reveals the text left-to-right behind a caret — reads as typing without
-   needing a character count per string. */
-@keyframes hwType {
+@keyframes hwFade {
   from {
-    width: 0;
+    opacity: 0;
   }
   to {
-    width: 100%;
-  }
-}
-
-@keyframes hwCaret {
-  0%,
-  100% {
-    border-right-color: var(--terracotta);
-  }
-  50% {
-    border-right-color: transparent;
+    opacity: 1;
   }
 }
 
@@ -89,28 +98,29 @@
   overflow: hidden;
 }
 
-.typed {
-  display: inline-block;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  vertical-align: bottom;
+/*
+ * The value fades in already sitting in the field. A left-to-right reveal was
+ * tried first and read as a stutter rather than as typing — the point of the
+ * scene is that the assistant answers from the clinic's own data, not that
+ * somebody is at a keyboard.
+ */
+.fieldValue {
+  display: block;
   font-size: var(--size-body-sm);
   font-weight: 500;
   color: var(--ink);
-  width: 0;
-  border-right: 1.5px solid transparent;
-  padding-right: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
 }
 
-[data-played] .typed {
-  animation:
-    hwType 900ms var(--ease-out) var(--delay) both,
-    hwCaret 620ms steps(1) var(--delay) 3;
+[data-played] .fieldValue {
+  animation: hwFade 620ms var(--ease-out) var(--delay) both;
 }
 
 .tableHead {
-  margin: 18px 0 8px;
+  margin: 0 0 8px;
   font-size: var(--size-ui);
   color: var(--ink-soft);
 }
@@ -135,7 +145,7 @@
 }
 
 [data-played] .tableRow {
-  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+  animation: hwRise 520ms var(--ease-out) var(--delay) both;
 }
 
 .price {
@@ -145,20 +155,40 @@
   color: var(--terracotta-deep);
 }
 
-/* ---------- step 2: call forwarding ---------- */
+/* ---------- step 2: the two ways onto Fonnus ---------- */
 
-.hop {
+/*
+ * Step 2's body keeps its own spacing off the chip, because the routes above
+ * absorb the pane's spare height instead of leaving it to space-between.
+ */
+.paneBodyWays {
+  composes: paneBody;
+  gap: 12px;
+}
+
+/*
+ * The two routes take the pane's spare height between them and spend it on
+ * their own inner gaps, so the air opens up between a card's badge and its
+ * numbers rather than pooling in one slab between the two cards.
+ */
+.ways {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
   gap: 10px;
 }
 
-.nodeBase {
-  flex: 1 1 0;
-  min-width: 0;
+/*
+ * One block per route. Both are ordinary choices, so both get the same card:
+ * neither is the recommended one, and the point of the scene is that there are
+ * exactly two.
+ */
+.way {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  justify-content: space-between;
   padding: 13px;
   border-radius: var(--radius-md);
   background: var(--paper);
@@ -166,50 +196,157 @@
   opacity: 0;
 }
 
-.node {
-  composes: nodeBase;
+[data-played] .way {
+  animation: hwRise 520ms var(--ease-out) var(--delay) both;
 }
 
-/* The Fonnus end lights up once the wire reaches it. */
-.nodeOn {
-  composes: nodeBase;
-  background: var(--surface-warm);
-  box-shadow: inset 0 0 0 1.5px var(--terracotta);
-}
-
-[data-played] .node,
-[data-played] .nodeOn {
-  animation: hwRise 420ms var(--ease-out) var(--delay) both;
-}
-
-.nodeLabel {
-  font-size: var(--size-eyebrow);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.nodeOn .nodeLabel {
-  color: var(--terracotta-deep);
-}
-
-.nodeNum {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
+.wayHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
   font-size: var(--size-body-sm);
   font-weight: 600;
   color: var(--ink);
 }
 
-.nodeNote {
+.wayBadge {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-warm);
+  color: var(--terracotta-deep);
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.wayNote {
+  margin: 10px 0 0;
   font-size: var(--size-ui);
-  line-height: 1.4;
+  line-height: 1.45;
   color: var(--ink-soft);
 }
 
+/* Way 1: the pool, with the one the clinic took. */
+.numbers {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.numberBase {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 11px;
+  border-radius: var(--radius-sm);
+  background: var(--milk);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body-sm);
+  font-weight: 600;
+  color: var(--ink);
+  opacity: 0;
+}
+
+.number {
+  composes: numberBase;
+}
+
+.numberWide {
+  composes: numberBase;
+}
+
+.numberOn {
+  composes: numberBase;
+}
+
+[data-played] .number,
+[data-played] .numberWide {
+  animation: hwRise 480ms var(--ease-out) var(--delay) both;
+}
+
+/* The chosen number lands with the rest and is picked a beat later, so the
+   list reads as a list first and a choice second. */
+[data-played] .numberOn {
+  animation:
+    hwRise 480ms var(--ease-out) var(--delay) both,
+    hwPick 420ms var(--ease-out) 980ms both;
+}
+
+@keyframes hwPick {
+  to {
+    background: var(--surface-warm);
+    box-shadow: inset 0 0 0 1.5px var(--terracotta);
+  }
+}
+
+.numberTag {
+  font-family: var(--font-ui);
+  font-variant-numeric: normal;
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--terracotta-deep);
+  opacity: 0;
+}
+
+[data-played] .numberTag {
+  animation: hwFade 420ms var(--ease-out) 1060ms both;
+}
+
+/* Way 2: the clinic's own line pointed at the Fonnus one. */
+.redirect {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.numBoxBase {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  background: var(--milk);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-body-sm);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.redirectFrom {
+  composes: numBoxBase;
+}
+
+/* The Fonnus end of the redirect, where the call actually lands. */
+.redirectTo {
+  composes: numBoxBase;
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+  color: var(--terracotta-deep);
+}
+
+[data-played] .redirectFrom,
+[data-played] .redirectTo {
+  animation: hwRise 480ms var(--ease-out) var(--delay) both;
+}
+
+/*
+ * The connector between the two numbers, drawn on a real box: left to right in
+ * the row, and top to bottom on the narrowest screens where the row cannot fit
+ * side by side. Rotating the box itself distorts it.
+ */
 .wire {
-  flex: 0 0 44px;
+  flex: 0 0 40px;
   position: relative;
   display: grid;
   place-items: center;
@@ -219,19 +356,27 @@
   position: absolute;
   left: 0;
   right: 14px;
+  top: 50%;
   height: 1.5px;
+  margin-top: -0.75px;
   background: var(--terracotta);
   transform-origin: left center;
   transform: scaleX(0);
 }
 
 [data-played] .wireLine {
-  animation: hwDraw 500ms var(--ease-out) var(--delay) both;
+  animation: hwDrawX 620ms var(--ease-out) var(--delay) both;
 }
 
-@keyframes hwDraw {
+@keyframes hwDrawX {
   to {
     transform: scaleX(1);
+  }
+}
+
+@keyframes hwDrawY {
+  to {
+    transform: scaleY(1);
   }
 }
 
@@ -244,77 +389,19 @@
 }
 
 [data-played] .wireHead {
-  animation: hwRise 300ms var(--ease-out) var(--delay) both;
+  animation: hwRise 380ms var(--ease-out) var(--delay) both;
 }
 
-.switchRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 12px 13px;
-  border-radius: var(--radius-md);
-  background: var(--paper);
-  opacity: 0;
-}
-
-[data-played] .switchRow {
-  animation: hwRise 400ms var(--ease-out) var(--delay) both;
-}
-
-.switchLabel {
-  font-size: var(--size-body-sm);
-  color: var(--ink);
-}
-
-.switchTrack {
-  flex: 0 0 auto;
-  width: 44px;
-  height: 26px;
-  border-radius: 999px;
-  background: var(--border-strong);
-  padding: 3px;
-  box-sizing: border-box;
-  display: flex;
-}
-
-[data-played] .switchTrack {
-  animation: hwSwitchOn 320ms var(--ease-out) calc(var(--delay) + 320ms) both;
-}
-
-@keyframes hwSwitchOn {
-  to {
-    background: var(--action-primary);
-  }
-}
-
-.switchKnob {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--milk);
-  box-shadow: 0 1px 3px rgba(38, 31, 24, 0.25);
-}
-
-[data-played] .switchKnob {
-  animation: hwKnob 320ms var(--ease-out) calc(var(--delay) + 320ms) both;
-}
-
-@keyframes hwKnob {
-  to {
-    transform: translateX(18px);
-  }
-}
-
+/* A status chip, so it hugs its text — the pane's flex column would otherwise
+   stretch it to full width and it would read as a button. */
 .liveChip,
 .doneChip {
   display: inline-flex;
+  align-self: flex-start;
   align-items: center;
   gap: 8px;
-  margin-top: 14px;
   padding: 10px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--action-primary);
   color: var(--cream);
   font-size: var(--size-body-sm);
@@ -324,7 +411,16 @@
 
 [data-played] .liveChip,
 [data-played] .doneChip {
-  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+  animation: hwRise 520ms var(--ease-out) var(--delay) both;
+}
+
+/*
+ * Both chips carry a full sentence, and on a phone both wrap to a second line
+ * and stop reading as chips. The long form is the default; narrow screens get
+ * the shorter one, trimmed of the part the reader can do without.
+ */
+.chipShort {
+  display: none;
 }
 
 /* ---------- step 3: a live call ---------- */
@@ -340,7 +436,7 @@
 }
 
 [data-played] .callRow {
-  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+  animation: hwRise 520ms var(--ease-out) var(--delay) both;
 }
 
 .ring {
@@ -387,35 +483,34 @@
   color: var(--ink-soft);
 }
 
+/* A caption, not a card. The transcript below is what the pane is about, and a
+   third filled box stacked into the column flattened the whole scene out. */
 .answering {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 12px;
-  padding: 12px 13px;
-  border-radius: var(--radius-md);
-  background: var(--surface-warm);
-  font-size: var(--size-body-sm);
-  color: var(--ink);
+  padding: 0 2px;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
   opacity: 0;
 }
 
 [data-played] .answering {
-  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+  animation: hwRise 520ms var(--ease-out) var(--delay) both;
 }
 
 .answerBars {
   display: flex;
   align-items: center;
   gap: 3px;
-  height: 18px;
+  height: 16px;
   flex: 0 0 auto;
 }
 
 .answerBars span {
   width: 3px;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--terracotta);
   transform: scaleY(0.35);
 }
@@ -434,70 +529,257 @@
   }
 }
 
-.saidRow {
-  margin-top: 10px;
-  padding: 13px;
-  border-radius: var(--radius-md);
-  background: var(--paper);
+/*
+ * Both sides of the exchange. Blush is the brand's assistant-speech ground, so
+ * Linh answers on blush from the right and the caller speaks on paper from the
+ * left: the shape of the conversation is legible before a word is read.
+ */
+.turns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.turnBase {
+  /* A chat bubble is still prose: the ch cap keeps the line at a readable
+     measure instead of letting it run the full width of a wide pane. */
+  max-width: min(94%, 44ch);
+  margin: 0;
+  padding: 11px 13px;
   font-size: var(--size-body-sm);
   line-height: 1.55;
   color: var(--ink);
   opacity: 0;
 }
 
+.askRow {
+  composes: turnBase;
+  align-self: flex-start;
+  border-radius: var(--radius-md) var(--radius-md) var(--radius-md) var(--radius-xs);
+  background: var(--paper);
+}
+
+.saidRow {
+  composes: turnBase;
+  align-self: flex-end;
+  border-radius: var(--radius-md) var(--radius-md) var(--radius-xs) var(--radius-md);
+  background: var(--surface-warm);
+}
+
+[data-played] .askRow,
 [data-played] .saidRow {
-  animation: hwRise 420ms var(--ease-out) var(--delay) both;
+  animation: hwRise 520ms var(--ease-out) var(--delay) both;
+}
+
+/*
+ * Narrow cards: the panes tighten so a whole card still fits inside a phone
+ * viewport and can therefore pin. Nothing is dropped — only the padding and
+ * the vertical rhythm come in.
+ */
+@media (max-width: 1023px) {
+  .pane {
+    padding: 16px;
+  }
+
+  .paneHead {
+    margin-bottom: 12px;
+  }
+
+  .field {
+    margin-bottom: 10px;
+  }
+
+  .fieldBox {
+    padding: 8px 11px;
+  }
+
+  .tableHead {
+    margin-bottom: 6px;
+  }
+
+  .tableRow,
+  .callRow {
+    padding: 10px 11px;
+  }
+
+  .way {
+    padding: 11px;
+  }
+
+  .wayHead {
+    margin-bottom: 8px;
+  }
+
+  .wayNote {
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  .numberBase {
+    padding: 7px 10px;
+  }
+
+  .turns {
+    gap: 6px;
+  }
+
+  .turnBase {
+    padding: 10px 11px;
+  }
+
+  .liveChip,
+  .doneChip {
+    padding: 9px 13px;
+  }
+
+  .ring {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/*
+ * Phone. The chips carry full sentences that wrap to a second line here and
+ * stop reading as chips, so narrow screens get their short forms.
+ */
+@media (max-width: 560px) {
+  .way {
+    padding: 11px 10px;
+  }
+
+  .wayHead {
+    margin-bottom: 10px;
+  }
+
+  .wayNote {
+    margin-top: 9px;
+  }
+
+  /* Both ends of the redirect are 028 numbers now, which is a good deal wider
+     than the row had to carry before. */
+  .numBoxBase {
+    padding: 8px;
+    font-size: var(--size-ui);
+  }
+
+  .redirect {
+    gap: 2px;
+  }
+
+  .wire {
+    flex: 0 0 26px;
+  }
+
+  .numbers {
+    gap: 4px;
+  }
+
+  .numberWide {
+    display: none;
+  }
+
+  .turns {
+    gap: 4px;
+  }
+
+  .turnBase {
+    padding: 9px 11px;
+    line-height: 1.5;
+  }
+
+  .chipLong {
+    display: none;
+  }
+
+  .chipShort {
+    display: inline;
+  }
+}
+
+/*
+ * Under about 360px the two numbers no longer sit side by side, so the
+ * connector is redrawn running downward — a 1.5px column with the arrow turned
+ * a quarter turn. Only the icon rotates; rotating the connector's own box is
+ * what distorts it. The deck is already a plain list at this width, so the
+ * extra height costs nothing.
+ */
+@media (max-width: 359px) {
+  .redirect {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .wire {
+    flex: 0 0 30px;
+    width: 100%;
+    place-items: end center;
+  }
+
+  .wireLine {
+    left: 50%;
+    right: auto;
+    top: 0;
+    bottom: 13px;
+    width: 1.5px;
+    height: auto;
+    margin-top: 0;
+    margin-left: -0.75px;
+    transform-origin: center top;
+    transform: scaleY(0);
+  }
+
+  [data-played] .wireLine {
+    animation-name: hwDrawY;
+  }
+
+  .wireHead {
+    transform: rotate(90deg);
+  }
+
+  /* hwRise ends on `transform: none`, which would undo the quarter turn, so
+     the stacked arrow fades in place instead of lifting. */
+  [data-played] .wireHead {
+    animation-name: hwFade;
+  }
 }
 
 /* Everything lands, nothing travels. */
 @media (prefers-reduced-motion: reduce) {
-  [data-played] .typed {
-    animation: none;
-    width: auto;
-  }
-
+  [data-played] .fieldValue,
   [data-played] .tableRow,
-  [data-played] .node,
-  [data-played] .nodeOn,
+  [data-played] .way,
+  [data-played] .number,
+  [data-played] .numberWide,
+  [data-played] .numberTag,
+  [data-played] .redirectFrom,
+  [data-played] .redirectTo,
   [data-played] .wireHead,
-  [data-played] .switchRow,
   [data-played] .liveChip,
   [data-played] .doneChip,
   [data-played] .callRow,
   [data-played] .answering,
+  [data-played] .askRow,
   [data-played] .saidRow {
     animation: none;
     opacity: 1;
   }
 
+  /* The pick still has to read as picked, so it keeps the end state. */
+  [data-played] .numberOn {
+    animation: none;
+    opacity: 1;
+    background: var(--surface-warm);
+    box-shadow: inset 0 0 0 1.5px var(--terracotta);
+  }
+
   [data-played] .wireLine {
     animation: none;
-    transform: scaleX(1);
-  }
-
-  [data-played] .switchTrack {
-    animation: none;
-    background: var(--action-primary);
-  }
-
-  [data-played] .switchKnob {
-    animation: none;
-    transform: translateX(18px);
+    transform: scale(1);
   }
 
   [data-played] .ring,
   [data-played] .answerBars span {
     animation: none;
-  }
-}
-
-@media (max-width: 520px) {
-  .hop {
-    flex-direction: column;
-  }
-
-  .wire {
-    flex: 0 0 24px;
-    transform: rotate(90deg);
   }
 }

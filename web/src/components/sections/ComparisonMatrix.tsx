@@ -14,7 +14,7 @@ export function ComparisonMatrix({ defaultOpen = false }: ComparisonMatrixProps)
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div data-reveal="1" style={{ marginTop: 40 }}>
+    <div data-reveal="0" style={{ marginTop: 40 }}>
       <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className={styles.toggle}>
         <span>{open ? 'Thu gọn bảng so sánh đầy đủ' : 'Xem bảng so sánh đầy đủ'}</span>
         <span className={open ? styles.caretOpen : styles.caret}>▾</span>

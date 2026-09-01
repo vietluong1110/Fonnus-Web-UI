@@ -30,13 +30,13 @@ const WITH_FONNUS: Step[] = [
 /** "Cái giá của một cuộc gọi nhỡ" — why this is a problem worth solving. */
 export function MissedCalls() {
   return (
-    <section id="vi-sao" data-reveal="0" className={section.section}>
+    <section id="vi-sao" className={section.section}>
       <div className={section.inner}>
-        <div className={section.eyebrow}>Cái giá của một cuộc gọi nhỡ</div>
-        <h2 className={`${section.heading} ${styles.heading}`}>
+        <div data-reveal="0" className={section.eyebrow}>Cái giá của một cuộc gọi nhỡ</div>
+        <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
           Người gọi không để lại lời nhắn. Họ gọi phòng khám tiếp theo.
         </h2>
-        <p className={`${section.lede} ${styles.lede}`}>
+        <p data-reveal="2" className={`${section.lede} ${styles.lede}`}>
           Cùng một cuộc gọi lúc 8 giờ tối — hai kết cục khác nhau.
         </p>
 
@@ -55,7 +55,7 @@ export function MissedCalls() {
           />
         </div>
 
-        <div data-reveal="4" className={styles.answer}>
+        <div data-reveal="0" className={styles.answer}>
           <div className={styles.answerText}>Fonnus nghe máy 24/7, từ 2.500.000 đ mỗi tháng.</div>
           <a href="#bang-gia" style={{ textDecoration: 'none' }}>
             <Button variant="inverse">Xem bảng giá</Button>
@@ -77,7 +77,7 @@ function Track({ variant, label, steps, outcome }: TrackProps) {
   const fonnus = variant === 'fonnus'
 
   return (
-    <div data-reveal={fonnus ? '3' : '2'} className={fonnus ? styles.trackFonnus : styles.trackToday}>
+    <div data-reveal={fonnus ? '1' : '0'} className={fonnus ? styles.trackFonnus : styles.trackToday}>
       <div className={styles.trackLabel}>
         <span className={styles.trackDot} aria-hidden="true" />
         {label}
