@@ -6,14 +6,14 @@ import type { RefObject } from 'react'
  * this hook drives with a transform, so it can travel between four places
  * without ever being re-mounted (which would restart its canvas animation):
  *
- *   hidden  — above the "Nghe thử" section: invisible, not clickable
- *   docked  — parked in the section's right-hand column, at the dock's size
- *   pinned  — 84px, bottom-right, after the section has scrolled past
+ *   docked  — parked in the hero's right-hand column, at the dock's size
+ *   pinned  — 84px, bottom-right, once the hero has scrolled past
  *   call    — filling the demo overlay's centre slot
  *
+ * The dock sits in the hero, so the orb is on screen from the first paint and
+ * there is no "before" state to fade in from.
+ *
  * Rules the transitions follow, from the design review:
- *   · hidden ↔ anything is a fade with no flight — scrolling down from the hero
- *     must not look like the orb slides up from below.
  *   · pinned ↔ docked is a real flight, and it must land exactly on the dock,
  *     once. Layout settles late (fonts, images), so after every mode change we
  *     re-measure at 600ms and keep re-targeting for 560ms while the flight is
@@ -25,14 +25,14 @@ const PINNED_SIZE = 84
 /** Re-measure passes that catch late layout shifts after mount. */
 const SETTLE_PASSES_MS = [60, 300, 800, 1600, 3200]
 
-type OrbMode = 'hidden' | 'docked' | 'pinned' | 'call'
+type OrbMode = 'docked' | 'pinned' | 'call'
 
 export interface OrbPlacement {
   orbRef: RefObject<HTMLButtonElement | null>
   labelRef: RefObject<HTMLSpanElement | null>
   /** Wrapper around the sound waves — only shown on the call screen. */
   wavesRef: RefObject<HTMLSpanElement | null>
-  /** Placeholder in the "Nghe thử" section that defines the docked position. */
+  /** Placeholder in the hero that defines the docked position. */
   dockRef: RefObject<HTMLDivElement | null>
   /** Placeholder in the call overlay that defines the call position. */
   callSpotRef: RefObject<HTMLDivElement | null>
@@ -85,11 +85,6 @@ export function useOrbPlacement(overlayOpen: boolean): OrbPlacement {
         s = PINNED_SIZE / ORB_BASE
         x = vw - PINNED_SIZE - 24
         y = vh - PINNED_SIZE - 28
-      } else if (r.top > vh) {
-        mode = 'hidden'
-        s = r.width / ORB_BASE
-        x = r.left
-        y = r.top
       } else {
         mode = 'docked'
         s = r.width / ORB_BASE
@@ -103,8 +98,8 @@ export function useOrbPlacement(overlayOpen: boolean): OrbPlacement {
     // While docked the orb tracks the dock every frame; other modes are static.
     if (!changed && mode !== 'docked' && !force) return
 
-    const instantJump =
-      changed && (!prev || mode === 'hidden' || prev === 'hidden') && mode !== 'call' && prev !== 'call'
+    // Only the very first placement is instant: everything after it is a flight.
+    const instantJump = !prev
     const settling = !changed && mode === 'docked' && Date.now() - movedAtRef.current < 560
 
     orb.style.transition = instantJump
@@ -113,8 +108,8 @@ export function useOrbPlacement(overlayOpen: boolean): OrbPlacement {
         ? `transform 520ms ${ORB_EASE}, opacity 360ms ${ORB_EASE}`
         : 'none'
     orb.style.transform = `translate(${x}px,${y}px) scale(${s})`
-    orb.style.opacity = mode === 'hidden' ? '0' : '1'
-    orb.style.pointerEvents = mode === 'hidden' || mode === 'call' ? 'none' : 'auto'
+    orb.style.opacity = '1'
+    orb.style.pointerEvents = mode === 'call' ? 'none' : 'auto'
     orb.style.zIndex = mode === 'call' ? '70' : '30'
 
     if (labelRef.current) labelRef.current.style.opacity = mode === 'docked' ? '1' : '0'

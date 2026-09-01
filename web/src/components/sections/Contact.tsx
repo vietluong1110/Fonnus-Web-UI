@@ -112,7 +112,7 @@ export function Contact() {
               </Button>
               <p className={styles.formNote}>
                 Không cần chờ gọi lại: <a href={hrefFor('signup')}>dùng thử miễn phí 14 ngày</a> hoặc{' '}
-                <a href="#nghe-thu">nghe thử ngay</a>.
+                <a href="#hero">nghe thử ngay</a>.
               </p>
             </form>
           )}

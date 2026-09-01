@@ -1,18 +1,55 @@
-export interface NavLink {
-  href: string
+import type { IconName } from '../design-system'
+
+export interface NavItem {
   label: string
-  /** Longer label used in the mobile drawer, where there is room for it. */
-  drawerLabel?: string
+  desc: string
+  icon: IconName
+  /** Omitted on the one item that opens the call demo instead of scrolling. */
+  href?: string
+  /** Opens the "nghe thử" call overlay rather than navigating. */
+  demo?: true
 }
 
-export const NAV_LINKS: NavLink[] = [
-  { href: '#nghe-thu', label: 'Nghe thử' },
-  { href: '#vi-sao', label: 'Vì sao' },
-  { href: '#cach-hoat-dong', label: 'Cách hoạt động' },
-  { href: '#kha-nang', label: 'Khả năng' },
-  { href: '#bang-gia', label: 'Bảng giá' },
-  { href: '#faq', label: 'FAQ' },
-  { href: '#bao-mat', label: 'Bảo mật', drawerLabel: 'Bảo mật & dữ liệu' },
+export interface NavGroup {
+  label: string
+  /** A plain link when there are no items. */
+  href?: string
+  items?: NavItem[]
+}
+
+/*
+ * Four entries, two of them menus. Every destination is a real section on this
+ * page — the nav never promises a page that does not exist.
+ */
+export const NAV_GROUPS: NavGroup[] = [
+  {
+    label: 'Sản phẩm',
+    items: [
+      { label: 'Nghe thử Linh', desc: 'Gọi thử ngay trên trình duyệt', icon: 'phone-call', demo: true },
+      { label: 'Khả năng', desc: 'Đặt lịch, báo giá, chuyển máy', icon: 'calendar-check', href: '#kha-nang' },
+      {
+        label: 'Cách hoạt động',
+        desc: 'Giữ nguyên số phòng khám đang dùng',
+        icon: 'settings',
+        href: '#cach-hoat-dong',
+      },
+    ],
+  },
+  { label: 'Bảng giá', href: '#bang-gia' },
+  {
+    label: 'Tin cậy',
+    items: [
+      { label: 'Vì sao Fonnus', desc: 'Cuộc gọi nhỡ đang lấy đi bao nhiêu', icon: 'phone-missed', href: '#vi-sao' },
+      {
+        label: 'Bảo mật & dữ liệu',
+        desc: 'Dữ liệu bệnh nhân lưu tại Việt Nam',
+        icon: 'shield-check',
+        href: '#bao-mat',
+      },
+      { label: 'Câu hỏi thường gặp', desc: 'Những điều chủ phòng khám hay hỏi', icon: 'list-checks', href: '#faq' },
+    ],
+  },
+  { label: 'Liên hệ', href: '#lien-he' },
 ]
 
 export interface FaqItem {

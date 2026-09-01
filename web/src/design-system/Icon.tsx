@@ -13,6 +13,7 @@ export type IconName =
   | 'arrow-up'
   | 'calendar-check'
   | 'clock'
+  | 'list-checks'
   | 'menu'
   | 'mic'
   | 'mic-off'
@@ -21,6 +22,7 @@ export type IconName =
   | 'phone-missed'
   | 'play'
   | 'settings'
+  | 'shield-check'
   | 'user-round'
   | 'x'
 

@@ -28,7 +28,7 @@ src/
   hooks/                   useReveal, useIsNarrow, useCallDemo, useRoute
   auth/                    the sign-up and sign-in flows
   components/
-    layout/                Header (+ drawer), Footer
+    layout/                Header (floating pill + menus + drawer), Footer
     sections/              one component per landing section
     orb/                   Orb, CallOverlay, and the two hooks that drive them
   styles/
@@ -100,18 +100,48 @@ verify except `000000`, which is reserved so the wrong-code state stays
 reachable. Both flows end by calling `navigate('landing')` — replace that with
 the redirect into the app shell (Tổng quan) once it exists.
 
+## The hero
+
+Three things and nothing else: the claim, one control, and the orb.
+
+The sign-up control is a single pill — `+84`, the field, and the button share
+one rounded container — rather than a label, a field and two buttons. A number
+typed here is handed to sign-up through `auth/handoff.ts`, which opens it
+straight on the SMS code step.
+
+The orb docks in the hero's right column and flies to the bottom-right corner
+once the section scrolls away, so trying the voice stays one click from
+anywhere on the page. There is no separate "Nghe thử" section any more — the
+hero is it.
+
+The proof row's clinic marks in `sections/clinic-logos.tsx` are **placeholders**
+for invented clinics. Swap them for real customer logos before launch, and only
+with each clinic's permission: a real logo there reads as an endorsement.
+
+## The navigation
+
+A floating glass pill, centred and sticky, that tightens and goes more opaque
+past 24px of scroll. The glass is tinted cream (`--milk`), not grey — that tint
+is what keeps it reading as Fonnus rather than as a generic SaaS bar.
+
+Seven flat links became four entries, two of them menus (`NAV_GROUPS` in
+`data/content.ts`). Every destination is a real section on this page; the nav
+never promises a page that does not exist. One menu row opens the call demo
+instead of navigating, which is why `Header` takes an `onTryCall` prop.
+
 ## The orb
 
 The orb is the page's signature and the fiddliest part of it. Three pieces:
 
 - **`Orb.tsx`** — one `position: fixed` button, mounted once at the app root and
   never re-mounted. It is deliberately outside every section.
-- **`useOrbPlacement.ts`** — decides which of four places the orb belongs in
-  (`hidden` above the demo section, `docked` in it, `pinned` bottom-right after
-  it, `call` inside the overlay) and drives it there with a transform. Sections
-  contribute an empty placeholder div — `TryIt`'s dock and `CallOverlay`'s spot —
-  which is what the hook measures. Comments in the file record which transitions
-  fade and which fly, and why.
+- **`useOrbPlacement.ts`** — decides which of three places the orb belongs in
+  (`docked` in the hero, `pinned` bottom-right once the hero scrolls away,
+  `call` inside the overlay) and drives it there with a transform. Two empty
+  placeholder divs are what the hook measures: the hero's dock and
+  `CallOverlay`'s spot. Because the dock is in the hero, the orb is on screen
+  from the first paint — there is no "before" state to fade in from. Comments in
+  the file record which transitions fade and which fly, and why.
 - **`useOrbField.ts`** — the animated gradient. A deforming scalar field
   rendered to a 144×144 canvas and blurred by CSS, not a gradient whose position
   is animated. Every temporal frequency is a multiple of `TAU / 44s`, so the
