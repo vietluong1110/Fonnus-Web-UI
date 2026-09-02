@@ -43,7 +43,6 @@ export type IconName =
   | 'log-out'
   | 'mail'
   | 'map-pin'
-  | 'mail'
   | 'menu'
   | 'mic'
   | 'mic-off'

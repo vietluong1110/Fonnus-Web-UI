@@ -11,15 +11,7 @@ import { takePhone } from './handoff'
 import { rememberMethod } from './lastMethod'
 import { formatPhone, isValidEmail, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
-import {
-  DEMO_ACCOUNT,
-  requestVoiceCode,
-  saveProfile,
-  sendEmailCode,
-  sendPhoneCode,
-  verifyCode,
-} from './mockAuth'
-import { saveProfile, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { DEMO_ACCOUNT, saveProfile, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
 import styles from './AuthPage.module.css'
 
 /*

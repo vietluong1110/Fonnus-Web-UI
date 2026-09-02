@@ -9,9 +9,8 @@ import { LastUsedBadge, SocialOptions } from './SocialOptions'
 import { readLastMethod, rememberMethod } from './lastMethod'
 import { formatPhone, isValidEmail, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
-import { DEMO_ACCOUNT, requestVoiceCode, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { DEMO_ACCOUNT, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
 import { startSession } from './session'
-import { sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
 import styles from './AuthPage.module.css'
 
 /*
@@ -186,13 +185,12 @@ export function SignInPage() {
       return (
         <AuthShell
           variant="signin"
-          overlay={<GoogleChooser onPick={(account) => enterApp(account)} onDismiss={() => goTo('phone')} />}
           back={{ label: 'Quay lại', onClick: () => goTo('phone') }}
           overlay={
             <GoogleChooser
-              onPick={() => {
+              onPick={(account) => {
                 rememberMethod('google')
-                enterApp()
+                enterApp(account)
               }}
               onDismiss={() => goTo('phone')}
             />
