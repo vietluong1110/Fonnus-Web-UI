@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Input } from '../design-system'
 import { EMAIL_STEPS, PHONE_STEPS, TRIAL_NOTE } from '../data/auth'
 import { hrefFor, navigate } from '../hooks/useRoute'
+import { startSession } from './session'
 import { AuthHeading, AuthShell } from './AuthShell'
 import { GoogleChooser } from './GoogleChooser'
 import { OtpField, OtpFooter } from './OtpField'
@@ -11,6 +12,7 @@ import { takePhone } from './handoff'
 import { formatPhone, isValidEmail, isValidPhone, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
 import {
+  DEMO_ACCOUNT,
   requestVoiceCode,
   saveProfile,
   sendEmailCode,
@@ -126,9 +128,15 @@ export function SignUpPage() {
     setStep('done')
   }
 
-  // TODO: replace with a redirect into the app shell (Tổng quan). Until that
-  // exists, the landing page is the only place to go.
-  const enterApp = () => navigate('landing')
+  // The account exists once the code verified: open a local session and go in.
+  const enterApp = () => {
+    startSession({
+      identity: phone || email || 'google',
+      method: phone ? 'phone' : email ? 'email' : 'google',
+      displayName: fullName || greetName || DEMO_ACCOUNT.displayName,
+    })
+    navigate('app')
+  }
 
   switch (step) {
     case 'phone':

@@ -1,0 +1,286 @@
+/*
+ * The signed-in frame: a 216px milk sidebar on the left, paper content on the
+ * right. Below 900px the sidebar narrows to an icon rail so the content keeps
+ * its width; the labels come back as tooltips.
+ */
+
+.shell {
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--surface-page);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: var(--surface-card);
+  border-right: 1px solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 14px 18px;
+  gap: 3px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.logo {
+  padding: 0 10px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.logoMark {
+  display: none;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
+}
+
+.item:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.itemOn,
+.itemOn:hover {
+  background: var(--terracotta);
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.itemLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warning);
+  flex: 0 0 auto;
+}
+
+.itemOn .itemDot {
+  background: var(--cream);
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+  position: relative;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.user:hover {
+  background: var(--action-ghost-hover);
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--blush);
+  color: var(--terracotta-deep);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 12.5px;
+  flex: 0 0 auto;
+}
+
+.userText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.userName {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userMeta {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userChevron {
+  color: var(--ink-soft);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-overlay), inset 0 0 0 1px var(--border-hairline);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 20;
+  animation: fnRise var(--duration-base) var(--ease-arc);
+}
+
+.menuHead {
+  padding: 8px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-bottom: 1px solid var(--border-hairline);
+  margin-bottom: 4px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  width: 100%;
+}
+
+.menuItem:hover {
+  background: var(--action-ghost-hover);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.menuItemDanger {
+  color: var(--error);
+}
+
+.content {
+  min-width: 0;
+  padding: 28px 36px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contentInner {
+  width: 100%;
+  max-width: 1180px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .sidebar {
+    padding: 18px 10px 14px;
+  }
+
+  .logo {
+    padding: 0 0 16px;
+    justify-content: center;
+  }
+
+  .logoFull {
+    display: none;
+  }
+
+  .logoMark {
+    display: block;
+  }
+
+  .item {
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  .itemLabel,
+  .itemDot,
+  .userText,
+  .userChevron {
+    display: none;
+  }
+
+  .user {
+    justify-content: center;
+    padding: 6px 0;
+  }
+
+  .menu {
+    left: 0;
+    right: auto;
+    min-width: 220px;
+  }
+
+  .content {
+    padding: 20px 20px 32px;
+  }
+}

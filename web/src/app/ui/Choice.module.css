@@ -1,0 +1,173 @@
+.choice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.choiceDisabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.box {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  transition:
+    box-shadow var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+  display: grid;
+  place-items: center;
+  color: var(--cream);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.radio {
+  composes: box;
+  border-radius: 50%;
+}
+
+.radioOn {
+  box-shadow: inset 0 0 0 6px var(--action-primary);
+}
+
+.check {
+  composes: box;
+  border-radius: var(--radius-xs);
+}
+
+.checkOn {
+  background: var(--action-primary);
+  box-shadow: none;
+}
+
+.native {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: inherit;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.hint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* Segmented control: one selected segment, filled terracotta. */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.segment {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  padding: 6px 16px;
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.segment + .segment {
+  border-left: 1px solid var(--border-hairline);
+}
+
+.segment:hover {
+  background: var(--action-ghost-hover);
+}
+
+.segmentOn,
+.segmentOn:hover {
+  background: var(--terracotta);
+  color: var(--cream);
+}
+
+/* Switch row: label + hint on the left, toggle on the right. */
+.switchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.switchRowLined {
+  padding: 10px 0;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.switchText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.switchLabel {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.track {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: rgba(38, 31, 24, 0.16);
+  transition: background var(--duration-base) var(--ease-out);
+}
+
+.trackOn {
+  background: var(--action-primary);
+}
+
+.thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--milk);
+  transition: left var(--duration-base) var(--ease-arc);
+}
+
+.thumbOn {
+  left: 19px;
+}
+
+.trackDisabled {
+  opacity: 0.5;
+}

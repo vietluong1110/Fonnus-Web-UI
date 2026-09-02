@@ -1,7 +1,10 @@
-# Fonnus landing page
+# Fonnus web app
 
-React implementation of the Fonnus landing page, built from the Claude Design
-handoff bundle in `../project/`.
+React implementation of the Fonnus landing page, the sign-up / sign-in flows,
+and the signed-in app shell with the **Lễ tân** (receptionist configuration)
+tab. The landing page was built from the Claude Design handoff bundle in
+`../project/`; the app screens from the `Fonnus App Hi-fi.dc.html` frames of
+the sign-in redesign bundle and the context field catalogue.
 
 The prototype was a single 1,100-line `.dc.html` file driven by the design
 canvas runtime (`support.js`, `x-dc` / `sc-if` / `sc-for` / `DCLogic`). This app
@@ -26,7 +29,8 @@ src/
   design-system/           Button, Icon, Badge, Input, Switch, Logo
   data/                    all copy and pricing, no markup
   hooks/                   useReveal, useIsNarrow, useCallDemo, useRoute
-  auth/                    the sign-up and sign-in flows
+  auth/                    the sign-up and sign-in flows, plus the local session
+  app/                     everything behind sign-in — see "The app shell"
   components/
     layout/                Header (floating pill + menus + drawer), Footer
     sections/              one component per landing section
@@ -65,6 +69,7 @@ Three pages, three hash routes, no router dependency:
 | `#` (anything) | landing                    |
 | `#/dang-ky`    | sign-up                    |
 | `#/dang-nhap`  | sign-in                    |
+| `#/app/…`      | the app shell (needs a session; bounces to sign-in otherwise) |
 
 Hash routing rather than the History API because the build ships with
 `base: './'` and `dist/` is meant to drop on any host — history routes would
@@ -95,10 +100,74 @@ Entering a number in the landing hero hands it to sign-up through
 straight on the code step.
 
 **Nothing here talks to a server.** `auth/mockAuth.ts` stands in for every call,
-each marked with a `TODO` naming the endpoint it should become; any six digits
-verify except `000000`, which is reserved so the wrong-code state stays
-reachable. Both flows end by calling `navigate('landing')` — replace that with
-the redirect into the app shell (Tổng quan) once it exists.
+each marked with a `TODO` naming the endpoint it should become. One demo
+account signs in — phone **0914378064**, code **111002** — and any other code
+shows the wrong-code state. A verified code opens a local session
+(`auth/session.ts`, localStorage, no credential in it) and lands on `#/app`;
+"Đăng xuất" in the sidebar's user menu clears it.
+
+## The app shell
+
+`src/app/` is everything behind sign-in. `AppRoot` guards the session and
+picks a page from the first path segment; `AppShell` is the frame: a 216px
+milk sidebar (logo, the six tabs, the clinic / owner block with a sign-out
+menu) and a paper content column. Below 900px the sidebar narrows to an icon
+rail. Only **Lễ tân** is built; the other five tabs are honest placeholders.
+
+### Lễ tân
+
+The tab where the owner tells the receptionist about the clinic. Three
+sub-tabs, all under `#/app/le-tan/`:
+
+| Path                       | What it configures                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `ho-so`                    | Who she is: name, voice (4 voices = gender × accent), speed, style, English, greeting, steering text, turn-taking |
+| `kien-thuc`                | Hub: readiness meter, section list with status, add-on sections, and the question rail      |
+| `kien-thuc/dia-diem`       | Business identity + address (R1), directions / parking / links / VAT, branches               |
+| `kien-thuc/gio-lam-viec`   | Weekly hours (R1, confirm the template), breaks, last intake, live "open now"                |
+| `kien-thuc/ngay-nghi`      | Holiday exceptions, pre-seeded with Vietnamese holidays incl. Tết (R2, confirm)              |
+| `kien-thuc/dich-vu`        | Service catalogue (12 dental template rows), pricing policy, not-offered, bundles, payments, promotions |
+| `kien-thuc/bao-hiem`       | Clinic pack: BHYT / insurance (R2), consultation fee, facilities, what to bring              |
+| `kien-thuc/bac-si`         | Practitioner roster                                                                          |
+| `kien-thuc/cau-hoi`        | FAQ pairs                                                                                    |
+| `kien-thuc/tu-khoa`        | STT keyterms: derived + vertical pack (read-only) + tenant additions                         |
+| `kien-thuc/tai-lieu`       | Knowledge files + website URL (October scope; records intent only)                           |
+| `ky-nang/chuyen-may`       | Escalation targets (R1), triggers, after-hours behaviour, emergency line, red flags, system safety scripts |
+| `ky-nang/gui-email`        | Email rules per call intent, recipients, templates with insertable variables                 |
+| `ky-nang/dat-lich`         | Booking windows per weekday, slots / duration / buffer / cap, confirmation, policies, identity rule |
+
+**The model is the catalogue.** `app/letan/model.ts` names every field exactly
+as `Fonnus_context-field-catalogue.md` does (`business_name`,
+`pricing_disclosure_policy`, `endpointing_silence_ms`, …), with its origin and
+gate in a comment, so a section save maps straight onto the tenant record.
+Fields the wireframes added on top of the catalogue are marked `[ext]`
+(`agent_name`, `escalation_window`, `greeting_by_daypart`, `email_rules`, the
+two `*_confirmed` flags). System-written values — compliance block, red-flag
+pack, refusal scripts, verbosity cap — live in `system.ts` and render
+read-only with a "Hệ thống" tag.
+
+**State and the backend seam.** `store.tsx` holds one `ReceptionistConfig`
+(seeded from `defaults.ts`, the dental template) mirrored to localStorage so a
+demo survives a reload. Every section edits a draft (`useDraft(keys, label)`)
+and commits through `saveSection(patch)` — one PATCH per section, carrying
+only that section's keys. Replace `load()` with GET /tenant/config and
+`saveSection` with the PATCH; keep the optimistic update. The question rail
+writes through `update()` immediately.
+
+**Readiness** (`readiness.ts`) applies the catalogue's gates: R1 = the agent
+can pick up, say the address and hours, and hand off; R2 = it can quote, book,
+and is safe with real patients. Each check deep-links to the page that fixes
+it. `isOpenNow` derives the catalogue's `is_open_now` from hours, breaks and
+holidays for the live indicator.
+
+**"Linh hỏi — bạn trả lời"** (`questions.ts`, `AskRail.tsx`) turns the missing
+fields into one question at a time with quick-reply chips and a free-text
+line; every answer writes the field it belongs to, so the forms and the meter
+move at once. Skips are per browser session.
+
+**"Nghe thử"** previews a line with the browser's own Vietnamese voice when one
+is installed (`ui/speak.ts`); it is a stand-in for the server-side TTS
+endpoint, not the product voice.
 
 ## The hero
 

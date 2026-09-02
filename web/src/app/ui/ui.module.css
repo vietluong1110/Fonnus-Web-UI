@@ -1,0 +1,270 @@
+/*
+ * Shared chrome for the app shell. Cards separate from the page by fill, not
+ * shadow; controls are 12px, containers 16px, pills for chips and tags.
+ */
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--pad-card);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.cardDashed {
+  composes: card;
+  border: 1px dashed var(--border-dashed);
+}
+
+.cardWarm {
+  composes: card;
+  background: var(--surface-warm);
+  border-color: transparent;
+}
+
+.cardSage {
+  composes: card;
+  background: var(--surface-sage);
+  border-color: transparent;
+}
+
+.cardRose {
+  composes: card;
+  background: var(--surface-rose);
+  border-color: transparent;
+}
+
+.cardTight {
+  padding: 16px 20px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.cardSub {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.cardActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.stackTight {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.span2 {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1100px) {
+  .grid3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .grid2,
+  .grid3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.labelMuted {
+  composes: label;
+  color: var(--ink-soft);
+}
+
+.hint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.small {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-hairline);
+  margin: 2px 0;
+}
+
+.linkButton {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-link);
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
+.linkButton:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* A quiet key/value line, e.g. system rules the tenant cannot edit. */
+.kv {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border-hairline);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.kv:first-child {
+  border-top: none;
+}
+
+.kvKey {
+  flex: 0 0 180px;
+  color: var(--ink-soft);
+}
+
+.kvVal {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Page-level header row: back link, title, status badge, actions. */
+.pageHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+}
+
+.backLink {
+  font-size: 13.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.gate {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.gateR1 {
+  composes: gate;
+  background: rgba(184, 92, 43, 0.12);
+  color: var(--text-accent);
+}
+
+.gateR2 {
+  composes: gate;
+  background: rgba(143, 99, 0, 0.12);
+  color: var(--warning);
+}
+
+.gateO {
+  composes: gate;
+  background: rgba(38, 31, 24, 0.06);
+  color: var(--ink-soft);
+}
+
+.gateSW {
+  composes: gate;
+  background: rgba(47, 109, 126, 0.12);
+  color: var(--info);
+}

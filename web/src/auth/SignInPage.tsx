@@ -7,7 +7,8 @@ import { OtpField, OtpFooter } from './OtpField'
 import { SocialOptions, SwapLink } from './SocialOptions'
 import { formatPhone, isValidEmail, isValidPhone, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
-import { requestVoiceCode, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { DEMO_ACCOUNT, requestVoiceCode, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { startSession } from './session'
 import styles from './AuthPage.module.css'
 
 /*
@@ -41,8 +42,20 @@ export function SignInPage() {
     setStep(next)
   }
 
-  // TODO: replace with a redirect into the app shell (Tổng quan).
-  const enterApp = useCallback(() => navigate('landing'), [])
+  // The code verified: open a local session and go into the app shell.
+  const enterApp = useCallback(
+    (google?: { name: string; email: string }) => {
+      startSession(
+        google
+          ? { identity: google.email, method: 'google', displayName: google.name }
+          : email
+            ? { identity: email, method: 'email', displayName: DEMO_ACCOUNT.displayName }
+            : { identity: normalizePhone(phone), method: 'phone', displayName: DEMO_ACCOUNT.displayName },
+      )
+      navigate('app')
+    },
+    [email, phone],
+  )
 
   const confirmCode = useCallback(
     async (entered: string) => {
@@ -168,7 +181,7 @@ export function SignInPage() {
       return (
         <AuthShell
           variant="signin"
-          overlay={<GoogleChooser onPick={enterApp} onDismiss={() => goTo('phone')} />}
+          overlay={<GoogleChooser onPick={(account) => enterApp(account)} onDismiss={() => goTo('phone')} />}
         >
           <div className={styles.behindOverlay} aria-hidden="true">
             <AuthHeading title="Đăng nhập" />
