@@ -15,6 +15,7 @@ export type IconName =
   | 'calendar-check'
   | 'clock'
   | 'list-checks'
+  | 'mail'
   | 'menu'
   | 'moon'
   | 'pause'

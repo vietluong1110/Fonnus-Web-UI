@@ -92,7 +92,7 @@ export interface Testimonial {
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      '“Tối nào cũng có người gọi sau chín giờ. Trước đây mình để máy reo, giờ sáng ra mở bảng điều khiển là thấy đã có ba lịch hẹn.”',
+      '“Tối nào cũng có người gọi sau chín giờ. Trước đây mình đành để kệ máy reo, giờ sáng ra mở Fonnus là thấy đã có ba lịch hẹn.”',
     attribution: 'Chủ phòng khám nha khoa · Quận 7, TP.HCM',
   },
   {

@@ -27,54 +27,87 @@
 }
 
 .box {
-  width: 52px;
-  height: 62px;
-  border-radius: 14px;
+  position: relative;
+  width: 56px;
+  height: 64px;
+  border-radius: var(--radius-lg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  font-size: 24px;
+  font-size: 26px;
   color: var(--ink);
-  background: var(--milk);
-  border: 1.5px solid var(--border-strong);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--border-strong);
   box-sizing: border-box;
-  transition: border-color var(--duration-fast) var(--ease-out);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .boxActive {
-  border: 2px solid var(--terracotta);
+  box-shadow: inset 0 0 0 2px var(--terracotta);
 }
 
 .boxError {
-  border-color: var(--error);
+  box-shadow: inset 0 0 0 1.5px var(--error);
   background: var(--rose);
+}
+
+/* The real caret is hidden with the input, so the active box draws its own. */
+.caret {
+  width: 1.5px;
+  height: 26px;
+  border-radius: 1px;
+  background: var(--terracotta);
+  animation: fnCaret 1.1s steps(1, end) infinite;
+}
+
+@keyframes fnCaret {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
 }
 
 @media (max-width: 420px) {
   .boxes {
     gap: 6px;
   }
+
   .box {
-    width: 46px;
-    height: 56px;
+    width: 48px;
+    height: 58px;
+    font-size: 24px;
   }
 }
 
 .error {
+  display: block;
+  margin-top: 10px;
   font-size: var(--size-ui);
   color: var(--error);
 }
 
-/* Resend timer and the voice-call fallback. */
+/* Resend timer, then the way out for a phone that never shows the SMS. */
 .footer {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 2px;
   font-size: 13.5px;
+  line-height: 1.5;
   font-weight: 500;
 }
 
@@ -90,12 +123,12 @@
 }
 
 .linkButton {
-  align-self: flex-start;
   padding: 0;
   border: none;
   background: none;
   font: inherit;
   font-family: var(--font-ui);
+  font-weight: 500;
   color: var(--text-link);
   cursor: pointer;
 }

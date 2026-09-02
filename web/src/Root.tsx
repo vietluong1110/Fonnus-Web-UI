@@ -6,7 +6,7 @@ import { useRoute } from './hooks/useRoute'
 
 const TITLES: Record<string, string> = {
   landing: 'Fonnus — Không cuộc gọi nào bị bỏ lỡ.',
-  signup: 'Tạo tài khoản · Fonnus',
+  signup: 'Dùng thử miễn phí · Fonnus',
   signin: 'Đăng nhập · Fonnus',
 }
 
