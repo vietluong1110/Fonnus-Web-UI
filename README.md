@@ -1,25 +1,36 @@
-# CODING AGENTS: READ THIS FIRST
+# Fonnus
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+Landing page, auth flows and signed-in app shell for Fonnus — an AI
+receptionist that answers the phone for Vietnamese clinics, in Vietnamese, 24/7.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+The app is a static React + Vite site in [`web/`](web/). It has no backend: the
+sign-up and sign-in flows run against `src/auth/mockAuth.ts`, and every function
+there is marked with a `TODO` naming the endpoint it should become.
 
-## What you should do — IMPORTANT
+```bash
+cd web
+npm install
+npm run dev        # dev server
+npm run build      # typecheck + static build into dist/
+npm run preview    # serve the build
+```
 
-**Read the chat transcripts first.** There are 4 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+`dist/` is a fully static site and can be dropped on any host.
 
-**Read `project/Fonnus Landing.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+## Layout
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+```
+web/                 the app — see web/README.md for the full tour
+design-reference/    archived design handoff; not built, not imported
+CONTEXT.md           product and market context
+```
 
-## About the design files
+**[`web/README.md`](web/README.md) is the real documentation.** It covers the
+routing, the design system, the auth flows, the Lễ tân tab, the orb, and the
+reasoning behind the parts that look strange on purpose. Read it before changing
+anything in `web/src/`.
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
-
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
-
-## Bundle contents
-
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `Fonnus Landing Page Design` project files (HTML prototypes, assets, components)
+`design-reference/` is the original Claude Design prototype for the landing
+page, kept only as a visual reference. Nothing imports it and nothing builds it
+— you can ignore it unless you are porting a design-system primitive the app
+does not have yet.

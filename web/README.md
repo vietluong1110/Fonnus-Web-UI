@@ -3,13 +3,13 @@
 React implementation of the Fonnus landing page, the sign-up / sign-in flows,
 and the signed-in app shell with the **Lễ tân** (receptionist configuration)
 tab. The landing page was built from the Claude Design handoff bundle in
-`../project/`; the app screens from the `Fonnus App Hi-fi.dc.html` frames of
+`../design-reference/`; the app screens from the `Fonnus App Hi-fi.dc.html` frames of
 the sign-in redesign bundle and the context field catalogue.
 
 The prototype was a single 1,100-line `.dc.html` file driven by the design
 canvas runtime (`support.js`, `x-dc` / `sc-if` / `sc-for` / `DCLogic`). This app
 reproduces the same page as ordinary React components with no canvas runtime.
-`../project/` is left untouched as the visual reference.
+`../design-reference/` keeps the prototype as a visual reference.
 
 ```
 npm install
@@ -51,7 +51,7 @@ token stops.
 `src/design-system/` holds the six primitives the page uses, ported from the
 bundle's compiled `_ds_bundle.js` back into readable source. The full system
 (18 primitives, guidelines, UI kits) lives in
-`../project/_ds/fonnus-design-system-…/` — port more from there as they are
+`../design-reference/_ds/fonnus-design-system-…/` — port more from there as they are
 needed rather than writing new ones.
 
 Icons are Lucide glyphs applied as CSS masks so they inherit `currentColor`, as
