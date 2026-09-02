@@ -6,11 +6,20 @@ import { normalizePhone } from './phone'
  * leaves the browser and no credential is stored.
  */
 
-/** Numbers that pretend to already have an account, so frame 12 is reachable. */
-const REGISTERED_PHONES = new Set(['0901234567', '0987654321'])
+/**
+ * The one demo account. Sign in with this number and the code below to reach
+ * the app shell. The two other numbers exist so the "already registered"
+ * branch of sign-up stays reachable.
+ */
+export const DEMO_ACCOUNT = {
+  phone: '0914378064',
+  code: '111002',
+  displayName: 'Nguyễn Lan',
+  clinic: 'Nha khoa Việt Smile',
+  plan: 'Gói Tiêu chuẩn',
+}
 
-/** Anything but this passes, so the wrong-code state is reachable on demand. */
-const WRONG_CODE = '000000'
+const REGISTERED_PHONES = new Set([DEMO_ACCOUNT.phone, '0901234567', '0987654321'])
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
@@ -25,10 +34,14 @@ export async function sendEmailCode(_email: string): Promise<void> {
   await delay(650)
 }
 
-/** TODO: POST /auth/otp/verify */
+/**
+ * TODO: POST /auth/otp/verify
+ * Only the demo code verifies, so the wrong-code state is reachable with any
+ * other six digits.
+ */
 export async function verifyCode(code: string): Promise<{ ok: boolean; reason?: 'invalid' }> {
   await delay(700)
-  if (code === WRONG_CODE) return { ok: false, reason: 'invalid' }
+  if (code !== DEMO_ACCOUNT.code) return { ok: false, reason: 'invalid' }
   return { ok: true }
 }
 

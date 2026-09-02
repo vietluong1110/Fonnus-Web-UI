@@ -1,0 +1,254 @@
+.layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.subnav {
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 20px;
+}
+
+@media (max-width: 900px) {
+  .subnav {
+    flex-direction: row;
+    position: static;
+    overflow-x: auto;
+  }
+}
+
+.subItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.subItem:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.subItemOn,
+.subItemOn:hover {
+  background: var(--terracotta);
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.subDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warning);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 820px;
+  min-width: 0;
+}
+
+.targets {
+  display: flex;
+  flex-direction: column;
+}
+
+.targetRow {
+  display: grid;
+  grid-template-columns: 32px 180px minmax(0, 1fr) 32px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.targetOrder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.targetOrderFirst {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--cream);
+}
+
+.redFlags {
+  background: var(--surface-rose);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.redEyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--error);
+}
+
+.intentRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-hairline);
+  font-size: 13.5px;
+}
+
+.intentRow:last-child {
+  border-bottom: none;
+}
+
+.intentDesc {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.intentMeta {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.varChip {
+  appearance: none;
+  border: none;
+  background: var(--surface-warm);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-accent);
+  cursor: pointer;
+}
+
+.varChip:hover {
+  background: var(--blush);
+  filter: brightness(0.97);
+}
+
+.slotRow {
+  display: grid;
+  grid-template-columns: 96px 48px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.windows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.window {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--paper);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 2px 4px 2px 10px;
+}
+
+.windowInput {
+  border: none;
+  background: transparent;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  width: 92px;
+  outline: none;
+}
+
+.windowInput:focus {
+  box-shadow: inset 0 -2px 0 var(--focus-ring);
+}
+
+.windowBad {
+  border-color: var(--error);
+}
+
+.windowRemove {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+}
+
+.windowRemove:hover {
+  background: var(--surface-rose);
+  color: var(--error);
+}
+
+.addWindow {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--text-accent);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.addWindow:hover {
+  background: var(--action-ghost-hover);
+}

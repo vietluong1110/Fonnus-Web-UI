@@ -9,7 +9,8 @@ import { LastUsedBadge, SocialOptions } from './SocialOptions'
 import { readLastMethod, rememberMethod } from './lastMethod'
 import { formatPhone, isValidEmail, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
-import { sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { DEMO_ACCOUNT, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { startSession } from './session'
 import styles from './AuthPage.module.css'
 
 /*
@@ -55,8 +56,20 @@ export function SignInPage() {
     setStep(next)
   }
 
-  // TODO: replace with a redirect into the app shell (Tổng quan).
-  const enterApp = useCallback(() => navigate('landing'), [])
+  // The code verified: open a local session and go into the app shell.
+  const enterApp = useCallback(
+    (google?: { name: string; email: string }) => {
+      startSession(
+        google
+          ? { identity: google.email, method: 'google', displayName: google.name }
+          : email
+            ? { identity: email, method: 'email', displayName: DEMO_ACCOUNT.displayName }
+            : { identity: normalizePhone(phone), method: 'phone', displayName: DEMO_ACCOUNT.displayName },
+      )
+      navigate('app')
+    },
+    [email, phone],
+  )
 
   const confirmCode = useCallback(
     async (entered: string, method: 'phone' | 'email') => {
@@ -175,9 +188,9 @@ export function SignInPage() {
           back={{ label: 'Quay lại', onClick: () => goTo('phone') }}
           overlay={
             <GoogleChooser
-              onPick={() => {
+              onPick={(account) => {
                 rememberMethod('google')
-                enterApp()
+                enterApp(account)
               }}
               onDismiss={() => goTo('phone')}
             />
