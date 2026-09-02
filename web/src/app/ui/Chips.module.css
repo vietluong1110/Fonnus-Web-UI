@@ -108,6 +108,12 @@
   box-shadow: inset 0 -1px 0 var(--border-hairline);
 }
 
+/* The underline is the focus mark; two selectors deep so the global
+   :focus-visible outline in tokens/base.css does not add a second box. */
+.adderInput:focus-visible {
+  outline: none;
+}
+
 .adderInput:focus {
   box-shadow: inset 0 -2px 0 var(--focus-ring);
 }

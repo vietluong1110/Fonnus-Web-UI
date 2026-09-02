@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Badge, Button } from '../../../design-system'
+import { Badge, Button, Icon } from '../../../design-system'
 import { BUFFER_OPTIONS, DURATION_OPTIONS, LABELS } from '../defaults'
 import type { Bundle, PaymentMethod, PriceUnit, PricingDisclosurePolicy, Promotion, ServiceRow } from '../model'
 import { newId } from '../model'
@@ -15,6 +15,7 @@ import {
   EmptyState,
   IconButton,
   MoneyField,
+  MoneyRangeField,
   Notice,
   SaveBar,
   SelectField,
@@ -107,48 +108,81 @@ export function ServicesSection() {
 
       <Card gate="R2" title="Bảng giá" subtitle="một dòng cho mỗi dịch vụ khách hay hỏi">
         <div className={styles.scroll}>
-          <div className={styles.scrollInner}>
+          <div className={styles.svcTable}>
             <div className={styles.svcHead}>
               <span>Dịch vụ</span>
-              <span>Tên khách hay gọi</span>
-              <span className={ui.right}>Giá từ</span>
-              <span className={ui.right}>đến</span>
-              <span>Đơn vị</span>
-              <span>Thời lượng</span>
-              <span>Đặt hẹn</span>
+              <span>Khách còn gọi là</span>
+              <span>Giá · từ – đến</span>
+              <span>Đặt hẹn · thời lượng</span>
               <span />
             </div>
             {draft.service_catalog.map((s) => {
               const unpriced = s.price_from == null
               const showNote = openNote === s.id || !!s.service_note
               return (
-                <div key={s.id} className={`${styles.svcRow} ${unpriced ? styles.svcWarn : ''}`}>
-                  <div className={ui.stackTight} style={{ gap: 2 }}>
+                <div key={s.id} className={`${styles.svcItem} ${unpriced ? styles.svcWarn : ''}`}>
+                  <div className={styles.svcMain}>
                     <TextField compact aria-label="Tên dịch vụ" value={s.service_name} onChange={(e) => setRow(s.id, { service_name: e.target.value })} placeholder="Tên dịch vụ" />
-                    {!showNote ? (
-                      <button type="button" className={ui.linkButton} style={{ fontSize: 11.5, fontWeight: 400, color: 'var(--ink-soft)', alignSelf: 'flex-start' }} onClick={() => setOpenNote(s.id)}>
-                        + ghi chú
-                      </button>
-                    ) : null}
+
+                    <ChipInput value={s.service_aliases} onChange={(v) => setRow(s.id, { service_aliases: v })} addLabel="+" placeholder="tên gọi khác" />
+
+                    {/* One range plus its unit — the shape of the sentence she actually says. */}
+                    <div className={styles.svcGroup}>
+                      <MoneyRangeField
+                        compact
+                        fromLabel="Giá từ"
+                        toLabel="Giá đến"
+                        from={s.price_from}
+                        to={s.price_to}
+                        onFrom={(v) => setRow(s.id, { price_from: v, price_to: s.price_to == null || (v != null && s.price_to < v) ? v : s.price_to })}
+                        onTo={(v) => setRow(s.id, { price_to: v })}
+                        fromPlaceholder={unpriced ? 'chưa có giá' : 'từ'}
+                        toPlaceholder={unpriced ? '' : 'đến'}
+                        toDisabled={unpriced}
+                      />
+                      <SelectField<PriceUnit>
+                        compact
+                        aria-label="Đơn vị tính giá"
+                        value={s.price_unit}
+                        onChange={(v) => setRow(s.id, { price_unit: v })}
+                        options={(Object.keys(LABELS.priceUnit) as PriceUnit[]).map((k) => ({ value: k, label: LABELS.priceUnit[k] }))}
+                        style={{ width: 122, flex: '0 0 auto' }}
+                      />
+                    </div>
+
+                    {/* The slot length only means anything once she is allowed to book it. */}
+                    <div className={styles.svcGroup}>
+                      <Switch checked={s.is_bookable} onChange={(v) => setRow(s.id, { is_bookable: v })} ariaLabel={`${agent} được đặt hẹn ${s.service_name}`} />
+                      <SelectField
+                        compact
+                        aria-label="Thời lượng một hẹn"
+                        value={s.duration == null ? '' : String(s.duration)}
+                        onChange={(v) => setRow(s.id, { duration: v ? Number(v) : null })}
+                        options={[{ value: '', label: '—' }, ...DURATION_OPTIONS.map((m) => ({ value: String(m), label: `${m} phút` }))]}
+                        disabled={!s.is_bookable}
+                        style={{ width: 108, flex: '0 0 auto' }}
+                      />
+                    </div>
+
+                    <div className={styles.svcActions}>
+                      <IconButton
+                        name="pencil"
+                        label={showNote ? 'Ghi chú của dịch vụ này' : 'Thêm ghi chú'}
+                        disabled={showNote}
+                        onClick={() => setOpenNote(s.id)}
+                      />
+                      <IconButton name="trash-2" label="Xoá dịch vụ" danger onClick={() => set('service_catalog', draft.service_catalog.filter((x) => x.id !== s.id))} />
+                    </div>
                   </div>
-                  <ChipInput value={s.service_aliases} onChange={(v) => setRow(s.id, { service_aliases: v })} addLabel="+" placeholder="tên gọi khác" />
-                  <MoneyField compact aria-label="Giá từ" value={s.price_from} onChange={(v) => setRow(s.id, { price_from: v, price_to: s.price_to == null || (v != null && s.price_to < v) ? v : s.price_to })} placeholder={unpriced ? 'chưa có' : ''} suffix={null} />
-                  <MoneyField compact aria-label="Giá đến" value={s.price_to} onChange={(v) => setRow(s.id, { price_to: v })} placeholder="= giá từ" suffix={null} disabled={unpriced} />
-                  <SelectField<PriceUnit> compact aria-label="Đơn vị" value={s.price_unit} onChange={(v) => setRow(s.id, { price_unit: v })} options={(Object.keys(LABELS.priceUnit) as PriceUnit[]).map((k) => ({ value: k, label: LABELS.priceUnit[k] }))} />
-                  <SelectField
-                    compact
-                    aria-label="Thời lượng"
-                    value={s.duration == null ? '' : String(s.duration)}
-                    onChange={(v) => setRow(s.id, { duration: v ? Number(v) : null })}
-                    options={[{ value: '', label: '—' }, ...DURATION_OPTIONS.map((m) => ({ value: String(m), label: `${m} phút` }))]}
-                  />
-                  <Switch checked={s.is_bookable} onChange={(v) => setRow(s.id, { is_bookable: v })} ariaLabel={`${agent} được đặt hẹn ${s.service_name}`} />
-                  <IconButton name="trash-2" label="Xoá dịch vụ" danger onClick={() => set('service_catalog', draft.service_catalog.filter((x) => x.id !== s.id))} />
+
                   {showNote ? (
                     <div className={styles.svcNote}>
+                      <span className={styles.svcNoteLabel}>
+                        <Icon name="pencil" size={12} /> Ghi chú
+                      </span>
                       <TextField
                         compact
-                        aria-label="Ghi chú"
+                        aria-label={`Ghi chú cho ${s.service_name || 'dịch vụ'}`}
                         value={s.service_note}
                         onChange={(e) => setRow(s.id, { service_note: e.target.value })}
                         placeholder={`Một dòng ${agent} được nói thêm — VD: Không áp dụng răng nhiễm tetracycline`}
@@ -172,7 +206,7 @@ export function ServicesSection() {
             + Thêm dịch vụ
           </Button>
           <span className={ui.hint}>
-            Giá để trống = {agent} mời khách đến khám. Giá 0 = miễn phí. "Đặt hẹn" tắt = {agent} không tự giữ lịch cho dịch vụ đó (ví dụ niềng răng cần bác sĩ xem trước).
+            Giá để trống = {agent} mời khách đến khám. Giá 0 = miễn phí. Tắt "Đặt hẹn" = {agent} không tự giữ lịch cho dịch vụ đó (ví dụ niềng răng cần bác sĩ xem trước), và thời lượng không dùng đến.
           </span>
         </div>
       </Card>
