@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
 import styles from './OtpField.module.css'
 
 export const OTP_LENGTH = 6
@@ -13,6 +14,10 @@ interface OtpFieldProps {
   autoFocus?: boolean
 }
 
+/**
+ * One real input under six painted boxes: SMS autofill, paste and mobile
+ * keyboards all keep working, and there is no six-way focus dance to manage.
+ */
 export function OtpField({
   value,
   onChange,
@@ -45,16 +50,20 @@ export function OtpField({
     <div>
       <div className={styles.wrap} onClick={() => inputRef.current?.focus()}>
         <div className={styles.boxes}>
-          {digits.map((digit, i) => (
-            <span
-              key={i}
-              className={`${styles.box} ${error ? styles.boxError : ''} ${
-                !error && i === cursor && !disabled ? styles.boxActive : ''
-              }`}
-            >
-              {digit.trim()}
-            </span>
-          ))}
+          {digits.map((digit, i) => {
+            const active = !error && i === cursor && !disabled
+            return (
+              <span
+                key={i}
+                className={`${styles.box} ${error ? styles.boxError : ''} ${
+                  active ? styles.boxActive : ''
+                }`}
+              >
+                {digit.trim()}
+                {active && !digit.trim() ? <span className={styles.caret} aria-hidden="true" /> : null}
+              </span>
+            )
+          })}
         </div>
 
         <input
@@ -72,7 +81,7 @@ export function OtpField({
       </div>
 
       {error ? (
-        <span className={styles.error} role="alert" style={{ display: 'block', marginTop: 10 }}>
+        <span className={styles.error} role="alert">
           {error}
         </span>
       ) : null}
@@ -84,20 +93,17 @@ interface ResendProps {
   /** Seconds left before the resend link unlocks. */
   secondsLeft: number
   onResend: () => void
-  /** The "gọi điện đọc mã" fallback — omitted for email codes. */
-  onVoiceCall?: () => void
-  voiceCallSent?: boolean
-  note?: string
+  /** Extra line for email codes, e.g. where to look when it has not arrived. */
+  note?: ReactNode
 }
 
-export function OtpFooter({ secondsLeft, onResend, onVoiceCall, voiceCallSent, note }: ResendProps) {
+/** Under the boxes: when the code can be sent again, and nothing else. */
+export function OtpFooter({ secondsLeft, onResend, note }: ResendProps) {
   const mm = Math.floor(secondsLeft / 60)
   const ss = String(secondsLeft % 60).padStart(2, '0')
 
   return (
     <div className={styles.footer}>
-      {note ? <span className={styles.muted}>{note}</span> : null}
-
       {secondsLeft > 0 ? (
         <span className={styles.muted}>
           Gửi lại mã sau{' '}
@@ -111,16 +117,7 @@ export function OtpFooter({ secondsLeft, onResend, onVoiceCall, voiceCallSent, n
         </button>
       )}
 
-      {onVoiceCall ? (
-        <button
-          type="button"
-          className={styles.linkButton}
-          onClick={onVoiceCall}
-          disabled={voiceCallSent}
-        >
-          {voiceCallSent ? 'Fonnus đang gọi cho bạn…' : 'Gọi điện đọc mã cho tôi'}
-        </button>
-      ) : null}
+      {note ? <span className={styles.muted}>{note}</span> : null}
     </div>
   )
 }

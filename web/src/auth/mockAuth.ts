@@ -45,11 +45,6 @@ export async function verifyCode(code: string): Promise<{ ok: boolean; reason?: 
   return { ok: true }
 }
 
-/** TODO: POST /auth/otp/voice — the fallback for owners who never read SMS. */
-export async function requestVoiceCode(_phone: string): Promise<void> {
-  await delay(400)
-}
-
 export interface Profile {
   fullName?: string
   phone?: string

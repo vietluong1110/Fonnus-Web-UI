@@ -1,188 +1,261 @@
+/*
+ * Two columns: the form, then the panel. The form leads because that is where a
+ * reader's eye lands first and it is the only thing on the page with a job to
+ * do — the panel answers "why should I" for whoever looks up from the field.
+ * It is also first in the DOM, so it is first for the keyboard.
+ */
 .shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 33.333% 1fr;
+  /* 620px at 1440 and above; never so wide on a small laptop that the form is
+     squeezed. */
+  grid-template-columns: minmax(0, 1fr) clamp(420px, 43%, 620px);
   background: var(--surface-page);
 }
 
 .panel {
   display: flex;
   flex-direction: column;
-  padding: 44px 40px;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 44px 56px 48px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
+/*
+ * The two moods. Everything inside the panel (AuthPanel.module.css) dresses
+ * itself from these four properties, so one stylesheet serves both doors.
+ */
 .panelNight {
   background: var(--night);
   color: var(--cream-night);
+  --panel-fg: var(--cream-night);
+  --panel-muted: var(--text-muted-on-inverse);
+  --panel-line: var(--border-on-inverse);
+  --panel-accent: var(--terracotta-night);
 }
 
 .panelWarm {
   background: var(--blush);
-  box-shadow: inset -1px 0 0 var(--border-hairline);
-}
-
-.panelBody {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  /* A third of a wide screen is a lot of room; cap the measure so the promise
-     still reads as a paragraph rather than a banner. */
-  max-width: 460px;
-}
-
-/* Sign-in centres its welcome instead of sitting it on the floor. */
-.panelBodyCentred {
-  margin: auto 0;
-  padding-bottom: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  max-width: 460px;
-}
-
-/* base.css sets an explicit colour on h1–h4, so the dark panel has to state
-   its own rather than relying on inheriting from .panelNight. */
-.panelHeadline {
-  margin: 0;
-  color: var(--cream-night);
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 34px;
-  line-height: 1.25;
-  letter-spacing: var(--tracking-display);
-}
-
-.panelHeadlineWarm {
-  font-size: 32px;
   color: var(--ink);
+  box-shadow: inset 1px 0 0 var(--border-hairline);
+  --panel-fg: var(--ink);
+  --panel-muted: var(--ink-soft);
+  --panel-line: var(--border-hairline);
+  --panel-accent: var(--terracotta);
 }
 
-.panelLede {
-  font-size: 14.5px;
-  line-height: 1.75;
-  color: rgba(243, 233, 218, 0.72);
+/* Narrower than this the footnote wraps, and the separator would be left
+   dangling at the end of the first line. */
+@media (max-width: 1180px) {
+  .footDot {
+    display: none;
+  }
 }
 
-.panelLedeWarm {
-  color: var(--ink-soft);
+/* Shorter laptops: tighten the panel rather than clipping the scene. */
+@media (max-height: 820px) {
+  .panel {
+    padding: 32px 48px 36px;
+    gap: 24px;
+  }
 }
 
-.stats {
-  margin-top: 40px;
-  max-width: 460px;
-  padding-top: 26px;
-  border-top: 1px solid var(--border-on-inverse);
-  display: flex;
-  gap: 40px;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.statValue {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  font-size: 27px;
-  color: var(--terracotta-night);
-}
-
-.statLabel {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: rgba(243, 233, 218, 0.72);
-}
-
-.panelFootnote {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
-/* Right column: stepper above the form, the pair centred as one block. The
-   steps are short and uneven in height, so top-aligning them left the screen
-   bottom-heavy with empty space. */
 .content {
-  position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  padding: 28px clamp(24px, 5vw, 64px) 26px;
+  box-sizing: border-box;
+}
+
+/* Way out on the left, the other door on the right. Wraps to two rows only on
+   very narrow phones, where both still read left and right of their own line. */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  min-height: 36px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.back:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* One arrow glyph in the set; this is the one place it points back. */
+.backIcon {
+  transform: rotate(180deg);
+}
+
+.swap {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.swapBottom {
+  display: none;
+}
+
+.middle {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
-  padding: 44px clamp(20px, 5vw, 64px);
-  box-sizing: border-box;
+  padding: 12px 0 20px;
 }
 
 .form {
   width: 100%;
-  max-width: 400px;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-
-.formTopGap {
-  margin-top: 8px;
-}
-
-/* Back to the landing page — small, out of the way, never competing with the
-   primary action. Absolute on desktop so it does not shift the form off-centre. */
-.exit {
-  position: absolute;
-  top: 20px;
-  right: clamp(20px, 5vw, 64px);
-  font-size: var(--size-ui);
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-
-.mobileLogo {
-  display: none;
-}
-
-/* Below 900px the left panel is the first thing to go — it is reassurance, not
-   a control — and the form takes the whole screen rather than being squeezed.
-   Declared after .panel and .content so it wins on source order. */
-@media (max-width: 900px) {
-  .shell {
-    grid-template-columns: 1fr;
-  }
-  .panel {
-    display: none;
-  }
-  .mobileLogo {
-    display: block;
-    margin-bottom: 8px;
-  }
-  .content {
-    padding-top: 64px;
-    justify-content: center;
-  }
-}
-
-.title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 26px;
-  line-height: 1.3;
-  letter-spacing: var(--tracking-display);
-  color: var(--ink);
-}
-
-.subtitle {
-  font-size: var(--size-body-sm);
-  line-height: 1.6;
-  color: var(--ink-soft);
+  gap: 30px;
 }
 
 .heading {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 1.25;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/*
+ * Where the data lives and who answers the phone — the two things a clinic
+ * owner checks before typing their number into a service they have just met.
+ */
+.footnote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.footDot {
+  opacity: 0.5;
+}
+
+.support {
+  white-space: nowrap;
+}
+
+.supportNote {
+  color: var(--ink-soft);
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-weight: 500;
+}
+
+.mobileLogo {
+  display: none;
+}
+
+/*
+ * Below 900px the panel goes: it is reassurance, not a control, and the form
+ * should have the screen to itself. The logo comes back above the heading so
+ * the page is still recognisably Fonnus.
+ */
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel {
+    display: none;
+  }
+
+  .content {
+    padding: 20px 20px 24px;
+  }
+
+  .middle {
+    align-items: flex-start;
+    padding: 20px 0 28px;
+  }
+
+  .form {
+    gap: 26px;
+  }
+
+  .swapTop {
+    display: none;
+  }
+
+  /* Under the form, centred, where a phone has room for it. */
+  .swapBottom {
+    display: block;
+    align-self: center;
+    padding-top: 2px;
+    text-align: center;
+  }
+
+  .mobileLogo {
+    display: inline-flex;
+    align-self: flex-start;
+    margin-bottom: -6px;
+  }
+
+  .mobileLogo:hover {
+    text-decoration: none;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 560px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14.5px;
+  }
 }
