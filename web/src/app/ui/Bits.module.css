@@ -158,11 +158,24 @@
   font-style: italic;
 }
 
+/*
+ * Preview button.
+ *
+ * Colours go through --play-bg / --play-fg rather than being set directly on
+ * each state. `.play:hover` outranks `.playOn` on specificity, so a direct
+ * `background` on hover used to repaint the *playing* button pale while its
+ * icon stayed cream — a pause glyph invisible against its own button. With the
+ * custom properties, `.playOn:hover` simply comes later and wins.
+ */
 .play {
+  --play-bg: var(--milk);
+  --play-fg: var(--text-accent);
+  --play-ring: inset 0 0 0 1px var(--border-strong);
+  position: relative;
   appearance: none;
   border: none;
-  background: var(--milk);
-  color: var(--text-accent);
+  background: var(--play-bg);
+  color: var(--play-fg);
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -170,24 +183,71 @@
   place-items: center;
   cursor: pointer;
   flex: 0 0 auto;
-  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  box-shadow: var(--play-ring);
   transition:
     background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-out);
 }
 
 .play:hover {
-  background: var(--action-secondary-hover);
+  --play-bg: var(--blush);
+  --play-ring: inset 0 0 0 1px transparent;
 }
 
 .play:active {
   transform: scale(var(--press-scale));
 }
 
+.play:disabled {
+  --play-bg: transparent;
+  --play-fg: var(--ink-soft);
+  --play-ring: inset 0 0 0 1px var(--border-hairline);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Playing: terracotta-deep so it stays legible on a milk card and on the
+   terracotta ground of a selected voice tile alike. */
 .playOn {
-  background: var(--terracotta);
-  color: var(--cream);
-  box-shadow: none;
+  --play-bg: var(--terracotta-deep);
+  --play-fg: var(--cream);
+  --play-ring: inset 0 0 0 1px transparent;
+}
+
+.playOn:hover {
+  --play-bg: var(--action-primary-active);
+}
+
+.playOn::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--terracotta);
+  opacity: 0.5;
+  animation: playPulse 1.7s var(--ease-out) infinite;
+  pointer-events: none;
+}
+
+@keyframes playPulse {
+  0% {
+    transform: scale(0.86);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(1.24);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playOn::after {
+    animation: none;
+    opacity: 0.45;
+  }
 }
 
 /* Icon button */

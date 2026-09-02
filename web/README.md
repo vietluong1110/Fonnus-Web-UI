@@ -169,6 +169,23 @@ move at once. Skips are per browser session.
 is installed (`ui/speak.ts`); it is a stand-in for the server-side TTS
 endpoint, not the product voice.
 
+**Form controls** (`ui/Field.tsx`). Selects are a listbox we draw ourselves,
+not a native `<select>`: the native popup is painted by the OS — on Windows a
+white list with a system-blue highlight — which has nothing to do with the
+brand. The panel is portalled to `<body>` and positioned `fixed`, because the
+tables that hold selects clip their overflow and would otherwise cut it off at
+the cell edge; it flips above the trigger when the page runs out of room below,
+and takes arrows, Home/End, type-ahead, Enter and Escape. The focus ring is
+drawn once, by the `.control` shell — the inner input suppresses the global
+`:focus-visible` outline, which used to add a second box inside the first.
+State on `.control` and on the play button goes through custom properties
+rather than competing `box-shadow` / `background` declarations, so `:hover` and
+the "on" state resolve by cascade order instead of by specificity.
+
+Prices are one `MoneyRangeField`, not two boxes under two headings: a range is
+one answer, the way the receptionist says it. Date and time inputs stay native
+— their pickers are calendars and clocks, not lists.
+
 ## The hero
 
 Three things and nothing else: the claim, one control, and the orb.

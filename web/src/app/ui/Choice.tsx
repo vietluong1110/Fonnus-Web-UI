@@ -108,9 +108,10 @@ interface SwitchProps {
   /** Adds a hairline above, for stacking rows in a card. */
   lined?: boolean
   ariaLabel?: string
+  className?: string
 }
 
-export function Switch({ checked, onChange, label, hint, disabled, lined, ariaLabel }: SwitchProps) {
+export function Switch({ checked, onChange, label, hint, disabled, lined, ariaLabel, className }: SwitchProps) {
   const toggle = (
     <span className={`${styles.track} ${checked ? styles.trackOn : ''} ${disabled ? styles.trackDisabled : ''}`}>
       <input
@@ -127,7 +128,7 @@ export function Switch({ checked, onChange, label, hint, disabled, lined, ariaLa
   )
   if (!label) return <label style={{ display: 'inline-flex', cursor: disabled ? 'not-allowed' : 'pointer' }}>{toggle}</label>
   return (
-    <label className={`${styles.switchRow} ${lined ? styles.switchRowLined : ''}`} style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
+    <label className={`${styles.switchRow} ${lined ? styles.switchRowLined : ''} ${className ?? ''}`} style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
       <span className={styles.switchText}>
         <span className={styles.switchLabel}>{label}</span>
         {hint ? <span className={styles.hint}>{hint}</span> : null}
