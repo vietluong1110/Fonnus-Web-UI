@@ -1,11 +1,19 @@
 /* Shared by both flows: the pieces that are not the shell and not a field. */
 
+/* Fields plus their submit button. Tighter than the gap between blocks, so the
+   button reads as belonging to the field above it rather than floating after it. */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .notice {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--sage);
   font-size: 13.5px;
   line-height: 1.6;
@@ -24,6 +32,11 @@
   color: var(--ink);
 }
 
+.strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
 /* "Để sau" — present but deliberately quiet, so skipping never looks like the
    recommended path yet never looks blocked either. */
 .skip {
@@ -36,23 +49,21 @@
   font-weight: 500;
   color: var(--ink-soft);
   cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
 }
 
 .skip:hover {
   color: var(--ink);
 }
 
-.backLink {
-  font-size: 13.5px;
-  font-weight: 500;
-}
-
+/* Inline in a sentence: "Đã gửi SMS tới 090 … · Đổi số". */
 .inlineButton {
   padding: 0;
   border: none;
   background: none;
   font: inherit;
   font-family: var(--font-ui);
+  font-weight: 500;
   color: var(--text-link);
   cursor: pointer;
 }
@@ -89,18 +100,17 @@
   gap: 8px;
 }
 
-.doneNext {
-  font-size: 13px;
+.doneWith {
+  margin: 0;
+  font-size: var(--size-body-sm);
   line-height: 1.6;
   color: var(--ink-soft);
 }
 
-/* Fields + their submit button, inside the form element. Matches the gap the
-   shell uses between blocks so the form is invisible as a boundary. */
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.doneNext {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
 }
 
 /* The sign-up form showing through behind the Google chooser. */

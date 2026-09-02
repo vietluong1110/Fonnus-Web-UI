@@ -1,3 +1,9 @@
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .divider {
   display: flex;
   align-items: center;
@@ -14,60 +20,78 @@
   background: var(--border-hairline);
 }
 
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.option {
+/* Pill, like the primary button and the fields — the only thing that separates
+   it from the primary action is its ground, which is the point. */
+.google {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: var(--milk);
+  height: 48px;
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--action-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
   font-family: var(--font-ui);
   font-size: var(--size-body-sm);
-  font-weight: 500;
-  color: var(--ink);
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  color: var(--text-body);
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out);
 }
 
-.option:hover {
+.google:hover {
   background: var(--action-secondary-hover);
 }
 
-.googleG {
-  font-weight: 700;
-  font-size: 15px;
-  background: linear-gradient(90deg, #4285f4, #ea4335, #fbbc05, #34a853);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.googleMark {
+  flex: 0 0 auto;
 }
 
-/* Footer link between the two doors: "already have an account?" / "no account?" */
-.swap {
-  padding-top: 6px;
-  border-top: 1px solid var(--border-hairline);
-  text-align: center;
+/* "You used this last time" — the shortcut a returning owner is looking for. */
+.lastUsed {
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: rgba(184, 92, 43, 0.12);
+  color: var(--text-accent);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Third method, third weight: a link, not a button. */
+.emailLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: center;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
   font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.4;
   color: var(--ink-soft);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.emailLink:hover {
+  color: var(--ink);
+}
+
+.emailIcon {
+  color: currentColor;
 }
 
 .terms {
+  margin: 0;
   text-align: center;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--ink-soft);
-}
-
-.trialNote {
-  text-align: center;
-  font-size: 12.5px;
   color: var(--ink-soft);
 }

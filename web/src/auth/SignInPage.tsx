@@ -1,25 +1,38 @@
 import { useCallback, useState } from 'react'
-import { Button, Input } from '../design-system'
+import { Button } from '../design-system'
 import { hrefFor, navigate } from '../hooks/useRoute'
 import { AuthHeading, AuthShell } from './AuthShell'
+import { Field, PhoneField } from './Field'
 import { GoogleChooser } from './GoogleChooser'
 import { OtpField, OtpFooter } from './OtpField'
-import { SocialOptions, SwapLink } from './SocialOptions'
-import { formatPhone, isValidEmail, isValidPhone, normalizePhone, phoneError } from './phone'
+import { LastUsedBadge, SocialOptions } from './SocialOptions'
+import { readLastMethod, rememberMethod } from './lastMethod'
+import { formatPhone, isValidEmail, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
-import { requestVoiceCode, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
 import styles from './AuthPage.module.css'
 
 /*
  * Same three methods as sign-up, because an owner will not remember which one
  * they used. Phone + SMS code is the default; there is no password anywhere.
  *
- * No stepper here: signing in is one screen and a code, and a progress bar
- * across two steps only advertises length.
+ * The one thing this door has that sign-up does not: a "Lần trước" badge on the
+ * method this browser used last time. Remembering that for the owner is the
+ * cheapest thing on the screen and the one they are actually looking for.
  */
 type Step = 'phone' | 'phone-otp' | 'google-chooser' | 'email' | 'email-otp'
 
 const RESEND_SECONDS = 42
+
+/** Top right on every step of this door. */
+const SWAP = (
+  <>
+    Chưa có tài khoản?{' '}
+    <a href={hrefFor('signup')} style={{ fontWeight: 500 }}>
+      Dùng thử miễn phí
+    </a>
+  </>
+)
 
 export function SignInPage() {
   const [step, setStep] = useState<Step>('phone')
@@ -29,7 +42,9 @@ export function SignInPage() {
   const [fieldError, setFieldError] = useState<string | null>(null)
   const [codeError, setCodeError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [voiceSent, setVoiceSent] = useState(false)
+
+  // Read once on mount: it must not change under the owner mid-flow.
+  const [lastUsed] = useState(readLastMethod)
 
   const resend = useCountdown(RESEND_SECONDS)
 
@@ -37,7 +52,6 @@ export function SignInPage() {
     setCode('')
     setCodeError(null)
     setFieldError(null)
-    setVoiceSent(false)
     setStep(next)
   }
 
@@ -45,7 +59,7 @@ export function SignInPage() {
   const enterApp = useCallback(() => navigate('landing'), [])
 
   const confirmCode = useCallback(
-    async (entered: string) => {
+    async (entered: string, method: 'phone' | 'email') => {
       setBusy(true)
       const result = await verifyCode(entered)
       setBusy(false)
@@ -55,6 +69,7 @@ export function SignInPage() {
         setCode('')
         return
       }
+      rememberMethod(method)
       enterApp()
     },
     [enterApp],
@@ -84,10 +99,8 @@ export function SignInPage() {
   switch (step) {
     case 'phone':
       return (
-        <AuthShell variant="signin">
-          <AuthHeading title="Đăng nhập">
-            Nhập số điện thoại đã đăng ký — mã xác nhận gửi qua SMS.
-          </AuthHeading>
+        <AuthShell variant="signin" swap={SWAP}>
+          <AuthHeading title="Đăng nhập">Mã đăng nhập sẽ được gửi qua SMS.</AuthHeading>
 
           <form
             onSubmit={(e) => {
@@ -96,44 +109,40 @@ export function SignInPage() {
             }}
             className={styles.formGroup}
           >
-            <Input
+            <PhoneField
               label="Số điện thoại"
+              badge={lastUsed === 'phone' ? <LastUsedBadge /> : null}
               placeholder="090 123 45 67"
               value={formatPhone(phone)}
               onChange={(e) => {
                 setPhone(normalizePhone(e.target.value).slice(0, 10))
                 setFieldError(null)
               }}
-              numeric
-              inputMode="tel"
-              autoComplete="tel"
               autoFocus
               error={fieldError}
             />
-            <Button type="submit" size="md" fullWidth disabled={busy || !isValidPhone(phone)}>
+            <Button type="submit" size="lg" fullWidth disabled={busy}>
               {busy ? 'Đang gửi…' : 'Gửi mã đăng nhập'}
             </Button>
           </form>
 
           <SocialOptions
             googleLabel="Đăng nhập với Google"
-            emailLabel="Đăng nhập với email"
+            emailLabel="Đăng nhập bằng email"
             onGoogle={() => goTo('google-chooser')}
             onEmail={() => goTo('email')}
+            lastUsed={lastUsed}
           />
-
-          <SwapLink>
-            Chưa có tài khoản?{' '}
-            <a href={hrefFor('signup')} style={{ fontWeight: 500 }}>
-              Dùng thử miễn phí
-            </a>
-          </SwapLink>
         </AuthShell>
       )
 
     case 'phone-otp':
       return (
-        <AuthShell variant="signin">
+        <AuthShell
+          variant="signin"
+          back={{ label: 'Quay lại', onClick: () => goTo('phone') }}
+          swap={SWAP}
+        >
           <AuthHeading title="Nhập mã 6 số">
             Đã gửi SMS tới <span className={styles.num}>{formatPhone(phone)}</span> ·{' '}
             <button type="button" className={styles.inlineButton} onClick={() => goTo('phone')}>
@@ -144,7 +153,7 @@ export function SignInPage() {
           <OtpField
             value={code}
             onChange={setCode}
-            onComplete={(entered) => void confirmCode(entered)}
+            onComplete={(entered) => void confirmCode(entered, 'phone')}
             error={codeError}
             disabled={busy}
           />
@@ -155,11 +164,6 @@ export function SignInPage() {
               resend.restart()
               void sendPhoneCode(phone)
             }}
-            onVoiceCall={() => {
-              setVoiceSent(true)
-              void requestVoiceCode(phone)
-            }}
-            voiceCallSent={voiceSent}
           />
         </AuthShell>
       )
@@ -168,19 +172,34 @@ export function SignInPage() {
       return (
         <AuthShell
           variant="signin"
-          overlay={<GoogleChooser onPick={enterApp} onDismiss={() => goTo('phone')} />}
+          back={{ label: 'Quay lại', onClick: () => goTo('phone') }}
+          overlay={
+            <GoogleChooser
+              onPick={() => {
+                rememberMethod('google')
+                enterApp()
+              }}
+              onDismiss={() => goTo('phone')}
+            />
+          }
         >
           <div className={styles.behindOverlay} aria-hidden="true">
-            <AuthHeading title="Đăng nhập" />
-            <Input label="Số điện thoại" placeholder="090 123 45 67" numeric disabled />
+            <AuthHeading title="Đăng nhập">Mã đăng nhập sẽ được gửi qua SMS.</AuthHeading>
+            <PhoneField label="Số điện thoại" placeholder="090 123 45 67" disabled />
           </div>
         </AuthShell>
       )
 
     case 'email':
       return (
-        <AuthShell variant="signin">
-          <AuthHeading title="Đăng nhập bằng email" />
+        <AuthShell
+          variant="signin"
+          back={{ label: 'Dùng số điện thoại', onClick: () => goTo('phone') }}
+          swap={SWAP}
+        >
+          <AuthHeading title="Đăng nhập bằng email">
+            Mã đăng nhập sẽ được gửi tới hộp thư của bạn.
+          </AuthHeading>
 
           <form
             onSubmit={(e) => {
@@ -189,7 +208,7 @@ export function SignInPage() {
             }}
             className={styles.formGroup}
           >
-            <Input
+            <Field
               label="Email"
               type="email"
               placeholder="lan@vietsmile.vn"
@@ -202,22 +221,22 @@ export function SignInPage() {
               autoFocus
               error={fieldError}
             />
-            <Button type="submit" size="md" fullWidth disabled={busy || !isValidEmail(email)}>
+            <Button type="submit" size="lg" fullWidth disabled={busy}>
               {busy ? 'Đang gửi…' : 'Gửi mã tới email'}
             </Button>
           </form>
-
-          <button type="button" className={styles.inlineButton} onClick={() => goTo('phone')}>
-            ‹ Dùng số điện thoại
-          </button>
         </AuthShell>
       )
 
     case 'email-otp':
       return (
-        <AuthShell variant="signin">
+        <AuthShell
+          variant="signin"
+          back={{ label: 'Quay lại', onClick: () => goTo('email') }}
+          swap={SWAP}
+        >
           <AuthHeading title="Kiểm tra hộp thư">
-            Mã 6 số đã gửi tới <b style={{ color: 'var(--ink)' }}>{email}</b> ·{' '}
+            Mã 6 số đã gửi tới <b className={styles.strong}>{email}</b> ·{' '}
             <button type="button" className={styles.inlineButton} onClick={() => goTo('email')}>
               Đổi email
             </button>
@@ -226,7 +245,7 @@ export function SignInPage() {
           <OtpField
             value={code}
             onChange={setCode}
-            onComplete={(entered) => void confirmCode(entered)}
+            onComplete={(entered) => void confirmCode(entered, 'email')}
             error={codeError}
             disabled={busy}
           />
