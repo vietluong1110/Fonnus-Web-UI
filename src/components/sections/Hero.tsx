@@ -75,19 +75,6 @@ export function Hero({ dockRef }: HeroProps) {
         </form>
 
         <p className={styles.reassurance}>Miễn phí 14 ngày · Không cần thẻ ngân hàng</p>
-
-        <div className={styles.proof}>
-          <div className={styles.marks}>
-            {CLINIC_LOGOS.map((logo) => (
-              <span key={logo.name} className={styles.mark}>
-                <ClinicMark logo={logo} size={30} />
-              </span>
-            ))}
-          </div>
-          <span className={styles.proofText}>
-            50+ phòng khám ở TP.HCM và Hà Nội đang để Fonnus nghe máy
-          </span>
-        </div>
       </div>
 
       <div className={styles.stage}>
@@ -102,6 +89,21 @@ export function Hero({ dockRef }: HeroProps) {
           <br />
           Không cần cài đặt, không cần để lại số.
         </p>
+      </div>
+
+      {/* Spans both columns: its hairline bridges the headline's edge to the
+          orb's, which is what stops the two halves reading as separate. */}
+      <div className={styles.proof}>
+        <div className={styles.marks}>
+          {CLINIC_LOGOS.map((logo) => (
+            <span key={logo.name} className={styles.mark}>
+              <ClinicMark logo={logo} size={30} />
+            </span>
+          ))}
+        </div>
+        <span className={styles.proofText}>
+          50+ phòng khám ở TP.HCM và Hà Nội đang để Fonnus nghe máy
+        </span>
       </div>
       </div>
     </section>
