@@ -119,17 +119,6 @@
   border-bottom: none;
 }
 
-.count {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--cream);
-  background: var(--action-primary);
-  border-radius: var(--radius-pill);
-  padding: 2px 8px;
-  flex: 0 0 auto;
-}
 
 /* --------------------------------------------------------------- messages */
 
@@ -142,6 +131,26 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  /* Firefox. The default bar is a grey slab from another operating system. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(38, 31, 24, 0.18) transparent;
+}
+
+.log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.log::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.log::-webkit-scrollbar-thumb {
+  background: rgba(38, 31, 24, 0.16);
+  border-radius: var(--radius-pill);
+}
+
+.log:hover::-webkit-scrollbar-thumb {
+  background: rgba(38, 31, 24, 0.28);
 }
 
 /* A young conversation sits at the bottom of the panel like a real chat,
@@ -429,23 +438,7 @@
   color: var(--ink-soft);
 }
 
-.skip {
-  margin-left: auto;
-  appearance: none;
-  border: none;
-  background: none;
-  padding: 0;
-  font: inherit;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
 
-.skip:hover {
-  color: var(--text-accent);
-}
 
 /* Narrow: the rail stops being a column, so it stops being sticky and tall. */
 @media (max-width: 1180px) {

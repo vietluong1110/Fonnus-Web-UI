@@ -19,9 +19,20 @@ import { useQuestionQueue } from '../knowledge/AskRail'
  * cannot parse comes back as a correction rather than a silent no-op, and
  * attachments are acknowledged but not read: there is no model behind this yet.
  *
- * State lives above the routes so walking into a sub-page (where the panel
- * becomes a docked window) does not restart the conversation.
+ * ONE CONVERSATION PER PAGE. The queue is filtered to questions that belong to
+ * the tab you are on, and each tab keeps its own history — an assistant that
+ * asks about the price list while you are naming the receptionist is not
+ * helping. State lives above the routes, so walking into a section (where the
+ * panel becomes a docked window) does not restart anything.
  */
+
+export type ChatPage = 'ho-so' | 'kien-thuc' | 'ky-nang'
+
+const PAGE_LABEL: Record<ChatPage, string> = {
+  'ho-so': 'Hồ sơ',
+  'kien-thuc': 'Kiến thức',
+  'ky-nang': 'Kỹ năng',
+}
 
 export type AttachmentKind = 'image' | 'pdf' | 'doc' | 'sheet' | 'slide' | 'text' | 'file'
 
@@ -58,62 +69,70 @@ export function attachmentKind(name: string, type: string): AttachmentKind {
 }
 
 interface ChatStore {
+  /** Which page's conversation this is — shown in the panel header. */
+  pageLabel: string
   messages: ChatMessage[]
   /** The question the last assistant bubble is asking, if any. */
   current: Question | undefined
-  remaining: number
+  /** No question left on this page. Drives the closing line, never a count. */
+  done: boolean
   minimized: boolean
   setMinimized: (v: boolean) => void
   answerWithChip: (label: string, patch: Record<string, unknown>, confirm: string) => void
   answerWithText: (text: string, attachments: Attachment[]) => void
-  skipCurrent: () => void
 }
 
 const ChatContext = createContext<ChatStore | null>(null)
 
-export function SetupChatProvider({ children }: { children: ReactNode }) {
+function opener(agent: string, page: ChatPage): string {
+  if (page === 'ho-so')
+    return `Em là Fonnus. Em hỏi vài câu để ${agent} biết cách xưng hô và chào khách — anh chị trả lời tự nhiên, hoặc gửi em tài liệu cũng được ạ.`
+  if (page === 'kien-thuc')
+    return `Em là Fonnus. Em hỏi vài câu về phòng khám để ${agent} trả lời khách cho đúng — anh chị trả lời tự nhiên, hoặc gửi em file bảng giá, ảnh chụp lịch làm việc cũng được ạ.`
+  return `Em là Fonnus. Em hỏi vài câu về những việc ${agent} được phép làm thay anh chị — trả lời tự nhiên là được ạ.`
+}
+
+export function SetupChatProvider({ page, children }: { page: ChatPage; children: ReactNode }) {
   const { config, update } = useConfig()
-  const { queue, skip } = useQuestionQueue()
+  const { queue } = useQuestionQueue()
   const agent = config.agent_name || 'Linh'
 
   /*
    * Starts minimized, which only affects the docked shape — the rail is always
    * open. A section page's right column is the "nghe thử" preview, and an
-   * expanded 468px window pinned bottom-right lands squarely on its play
-   * button. Arriving collapsed keeps that preview whole; the count badge makes
-   * the assistant obvious, and once opened it stays open as you move around.
+   * expanded window pinned bottom-right lands squarely on its play button.
+   * Arriving collapsed keeps that preview whole; once opened it stays open.
    */
   const [minimized, setMinimized] = useState(true)
-  const [history, setHistory] = useState<ChatMessage[]>(() => [
-    {
-      id: newId('m'),
-      role: 'assistant',
-      text: `Em là Fonnus. Em hỏi vài câu để ${agent} biết đủ thông tin mà trả lời khách — anh chị trả lời tự nhiên, hoặc gửi em file bảng giá, ảnh chụp lịch làm việc cũng được ạ.`,
-    },
-  ])
 
-  /*
-   * The queue is derived from the record, so the head changes on its own as
-   * answers land. The conversation only needs to notice when it has moved on
-   * to a question it has not asked yet.
-   */
-  const asked = useRef<string | null>(null)
-  const current = queue[0]
+  // One history and one "already asked" marker per page.
+  const [histories, setHistories] = useState<Partial<Record<ChatPage, ChatMessage[]>>>({})
+  const asked = useRef<Partial<Record<ChatPage, string | null>>>({})
+
+  const history = histories[page] ?? [{ id: `open-${page}`, role: 'assistant' as const, text: opener(agent, page) }]
+
+  // Only this page's questions, in the order the queue offers them.
+  const pageQueue = useMemo(() => queue.filter((q) => q.path[0] === page), [queue, page])
+  const current = pageQueue[0]
+
   const messages = useMemo(() => {
     if (!current) return history
-    if (asked.current === current.id) return history
+    if (asked.current[page] === current.id) return history
     return [...history, { id: `q-${current.id}`, role: 'assistant' as const, text: current.text, question: current }]
-  }, [history, current])
+  }, [history, current, page])
 
-  const commitHistory = useCallback((next: ChatMessage[], askedId: string | null) => {
-    asked.current = askedId
-    setHistory(next)
-  }, [])
+  const commit = useCallback(
+    (next: ChatMessage[], askedId: string | null) => {
+      asked.current = { ...asked.current, [page]: askedId }
+      setHistories((h) => ({ ...h, [page]: next }))
+    },
+    [page],
+  )
 
   const answerWithChip = useCallback(
     (label: string, patch: Record<string, unknown>, confirm: string) => {
       const asking = current
-      commitHistory(
+      commit(
         [
           ...messages,
           { id: newId('m'), role: 'user', text: label },
@@ -123,7 +142,7 @@ export function SetupChatProvider({ children }: { children: ReactNode }) {
       )
       update(patch as never)
     },
-    [messages, current, update, commitHistory],
+    [messages, current, update, commit],
   )
 
   const answerWithText = useCallback(
@@ -134,7 +153,7 @@ export function SetupChatProvider({ children }: { children: ReactNode }) {
 
       // Files are acknowledged, never parsed: there is no extraction service yet.
       if (attachments.length && !said) {
-        commitHistory(
+        commit(
           [
             ...messages,
             userMsg,
@@ -150,36 +169,39 @@ export function SetupChatProvider({ children }: { children: ReactNode }) {
       }
 
       if (!asking) {
-        commitHistory([...messages, userMsg, { id: newId('m'), role: 'assistant', text: 'Em ghi nhận rồi ạ.' }], null)
+        commit([...messages, userMsg, { id: newId('m'), role: 'assistant', text: 'Em ghi nhận rồi ạ.' }], null)
         return
       }
 
       const result = asking.applyText(config, said)
       if ('error' in result) {
         // The question stays open, so `asked` is left pointing at it.
-        commitHistory([...messages, userMsg, { id: newId('m'), role: 'assistant', text: result.error, tone: 'error' }], asking.id)
+        commit([...messages, userMsg, { id: newId('m'), role: 'assistant', text: result.error, tone: 'error' }], asking.id)
         return
       }
 
       const confirm = asking.confirm({ ...config, ...result })
-      commitHistory(
+      commit(
         [...messages, userMsg, { id: newId('m'), role: 'assistant', text: `Đã ghi ${confirm} vào ${asking.sectionLabel}.`, tone: 'saved' }],
         asking.id,
       )
       update(result)
     },
-    [messages, current, config, update, commitHistory],
+    [messages, current, config, update, commit],
   )
 
-  const skipCurrent = useCallback(() => {
-    if (!current) return
-    commitHistory([...messages, { id: newId('m'), role: 'user', text: 'Để sau' }], current.id)
-    skip(current.id)
-  }, [messages, current, skip, commitHistory])
-
   const value = useMemo(
-    () => ({ messages, current, remaining: queue.length, minimized, setMinimized, answerWithChip, answerWithText, skipCurrent }),
-    [messages, current, queue.length, minimized, answerWithChip, answerWithText, skipCurrent],
+    () => ({
+      pageLabel: PAGE_LABEL[page],
+      messages,
+      current,
+      done: !current,
+      minimized,
+      setMinimized,
+      answerWithChip,
+      answerWithText,
+    }),
+    [page, messages, current, minimized, answerWithChip, answerWithText],
   )
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>

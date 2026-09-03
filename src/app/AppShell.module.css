@@ -229,6 +229,9 @@
 .contentInner {
   width: 100%;
   max-width: 1180px;
+  /* Centred, not left-aligned: capped-and-left put 36px of margin on one side
+     of a wide window and 300px on the other. */
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   gap: 18px;
