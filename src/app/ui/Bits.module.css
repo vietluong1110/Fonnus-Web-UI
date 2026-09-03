@@ -374,6 +374,13 @@
   color: var(--text-muted-on-inverse);
 }
 
+/* The save bar sits on the inverse (night) surface, where --error (#B23A2E) is
+   too dark to read. --rose is the palette's light error tint, made for exactly
+   this: the "red zone" note on a dark ground. */
+.saveBarError {
+  color: var(--rose);
+}
+
 /* Toasts */
 .toasts {
   position: fixed;

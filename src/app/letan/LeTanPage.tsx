@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react'
+import { messageFor } from '../../api'
 import { Badge } from '../../design-system'
 import { appHref } from '../../hooks/useRoute'
+import { ContentSkeleton, RetryCard } from '../Boot'
 import { Tabs, ui } from '../ui'
+import { useConfig } from './store'
 import { LeTanHeader } from './LeTanHeader'
 import { SetupChatProvider } from './assistant/chatStore'
 import { SetupChat } from './assistant/SetupChat'
@@ -73,6 +76,26 @@ export type KnowledgeSectionKey = keyof typeof KNOWLEDGE_SECTIONS
 
 export function LeTanPage({ path }: { path: string[] }) {
   const tab = (TABS.some((t) => t.value === path[0]) ? path[0] : 'ho-so') as LeTanTab
+  const { status, loadError, reload } = useConfig()
+
+  // The whole tab is a view over one record, so there is nothing to render
+  // until it lands. Note this does NOT fall back to the template on failure:
+  // an owner shown a stranger's dental clinic would start editing it.
+  if (status === 'loading') return <ContentSkeleton />
+  if (status === 'error') {
+    return (
+      <RetryCard
+        title="Chưa tải được thông tin"
+        body={
+          loadError
+            ? messageFor(loadError)
+            : 'Bọn mình chưa tải được thông tin phòng khám. Bạn thử lại giúp mình nhé.'
+        }
+        onRetry={reload}
+      />
+    )
+  }
+
   // Above the routes, so walking into a section does not restart the
   // conversation — it only changes the shape the assistant is rendered in.
   // Keyed by tab, so each page holds its own questions and its own thread.

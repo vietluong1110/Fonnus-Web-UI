@@ -90,7 +90,7 @@ export function InsuranceSection() {
         </Card>
       </div>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="BHYT, bảo hiểm và khám ban đầu" />
+      <SaveBar {...d.bar} sub="BHYT, bảo hiểm và khám ban đầu" />
     </>
   )
 }

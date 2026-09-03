@@ -159,10 +159,9 @@ export function HoursSection() {
       </div>
 
       <SaveBar
+        {...d.bar}
         dirty={d.dirty || !draft.operating_hours_confirmed}
-        saving={d.saving}
         onSave={save}
-        onCancel={d.cancel}
         label={draft.operating_hours_confirmed ? 'Bạn có thay đổi chưa lưu' : 'Xác nhận giờ làm việc'}
         sub={invalid ? 'Có ngày giờ đóng trước giờ mở — sửa trước khi lưu.' : `${agent} đọc giờ này khi khách hỏi "mấy giờ mở cửa".`}
       />

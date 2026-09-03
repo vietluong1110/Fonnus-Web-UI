@@ -35,7 +35,7 @@ export function CallOverlay({ demo, spotRef }: CallOverlayProps) {
       <div className={styles.controls}>
         <div className={styles.chips}>
           {CHIPS.map((chip) => (
-            <button key={chip.label} onClick={() => demo.speak(chip.speakMs)} className={styles.chip}>
+            <button key={chip.label} onClick={() => demo.ask(chip.label)} className={styles.chip}>
               {chip.label}
             </button>
           ))}

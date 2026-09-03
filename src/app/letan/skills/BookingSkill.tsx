@@ -169,7 +169,7 @@ export function BookingSkill() {
         ) : null}
       </Card>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub={anyBad ? 'Có khung giờ nằm ngoài giờ làm việc — kiểm tra lại trước khi lưu.' : `${draft.ai_bookable_slots_per_day} chỗ mỗi ngày · hẹn ${draft.slot_duration} phút · xác nhận qua ${LABELS.confirmation[draft.booking_confirmation_channel]}`} />
+      <SaveBar {...d.bar} sub={anyBad ? 'Có khung giờ nằm ngoài giờ làm việc — kiểm tra lại trước khi lưu.' : `${draft.ai_bookable_slots_per_day} chỗ mỗi ngày · hẹn ${draft.slot_duration} phút · xác nhận qua ${LABELS.confirmation[draft.booking_confirmation_channel]}`} />
     </>
   )
 }

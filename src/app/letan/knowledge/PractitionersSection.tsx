@@ -101,7 +101,7 @@ export function PractitionersSection() {
         </SpeechBubble>
       ) : null}
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="Bác sĩ · tên bác sĩ cũng được thêm vào Từ hay nghe nhầm" />
+      <SaveBar {...d.bar} sub="Bác sĩ · tên bác sĩ cũng được thêm vào Từ hay nghe nhầm" />
     </>
   )
 }

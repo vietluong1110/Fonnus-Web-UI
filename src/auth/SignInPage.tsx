@@ -9,8 +9,9 @@ import { LastUsedBadge, SocialOptions } from './SocialOptions'
 import { readLastMethod, rememberMethod } from './lastMethod'
 import { formatPhone, isValidEmail, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
-import { DEMO_ACCOUNT, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
-import { startSession } from './session'
+import { api, messageFor } from '../api'
+import type { GoogleAccount, Me } from '../api'
+import { useSession } from './SessionProvider'
 import styles from './AuthPage.module.css'
 
 /*
@@ -36,6 +37,7 @@ const SWAP = (
 )
 
 export function SignInPage() {
+  const session = useSession()
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -56,34 +58,48 @@ export function SignInPage() {
     setStep(next)
   }
 
-  // The code verified: open a local session and go into the app shell.
+  // The server has set the session cookie: record who is in and go to the shell.
   const enterApp = useCallback(
-    (google?: { name: string; email: string }) => {
-      startSession(
-        google
-          ? { identity: google.email, method: 'google', displayName: google.name }
-          : email
-            ? { identity: email, method: 'email', displayName: DEMO_ACCOUNT.displayName }
-            : { identity: normalizePhone(phone), method: 'phone', displayName: DEMO_ACCOUNT.displayName },
-      )
+    (me: Me) => {
+      session.signIn(me)
       navigate('app')
     },
-    [email, phone],
+    [session],
   )
 
   const confirmCode = useCallback(
     async (entered: string, method: 'phone' | 'email') => {
       setBusy(true)
-      const result = await verifyCode(entered)
-      setBusy(false)
-
-      if (!result.ok) {
-        setCodeError('Mã không đúng. Kiểm tra lại giúp mình nhé.')
+      try {
+        const identity = method === 'email' ? email : normalizePhone(phone)
+        const me = await api.auth.verifyCode({ identity, code: entered })
+        rememberMethod(method)
+        enterApp(me)
+      } catch (e) {
+        // messageFor() knows the difference between a wrong code, an expired
+        // one, too many tries and the server simply being down.
+        setCodeError(messageFor(e))
         setCode('')
-        return
+      } finally {
+        setBusy(false)
       }
-      rememberMethod(method)
-      enterApp()
+    },
+    [email, phone, enterApp],
+  )
+
+  const signInWithGoogle = useCallback(
+    async (account: GoogleAccount) => {
+      setBusy(true)
+      try {
+        const me = await api.auth.signInWithGoogle(account)
+        rememberMethod('google')
+        enterApp(me)
+      } catch (e) {
+        setFieldError(messageFor(e))
+        goTo('phone')
+      } finally {
+        setBusy(false)
+      }
     },
     [enterApp],
   )
@@ -93,20 +109,30 @@ export function SignInPage() {
     if (problem) return setFieldError(problem)
 
     setBusy(true)
-    await sendPhoneCode(phone)
-    setBusy(false)
-    resend.restart()
-    goTo('phone-otp')
+    try {
+      await api.auth.sendPhoneCode(phone)
+      resend.restart()
+      goTo('phone-otp')
+    } catch (e) {
+      setFieldError(messageFor(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function submitEmail() {
     if (!isValidEmail(email)) return setFieldError('Email chưa đúng định dạng.')
 
     setBusy(true)
-    await sendEmailCode(email)
-    setBusy(false)
-    resend.restart()
-    goTo('email-otp')
+    try {
+      await api.auth.sendEmailCode(email)
+      resend.restart()
+      goTo('email-otp')
+    } catch (e) {
+      setFieldError(messageFor(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   switch (step) {
@@ -175,7 +201,7 @@ export function SignInPage() {
             secondsLeft={resend.left}
             onResend={() => {
               resend.restart()
-              void sendPhoneCode(phone)
+              void api.auth.sendPhoneCode(phone).catch(() => {})
             }}
           />
         </AuthShell>
@@ -188,10 +214,7 @@ export function SignInPage() {
           back={{ label: 'Quay lại', onClick: () => goTo('phone') }}
           overlay={
             <GoogleChooser
-              onPick={(account) => {
-                rememberMethod('google')
-                enterApp(account)
-              }}
+              onPick={(account) => void signInWithGoogle(account)}
               onDismiss={() => goTo('phone')}
             />
           }
@@ -267,7 +290,7 @@ export function SignInPage() {
             secondsLeft={resend.left}
             onResend={() => {
               resend.restart()
-              void sendEmailCode(email)
+              void api.auth.sendEmailCode(email).catch(() => {})
             }}
             note="Không thấy email? Kiểm tra mục Spam."
           />

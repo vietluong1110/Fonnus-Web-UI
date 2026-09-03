@@ -116,7 +116,7 @@ export function InstructionsSection() {
         </aside>
       </div>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="Chỉ dẫn riêng · áp dụng cho cuộc gọi tiếp theo" />
+      <SaveBar {...d.bar} sub="Chỉ dẫn riêng · áp dụng cho cuộc gọi tiếp theo" />
     </>
   )
 }

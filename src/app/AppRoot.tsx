@@ -1,23 +1,29 @@
 import { useEffect } from 'react'
-import { isSignedIn } from '../auth/session'
+import { useSession } from '../auth/SessionProvider'
 import { navigate, useAppPath } from '../hooks/useRoute'
 import { AppShell, activeNav } from './AppShell'
 import { ConfigProvider } from './letan/store'
 import { LeTanPage } from './letan/LeTanPage'
 import { PlaceholderPage } from './pages/Placeholder'
-import { ToastProvider } from './ui'
+import { ConnectionError, ShellSkeleton } from './Boot'
 
 /**
  * Everything under `#/app`. Guards the session, then picks the page from the
  * first path segment. Only Lễ tân is built; the other five are placeholders.
+ *
+ * The guard has three answers, not two. "Still checking" is a real state — the
+ * session lives in an httpOnly cookie this app cannot read, so the only way to
+ * know is a round trip, and bouncing to sign-in while that is in flight would
+ * throw out a perfectly good session on every reload.
  */
 export function AppRoot() {
   const path = useAppPath()
-  const signedIn = isSignedIn()
+  const { status, error, hint } = useSession()
 
   useEffect(() => {
-    if (!signedIn) navigate('signin')
-  }, [signedIn])
+    // Only once we actually know. `checking` must not redirect.
+    if (status === 'anonymous' && !error) navigate('signin')
+  }, [status, error])
 
   useEffect(() => {
     const nav = activeNav(path)
@@ -35,15 +41,23 @@ export function AppRoot() {
     }
   }, [])
 
-  if (!signedIn) return null
+  if (status === 'checking') {
+    // If this browser signed in recently, show the frame it is about to see
+    // rather than a blank page. The hint is not a credential and gates nothing.
+    return hint ? <ShellSkeleton /> : null
+  }
+
+  // Unreachable is not signed-out. Offer a retry instead of throwing the owner
+  // back to a login screen they cannot get through either.
+  if (status === 'anonymous' && error) return <ConnectionError />
+
+  if (status === 'anonymous') return null
 
   const nav = activeNav(path)
 
   return (
-    <ToastProvider>
-      <ConfigProvider>
-        <AppShell>{nav.key === 'le-tan' ? <LeTanPage path={path.slice(1)} /> : <PlaceholderPage title={nav.label} />}</AppShell>
-      </ConfigProvider>
-    </ToastProvider>
+    <ConfigProvider>
+      <AppShell>{nav.key === 'le-tan' ? <LeTanPage path={path.slice(1)} /> : <PlaceholderPage title={nav.label} />}</AppShell>
+    </ConfigProvider>
   )
 }

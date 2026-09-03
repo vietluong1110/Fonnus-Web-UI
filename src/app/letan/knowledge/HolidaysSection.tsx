@@ -116,10 +116,9 @@ export function HolidaysSection() {
       ) : null}
 
       <SaveBar
+        {...d.bar}
         dirty={d.dirty || !draft.holidays_confirmed}
-        saving={d.saving}
         onSave={save}
-        onCancel={d.cancel}
         label={draft.holidays_confirmed ? 'Bạn có thay đổi chưa lưu' : 'Xác nhận lịch nghỉ'}
         sub={tet ? `Tết ${fmt(tet.date_from)} – ${fmt(tet.date_to)} · ${rows.length} ngày nghỉ` : 'Chưa có ngày Tết trong danh sách.'}
       />

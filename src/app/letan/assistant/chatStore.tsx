@@ -1,5 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { api, attachmentKindOf, isCanceled, messageFor } from '../../../api'
+import type { AssistantEvent, AttachmentRef, ChatPage } from '../../../api'
 import { newId } from '../model'
 import type { Question } from '../questions'
 import { useConfig } from '../store'
@@ -13,11 +15,16 @@ import { useQuestionQueue } from '../knowledge/AskRail'
  * speakers with two different marks, because conflating them makes it look
  * like the receptionist is interviewing her own employer.
  *
- * The conversation is a view over `buildQuestions(config)` — the same queue
- * the Kiến thức rail runs — so a chip or a parseable sentence writes straight
- * into the tenant record and the queue shrinks. Free text that the question
- * cannot parse comes back as a correction rather than a silent no-op, and
- * attachments are acknowledged but not read: there is no model behind this yet.
+ * This file is now view state only. What the assistant *says* — and what it
+ * writes into the record — comes from `api.assistant`, as a stream of events:
+ * `delta` for text, `patch` for a field it filled in, `rejected` for an answer
+ * it could not use. Today that stream is produced in the browser by the regex
+ * parsers in `questions.ts`; live it is an SSE stream from a model. Nothing in
+ * this component knows which.
+ *
+ * The assistant's write authority is deliberately narrow: it emits a patch and
+ * this file applies it through the same `update()` a form uses. It cannot write
+ * to the record any other way.
  *
  * ONE CONVERSATION PER PAGE. The queue is filtered to questions that belong to
  * the tab you are on, and each tab keeps its own history — an assistant that
@@ -26,7 +33,7 @@ import { useQuestionQueue } from '../knowledge/AskRail'
  * panel becomes a docked window) does not restart anything.
  */
 
-export type ChatPage = 'ho-so' | 'kien-thuc' | 'ky-nang'
+export type { ChatPage }
 
 const PAGE_LABEL: Record<ChatPage, string> = {
   'ho-so': 'Hồ sơ',
@@ -34,17 +41,10 @@ const PAGE_LABEL: Record<ChatPage, string> = {
   'ky-nang': 'Kỹ năng',
 }
 
-export type AttachmentKind = 'image' | 'pdf' | 'doc' | 'sheet' | 'slide' | 'text' | 'file'
-
-export interface Attachment {
-  id: string
-  name: string
-  kind: AttachmentKind
-  /** Bytes; 0 for pasted text. */
-  size: number
-  /** Object URL for images, so the chip can show a thumbnail. */
-  preview?: string
-}
+/** Re-exported so the panel keeps importing its types from one place. */
+export type { AttachmentKind, AttachmentRef } from '../../../api'
+export type Attachment = AttachmentRef
+export const attachmentKind = attachmentKindOf
 
 export interface ChatMessage {
   id: string
@@ -57,17 +57,6 @@ export interface ChatMessage {
   attachments?: Attachment[]
 }
 
-export function attachmentKind(name: string, type: string): AttachmentKind {
-  if (type.startsWith('image/')) return 'image'
-  const ext = name.toLowerCase().split('.').pop() ?? ''
-  if (ext === 'pdf') return 'pdf'
-  if (ext === 'doc' || ext === 'docx' || ext === 'rtf') return 'doc'
-  if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') return 'sheet'
-  if (ext === 'ppt' || ext === 'pptx') return 'slide'
-  if (ext === 'txt' || ext === 'md') return 'text'
-  return 'file'
-}
-
 interface ChatStore {
   /** Which page's conversation this is — shown in the panel header. */
   pageLabel: string
@@ -76,6 +65,8 @@ interface ChatStore {
   current: Question | undefined
   /** No question left on this page. Drives the closing line, never a count. */
   done: boolean
+  /** A turn is in flight — the composer disables and the panel can show a beat. */
+  busy: boolean
   minimized: boolean
   setMinimized: (v: boolean) => void
   answerWithChip: (label: string, patch: Record<string, unknown>, confirm: string) => void
@@ -104,10 +95,21 @@ export function SetupChatProvider({ page, children }: { page: ChatPage; children
    * Arriving collapsed keeps that preview whole; once opened it stays open.
    */
   const [minimized, setMinimized] = useState(true)
+  const [busy, setBusy] = useState(false)
 
   // One history and one "already asked" marker per page.
   const [histories, setHistories] = useState<Partial<Record<ChatPage, ChatMessage[]>>>({})
   const asked = useRef<Partial<Record<ChatPage, string | null>>>({})
+
+  // Readable from a callback without making every keystroke a new callback.
+  const configRef = useRef(config)
+  configRef.current = config
+
+  // One turn at a time; a page change or unmount cancels whatever is streaming.
+  const inFlight = useRef<AbortController | null>(null)
+  useEffect(() => {
+    return () => inFlight.current?.abort()
+  }, [page])
 
   const history = histories[page] ?? [{ id: `open-${page}`, role: 'assistant' as const, text: opener(agent, page) }]
 
@@ -129,6 +131,11 @@ export function SetupChatProvider({ page, children }: { page: ChatPage; children
     [page],
   )
 
+  /*
+   * A chip is a pre-parsed answer: the patch and the confirmation line are both
+   * known before the click, so there is nothing for the assistant to work out
+   * and no reason to make the owner wait for a round trip.
+   */
   const answerWithChip = useCallback(
     (label: string, patch: Record<string, unknown>, confirm: string) => {
       const asking = current
@@ -149,45 +156,83 @@ export function SetupChatProvider({ page, children }: { page: ChatPage; children
     (text: string, attachments: Attachment[]) => {
       const asking = current
       const said = text.trim()
-      const userMsg: ChatMessage = { id: newId('m'), role: 'user', text: said, attachments: attachments.length ? attachments : undefined }
+      if (!said && !attachments.length) return
 
-      // Files are acknowledged, never parsed: there is no extraction service yet.
-      if (attachments.length && !said) {
-        commit(
-          [
-            ...messages,
-            userMsg,
-            {
-              id: newId('m'),
-              role: 'assistant',
-              text: `Em nhận được ${attachments.length} tệp rồi ạ. Em sẽ đọc và điền giúp anh chị, xong em báo lại.`,
-            },
-          ],
-          asking?.id ?? null,
-        )
-        return
+      const userMsg: ChatMessage = {
+        id: newId('m'),
+        role: 'user',
+        text: said,
+        attachments: attachments.length ? attachments : undefined,
       }
+      const withUser = [...messages, userMsg]
+      // Show the owner's own line straight away; the reply streams in after.
+      commit(withUser, asking?.id ?? null)
 
-      if (!asking) {
-        commit([...messages, userMsg, { id: newId('m'), role: 'assistant', text: 'Em ghi nhận rồi ạ.' }], null)
-        return
-      }
+      inFlight.current?.abort()
+      const ac = new AbortController()
+      inFlight.current = ac
+      setBusy(true)
 
-      const result = asking.applyText(config, said)
-      if ('error' in result) {
-        // The question stays open, so `asked` is left pointing at it.
-        commit([...messages, userMsg, { id: newId('m'), role: 'assistant', text: result.error, tone: 'error' }], asking.id)
-        return
-      }
+      void (async () => {
+        // One bubble per turn, appended to as deltas arrive.
+        const replyId = newId('m')
+        let reply = ''
+        let tone: ChatMessage['tone']
+        // The question stays open unless something actually answered it.
+        let nextAsked = asking?.id ?? null
 
-      const confirm = asking.confirm({ ...config, ...result })
-      commit(
-        [...messages, userMsg, { id: newId('m'), role: 'assistant', text: `Đã ghi ${confirm} vào ${asking.sectionLabel}.`, tone: 'saved' }],
-        asking.id,
-      )
-      update(result)
+        const render = () => {
+          commit([...withUser, { id: replyId, role: 'assistant', text: reply, tone }], nextAsked)
+        }
+
+        try {
+          const turn = {
+            page,
+            text: said,
+            attachments,
+            questionId: asking?.id,
+            config: configRef.current,
+          }
+          for await (const event of api.assistant.send(turn, { signal: ac.signal })) {
+            const e = event as AssistantEvent
+            if (e.type === 'delta') {
+              reply += e.text
+              render()
+            } else if (e.type === 'patch') {
+              reply = `Đã ghi ${e.confirm}.`
+              tone = 'saved'
+              // Answered: let the queue move on to the next question.
+              nextAsked = asking?.id ?? null
+              update(e.patch)
+              render()
+            } else if (e.type === 'rejected') {
+              reply = e.reason
+              tone = 'error'
+              // Not answered — leave `asked` pointing at it so it stays open.
+              nextAsked = asking?.id ?? null
+              render()
+            } else if (e.type === 'extraction') {
+              // Never applied automatically: the owner is promised, in writing,
+              // that they review every suggestion before Linh uses it.
+              reply = e.summary
+              render()
+            }
+          }
+        } catch (err) {
+          if (!isCanceled(err)) {
+            reply = messageFor(err)
+            tone = 'error'
+            render()
+          }
+        } finally {
+          if (inFlight.current === ac) {
+            inFlight.current = null
+            setBusy(false)
+          }
+        }
+      })()
     },
-    [messages, current, config, update, commit],
+    [messages, current, page, update, commit],
   )
 
   const value = useMemo(
@@ -196,12 +241,13 @@ export function SetupChatProvider({ page, children }: { page: ChatPage; children
       messages,
       current,
       done: !current,
+      busy,
       minimized,
       setMinimized,
       answerWithChip,
       answerWithText,
     }),
-    [page, messages, current, minimized, answerWithChip, answerWithText],
+    [page, messages, current, busy, minimized, answerWithChip, answerWithText],
   )
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>

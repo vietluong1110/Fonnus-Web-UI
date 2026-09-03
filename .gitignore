@@ -1,3 +1,9 @@
 node_modules/
 dist/
 *.tsbuildinfo
+
+# Local environment. `.env.example` is the committed template; everything else
+# is a developer's own machine and must never be committed.
+.env
+.env.*
+!.env.example

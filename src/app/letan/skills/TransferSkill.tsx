@@ -184,7 +184,7 @@ export function TransferSkill() {
         </Disclosure>
       </Card>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub={hasTarget ? `Chuyển máy tới ${who}${emergencyOk ? ` · khẩn cấp tới ${doctor}` : ''}` : 'Chưa có số máy nhận — lưu được, nhưng Linh chưa chuyển máy được.'} />
+      <SaveBar {...d.bar} sub={hasTarget ? `Chuyển máy tới ${who}${emergencyOk ? ` · khẩn cấp tới ${doctor}` : ''}` : 'Chưa có số máy nhận — lưu được, nhưng Linh chưa chuyển máy được.'} />
     </>
   )
 }

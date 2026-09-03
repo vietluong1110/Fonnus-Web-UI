@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { api, messageFor } from '../../api'
 import { Button, Input } from '../../design-system'
 import { CONTACT } from '../../data/content'
 import { hrefFor } from '../../hooks/useRoute'
@@ -18,15 +19,38 @@ const EMPTY = { clinic: '', name: '', phone: '' }
  * chains and hospitals on a quoted plan, and anyone who would rather be walked
  * through call forwarding than click "Dùng thử miễn phí".
  *
- * Nothing is posted anywhere yet — the form moves to its success state locally,
- * ready for a real endpoint later.
+ * Posts through `api.leads`. The landing page is outside `ToastProvider` — and
+ * should be: a toast is a thing that disappears, and someone who just typed
+ * their phone number needs to see what happened to it. So the error lives
+ * inline, under the button, and the form keeps what they typed.
  */
 export function Contact() {
   const [fields, setFields] = useState(EMPTY)
   const [sent, setSent] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const set = (key: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (key: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null)
     setFields((f) => ({ ...f, [key]: e.target.value }))
+  }
+
+  async function submit() {
+    setBusy(true)
+    setError(null)
+    try {
+      await api.leads.submit({
+        clinic_name: fields.clinic,
+        contact_name: fields.name,
+        phone: fields.phone,
+      })
+      setSent(true)
+    } catch (e) {
+      setError(messageFor(e))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
     <section id="lien-he" className={`${section.section} ${section.milk}`}>
@@ -72,6 +96,7 @@ export function Contact() {
                 variant="ghost"
                 onClick={() => {
                   setSent(false)
+                  setError(null)
                   setFields(EMPTY)
                 }}
               >
@@ -83,7 +108,7 @@ export function Contact() {
               className={styles.form}
               onSubmit={(e) => {
                 e.preventDefault()
-                setSent(true)
+                void submit()
               }}
             >
               <Input
@@ -107,9 +132,14 @@ export function Contact() {
                 onChange={set('phone')}
                 hint="Chúng tôi chỉ gọi, không nhắn tin quảng cáo."
               />
-              <Button type="submit" size="lg" fullWidth>
-                Gửi thông tin
+              <Button type="submit" size="lg" fullWidth disabled={busy}>
+                {busy ? 'Đang gửi…' : 'Gửi thông tin'}
               </Button>
+              {error ? (
+                <p className={styles.formError} role="alert">
+                  {error}
+                </p>
+              ) : null}
               <p className={styles.formNote}>
                 Không cần chờ gọi lại: <a href={hrefFor('signup')}>dùng thử miễn phí 14 ngày</a> hoặc{' '}
                 <a href="#hero">nghe thử ngay</a>.

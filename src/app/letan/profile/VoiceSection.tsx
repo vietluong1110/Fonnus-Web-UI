@@ -239,7 +239,7 @@ export function VoiceSection() {
         </aside>
       </div>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="Giọng nói và cách nói · áp dụng cho cuộc gọi tiếp theo" />
+      <SaveBar {...d.bar} sub="Giọng nói và cách nói · áp dụng cho cuộc gọi tiếp theo" />
     </>
   )
 }

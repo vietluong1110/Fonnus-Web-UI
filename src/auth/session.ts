@@ -1,46 +1,39 @@
-/*
- * Front-end session. Nothing here is a credential: it only records that the
- * code was verified in this browser, so a reload on `#/app` does not bounce the
- * owner back to the sign-in screen.
+/**
+ * The session *hint* — not the session.
  *
- * TODO: replace with the httpOnly session cookie the auth endpoints will set;
- * `isSignedIn` then becomes a GET /me probe.
+ * The real session is an httpOnly cookie the browser holds and this app cannot
+ * read. `GET /me` is the only way to know whether it is still valid, and that is
+ * a round trip. This flag records "a sign-in completed in this browser recently"
+ * so the app shell can render its frame while the probe is still in flight,
+ * instead of flashing the sign-in screen at an owner who is perfectly signed in.
+ *
+ * It is deliberately not a credential and grants nothing: a stale `true` here
+ * costs one skeleton frame before the probe answers 401 and redirects. Never
+ * gate anything real on it.
  */
 
-const KEY = 'fonnus.session'
+const HINT_KEY = 'fonnus.session.hint'
 
-export interface Session {
-  /** National-format phone, or the email / Google account that signed in. */
-  identity: string
-  method: 'phone' | 'email' | 'google'
-  displayName: string
-  signedInAt: string
-}
-
-export function readSession(): Session | null {
+export function readSessionHint(): boolean {
   try {
-    const raw = window.localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as Session) : null
+    return window.localStorage.getItem(HINT_KEY) === '1'
   } catch {
-    return null
+    // Private mode: no hint, so a reload shows the sign-in screen a beat sooner.
+    return false
   }
 }
 
-export function isSignedIn(): boolean {
-  return readSession() !== null
-}
-
-export function startSession(session: Omit<Session, 'signedInAt'>) {
+export function writeSessionHint(): void {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify({ ...session, signedInAt: new Date().toISOString() }))
+    window.localStorage.setItem(HINT_KEY, '1')
   } catch {
-    /* private mode: the session simply does not survive a reload */
+    /* ignore */
   }
 }
 
-export function endSession() {
+export function clearSessionHint(): void {
   try {
-    window.localStorage.removeItem(KEY)
+    window.localStorage.removeItem(HINT_KEY)
   } catch {
     /* ignore */
   }

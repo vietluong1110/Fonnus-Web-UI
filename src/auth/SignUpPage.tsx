@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '../design-system'
 import { hrefFor, navigate } from '../hooks/useRoute'
-import { startSession } from './session'
+import { useSession } from './SessionProvider'
 import { AuthHeading, AuthShell } from './AuthShell'
 import { Field, PhoneField } from './Field'
 import { GoogleChooser } from './GoogleChooser'
@@ -11,7 +11,8 @@ import { takePhone } from './handoff'
 import { rememberMethod } from './lastMethod'
 import { formatPhone, isValidEmail, normalizePhone, phoneError } from './phone'
 import { useCountdown } from './useCountdown'
-import { DEMO_ACCOUNT, saveProfile, sendEmailCode, sendPhoneCode, verifyCode } from './mockAuth'
+import { api, isCanceled, messageFor } from '../api'
+import type { GoogleAccount, Me } from '../api'
 import styles from './AuthPage.module.css'
 
 /*
@@ -57,25 +58,47 @@ export function SignUpPage() {
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
+  const session = useSession()
   const [code, setCode] = useState('')
   const [greetName, setGreetName] = useState('')
   const [signedUpWith, setSignedUpWith] = useState('')
   const [fieldError, setFieldError] = useState<string | null>(null)
   const [codeError, setCodeError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // Whatever the server said the account is, once a code verified.
+  const [me, setMe] = useState<Me | null>(null)
 
   const resend = useCountdown(RESEND_SECONDS)
   const emailResend = useCountdown(EMAIL_RESEND_SECONDS)
 
-  // A number typed in the landing hero skips this screen and goes to the code.
+  /*
+   * A number typed in the landing hero skips this screen and goes to the code.
+   *
+   * `takePhone()` reads sessionStorage once and deletes it, which does not
+   * survive StrictMode's double-invoked effect: the first pass takes the number
+   * and is then aborted by the cleanup, and the second pass finds nothing. So
+   * the value is parked in a ref — the second pass reuses it, and only the
+   * abandoned request is thrown away.
+   */
+  const handedOffPhone = useRef<string | null>(null)
   useEffect(() => {
-    const handedOff = takePhone()
+    const handedOff = handedOffPhone.current ?? takePhone()
     if (!handedOff) return
+    handedOffPhone.current = handedOff
+
     setPhone(handedOff)
     setBusy(true)
-    sendPhoneCode(handedOff)
-      .then(({ existingAccount }) => setStep(existingAccount ? 'existing-otp' : 'phone-otp'))
-      .finally(() => setBusy(false))
+    const ac = new AbortController()
+    api.auth
+      .sendPhoneCode(handedOff, { signal: ac.signal })
+      .then(({ existing_account }) => setStep(existing_account ? 'existing-otp' : 'phone-otp'))
+      .catch((e: unknown) => {
+        if (!isCanceled(e)) setFieldError(messageFor(e))
+      })
+      .finally(() => {
+        if (!ac.signal.aborted) setBusy(false)
+      })
+    return () => ac.abort()
   }, [])
 
   const goTo = (next: Step) => {
@@ -90,36 +113,50 @@ export function SignUpPage() {
     if (problem) return setFieldError(problem)
 
     setBusy(true)
-    const { existingAccount } = await sendPhoneCode(phone)
-    setBusy(false)
-    resend.restart()
-    goTo(existingAccount ? 'existing-otp' : 'phone-otp')
+    try {
+      const { existing_account } = await api.auth.sendPhoneCode(phone)
+      resend.restart()
+      goTo(existing_account ? 'existing-otp' : 'phone-otp')
+    } catch (e) {
+      setFieldError(messageFor(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function submitEmail() {
     if (!isValidEmail(email)) return setFieldError('Email chưa đúng định dạng.')
 
     setBusy(true)
-    await sendEmailCode(email)
-    setBusy(false)
-    emailResend.restart()
-    goTo('email-otp')
+    try {
+      await api.auth.sendEmailCode(email)
+      emailResend.restart()
+      goTo('email-otp')
+    } catch (e) {
+      setFieldError(messageFor(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   // Confirms itself on the sixth digit — no "Xác nhận" button to hunt for.
-  const confirmCode = useCallback(async (entered: string, next: Step) => {
-    setBusy(true)
-    const result = await verifyCode(entered)
-    setBusy(false)
-
-    if (!result.ok) {
-      setCodeError('Mã không đúng. Kiểm tra lại giúp mình nhé.')
-      setCode('')
-      return
-    }
-    setCodeError(null)
-    setStep(next)
-  }, [])
+  const confirmCode = useCallback(
+    async (entered: string, next: Step) => {
+      setBusy(true)
+      try {
+        const identity = phone ? normalizePhone(phone) : email
+        setMe(await api.auth.verifyCode({ identity, code: entered }))
+        setCodeError(null)
+        setStep(next)
+      } catch (e) {
+        setCodeError(messageFor(e))
+        setCode('')
+      } finally {
+        setBusy(false)
+      }
+    },
+    [phone, email],
+  )
 
   async function finish(
     profile: { fullName?: string; phone?: string; email?: string },
@@ -127,21 +164,41 @@ export function SignUpPage() {
     method: 'phone' | 'email',
   ) {
     setBusy(true)
-    await saveProfile(profile)
-    setBusy(false)
+    try {
+      setMe(await api.auth.updateProfile({ full_name: profile.fullName, phone: profile.phone }))
+    } catch (e) {
+      // The account already exists — the code verified. A failed name save is
+      // not worth trapping the owner on this screen; they can fix it in Cài đặt.
+      setFieldError(messageFor(e))
+    } finally {
+      setBusy(false)
+    }
     rememberMethod(method)
     setGreetName(greeting)
     setStep('done')
   }
 
-  // The account exists once the code verified: open a local session and go in.
+  // The account exists once the code verified, and the server has set the
+  // session cookie. Nothing here invents an identity.
   const enterApp = () => {
-    startSession({
-      identity: phone || email || 'google',
-      method: phone ? 'phone' : email ? 'email' : 'google',
-      displayName: fullName || greetName || DEMO_ACCOUNT.displayName,
-    })
+    if (me) session.signIn(me)
     navigate('app')
+  }
+
+  const signUpWithGoogle = async (account: GoogleAccount) => {
+    setBusy(true)
+    try {
+      setMe(await api.auth.signInWithGoogle(account))
+      rememberMethod('google')
+      setSignedUpWith(account.email)
+      setGreetName(account.name.split(' ').slice(-1)[0])
+      setStep('done')
+    } catch (e) {
+      setFieldError(messageFor(e))
+      goTo('phone')
+    } finally {
+      setBusy(false)
+    }
   }
 
   switch (step) {
@@ -210,7 +267,7 @@ export function SignUpPage() {
             secondsLeft={resend.left}
             onResend={() => {
               resend.restart()
-              void sendPhoneCode(phone)
+              void api.auth.sendPhoneCode(phone).catch(() => {})
             }}
           />
         </AuthShell>
@@ -262,12 +319,7 @@ export function SignUpPage() {
           back={{ label: 'Quay lại', onClick: () => goTo('phone') }}
           overlay={
             <GoogleChooser
-              onPick={(account) => {
-                rememberMethod('google')
-                setSignedUpWith(account.email)
-                setGreetName(account.name.split(' ').slice(-1)[0])
-                setStep('done')
-              }}
+              onPick={(account) => void signUpWithGoogle(account)}
               onDismiss={() => goTo('phone')}
             />
           }
@@ -346,7 +398,7 @@ export function SignUpPage() {
             secondsLeft={emailResend.left}
             onResend={() => {
               emailResend.restart()
-              void sendEmailCode(email)
+              void api.auth.sendEmailCode(email).catch(() => {})
             }}
             note="Không thấy email? Kiểm tra mục Spam."
           />
@@ -434,7 +486,7 @@ export function SignUpPage() {
             secondsLeft={resend.left}
             onResend={() => {
               resend.restart()
-              void sendPhoneCode(phone)
+              void api.auth.sendPhoneCode(phone).catch(() => {})
             }}
           />
         </AuthShell>

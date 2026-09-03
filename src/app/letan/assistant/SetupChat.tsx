@@ -78,7 +78,7 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
         name: f.name,
         kind,
         size: f.size,
-        preview: kind === 'image' ? URL.createObjectURL(f) : undefined,
+        previewUrl: kind === 'image' ? URL.createObjectURL(f) : undefined,
       })
     }
     setAttachments((a) => [...a, ...next])
@@ -108,6 +108,7 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
   }
 
   const send = () => {
+    if (chat.busy) return
     if (!text.trim() && !attachments.length) return
     // The object URLs are NOT revoked here: the sent message keeps rendering
     // those thumbnails, so the blobs have to outlive the composer.
@@ -206,8 +207,8 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
           <div className={styles.attachments}>
             {attachments.map((a) => (
               <span key={a.id} className={styles.attachment}>
-                {a.preview ? (
-                  <img src={a.preview} alt="" className={styles.thumb} />
+                {a.previewUrl ? (
+                  <img src={a.previewUrl} alt="" className={styles.thumb} />
                 ) : (
                   <span className={styles.attachIcon}>
                     <Icon name={KIND_ICON[a.kind]} size={14} />
@@ -222,7 +223,7 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
                   className={styles.attachRemove}
                   aria-label={`Bỏ ${a.name}`}
                   onClick={() => {
-                    if (a.preview) URL.revokeObjectURL(a.preview)
+                    if (a.previewUrl) URL.revokeObjectURL(a.previewUrl)
                     setAttachments((list) => list.filter((x) => x.id !== a.id))
                   }}
                 >
@@ -248,7 +249,13 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
           <button type="button" className={styles.headButton} aria-label="Đính kèm tệp" onClick={() => fileRef.current?.click()}>
             <Icon name="plus" size={18} />
           </button>
-          <button type="button" className={styles.send} aria-label="Gửi" onClick={send} disabled={!text.trim() && !attachments.length}>
+          <button
+            type="button"
+            className={styles.send}
+            aria-label="Gửi"
+            onClick={send}
+            disabled={chat.busy || (!text.trim() && !attachments.length)}
+          >
             <Icon name="arrow-up" size={17} />
           </button>
           <input
@@ -265,7 +272,13 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
         </div>
 
         <div className={styles.foot}>
-          <span>{done ? `${agent} đã đủ thông tin ở mục này.` : 'Trả lời ở đây điền thẳng vào các mục.'}</span>
+          <span>
+            {chat.busy
+              ? 'Fonnus đang xem…'
+              : done
+                ? `${agent} đã đủ thông tin ở mục này.`
+                : 'Trả lời ở đây điền thẳng vào các mục.'}
+          </span>
         </div>
       </div>
     </aside>
@@ -288,8 +301,8 @@ function Turn({ message }: { message: ChatMessage }) {
         <div className={styles.attachments} style={{ justifyContent: 'flex-end' }}>
           {message.attachments.map((a) => (
             <span key={a.id} className={styles.attachment}>
-              {a.preview ? (
-                <img src={a.preview} alt="" className={styles.thumb} />
+              {a.previewUrl ? (
+                <img src={a.previewUrl} alt="" className={styles.thumb} />
               ) : (
                 <span className={styles.attachIcon}>
                   <Icon name={KIND_ICON[a.kind]} size={14} />

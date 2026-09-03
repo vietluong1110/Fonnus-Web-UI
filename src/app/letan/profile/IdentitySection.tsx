@@ -136,7 +136,7 @@ export function IdentitySection() {
         </aside>
       </div>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="Danh tính và lời chào · áp dụng cho cuộc gọi tiếp theo" />
+      <SaveBar {...d.bar} sub="Danh tính và lời chào · áp dụng cho cuộc gọi tiếp theo" />
     </>
   )
 }
