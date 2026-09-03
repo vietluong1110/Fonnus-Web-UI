@@ -15,7 +15,10 @@
 
 .work {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  /* 380px is the assistant rail's width on the hub, so the right-hand column
+     is the same width everywhere in the tab. The left column fills whatever
+     is left — capping it as well is what opened a 120px gap in the middle. */
+  grid-template-columns: minmax(0, 1fr) 380px;
   gap: 24px;
   align-items: start;
 }
@@ -25,7 +28,6 @@
   flex-direction: column;
   gap: 20px;
   min-width: 0;
-  max-width: 720px;
 }
 
 .rail {
@@ -49,7 +51,6 @@
   }
 
   .col {
-    max-width: none;
     order: 2;
   }
 

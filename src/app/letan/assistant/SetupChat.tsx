@@ -43,7 +43,7 @@ function humanSize(bytes: number): string {
 export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
   const { config } = useConfig()
   const chat = useSetupChat()
-  const { messages, current, remaining, minimized, setMinimized } = chat
+  const { messages, current, done, pageLabel, minimized, setMinimized } = chat
 
   const [text, setText] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
@@ -137,11 +137,11 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
       </span>
       <span className={styles.headText}>
         <span className={styles.headName}>Fonnus</span>
-        <span className={styles.headMeta}>
-          {remaining ? `Trợ lý thiết lập · còn ${remaining} câu` : `${agent} đã đủ thông tin để trả lời khách`}
-        </span>
+        {/* The page, not a count. A number counting down how much is left to
+            answer reads as a debt, and it is the first thing an owner opening
+            this on a busy morning would rather not see. */}
+        <span className={styles.headMeta}>Trợ lý thiết lập · {pageLabel}</span>
       </span>
-      {docked && minimized && remaining ? <span className={styles.count}>{remaining}</span> : null}
       {docked ? (
         <button
           type="button"
@@ -265,12 +265,7 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
         </div>
 
         <div className={styles.foot}>
-          <span>Trả lời ở đây điền thẳng vào các mục.</span>
-          {current ? (
-            <button type="button" className={styles.skip} onClick={chat.skipCurrent}>
-              Để sau
-            </button>
-          ) : null}
+          <span>{done ? `${agent} đã đủ thông tin ở mục này.` : 'Trả lời ở đây điền thẳng vào các mục.'}</span>
         </div>
       </div>
     </aside>

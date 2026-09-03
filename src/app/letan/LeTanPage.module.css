@@ -10,17 +10,20 @@
 
 .head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 20px;
   flex-wrap: wrap;
 }
 
+/* Title and number are boxes on one centre line, not text on a baseline —
+   the number used to hang off a nested flex and never quite lined up. */
 .identity {
   min-width: 0;
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .title {
@@ -31,10 +34,6 @@
   line-height: 1.3;
   letter-spacing: var(--tracking-display);
   color: var(--ink);
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
 }
 
 .titleCompact {
@@ -45,35 +44,31 @@
   color: var(--ink-soft);
 }
 
+/* The receptionist's own name in the brand's dark terracotta: this tab is
+   about her, and one day there will be more than one of her. */
 .name {
-  color: var(--ink);
+  color: var(--text-accent);
 }
 
-/* The number reads as data, so it gets the numeric face and a dot separator
-   rather than a chip — it is identity, not a control. */
-.phone {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-soft);
+.phoneBadge {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  padding: 5px 12px 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-warm);
+  color: var(--text-accent);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
   white-space: nowrap;
 }
 
-.phoneCompact {
-  font-size: 13px;
-}
-
-.dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--border-strong);
-  display: inline-block;
-  flex: 0 0 auto;
+.phoneBadgeCompact {
+  font-size: 12px;
+  padding: 3px 10px 3px 8px;
 }
 
 .unassigned {
@@ -85,34 +80,20 @@
 
 /* --------------------------------------------------------------- call orb */
 
-/*
- * The orb is the product's one call affordance — it is what a visitor presses
- * on the landing page to hear Linh. Reusing it here, at 48px, means the
- * gesture an owner already learned before signing up is the same gesture that
- * calls their own receptionist.
- */
 .call {
+  position: relative;
   appearance: none;
   border: none;
   background: none;
-  padding: 4px 6px 6px;
-  margin: -4px -6px -6px;
-  border-radius: var(--radius-md);
+  padding: 0;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
+  display: block;
   flex: 0 0 auto;
-  color: var(--ink);
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.call:hover {
-  background: var(--action-ghost-hover);
+  border-radius: 50%;
 }
 
 .orbWrap {
+  position: relative;
   display: block;
   transition: transform var(--duration-base) var(--ease-arc);
 }
@@ -125,17 +106,68 @@
   transform: scale(var(--press-scale));
 }
 
-.callLabel {
-  font-family: var(--font-ui);
-  font-size: 12.5px;
-  font-weight: 500;
-  line-height: 1.3;
-  white-space: nowrap;
-  transition: color var(--duration-fast) var(--ease-out);
+/* Same glyph and the same lit-from-within shadow as the orb's label on the
+   landing page, so the small one reads as the same object. */
+.callIcon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--cream);
+  pointer-events: none;
+  /*
+   * `Icon` paints a CSS mask, not text, so text-shadow does nothing to it —
+   * drop-shadow is the filter that follows a mask's alpha. The scrim below
+   * does the real work: the orb's pigment drifts through pale phases where a
+   * cream glyph would otherwise vanish.
+   */
+  filter:
+    drop-shadow(0 1px 2px rgba(138, 65, 24, 0.6))
+    drop-shadow(0 0 5px rgba(138, 65, 24, 0.45));
 }
 
-.call:hover .callLabel {
-  color: var(--text-accent);
+.callIcon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(122, 56, 19, 0.46) 0%, rgba(122, 56, 19, 0) 64%);
+}
+
+.tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  background: var(--night);
+  color: var(--cream-night);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  box-shadow: var(--shadow-overlay);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.call:hover .tip,
+.call:focus-visible .tip {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbWrap,
+  .tip {
+    transition: none;
+  }
 }
 
 /* ------------------------------------------------------------- section head */

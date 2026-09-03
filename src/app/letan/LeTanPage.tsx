@@ -72,17 +72,18 @@ export const KNOWLEDGE_SECTIONS = {
 export type KnowledgeSectionKey = keyof typeof KNOWLEDGE_SECTIONS
 
 export function LeTanPage({ path }: { path: string[] }) {
+  const tab = (TABS.some((t) => t.value === path[0]) ? path[0] : 'ho-so') as LeTanTab
   // Above the routes, so walking into a section does not restart the
   // conversation — it only changes the shape the assistant is rendered in.
+  // Keyed by tab, so each page holds its own questions and its own thread.
   return (
-    <SetupChatProvider>
-      <LeTanRoutes path={path} />
+    <SetupChatProvider page={tab}>
+      <LeTanRoutes path={path} tab={tab} />
     </SetupChatProvider>
   )
 }
 
-function LeTanRoutes({ path }: { path: string[] }) {
-  const tab = (TABS.some((t) => t.value === path[0]) ? path[0] : 'ho-so') as LeTanTab
+function LeTanRoutes({ path, tab }: { path: string[]; tab: LeTanTab }) {
 
   if (tab === 'ho-so' && path[1] && path[1] in PROFILE_SECTIONS) {
     const Section = PROFILE_SECTIONS[path[1] as ProfileSectionKey].component
