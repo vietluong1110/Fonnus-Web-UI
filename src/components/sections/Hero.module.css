@@ -20,7 +20,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
-  gap: clamp(32px, 5vw, 64px);
+  column-gap: clamp(32px, 5vw, 64px);
+  /* The proof row is a second row; it sets its own distance with margin, so a
+     row gap here would double up. */
+  row-gap: 0;
 }
 
 /* Two soft washes, both clay — the only "decoration" on the section. */
@@ -150,13 +153,19 @@
   color: var(--ink-soft);
 }
 
-/* Proof sits with the CTA, which is where it does the most work. */
+/*
+ * Full width under both columns, not tucked under the CTA. The claim fills its
+ * own left edge and the orb its right, so a 528px proof row left a wide hole
+ * between them; spanning the grid turns that hole into a base, and the hairline
+ * runs edge to edge as the line that ties the two halves together.
+ */
 .proof {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: 12px;
-  width: min(528px, 100%);
-  margin-top: 34px;
+  width: 100%;
+  margin-top: 44px;
   padding-top: 24px;
   border-top: 1px solid var(--border-hairline);
 }
@@ -188,7 +197,13 @@
   flex-direction: column;
   align-items: center;
   gap: 26px;
-  justify-self: center;
+  /*
+   * End, not center. The claim column fills its own left edge, so a centred orb
+   * leaves ~130px of dead column on the outside and the whole hero reads as
+   * shifted left even though the grid is symmetric. Flush-right puts the orb's
+   * edge on the same 1280px column edge the headline starts from.
+   */
+  justify-self: end;
 }
 
 /*
@@ -245,6 +260,8 @@
   .stage {
     order: 3;
     margin: 26px 0 0;
+    /* Single column here, so the desktop flush-right rule has to stand down. */
+    justify-self: center;
   }
   .signup {
     order: 4;
