@@ -3,6 +3,7 @@ import type { ChangeEvent, ClipboardEvent, DragEvent, KeyboardEvent } from 'reac
 import { Icon, Logo } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
+import { PHONE_BREAKPOINT, useIsNarrow } from '../../../hooks/useIsNarrow'
 import { ChipButton } from '../../ui'
 import { newId } from '../model'
 import { useConfig } from '../store'
@@ -11,9 +12,21 @@ import type { Attachment, AttachmentKind, ChatMessage } from './chatStore'
 import styles from './SetupChat.module.css'
 
 /*
- * Fonnus, the setup assistant, rendered either as a rail beside a hub page or
- * as a window docked bottom-right on a sub-page. Same conversation either way
- * — the state lives in `chatStore`, above the routes.
+ * Fonnus, the setup assistant. Same conversation in every shape it takes —
+ * the state lives in `chatStore`, above the routes.
+ *
+ *   rail   a column beside a hub page
+ *   dock   a window pinned bottom-right on a section page
+ *   phone  neither fits, so the panel splits: what stays in the page is the
+ *          current question and its chips (a `prompt` card on a hub, a `fab`
+ *          on a section page), and the conversation comes up as a `sheet`
+ *          over the page when it is asked for.
+ *
+ * The split matters more than it looks. A full panel above the hub on a phone
+ * pushed all three sections off the screen, so the page opened on a chat box
+ * and hid the thing the owner came for — while a one-tap answer like "Dùng câu
+ * mặc định" still has to cost exactly one tap. Hence a card that carries the
+ * question and the chips but not the log.
  *
  * Nothing here talks to a model. Chips and parseable sentences write into the
  * tenant record through the question queue; attachments are accepted and
@@ -48,26 +61,56 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
   const [text, setText] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [dropping, setDropping] = useState(false)
+  const [sheet, setSheet] = useState(false)
   const logRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const phone = useIsNarrow(PHONE_BREAKPOINT)
   const agent = config.agent_name || 'Linh'
   const docked = variant === 'dock'
+  const asSheet = phone && sheet
 
   // Keep the newest turn in view; the log is the only scrolling region.
   useEffect(() => {
     const el = logRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [messages, minimized])
+  }, [messages, minimized, sheet])
 
-  // The composer grows with its content, up to the cap in CSS.
+  // A sheet that lets the page scroll under it is the thing that makes a sheet
+  // feel broken. Escape closes it, the way every other overlay in the app does.
+  useEffect(() => {
+    if (!asSheet) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === 'Escape') setSheet(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [asSheet])
+
+  // Leaving the phone (a rotation, a resized window) must not leave the page
+  // scroll-locked behind a sheet that is no longer rendered.
+  useEffect(() => {
+    if (!phone) setSheet(false)
+  }, [phone])
+
+  /*
+   * The composer grows with its content, up to the cap in CSS. It also has to
+   * be measured whenever the textarea is a *different element* — opening the
+   * sheet on a phone mounts a fresh one, and one that was never measured opens
+   * one line tall with its own placeholder scrolled out of view.
+   */
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
     el.style.height = 'auto'
     el.style.height = `${el.scrollHeight}px`
-  }, [text])
+  }, [text, sheet, current?.placeholder])
 
   const addFiles = (files: FileList | File[]) => {
     const next: Attachment[] = []
@@ -124,26 +167,42 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
     }
   }
 
-  const shellClass = `${styles.shell} ${docked ? styles.dock : styles.rail} ${docked && minimized ? styles.dockMin : ''}`
+  const shellClass = asSheet
+    ? `${styles.shell} ${styles.sheet}`
+    : `${styles.shell} ${docked ? styles.dock : styles.rail} ${docked && minimized ? styles.dockMin : ''}`
 
-  const head = (
-    <div
-      className={`${styles.head} ${docked && minimized ? styles.minBar : ''}`}
-      onClick={docked && minimized ? () => setMinimized(false) : undefined}
-      role={docked && minimized ? 'button' : undefined}
-      tabIndex={docked && minimized ? 0 : undefined}
-    >
+  // Minimizing is a desktop gesture on a window. A phone has no window to
+  // minimize — it has the button below, which is already the collapsed state.
+  const collapsedDock = !phone && docked && minimized
+
+  // Who is asking, on every shape. The page, not a count: a number counting
+  // down how much is left to answer reads as a debt, and it is the first thing
+  // an owner opening this on a busy morning would rather not see.
+  const identity = (
+    <>
       <span className={styles.mark}>
         <Logo variant="mark" height={17} />
       </span>
       <span className={styles.headText}>
         <span className={styles.headName}>Fonnus</span>
-        {/* The page, not a count. A number counting down how much is left to
-            answer reads as a debt, and it is the first thing an owner opening
-            this on a busy morning would rather not see. */}
         <span className={styles.headMeta}>Trợ lý thiết lập · {pageLabel}</span>
       </span>
-      {docked ? (
+    </>
+  )
+
+  const head = (
+    <div
+      className={`${styles.head} ${collapsedDock ? styles.minBar : ''}`}
+      onClick={collapsedDock ? () => setMinimized(false) : undefined}
+      role={collapsedDock ? 'button' : undefined}
+      tabIndex={collapsedDock ? 0 : undefined}
+    >
+      {identity}
+      {asSheet ? (
+        <button type="button" className={styles.headButton} aria-label="Đóng trợ lý" onClick={() => setSheet(false)}>
+          <Icon name="x" size={18} />
+        </button>
+      ) : docked ? (
         <button
           type="button"
           className={styles.headButton}
@@ -159,7 +218,23 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
     </div>
   )
 
-  if (docked && minimized) {
+  const chips = current?.chips.length ? (
+    <div className={styles.chips}>
+      {current.chips.map((c) => (
+        <ChipButton
+          key={c.label}
+          onClick={() => {
+            const patch = c.apply(config)
+            chat.answerWithChip(c.label, patch as Record<string, unknown>, current.confirm({ ...config, ...patch }))
+          }}
+        >
+          {c.label}
+        </ChipButton>
+      ))}
+    </div>
+  ) : null
+
+  if (collapsedDock) {
     return (
       <aside className={shellClass} aria-label="Trợ lý thiết lập Fonnus">
         {head}
@@ -167,7 +242,54 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
     )
   }
 
-  return (
+  /*
+   * Phone, sheet closed. The dock becomes a button because a section page is a
+   * form and the form comes first; the rail becomes a card because a hub page
+   * has nothing more useful to lead with than the question itself.
+   */
+  if (phone && !sheet) {
+    if (docked) {
+      return (
+        <button
+          type="button"
+          className={styles.fab}
+          aria-label={`Mở trợ lý thiết lập Fonnus${done ? '' : ' — đang có câu hỏi'}`}
+          onClick={() => setSheet(true)}
+        >
+          <Logo variant="mark" height={22} />
+          {done ? null : <span className={styles.fabDot} aria-hidden="true" />}
+        </button>
+      )
+    }
+
+    const asked = [...messages].reverse().find((m) => m.role === 'assistant' && m.text.trim())
+
+    return (
+      <aside className={styles.prompt} aria-label="Trợ lý thiết lập Fonnus">
+        <div className={styles.promptHead}>{identity}</div>
+
+        {done ? (
+          <div className={`${styles.promptQuestion} ${styles.promptDone}`}>
+            <span className={styles.savedIcon}>
+              <Icon name="circle-check" size={15} />
+            </span>
+            <span>{agent} đã đủ thông tin ở mục này.</span>
+          </div>
+        ) : asked ? (
+          <div className={styles.promptQuestion}>{asked.text}</div>
+        ) : null}
+
+        {chips}
+
+        <button type="button" className={styles.promptOpen} onClick={() => setSheet(true)}>
+          {done ? 'Mở trò chuyện với Fonnus' : 'Trả lời Fonnus'}
+          <Icon name="arrow-up" size={17} />
+        </button>
+      </aside>
+    )
+  }
+
+  const panel = (
     <aside
       className={shellClass}
       aria-label="Trợ lý thiết lập Fonnus"
@@ -178,6 +300,7 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
       onDragLeave={() => setDropping(false)}
       onDrop={onDrop}
     >
+      {asSheet ? <span className={styles.grip} aria-hidden="true" /> : null}
       {head}
 
       <div className={styles.log} ref={logRef} role="log">
@@ -185,21 +308,7 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
           <Turn key={m.id} message={m} />
         ))}
 
-        {current?.chips.length ? (
-          <div className={styles.chips}>
-            {current.chips.map((c) => (
-              <ChipButton
-                key={c.label}
-                onClick={() => {
-                  const patch = c.apply(config)
-                  chat.answerWithChip(c.label, patch as Record<string, unknown>, current.confirm({ ...config, ...patch }))
-                }}
-              >
-                {c.label}
-              </ChipButton>
-            ))}
-          </div>
-        ) : null}
+        {chips}
       </div>
 
       <div className={`${styles.composer} ${dropping ? styles.dropping : ''}`}>
@@ -283,6 +392,17 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
       </div>
     </aside>
   )
+
+  if (asSheet) {
+    return (
+      <>
+        <div className={styles.sheetScrim} onClick={() => setSheet(false)} />
+        {panel}
+      </>
+    )
+  }
+
+  return panel
 }
 
 function Turn({ message }: { message: ChatMessage }) {

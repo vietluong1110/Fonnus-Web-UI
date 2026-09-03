@@ -4,23 +4,54 @@
  * The layout rules here are meant to be the template for every other page in
  * the app, so they are written to be copied:
  *
- *   1. One work column and one sticky preview rail, `align-items: start`.
- *      Two editable fields never share a row. That is what stops a growing
- *      textarea from stretching whatever sits beside it — the two columns no
- *      longer share a height at all, so there is nothing to stretch.
+ *   1. One work column and one sticky rail, `align-items: start`. Two editable
+ *      fields never share a row. That is what stops a growing textarea from
+ *      stretching whatever sits beside it — the two columns no longer share a
+ *      height at all, so there is nothing to stretch.
  *   2. Every screen ends in something you can hear. The rail is the caller's
  *      side of the call, updating as the fields change.
  *   3. Status is a summary of what is set, never a "required" badge.
+ *   4. What separates the two columns is the gutter, not the colour: a 380px
+ *      column, a 40px gap, and a hairline down the middle of it — the same
+ *      geometry as `.withRail` in LeTanPage.module.css. Anything with a voice
+ *      that talks back — the Fonnus assistant on the hub — is a **blush
+ *      panel**; a read-only preview is a milk panel of the same shape. Blush
+ *      is never used inside the form itself: no blush callouts, no blush
+ *      badges, so the tint keeps meaning "speech" wherever it appears.
+ *   5. Under 1180px the columns stack, and the stacked container restates
+ *      `align-items: stretch` — see the note in the media query below, and
+ *      the same reset in LeTanPage.module.css.
+ *   6. Under 640px the page is a phone: one column, controls at least 44px
+ *      tall, nothing pinned to the bottom edge without going through
+ *      `--tabbar-h` / `--dock-lift`.
  */
 
+/*
+ * The section page grid. Same geometry as the hub's `.withRail` in
+ * LeTanPage.module.css — 380px panel, 40px gutter, a hairline down the middle
+ * of it — restated rather than composed across files so each keeps its own
+ * cascade. Change both together.
+ */
 .work {
+  position: relative;
   display: grid;
-  /* 380px is the assistant rail's width on the hub, so the right-hand column
-     is the same width everywhere in the tab. The left column fills whatever
-     is left — capping it as well is what opened a 120px gap in the middle. */
   grid-template-columns: minmax(0, 1fr) 380px;
-  gap: 24px;
+  gap: 40px;
   align-items: start;
+}
+
+/* Full height of the taller column, not of the panel: the panel is sticky and
+   short, and a rule that stopped where it stops would look like an accident. */
+.work::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Centre of the gutter: 380px column + half of the 40px gap. */
+  right: 400px;
+  width: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
 }
 
 .col {
@@ -37,7 +68,21 @@
 }
 
 /*
- * Below this the rail would squeeze the work column under ~530px, so it goes
+ * The line under the title says what the page is for. It wraps at the width
+ * of the work column it introduces — the same 380px + 40px the grid below
+ * reserves for the panel — not at a reading measure of its own, which broke
+ * it into a narrow block that stopped well short of the fields underneath.
+ */
+.lede {
+  margin: -6px 0 0;
+  max-width: calc(100% - 420px);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/*
+ * Below this the panel would squeeze the work column under ~530px, so it goes
  * back to being one column — and moves *above* the fields rather than below
  * them, because hearing what the caller hears is the point of the page.
  */
@@ -45,9 +90,16 @@
   .work {
     display: flex;
     flex-direction: column;
-    /* `align-items: start` above is a grid instruction; left in place on a
-       flex column it stops the stacked cards filling the width. */
+    /* The 40px above is the width of a gutter with a rule down it; stacked
+       there is no gutter. And `align-items: start` above is a grid
+       instruction — left in place on a flex column it stops the stacked
+       cards filling the width. */
+    gap: 20px;
     align-items: stretch;
+  }
+
+  .work::before {
+    display: none;
   }
 
   .col {
@@ -58,14 +110,10 @@
     position: static;
     order: 1;
   }
-}
 
-.lede {
-  margin: -6px 0 0;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  max-width: 64ch;
+  .lede {
+    max-width: none;
+  }
 }
 
 /* ------------------------------------------------------------------- hub */
@@ -165,32 +213,109 @@
   flex: 0 0 auto;
 }
 
-/* ---------------------------------------------------------- preview rail */
+/*
+ * Phone. The one-line summary is the whole point of a row — "Chưa dặn gì thêm
+ * — Linh đang trả lời…" ellipsised after four words says nothing — so it wraps
+ * here instead of truncating, and the row grows to fit rather than the text
+ * disappearing.
+ */
+@media (max-width: 639.98px) {
+  .rowLink {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 15px;
+  }
 
-.previewHead {
+  .rowIcon,
+  .rowChev {
+    margin-top: 1px;
+  }
+
+  .rowSub {
+    white-space: normal;
+    overflow: visible;
+  }
+}
+
+/* --------------------------------------------------------- preview panel */
+
+/*
+ * The rail is the caller's side of the call, and it takes the *shape* of the
+ * assistant on the hub — a head above a hairline, the conversation under it,
+ * behind the same rule down the same 40px gutter — on the same milk ground as
+ * the fields it sits beside. It used to be a milk card with a well sunk into
+ * it: a card inside a card, which is what read as cramped. One ground, one
+ * frame, and the gutter rule is what says this column is a different job.
+ *
+ * Separation here is therefore structural, not chromatic. Blush is spent on
+ * the assistant, which is the thing that *talks back*; a read-only transcript
+ * does not need a ground of its own to say it is not a form — having no
+ * inputs in it already says that.
+ *
+ * Inside, the ladder runs loudest first:
+ *
+ *   the play control    the one filled terracotta pill, at the foot
+ *   the agent's line    a blush bubble — the sentence the fields are writing,
+ *                       and the app's "assistant speech" tint everywhere else
+ *   the caller's line   a hollow bubble: the other side of the call, and
+ *                       nothing on this page edits it
+ *   the locked line     no bubble at all, a rule down the margin — set the
+ *                       way a citation is set, because the law wrote it
+ *
+ * Nothing else. The captions that used to sit under the transcript ("Ví dụ
+ * trên đang dùng chỉ dẫn…") are gone; anything a turn needs to say about
+ * itself goes in its label or in a one-line `note` inside the bubble.
+ */
+.panel {
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.panelHead {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.previewText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
 }
 
 .previewName {
-  display: block;
   font-weight: 600;
   font-size: 14px;
   line-height: 1.3;
+  color: var(--ink);
 }
 
 .previewMeta {
-  display: block;
-  font-size: 12px;
-  color: var(--ink-soft);
+  font-size: 11.5px;
   line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.panelBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .turn {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
 
 .turnLabel {
@@ -204,39 +329,138 @@
   gap: 5px;
 }
 
+/* Same bubble as the chat panel's: 16px corners, one tucked, 13.5px on 1.6. */
 .turnBody {
   font-size: 13.5px;
   line-height: 1.6;
-  border-radius: var(--radius-md);
-  padding: 11px 14px;
+  border-radius: 16px;
+  padding: 10px 14px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+/* The agent's own words: the one filled bubble, because it is the sentence
+   the fields on the left are writing. Blush on milk — the same pairing as
+   `SpeechBubble`'s assistant line in Bits.module.css. */
+.turnGreeting {
+  background: var(--surface-warm);
+  border-bottom-left-radius: 6px;
+}
+
+/* The caller. Hollow: a defined object, but not one this page edits. The ring
+   is heavier than --border-hairline because at 1.1:1 it vanished and the
+   bubble collapsed back into loose text. */
+.turnCaller {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(38, 31, 24, 0.3);
 }
 
 /*
- * The line the law requires. It is shown, because the caller hears it — but as
- * a quiet locked quote in the preview where it actually happens, not as a red
- * warning block among the fields. There is nothing here to fill in.
+ * The line the law requires, or the answer without the owner's instruction:
+ * shown, because the caller hears it, but as a quiet quotation set against a
+ * rule rather than as a bubble. As a bubble it sat one shade off the agent's
+ * own line and the two read as the same kind of thing, which is the opposite
+ * of true.
  */
 .turnLocked {
-  background: var(--surface-card);
-  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  background: transparent;
+  border-radius: 0;
+  border-left: 2px solid rgba(38, 31, 24, 0.28);
+  padding: 2px 0 2px 14px;
   color: var(--ink-soft);
 }
 
-.turnGreeting {
-  background: var(--surface-warm);
-  color: var(--ink);
+/* One line a bubble says about itself — which instruction produced this
+   answer, which daypart's greeting this is. Inside the bubble, above the
+   quote, so it cannot be mistaken for another turn. */
+.turnNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding-bottom: 7px;
+  margin-bottom: 7px;
+  border-bottom: 1px solid var(--border-hairline);
 }
 
-.turnCaller {
-  background: var(--surface-card);
-  box-shadow: inset 0 0 0 1px var(--border-hairline);
+.turnNoteIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--text-accent);
 }
 
 .turnSilence {
   font-size: 12.5px;
   color: var(--ink-soft);
   font-style: italic;
-  padding: 2px;
+  padding: 0 2px;
+}
+
+.turnMuted {
+  color: var(--ink-soft);
+}
+
+.panelDivider {
+  height: 1px;
+  background: var(--border-hairline);
+  margin: 2px 0;
+}
+
+/*
+ * "Nghe thử" is the point of the whole panel, so it is the panel's one filled
+ * control: full width at the foot of the transcript, with the label on it
+ * rather than beside it. Terracotta on blush is the same pairing as the chat
+ * panel's send button. Playing inverts it to an outline — the same button,
+ * visibly in a second state, without the row changing height.
+ */
+.listen {
+  appearance: none;
+  border: none;
+  width: 100%;
+  margin-top: 4px;
+  padding: 11px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.listen:hover {
+  background: var(--action-primary-hover);
+}
+
+.listen:active {
+  transform: scale(var(--press-scale));
+}
+
+.listenOn,
+.listenOn:hover {
+  background: transparent;
+  color: var(--text-accent);
+  box-shadow: inset 0 0 0 1.5px var(--action-primary);
+}
+
+.listen:disabled {
+  background: transparent;
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  cursor: not-allowed;
 }
 
 /* --------------------------------------------------------- voice picker */

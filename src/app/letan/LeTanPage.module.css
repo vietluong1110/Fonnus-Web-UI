@@ -50,13 +50,16 @@
   color: var(--text-accent);
 }
 
+/* A milk tag with a hairline, not blush: blush is the side panels' colour
+   (Profile.module.css, rule 4) and the header is part of the form's side. */
 .phoneBadge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 5px 12px 5px 10px;
   border-radius: var(--radius-pill);
-  background: var(--surface-warm);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
   color: var(--text-accent);
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
@@ -195,12 +198,35 @@
  * A hub page beside the setup assistant. The rail is a fixed 380px so the
  * conversation keeps a comfortable measure whatever the window does, and the
  * hub column takes what is left.
+ *
+ * The two sides are different *kinds* of thing — a list of the clinic's own
+ * settings, and a tool that talks — so they are separated the way a copilot
+ * panel is separated everywhere else: a rule down the gutter, and a ground of
+ * its own on the panel (see SetupChat.module.css). Cards alone were not
+ * enough; both sides were milk on paper and read as one field of cards.
  */
 .withRail {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
-  gap: 24px;
+  /* 40px, not 24: the rule needs air on both sides or it reads as a border
+     belonging to whichever card it happens to be nearest. */
+  gap: 40px;
   align-items: start;
+}
+
+/* Full height of the taller column, not of the panel — the panel is sticky and
+   short, and a rule that stopped where it stops would look like an accident. */
+.withRail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Centre of the gutter: 380px column + half of the 40px gap. */
+  right: 400px;
+  width: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
 }
 
 /* Narrow: one column, and the assistant goes on top — it is the fastest way
@@ -209,6 +235,22 @@
   .withRail {
     display: flex;
     flex-direction: column;
+    /* The 40px above is the width of a gutter with a rule down it. Stacked
+       there is no gutter, and 40px of blank paper between the assistant and
+       the sections reads as two unrelated pages. */
+    gap: 20px;
+    /*
+     * `align-items: start` above is a grid instruction; left in place on a
+     * flex column it sizes each child to its own max-content. That is what
+     * left the hub cards short of the panel's right edge on a tablet, and
+     * what blew the page 620px wide inside a 375px phone — the row subtitles
+     * are `white-space: nowrap`, so max-content is a very long line.
+     */
+    align-items: stretch;
+  }
+
+  .withRail::before {
+    display: none;
   }
 
   .withRailMain {
@@ -230,8 +272,46 @@
   --dock-inset: 396px;
 }
 
-@media (max-width: 640px) {
+/*
+ * Phone: the assistant is a button over the page, not a window beside it — so
+ * it owns none of the right edge, and instead owns a strip of the bottom one.
+ * `--dock-lift` is the height of that strip: the save bar reads it and stacks
+ * above the button rather than under it.
+ */
+@media (max-width: 639.98px) {
   .docked {
     --dock-inset: 0px;
+    --dock-lift: 68px;
+  }
+}
+
+/* ------------------------------------------------------------ phone header */
+
+/*
+ * The identity wraps to two lines on a phone — name, then the number — so the
+ * orb has to stop centring itself against the block and sit level with the
+ * name it belongs to.
+ */
+@media (max-width: 639.98px) {
+  .head {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .identity {
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 21px;
+  }
+
+  .sectionTitle {
+    font-size: 21px;
+  }
+
+  .call {
+    /* Optically level with the cap height of the title beside it. */
+    margin-top: -1px;
   }
 }

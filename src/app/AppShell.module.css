@@ -1,7 +1,9 @@
 /*
  * The signed-in frame: a 216px milk sidebar on the left, paper content on the
  * right. Below 900px the sidebar narrows to an icon rail so the content keeps
- * its width; the labels come back as tooltips.
+ * its width; the labels come back as tooltips. Below 640px it leaves the side
+ * of the screen entirely and becomes a bottom tab bar — see the phone block
+ * at the foot of this file.
  */
 
 .shell {
@@ -9,6 +11,14 @@
   grid-template-columns: 216px minmax(0, 1fr);
   min-height: 100vh;
   background: var(--surface-page);
+
+  /*
+   * Height of the bottom tab bar, published here because things pinned to the
+   * bottom of the viewport — the save bar, the assistant's phone button — have
+   * to sit clear of it. Zero until the phone block sets it, so the same
+   * `calc()` is correct on every width.
+   */
+  --tabbar-h: 0px;
 }
 
 .sidebar {
@@ -265,10 +275,15 @@
     padding: 10px 0;
   }
 
-  .itemLabel,
-  .itemDot,
-  .userText,
-  .userChevron {
+  /*
+   * Scoped to the sidebar: the same `.userText` renders the clinic and the
+   * signed-in name inside the phone's "Thêm" sheet, where there is all the
+   * room in the world for it.
+   */
+  .sidebar .itemLabel,
+  .sidebar .itemDot,
+  .sidebar .userText,
+  .sidebar .userChevron {
     display: none;
   }
 
@@ -285,5 +300,208 @@
 
   .content {
     padding: 20px 20px 32px;
+  }
+}
+
+/* ------------------------------------------------------------ phone shell */
+
+/*
+ * 639.98 rather than 640: `useIsNarrow(PHONE_BREAKPOINT)` is a strict `<`, and
+ * it decides which nav is in the tree. A whole-pixel query here would leave a
+ * 640px-wide window with neither the sidebar nor the tab bar.
+ */
+@media (max-width: 639.98px) {
+  .shell {
+    --tabbar-h: 60px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    /* The bar is fixed, so it is out of flow — the page has to leave the room. */
+    padding: 16px 16px calc(var(--tabbar-h) + 24px);
+  }
+}
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  background: var(--surface-card);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.tab {
+  flex: 1 1 0;
+  min-width: 0;
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 7px 2px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font: inherit;
+  font-family: var(--font-ui);
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.tab:hover {
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.tabOn,
+.tabOn:hover {
+  color: var(--text-accent);
+}
+
+/*
+ * The active mark is a filled pill behind the glyph, not a whole-item
+ * background: a 60px-tall block of terracotta at the bottom of a cream phone
+ * screen is the loudest thing on the page, and it is only telling you where
+ * you already are.
+ */
+.tabIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.tabOn .tabIcon {
+  background: var(--surface-warm);
+}
+
+.tabDot {
+  position: absolute;
+  top: 1px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warning);
+  box-shadow: 0 0 0 2px var(--surface-card);
+}
+
+.tabOn .tabDot {
+  box-shadow: 0 0 0 2px var(--surface-warm);
+}
+
+.tabLabel {
+  font-size: 10.5px;
+  line-height: 1.2;
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tabOn .tabLabel {
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------- "Thêm" */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(38, 31, 24, 0.34);
+  animation: fnFadeIn var(--duration-base) var(--ease-out);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  background: var(--surface-card);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  box-shadow: var(--shadow-overlay);
+  padding: 8px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: fnSheetUp var(--duration-slow) var(--ease-arc);
+}
+
+.sheetGrip {
+  width: 38px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  margin: 4px auto 10px;
+}
+
+.sheetItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* 48px tall: the smallest target a thumb hits reliably. */
+  padding: 14px 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: none;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sheetItem:hover,
+.sheetItem:active {
+  background: var(--action-ghost-hover);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.sheetItemOn,
+.sheetItemOn:hover {
+  color: var(--text-accent);
+  background: var(--surface-warm);
+}
+
+.sheetDivider {
+  height: 1px;
+  background: var(--border-hairline);
+  margin: 8px 12px;
+}
+
+.sheetHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 12px 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .sheet {
+    animation: none;
   }
 }
