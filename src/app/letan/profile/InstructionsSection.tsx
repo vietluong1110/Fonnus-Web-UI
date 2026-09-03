@@ -2,14 +2,14 @@ import { Icon } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
 import { SectionHead } from '../LeTanPage'
 import { useConfig, useDraft } from '../store'
-import { Card, Notice, SaveBar, TextArea, ui } from '../../ui'
+import { Card, SaveBar, TextArea } from '../../ui'
 import { PreviewCard, Turn } from './preview'
 import styles from './Profile.module.css'
 
 const KEYS = ['tenant_instructions'] as const
 
 /*
- * Each suggestion carries the answer it produces, so the rail can show the
+ * Each suggestion carries the answer it produces, so the panel can show the
  * same caller question answered with and without it. Sample prices — a real
  * clinic's would come from the service catalogue.
  */
@@ -41,8 +41,15 @@ const PLAIN_ANSWER = 'Dạ niềng răng bên em khoảng 25–45 triệu tuỳ 
  *
  * The textarea gets the whole work column and nothing sits beside it, so it
  * can be dragged as tall as the owner wants without shifting anything. The
- * rail answers the question a blank box cannot: what does writing this here
- * actually change about what the receptionist says.
+ * panel answers the question a blank box cannot: what does writing this here
+ * actually change about what the receptionist says. The instruction being
+ * demonstrated is named inside the answer it produced, so the panel needs no
+ * caption explaining itself.
+ *
+ * There is no compliance notice among the fields any more. What the
+ * instructions cannot override (safety, the legal disclosure, emergency
+ * transfer) is enforced server-side; a warning box in the form only made the
+ * page read as something that could be got wrong.
  */
 export function InstructionsSection() {
   const { config } = useConfig()
@@ -52,6 +59,7 @@ export function InstructionsSection() {
   const agent = config.agent_name || 'Linh'
   const unused = IDEAS.filter((i) => !draft.tenant_instructions.includes(i.text))
   const lastUsed = IDEAS.filter((i) => draft.tenant_instructions.includes(i.text)).pop()
+  const shown = lastUsed ?? IDEAS[0]
 
   const add = (text: string) =>
     set('tenant_instructions', (draft.tenant_instructions.trim() ? draft.tenant_instructions.trimEnd() + '\n' : '') + text)
@@ -75,9 +83,6 @@ export function InstructionsSection() {
               aria-label="Chỉ dẫn riêng"
               hint="Kéo góc dưới bên phải để ô cao thêm."
             />
-            <Notice tone="neutral" icon="shield-check">
-              Chỉ dẫn không thay đổi được quy tắc an toàn, tuân thủ pháp lý và chuyển máy khẩn cấp. Nội dung được kiểm duyệt trước khi áp dụng.
-            </Notice>
           </Card>
 
           {unused.length ? (
@@ -97,21 +102,23 @@ export function InstructionsSection() {
         </div>
 
         <aside className={styles.rail}>
-          <PreviewCard title="Chỉ dẫn đổi câu trả lời thế nào" meta="Cùng một câu hỏi của khách, hai câu trả lời" orb={false}>
+          <PreviewCard
+            title={agent}
+            meta="Cùng một câu hỏi — có và không có chỉ dẫn"
+            /* Rule 2 — every screen ends in something you can hear. This is
+               exactly the screen where hearing the difference is the argument
+               for writing anything at all. */
+            listen={{ text: shown.answer, label: 'Nghe câu có chỉ dẫn' }}
+          >
             <Turn label="Khách hỏi" tone="caller">
               “Niềng răng bên mình bao nhiêu tiền ạ?”
             </Turn>
             <Turn label="Không có chỉ dẫn" tone="locked">
               “{PLAIN_ANSWER}”
             </Turn>
-            <Turn label={lastUsed ? 'Có chỉ dẫn của bạn' : 'Có chỉ dẫn — ví dụ'}>
-              “{(lastUsed ?? IDEAS[0]).answer}”
+            <Turn label={lastUsed ? 'Có chỉ dẫn của bạn' : 'Có chỉ dẫn — ví dụ'} note={shown.text} noteIcon="clipboard-list">
+              “{shown.answer}”
             </Turn>
-            <span className={ui.hint}>
-              {lastUsed
-                ? 'Đang xem chỉ dẫn bạn vừa thêm.'
-                : `Ví dụ trên đang dùng chỉ dẫn “${IDEAS[0].text}”. Thêm một gợi ý bên cạnh để xem chỉ dẫn của chính bạn.`}
-            </span>
           </PreviewCard>
         </aside>
       </div>

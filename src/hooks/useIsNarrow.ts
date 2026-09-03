@@ -21,3 +21,13 @@ export function useIsNarrow(breakpoint = NARROW_BREAKPOINT) {
 
   return narrow
 }
+
+/**
+ * Below this width the app shell swaps its side rail for a bottom tab bar and
+ * the setup assistant collapses to a prompt card. Phone, not tablet: a 768px
+ * iPad still has room for the rail beside the content.
+ *
+ * CSS matches this as `@media (max-width: 639.98px)` — the hook is a strict
+ * `<`, so the two would disagree at exactly 640px otherwise.
+ */
+export const PHONE_BREAKPOINT = 640

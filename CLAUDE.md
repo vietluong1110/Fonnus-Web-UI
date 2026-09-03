@@ -89,6 +89,27 @@ npm run typecheck
   bounded by their parent's *content* box, which padding does not extend.
 - The orb is mounted once at the app root and never re-mounted. It is deliberately outside
   every section.
+- A two-column grid that collapses to `flex-direction: column` **must** restate
+  `align-items: stretch`. `align-items: start` is a grid instruction; left in place
+  on a flex column it sizes every child to its own *max-content*. On `Hồ sơ` that
+  quietly shortened the hub cards on a tablet and blew the page 620px wide inside a
+  375px phone. Both stacked layouts in `LeTanPage.module.css` / `Profile.module.css`
+  carry the reset — copy it with the pattern.
+- Three things want the bottom edge of a phone: the tab bar (`--tabbar-h`, published
+  by `AppShell.module.css`), a floating assistant (`--dock-lift`, published by the
+  page that mounts one) and the sticky save bar, which stacks above both by reading
+  those two variables. Never pin something to the bottom with a hard-coded offset.
+- `html { scrollbar-gutter: stable }` in `global.css`. A hub page fits the viewport
+  and a section page does not, so without it the scrollbar appears on one and not the
+  other and the centred content column shifts 7–8px between them. It looked like the
+  two pages had different margins; they had different scrollbars.
+- The rail beside a form is separated by the **gutter**, not by a fill: 380px column,
+  40px gap, a hairline down the middle of it (`.withRail` in `LeTanPage.module.css`,
+  `.work` in `Profile.module.css` — restated in both, change them together). A milk
+  panel beside milk cards is correct; the rule is what does the work.
+- Blush (`--surface-warm`) means **speech**: the Fonnus assistant panel, and the
+  receptionist's own line inside a call preview. Never a callout or a badge inside a
+  form — that is what drained the tint of meaning last time.
 - `design-reference/` is an archive. Nothing imports it and nothing builds it.
 
 ## Before you finish

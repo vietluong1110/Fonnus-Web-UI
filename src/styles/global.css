@@ -8,6 +8,13 @@
 
 html {
   scroll-behavior: smooth;
+  /*
+   * Always reserve the scrollbar's column. Without this a page that scrolls
+   * (a section form) is ~15px narrower than one that does not (its hub), and
+   * a centred content column drifts sideways between the two — the margins
+   * of Hồ sơ and its sub-pages visibly disagreed.
+   */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -139,6 +146,17 @@ a:hover {
   }
   to {
     opacity: 1;
+    transform: none;
+  }
+}
+
+/* A bottom sheet comes up from off-screen, not from 16px away: it is the
+   whole surface arriving, and a short hop reads as a jitter instead. */
+@keyframes fnSheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
     transform: none;
   }
 }

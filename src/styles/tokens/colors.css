@@ -24,6 +24,7 @@
 --night-surface:#2D251C;
 --cream-night:#F3E9DA;      /* 14.2:1 on night */
 --terracotta-night:#E08A50; /* 6.4:1 — logo arc, accents, buttons */
+--terracotta-night-hover:#EC9A61;
 --lemongrass-night:#AFBE93; /* 8.6:1 — charts, states */
 
 /* --- Semantic aliases: surfaces --- */
@@ -79,7 +80,7 @@
 --border-hairline:rgba(243,233,218,.10);
 --border-strong:rgba(243,233,218,.22);
 --action-primary:var(--terracotta-night);
---action-primary-hover:#EC9A61;
+--action-primary-hover:var(--terracotta-night-hover);
 --action-primary-active:#C9773F;
 --action-secondary:var(--night-surface);
 --action-secondary-hover:#372D22;

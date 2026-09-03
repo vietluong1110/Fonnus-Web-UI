@@ -81,9 +81,12 @@
   color: var(--info);
 }
 
+/* A neutral aside inside a form: an ink tint with a hairline, so it reads
+   as a note and not as the blush side panels standing beside the form. */
 .noticeNeutral {
   composes: notice;
-  background: var(--surface-warm);
+  background: rgba(38, 31, 24, 0.045);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
   color: var(--ink-soft);
 }
 
@@ -191,9 +194,11 @@
     transform var(--duration-fast) var(--ease-out);
 }
 
+/* Hover tints and rings in terracotta, the way a style tile or a suggestion
+   row does — not blush, which is reserved for the side panels. */
 .play:hover {
-  --play-bg: var(--blush);
-  --play-ring: inset 0 0 0 1px transparent;
+  --play-bg: var(--action-ghost-hover);
+  --play-ring: inset 0 0 0 1px var(--terracotta);
 }
 
 .play:active {
@@ -379,6 +384,37 @@
    this: the "red zone" note on a dark ground. */
 .saveBarError {
   color: var(--rose);
+}
+
+/*
+ * Phone. Three things want the bottom of the screen: the tab bar owns the
+ * edge, the assistant sits just above it (--dock-lift, published by whichever
+ * page put it there — 0 on a page with no assistant), and this bar stacks on
+ * top of both. None of them may overlap, and none of them may be reached by
+ * guessing at a height.
+ *
+ * The bar itself stops being one row: "Bạn có thay đổi chưa lưu" plus a
+ * subtitle plus two buttons on a 358px line wraps into four ragged lines with
+ * the buttons crushed against the edge. The message takes the first row, the
+ * two buttons split the second.
+ */
+@media (max-width: 639.98px) {
+  .saveBar {
+    bottom: calc(16px + var(--tabbar-h, 0px) + var(--dock-lift, 0px));
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 12px 14px;
+  }
+
+  .saveBarText {
+    flex: 1 1 100%;
+  }
+
+  .saveBar > :nth-child(2),
+  .saveBar > :nth-child(3) {
+    flex: 1 1 0;
+    justify-content: center;
+  }
 }
 
 /* Toasts */
