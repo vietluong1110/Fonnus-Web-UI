@@ -56,6 +56,40 @@ export function FieldFrame({ label, gate, hint, error, labelExtra, htmlFor, styl
 
 type FrameProps = Pick<FieldFrameProps, 'label' | 'gate' | 'hint' | 'error' | 'labelExtra' | 'style' | 'className'>
 
+/**
+ * The field skin on its own, for controls this file does not implement (the
+ * voice picker). Exported rather than copied so the focus ring stays drawn in
+ * exactly one place — two of them nested is a bug this file already fixed once.
+ */
+export function ControlShell({
+  open,
+  error,
+  readOnly,
+  compact,
+  className,
+  children,
+}: {
+  /** A popup is open under this control: hold the focus ring while it is. */
+  open?: boolean
+  error?: boolean
+  readOnly?: boolean
+  compact?: boolean
+  className?: string
+  children: ReactNode
+}) {
+  const cls = [
+    styles.control,
+    error ? styles.controlError : '',
+    readOnly ? styles.controlReadonly : '',
+    compact ? styles.compact : '',
+    open ? styles.triggerOpen : '',
+    className ?? '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+  return <span className={cls}>{children}</span>
+}
+
 export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'style' | 'className' | 'prefix'>, FrameProps {
   prefix?: ReactNode
   suffix?: ReactNode

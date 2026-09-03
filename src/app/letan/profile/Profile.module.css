@@ -1,0 +1,645 @@
+/*
+ * Hồ sơ — the hub and its three sub-pages.
+ *
+ * The layout rules here are meant to be the template for every other page in
+ * the app, so they are written to be copied:
+ *
+ *   1. One work column and one sticky preview rail, `align-items: start`.
+ *      Two editable fields never share a row. That is what stops a growing
+ *      textarea from stretching whatever sits beside it — the two columns no
+ *      longer share a height at all, so there is nothing to stretch.
+ *   2. Every screen ends in something you can hear. The rail is the caller's
+ *      side of the call, updating as the fields change.
+ *   3. Status is a summary of what is set, never a "required" badge.
+ */
+
+.work {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  max-width: 720px;
+}
+
+.rail {
+  position: sticky;
+  top: 24px;
+  min-width: 0;
+}
+
+/*
+ * Below this the rail would squeeze the work column under ~530px, so it goes
+ * back to being one column — and moves *above* the fields rather than below
+ * them, because hearing what the caller hears is the point of the page.
+ */
+@media (max-width: 1180px) {
+  .work {
+    display: flex;
+    flex-direction: column;
+    /* `align-items: start` above is a grid instruction; left in place on a
+       flex column it stops the stacked cards filling the width. */
+    align-items: stretch;
+  }
+
+  .col {
+    max-width: none;
+    order: 2;
+  }
+
+  .rail {
+    position: static;
+    order: 1;
+  }
+}
+
+.lede {
+  margin: -6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 64ch;
+}
+
+/* ------------------------------------------------------------------- hub */
+
+.hub {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 880px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 232px;
+  gap: 24px;
+  align-items: start;
+}
+
+.heroLines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.heroFoot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.who {
+  border-left: 1px solid var(--border-hairline);
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.whoName {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .who {
+    border-left: none;
+    border-top: 1px solid var(--border-hairline);
+    padding-left: 0;
+    padding-top: 18px;
+  }
+}
+
+/* The three ways in. Same row vocabulary as the Kiến thức hub next door. */
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rowLink {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.rowLink:hover {
+  background: var(--action-secondary-hover);
+  transform: translateY(var(--lift-hover));
+  text-decoration: none;
+  color: var(--ink);
+}
+
+/* Nothing filled in yet — a dashed edge, not a warning colour. */
+.rowEmpty {
+  border: 1px dashed var(--border-dashed);
+}
+
+.rowIcon {
+  color: var(--text-accent);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.rowTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.rowSub {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowSubEmpty {
+  color: var(--text-accent);
+}
+
+.rowChev {
+  color: var(--ink-soft);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.hubFoot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding: 2px 2px 0;
+}
+
+.hubFootIcon {
+  color: var(--ink-soft);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+/* ---------------------------------------------------------- preview rail */
+
+.previewHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.previewName {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.previewMeta {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.turnLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.turnBody {
+  font-size: 13.5px;
+  line-height: 1.6;
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+}
+
+/*
+ * The line the law requires. It is shown, because the caller hears it — but as
+ * a quiet locked quote in the preview where it actually happens, not as a red
+ * warning block among the fields. There is nothing here to fill in.
+ */
+.turnLocked {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  color: var(--ink-soft);
+}
+
+.turnGreeting {
+  background: var(--surface-warm);
+  color: var(--ink);
+}
+
+.turnCaller {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.turnSilence {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 2px;
+}
+
+/* --------------------------------------------------------- voice picker */
+
+.anchor {
+  position: relative;
+}
+
+.trigger {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  line-height: 1.5;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.trigger:focus-visible {
+  outline: none;
+}
+
+.triggerText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.triggerName {
+  font-weight: 600;
+}
+
+.triggerChev {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+  margin-left: auto;
+  transition: transform var(--duration-base) var(--ease-arc);
+}
+
+.triggerOpen {
+  transform: rotate(180deg);
+  color: var(--text-accent);
+}
+
+/*
+ * Same panel as the voice menu on the landing page's call screen, so a tenant
+ * who tried the demo meets a control they have already used. A list rather
+ * than a tile grid because the roster grows: four voices today, and the
+ * catalogue's `voice_selection` is an open enum.
+ */
+.popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  box-shadow:
+    var(--shadow-overlay),
+    inset 0 0 0 1px var(--border-hairline);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  animation: fnRise var(--duration-base) var(--ease-arc);
+}
+
+.popGroup {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding: 9px 10px 5px;
+}
+
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--size-body-sm);
+  line-height: 1.4;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.opt:hover,
+.optActive {
+  background: var(--action-ghost-hover);
+}
+
+.optOn,
+.optOn:hover,
+.optOn.optActive {
+  background: var(--action-primary);
+  color: var(--cream);
+}
+
+.optMark {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 15px;
+  color: var(--text-accent);
+}
+
+.optOn .optMark {
+  color: var(--cream);
+}
+
+.optText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.optName {
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.optDesc {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.optOn .optDesc {
+  color: var(--cream);
+  opacity: 0.85;
+}
+
+/* ----------------------------------------------------------- style tiles */
+
+/*
+ * "Chuyên nghiệp và ấm áp" is an adjective; the sentence under it is the
+ * thing being chosen. Each style carries its own sample so the choice is made
+ * by ear rather than by guessing what the label means.
+ */
+.tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--radius-md);
+  padding: 11px 12px 11px 16px;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.tile:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+.tileOn,
+.tileOn:hover {
+  background: var(--terracotta);
+  color: var(--cream);
+  box-shadow: none;
+}
+
+.tileButton {
+  flex: 1;
+  min-width: 0;
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: inherit;
+  font: inherit;
+}
+
+.tileName {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.tileSample {
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.tileOn .tileSample {
+  color: var(--cream);
+  opacity: 0.88;
+}
+
+/* ------------------------------------------------------------------ pace */
+
+/*
+ * Turn-taking was a three-column band of toggles, dropdowns and a slider. It
+ * is now three full-width blocks, each written as a sentence with its controls
+ * set into it — closer to how an owner would explain the rule out loud.
+ */
+.paceBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.paceFirst {
+  border-top: none;
+  padding-top: 0;
+}
+
+.paceHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.paceValue {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-accent);
+}
+
+.range {
+  width: 100%;
+  accent-color: var(--terracotta);
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.rangeScale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.sentence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------- standing orders */
+
+.ideas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Whole sentences, so rows rather than pills: a pill has to stay on one line
+   and these ran off the edge of the card when they could not. */
+.idea {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  border: 1px dashed var(--border-dashed);
+  border-radius: var(--radius-md);
+  background: transparent;
+  padding: 10px 13px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.idea:hover {
+  background: var(--action-ghost-hover);
+  border-style: solid;
+  border-color: var(--terracotta);
+}
+
+.ideaPlus {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--text-accent);
+}
+
+/* --------------------------------------------------------------- dayparts */
+
+.daypart {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.daypart > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.daypart > :last-child {
+  margin-bottom: 6px;
+}
+
+.daypartLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

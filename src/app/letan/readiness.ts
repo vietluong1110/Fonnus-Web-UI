@@ -64,7 +64,7 @@ export function computeReadiness(cfg: ReceptionistConfig): Readiness {
       path: ['ky-nang', 'chuyen-may'],
       effort: 15,
     },
-    { id: 'voice_selection', gate: 'R1', label: 'Giọng nói', done: !!cfg.voice_selection, path: ['ho-so'], effort: 10 },
+    { id: 'voice_selection', gate: 'R1', label: 'Giọng nói', done: !!cfg.voice_selection, path: ['ho-so', 'giong-noi'], effort: 10 },
 
     {
       id: 'holiday_exceptions',

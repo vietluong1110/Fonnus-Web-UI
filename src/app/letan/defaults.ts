@@ -331,11 +331,16 @@ export const LABELS = {
     private: 'Chỉ hỗ trợ bảo hiểm tư nhân',
     both: 'Nhận BHYT và bảo hiểm tư nhân',
   },
+  /*
+   * `desc` is the region alone and `tone` the temperament, kept apart so a
+   * summary line can read "Nữ · miền Nam · nói vừa" rather than piling three
+   * comma clauses on top of each other. The picker joins them back together.
+   */
   voices: {
-    linh: { name: 'Linh', gender: 'Nữ', accent: 'nam' as const, desc: 'Nữ · miền Nam' },
-    mai: { name: 'Mai', gender: 'Nữ', accent: 'bac' as const, desc: 'Nữ · miền Bắc' },
-    khang: { name: 'Khang', gender: 'Nam', accent: 'nam' as const, desc: 'Nam · miền Nam' },
-    duc: { name: 'Đức', gender: 'Nam', accent: 'bac' as const, desc: 'Nam · miền Bắc' },
+    linh: { name: 'Linh', gender: 'Nữ', accent: 'nam' as const, desc: 'Nữ · miền Nam', tone: 'ấm áp' },
+    mai: { name: 'Mai', gender: 'Nữ', accent: 'bac' as const, desc: 'Nữ · miền Bắc', tone: 'nhẹ nhàng' },
+    khang: { name: 'Khang', gender: 'Nam', accent: 'nam' as const, desc: 'Nam · miền Nam', tone: 'thân thiện' },
+    duc: { name: 'Đức', gender: 'Nam', accent: 'bac' as const, desc: 'Nam · miền Bắc', tone: 'điềm tĩnh' },
   },
   style: { professional_warm: 'Chuyên nghiệp và ấm áp', friendly: 'Thân thiện', formal: 'Trang trọng' },
   speed: { slow: 'Chậm', normal: 'Vừa', fast: 'Nhanh' },

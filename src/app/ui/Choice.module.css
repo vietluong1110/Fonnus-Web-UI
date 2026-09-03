@@ -79,6 +79,9 @@
 /* Segmented control: one selected segment, filled terracotta. */
 .segmented {
   display: inline-flex;
+  /* inline-flex alone still stretches inside a flex column, which left the
+     three options huddled at the left of a full-width box. */
+  width: fit-content;
   border: 1px solid var(--border-strong);
   border-radius: 10px;
   overflow: hidden;
