@@ -5,6 +5,7 @@ import { appHref } from '../../../hooks/useRoute'
 import { LABELS } from '../defaults'
 import { formatVnd } from '../../ui'
 import { computeReadiness, pricedCount, summarizeHours } from '../readiness'
+import { messageFor } from '../../../api'
 import { useConfig } from '../store'
 import { Notice, ui, useToast } from '../../ui'
 import { AskRail } from './AskRail'
@@ -202,7 +203,8 @@ export function KnowledgeHub() {
               onClick={() => {
                 if (window.confirm('Đưa toàn bộ Lễ tân về mẫu ban đầu? Mọi thông tin bạn đã nhập sẽ mất.')) {
                   reset()
-                  toast('Đã đưa Lễ tân về mẫu nha khoa.', 'neutral')
+                    .then(() => toast('Đã đưa Lễ tân về mẫu nha khoa.', 'neutral'))
+                    .catch((e: unknown) => toast(messageFor(e), 'error'))
                 }
               }}
             >

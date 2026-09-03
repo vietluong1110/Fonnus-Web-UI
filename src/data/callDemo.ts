@@ -1,17 +1,19 @@
 /**
- * The "Nghe thử" gadget is a mockup: nothing is recorded, nothing is sent.
- * Chips and the typed input only decide how long the orb pretends to speak.
+ * Copy and timings for the "Nghe thử" call screen.
+ *
+ * A chip is a question the caller asks — it goes to the voice session the same
+ * way a typed line does. How long the agent then talks is the session's
+ * business, not the chip's: mocked it is the constant below, live it is however
+ * long the real reply takes.
  */
 export interface SuggestionChip {
   label: string
-  /** How long the scripted reply "lasts", in ms. */
-  speakMs: number
 }
 
 export const CHIPS: SuggestionChip[] = [
-  { label: 'Cạo vôi răng bao nhiêu?', speakMs: 4200 },
-  { label: '9h sáng thứ Bảy còn trống không?', speakMs: 4600 },
-  { label: 'Phòng khám ở đâu?', speakMs: 3800 },
+  { label: 'Cạo vôi răng bao nhiêu?' },
+  { label: '9h sáng thứ Bảy còn trống không?' },
+  { label: 'Phòng khám ở đâu?' },
 ]
 
 export interface Voice {

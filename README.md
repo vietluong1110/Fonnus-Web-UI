@@ -3,7 +3,9 @@
 Landing page, auth flows and signed-in app shell for Fonnus — an AI
 receptionist that answers the phone for Vietnamese clinics, in Vietnamese, 24/7.
 
-A static React + Vite site with no backend. It covers the landing page, the
+A static React + Vite site. It runs with **no backend** — every call is faked in
+the browser, and one env variable swaps each group for the real thing when it
+exists (see "The backend seam"). It covers the landing page, the
 sign-up / sign-in flows, and the app shell behind them with the **Lễ tân**
 (receptionist configuration) tab. The landing page was built from the Claude
 Design handoff bundle in `design-reference/`; the app screens from the
@@ -34,7 +36,8 @@ src/
   design-system/           Button, Icon, Badge, Input, Switch, Logo
   data/                    all copy and pricing, no markup
   hooks/                   useReveal, useIsNarrow, useCallDemo, useRoute
-  auth/                    the sign-up and sign-in flows, plus the local session
+  api/                     every call to the backend — see "The backend seam"
+  auth/                    the sign-up and sign-in flows, plus the session
   app/                     everything behind sign-in — see "The app shell"
   components/
     layout/                Header (floating pill + menus + drawer), Footer
@@ -46,7 +49,9 @@ src/
     section.module.css     shared section chrome (eyebrow, heading, card, …)
 public/                    icons, logo SVGs and the greeting audio, served as-is
 design-reference/          archived design handoff; not built, not imported
+docs/                      the API contract and the field-catalogue mapping
 CONTEXT.md                 product and market context
+CLAUDE.md                  conventions that look like accidents but are not
 ```
 
 Each component owns a co-located `*.module.css`. Colours, spacing, radii, type
@@ -107,12 +112,19 @@ Entering a number in the landing hero hands it to sign-up through
 `auth/handoff.ts` (sessionStorage, so it stays out of the URL) and opens
 straight on the code step.
 
-**Nothing here talks to a server.** `auth/mockAuth.ts` stands in for every call,
-each marked with a `TODO` naming the endpoint it should become. One demo
-account signs in — phone **0914378064**, code **111002** — and any other code
-shows the wrong-code state. A verified code opens a local session
-(`auth/session.ts`, localStorage, no credential in it) and lands on `#/app`;
-"Đăng xuất" in the sidebar's user menu clears it.
+**No server is required.** Every call goes through `api.auth`, which is faked in
+the browser by default (`api/auth.mock.ts`). One demo account signs in — phone
+**0914378064**, code **111002** — and any other code shows the wrong-code
+state.
+
+`auth/SessionProvider.tsx` holds who is signed in, as three states rather than
+a boolean: `checking`, `authenticated`, `anonymous`. "Still checking" is a real
+answer, because the session is meant to be an httpOnly cookie this app cannot
+read — the only way to know is `GET /me`, and bouncing to sign-in while that is
+in flight would throw out a good session on every reload. `auth/session.ts` is
+now only a *hint* — a flag saying "this browser signed in recently", used to
+pick the placeholder to show while the probe runs. It is not a credential and
+gates nothing.
 
 ## The app shell
 
@@ -154,13 +166,17 @@ two `*_confirmed` flags). System-written values — compliance block, red-flag
 pack, refusal scripts, verbosity cap — live in `system.ts` and render
 read-only with a "Hệ thống" tag.
 
-**State and the backend seam.** `store.tsx` holds one `ReceptionistConfig`
-(seeded from `defaults.ts`, the dental template) mirrored to localStorage so a
-demo survives a reload. Every section edits a draft (`useDraft(keys, label)`)
-and commits through `saveSection(patch)` — one PATCH per section, carrying
-only that section's keys. Replace `load()` with GET /tenant/config and
-`saveSection` with the PATCH; keep the optimistic update. The question rail
-writes through `update()` immediately.
+**State and the backend seam.** `store.tsx` holds one `ReceptionistConfig`,
+loaded through `api.tenant.getConfig()`. Every section edits a draft
+(`useDraft(keys, label)`) and commits through `saveSection(patch)` — one PATCH
+per section, carrying only that section's catalogue keys. The question rail and
+the setup assistant write through `update()` immediately.
+
+The save is optimistic and rolls back per key on failure, so a failure in one
+section cannot undo a concurrent write from another or from the rail. No
+storage key appears in this file: persistence belongs to the mock, because a
+localStorage mirror that outlives the server's truth is a stale cache. See
+"The backend seam" below.
 
 **Readiness** (`readiness.ts`) applies the catalogue's gates: R1 = the agent
 can pick up, say the address and hours, and hand off; R2 = it can quote, book,
@@ -173,9 +189,10 @@ fields into one question at a time with quick-reply chips and a free-text
 line; every answer writes the field it belongs to, so the forms and the meter
 move at once. Skips are per browser session.
 
-**"Nghe thử"** previews a line with the browser's own Vietnamese voice when one
-is installed (`ui/speak.ts`); it is a stand-in for the server-side TTS
-endpoint, not the product voice.
+**"Nghe thử"** (`ui/speak.ts`) asks `api.voice.previewTts` to voice a line in
+the tenant's chosen voice. With no TTS server it falls back to the browser's
+own Vietnamese voice where one is installed — a stand-in that ignores the
+chosen voice and speed, and is not the product voice.
 
 **Form controls** (`ui/Field.tsx`). Selects are a listbox we draw ourselves,
 not a native `<select>`: the native popup is painted by the OS — on Windows a
@@ -347,8 +364,54 @@ controls:
 | `pricingHighlight` | `'Tiêu chuẩn'` | which plan gets the terracotta outline |
 | `matrixDefaultOpen` | `false` | whether the comparison table starts expanded |
 
-## Not wired up
+## The backend seam
 
-The sign-up form moves to its success state locally — add a real endpoint in
-`sections/Contact.tsx`. The voice demo needs a backend before it can do
-anything; the UI is ready for one.
+There is no backend yet, and the app does not need one: it runs entirely on
+in-browser fakes and that is the committed default. But nothing is faked
+*inline* any more. Every call — auth, the tenant record, file upload, TTS, the
+setup assistant, the voice session — goes through one interface in `src/api/`,
+and one environment variable decides which of two implementations answers it.
+
+```
+Component  →  api.tenant.getConfig()   ─┬─→  tenant.mock.ts   (faked in the browser)
+                                        └─→  tenant.live.ts   (fetch → the backend)
+                                                  ↑
+                                    VITE_API_MODE / VITE_API_LIVE_GROUPS
+```
+
+Both files are typed against the same interface in `api/contracts.ts`, so
+`npm run typecheck` fails the moment a live implementation drifts from the mock
+it replaces. Groups switch **one at a time** (`VITE_API_LIVE_GROUPS=tenant`),
+because the backend will ship endpoints over weeks and a single global switch
+would mean nothing could be tested until everything existed.
+
+Copy `.env.example` to `.env.local` to change any of it. Two knobs matter more
+than they look:
+
+| | |
+| --- | --- |
+| `VITE_MOCK_FAILURE_RATE=1` | every faked call fails. **The only way to see the loading, rollback and retry states before a backend exists** — use it before shipping anything that touches them. |
+| `VITE_MOCK_LATENCY_MS=0` | instant, for a live demo. |
+
+Because a real network is slow and fails, three screens exist that the design
+bundle never needed: a boot skeleton, a retry card when the record cannot load
+(it deliberately does *not* fall back to the dental template — an owner shown a
+stranger's clinic would start editing it), and a save bar that stays open in red
+with "Thử lại" when a save fails, having rolled the record back.
+
+`docs/` is the handoff:
+
+| | |
+| --- | --- |
+| [`docs/api-contract.md`](docs/api-contract.md) | every endpoint, request and response |
+| [`docs/backend-integration.md`](docs/backend-integration.md) | how to fill in the live half, in order |
+| [`docs/field-catalogue-mapping.md`](docs/field-catalogue-mapping.md) | how `model.ts` maps to the context field catalogue, and the `[ext]` fields it adds |
+| [`docs/open-questions.md`](docs/open-questions.md) | the decisions the backend team still owes an answer to |
+
+## Still faked
+
+The parts with an interface but no implementation behind it: the setup
+assistant's replies come from the regex parsers in `questions.ts` rather than a
+model, and the voice demo plays a recording on a scripted beat rather than
+opening a microphone. Both have a defined transport (`AssistantApi`,
+`VoiceApi`) that a real one drops into.

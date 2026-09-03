@@ -121,7 +121,7 @@ export function EmailSkill() {
         </div>
       </Card>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub={`${draft.email_rules.filter((r) => r.enabled).length}/3 loại đang bật`} />
+      <SaveBar {...d.bar} sub={`${draft.email_rules.filter((r) => r.enabled).length}/3 loại đang bật`} />
     </>
   )
 }

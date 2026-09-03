@@ -1,21 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { TYPED_SPEAK_MS, VOICE_PREVIEW_MS } from '../data/callDemo'
-import { useGreetingAudio } from './useGreetingAudio'
+import { api } from '../api'
+import type { VoiceSession } from '../api'
 
 /**
- * State machine behind the "Nghe thử" mockup. No microphone is opened and
- * nothing is sent anywhere — asking a question just decides how long the orb
- * stays in the "speaking" state before falling back to "listening".
+ * The "Nghe thử" call screen.
+ *
+ * Everything the agent does comes from a `VoiceSession` (`api.voice`). Mocked,
+ * that session plays the real greeting WAV and scripts the rest of the beat —
+ * no microphone is opened and nothing is sent anywhere. Live, it is the actual
+ * pipeline. This hook does not know which, and neither does the overlay.
+ *
+ * The shape it returns is unchanged, so `CallOverlay`, `Orb`, `MiniOrb` and
+ * `Hero` are untouched.
  */
 export type AgentState = 'ringing' | 'speaking' | 'listening'
-
-/**
- * Fallback timings, used only when the browser refuses to play the greeting
- * (autoplay policy, no codec). With audio, the recording's own length decides
- * how long the agent speaks.
- */
-const GREETING_DELAY_MS = 1600
-const GREETING_HOLD_MS = 5200
 
 export function useCallDemo() {
   const [open, setOpen] = useState(false)
@@ -25,76 +23,86 @@ export function useCallDemo() {
   const [voice, setVoice] = useState(0)
   const [voiceOpen, setVoiceOpen] = useState(false)
 
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const session = useRef<VoiceSession | null>(null)
+  const connecting = useRef<AbortController | null>(null)
 
-  const clearTimers = useCallback(() => {
-    clearTimeout(timer.current)
-    clearTimeout(holdTimer.current)
+  const closeSession = useCallback(() => {
+    connecting.current?.abort()
+    connecting.current = null
+    void session.current?.close()
+    session.current = null
   }, [])
-
-  /** Enter `next` after `delay`, then drop back to listening after `hold`. */
-  const queue = useCallback(
-    (next: AgentState, delay: number, hold: number) => {
-      clearTimers()
-      timer.current = setTimeout(() => {
-        setAgent(next)
-        holdTimer.current = setTimeout(() => setAgent('listening'), hold)
-      }, delay)
-    },
-    [clearTimers],
-  )
-
-  // Real audio, so the greeting's length is the recording's, not a guess.
-  const greeting = useGreetingAudio(useCallback(() => setAgent('listening'), []))
-
-  const speak = useCallback(
-    (ms: number) => {
-      // Asking something cuts the greeting off rather than talking over it.
-      greeting.stop()
-      setAgent('speaking')
-      clearTimeout(timer.current)
-      clearTimeout(holdTimer.current)
-      holdTimer.current = setTimeout(() => setAgent('listening'), ms)
-    },
-    [greeting],
-  )
 
   const openCall = useCallback(() => {
     setOpen(true)
     setTyped('')
     setVoiceOpen(false)
     document.body.style.overflow = 'hidden'
-
-    // Linh greets straight away — the click that opened this screen is the
-    // gesture that lets the audio play, so there is nothing left to ask for.
-    clearTimers()
+    // The agent is already talking: the click that opened this screen is the
+    // gesture browsers require for autoplay, so there is nothing left to ask for.
     setAgent('speaking')
-    void greeting.play().then((started) => {
-      if (started) return
-      // Refused: fall back to the scripted ring-then-speak beat.
-      setAgent('ringing')
-      queue('speaking', GREETING_DELAY_MS, GREETING_HOLD_MS)
-    })
-  }, [queue, clearTimers, greeting])
+
+    closeSession()
+    const ac = new AbortController()
+    connecting.current = ac
+
+    void api.voice
+      .connect({ mode: 'landing-demo', signal: ac.signal })
+      .then(async (live) => {
+        if (ac.signal.aborted) {
+          void live.close()
+          return
+        }
+        session.current = live
+
+        for await (const event of live.events) {
+          if (ac.signal.aborted) break
+          if (event.type === 'state') {
+            // `connecting` and `thinking` have no orb pose of their own; both
+            // read as the agent holding the floor.
+            if (event.state === 'connecting' || event.state === 'ringing') setAgent('ringing')
+            else if (event.state === 'speaking' || event.state === 'thinking') setAgent('speaking')
+            else if (event.state === 'listening') setAgent('listening')
+          }
+        }
+      })
+      .catch(() => {
+        // Nothing to connect to. The screen stays open and silent rather than
+        // throwing the visitor out of it.
+        setAgent('listening')
+      })
+  }, [closeSession])
 
   const closeCall = useCallback(() => {
-    clearTimers()
-    greeting.stop()
+    closeSession()
     document.body.style.overflow = ''
     setOpen(false)
     setAgent('ringing')
     setVoiceOpen(false)
-  }, [clearTimers, greeting])
+  }, [closeSession])
+
+  /** Ask something — a suggestion chip, or the typed box. */
+  const ask = useCallback((text: string) => {
+    if (!text.trim()) return
+    session.current?.sendText(text)
+  }, [])
 
   const send = useCallback(() => {
     if (!typed.trim()) return
+    ask(typed)
     setTyped('')
-    speak(TYPED_SPEAK_MS)
-  }, [typed, speak])
+  }, [typed, ask])
 
   /** The play button auditions a voice without selecting it. */
-  const previewVoice = useCallback(() => speak(VOICE_PREVIEW_MS), [speak])
+  const previewVoice = useCallback(() => session.current?.previewVoice(), [])
+
+  const toggleMic = useCallback(() => {
+    setMic((m) => {
+      const next = !m
+      void session.current?.setMicEnabled(next)
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -107,10 +115,10 @@ export function useCallDemo() {
   // A hot reload or unmount must never leave the page permanently unscrollable.
   useEffect(
     () => () => {
-      clearTimers()
+      closeSession()
       document.body.style.overflow = ''
     },
-    [clearTimers],
+    [closeSession],
   )
 
   const stateLabel =
@@ -126,15 +134,19 @@ export function useCallDemo() {
     open,
     agent,
     speaking: agent === 'speaking',
-    /** Live loudness of the greeting for the orb's waves; null when silent. */
-    getAmplitude: greeting.getAmplitude,
+    /**
+     * Live loudness for the orb's waves; null when silent. Polled from the
+     * orb's own animation frame, never pushed through React state — a 60fps
+     * signal there would re-render the whole overlay every frame.
+     */
+    getAmplitude: () => session.current?.getAmplitude() ?? null,
     stateLabel,
     mic,
-    toggleMic: () => setMic((m) => !m),
+    toggleMic,
     typed,
     setTyped,
     send,
-    speak,
+    ask,
     voice,
     setVoice,
     previewVoice,

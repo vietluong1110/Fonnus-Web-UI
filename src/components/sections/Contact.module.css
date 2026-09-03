@@ -63,6 +63,14 @@
   margin: 0;
 }
 
+/* Inline, not a toast: the landing page has no toast surface, and someone who
+   just typed their phone number needs the answer to stay on screen. */
+.formError {
+  font-size: var(--size-ui);
+  color: var(--error);
+  margin: 0;
+}
+
 /* Success state keeps the card's height so the page does not jump on submit. */
 .sent {
   display: flex;

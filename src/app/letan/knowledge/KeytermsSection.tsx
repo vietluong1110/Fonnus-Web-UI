@@ -94,7 +94,7 @@ export function KeytermsSection() {
         </Card>
       </div>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="Từ hay nghe nhầm" />
+      <SaveBar {...d.bar} sub="Từ hay nghe nhầm" />
     </>
   )
 }

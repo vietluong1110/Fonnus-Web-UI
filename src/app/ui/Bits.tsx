@@ -249,6 +249,7 @@ export function Slider({
 export function SaveBar({
   dirty,
   saving,
+  error,
   onSave,
   onCancel,
   label = 'Bạn có thay đổi chưa lưu',
@@ -256,6 +257,12 @@ export function SaveBar({
 }: {
   dirty: boolean
   saving?: boolean
+  /**
+   * A failed save, in Vietnamese. The bar stays up and the button becomes
+   * "Thử lại" — a toast would take the message away while the unsaved change
+   * is still sitting on screen.
+   */
+  error?: string | null
   onSave: () => void
   onCancel: () => void
   label?: ReactNode
@@ -265,14 +272,20 @@ export function SaveBar({
   return (
     <div className={styles.saveBar} role="region" aria-label="Lưu thay đổi">
       <div className={styles.saveBarText}>
-        <div>{label}</div>
-        {sub ? <div className={styles.saveBarSub}>{sub}</div> : null}
+        <div>{error ? 'Chưa lưu được' : label}</div>
+        {error ? (
+          <div className={`${styles.saveBarSub} ${styles.saveBarError}`} role="alert">
+            {error}
+          </div>
+        ) : sub ? (
+          <div className={styles.saveBarSub}>{sub}</div>
+        ) : null}
       </div>
       <Button variant="ghost" size="sm" onClick={onCancel} style={{ color: 'var(--cream-night)' }} disabled={saving}>
         Huỷ
       </Button>
       <Button variant="inverse" size="sm" onClick={onSave} disabled={saving}>
-        {saving ? 'Đang lưu…' : 'Lưu thay đổi'}
+        {saving ? 'Đang lưu…' : error ? 'Thử lại' : 'Lưu thay đổi'}
       </Button>
     </div>
   )

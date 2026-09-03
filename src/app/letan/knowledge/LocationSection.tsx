@@ -139,7 +139,7 @@ export function LocationSection() {
         )}
       </Card>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="Địa điểm và liên hệ" />
+      <SaveBar {...d.bar} sub="Địa điểm và liên hệ" />
     </>
   )
 }

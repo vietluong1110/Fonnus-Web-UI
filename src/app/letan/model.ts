@@ -11,6 +11,17 @@
  * Everything SW / SD lives in `system.ts`, not here: the tenant never edits it.
  */
 
+/**
+ * The catalogue revision these names were written against.
+ *
+ * `GET /tenant/config` returns a `catalogue_version`; the config store compares
+ * the two and warns loudly in development when they differ. The catalogue lives
+ * in the backend repo, so it will change without this one noticing, and the
+ * failure mode is silent — a renamed field simply stops being saved. This turns
+ * silent drift into noisy drift. See docs/field-catalogue-mapping.md.
+ */
+export const CATALOGUE_VERSION = 'v1'
+
 // ---------------------------------------------------------------------------
 // Section A — general fields
 // ---------------------------------------------------------------------------

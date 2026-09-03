@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon, Logo } from '../design-system'
 import type { IconName } from '../design-system'
-import { DEMO_ACCOUNT } from '../auth/mockAuth'
-import { endSession, readSession } from '../auth/session'
-import { appHref, navigate, useAppPath } from '../hooks/useRoute'
+import { useSession } from '../auth/SessionProvider'
+import { appHref, useAppPath } from '../hooks/useRoute'
 import { useConfig } from './letan/store'
 import { computeReadiness } from './letan/readiness'
 import styles from './AppShell.module.css'
@@ -41,7 +40,7 @@ function initials(name: string): string {
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useAppPath()
   const active = activeNav(path)
-  const { config } = useConfig()
+  const { config, status } = useConfig()
   const readiness = computeReadiness(config)
 
   return (
@@ -59,7 +58,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className={styles.nav}>
           {NAV.map((n) => {
             const on = n.key === active.key
-            const attention = n.key === 'le-tan' && !readiness.r2Done
+            // Until the record has loaded, `config` is the template — the dot
+            // would say "Còn thiếu thông tin" about a clinic that is fully set up.
+            const attention = n.key === 'le-tan' && status === 'ready' && !readiness.r2Done
             return (
               <a
                 key={n.key}
@@ -87,8 +88,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function UserBlock({ clinic }: { clinic: string }) {
-  const session = readSession()
-  const name = session?.displayName || DEMO_ACCOUNT.displayName
+  const { me, signOut } = useSession()
+  const name = me?.display_name ?? ''
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -108,24 +109,19 @@ function UserBlock({ clinic }: { clinic: string }) {
     }
   }, [open])
 
-  const signOut = () => {
-    endSession()
-    navigate('signin')
-  }
-
   return (
     <div className={styles.footer} ref={ref}>
       {open ? (
         <div className={styles.menu} role="menu">
           <div className={styles.menuHead}>
             <span className={styles.userName}>{name}</span>
-            <span className={styles.userMeta}>{session?.identity ?? DEMO_ACCOUNT.phone}</span>
+            <span className={styles.userMeta}>{me?.identity}</span>
           </div>
           <a className={styles.menuItem} href={appHref('cai-dat')} role="menuitem" onClick={() => setOpen(false)}>
             <Icon name="settings" size={16} />
             Cài đặt tài khoản
           </a>
-          <button type="button" className={`${styles.menuItem} ${styles.menuItemDanger}`} role="menuitem" onClick={signOut}>
+          <button type="button" className={`${styles.menuItem} ${styles.menuItemDanger}`} role="menuitem" onClick={() => void signOut()}>
             <Icon name="log-out" size={16} />
             Đăng xuất
           </button>
@@ -143,9 +139,7 @@ function UserBlock({ clinic }: { clinic: string }) {
         <span className={styles.avatar}>{initials(name)}</span>
         <span className={styles.userText}>
           <span className={styles.userName}>{clinic}</span>
-          <span className={styles.userMeta}>
-            {name} · {DEMO_ACCOUNT.plan}
-          </span>
+          <span className={styles.userMeta}>{[name, me?.plan].filter(Boolean).join(' · ')}</span>
         </span>
         <span className={styles.userChevron}>
           <Icon name="chevron-up" size={16} />

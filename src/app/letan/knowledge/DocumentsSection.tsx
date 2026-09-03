@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Badge, Icon } from '../../../design-system'
+import { api, messageFor } from '../../../api'
 import { newId } from '../model'
 import { useConfig, useDraft } from '../store'
 import { SectionHead } from '../LeTanPage'
@@ -22,23 +23,53 @@ export function DocumentsSection() {
   const agent = config.agent_name || 'Linh'
   const [over, setOver] = useState(false)
   const [rejected, setRejected] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const addFiles = (files: FileList | null) => {
+  /*
+   * Uploads through `api.tenant`, which is what turns this from a list of
+   * filenames into files the extraction service can actually read.
+   *
+   * Each file is added to the list optimistically so the row appears the
+   * instant it is dropped, then replaced by the stored record — the server's
+   * id, and its `status`, which is what a later `indexed` will arrive on. A
+   * failed upload takes its own row back out and says which file it was.
+   */
+  const addFiles = async (files: FileList | null) => {
     if (!files) return
-    const next = [...draft.knowledge_files]
+    const accepted: File[] = []
     let bad: string | null = null
+
     for (const f of Array.from(files)) {
       if (f.size > MAX_BYTES) {
         bad = `${f.name} quá 20 MB.`
         continue
       }
-      if (next.some((x) => x.name === f.name)) continue
-      // TODO: POST /tenant/knowledge-files (multipart). Only the name and size are recorded here.
-      next.push({ id: newId('file'), name: f.name, size: f.size, status: 'queued' })
+      if (draft.knowledge_files.some((x) => x.name === f.name)) continue
+      accepted.push(f)
     }
     setRejected(bad)
-    set('knowledge_files', next)
+    if (!accepted.length) return
+
+    const pending = accepted.map((f) => ({
+      file: f,
+      row: { id: newId('file'), name: f.name, size: f.size, status: 'queued' as const },
+    }))
+    let list = [...draft.knowledge_files, ...pending.map((p) => p.row)]
+    set('knowledge_files', list)
+    setUploading(pending.length)
+
+    for (const { file, row } of pending) {
+      try {
+        const stored = await api.tenant.uploadKnowledgeFile(file)
+        list = list.map((x) => (x.id === row.id ? stored : x))
+      } catch (e) {
+        list = list.filter((x) => x.id !== row.id)
+        setRejected(`${file.name}: ${messageFor(e)}`)
+      }
+      set('knowledge_files', list)
+      setUploading((n) => n - 1)
+    }
   }
 
   const urlOk = !draft.website_scrape_url.trim() || /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}(\/\S*)?$/i.test(draft.website_scrape_url.trim())
@@ -64,7 +95,7 @@ export function DocumentsSection() {
             onDrop={(e) => {
               e.preventDefault()
               setOver(false)
-              addFiles(e.dataTransfer.files)
+              void addFiles(e.dataTransfer.files)
             }}
             role="button"
             tabIndex={0}
@@ -75,8 +106,11 @@ export function DocumentsSection() {
             <Icon name="file-text" size={22} />
             <span style={{ color: 'var(--ink)', fontWeight: 500 }}>Kéo thả hoặc bấm để chọn</span>
             <span className={ui.hint}>PDF, Word, Excel, ảnh · tối đa 20 MB mỗi tệp</span>
-            <input ref={inputRef} type="file" accept={ACCEPT} multiple hidden onChange={(e) => addFiles(e.target.files)} />
+            <input ref={inputRef} type="file" accept={ACCEPT} multiple hidden onChange={(e) => void addFiles(e.target.files)} />
           </div>
+          {uploading > 0 ? (
+            <span style={{ fontSize: 12.5, color: 'var(--ink-soft)' }}>Đang tải lên {uploading} tệp…</span>
+          ) : null}
           {rejected ? <span style={{ fontSize: 12.5, color: 'var(--error)' }}>{rejected}</span> : null}
           {draft.knowledge_files.length ? (
             <div>
@@ -108,7 +142,7 @@ export function DocumentsSection() {
         </Card>
       </div>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub="Tài liệu và website · Fonnus sẽ gửi gợi ý sau khi đọc xong" />
+      <SaveBar {...d.bar} sub="Tài liệu và website · Fonnus sẽ gửi gợi ý sau khi đọc xong" />
     </>
   )
 }

@@ -70,7 +70,7 @@ export function FaqSection() {
         <EmptyState title="Chưa có câu hỏi nào">Bấm một gợi ý ở trên, hoặc thêm câu của riêng phòng khám.</EmptyState>
       )}
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub={`${draft.faq_pairs.filter((f) => f.question.trim() && f.answer.trim()).length} câu có trả lời`} />
+      <SaveBar {...d.bar} sub={`${draft.faq_pairs.filter((f) => f.question.trim() && f.answer.trim()).length} câu có trả lời`} />
     </>
   )
 }

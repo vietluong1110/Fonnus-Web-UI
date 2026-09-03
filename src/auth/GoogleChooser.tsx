@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { GOOGLE_ACCOUNTS } from './mockAuth'
+import { api } from '../api'
+import type { GoogleAccount } from '../api'
 import styles from './GoogleChooser.module.css'
 
 interface GoogleChooserProps {
-  onPick: (account: (typeof GOOGLE_ACCOUNTS)[number]) => void
+  onPick: (account: GoogleAccount) => void
   onDismiss: () => void
 }
 
@@ -13,6 +14,9 @@ interface GoogleChooserProps {
  * lands this whole component is replaced by a redirect.
  */
 export function GoogleChooser({ onPick, onDismiss }: GoogleChooserProps) {
+  // Empty in live mode: the real flow is a redirect, not an in-page chooser.
+  const accounts = api.auth.googleAccounts()
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onDismiss()
@@ -44,7 +48,7 @@ export function GoogleChooser({ onPick, onDismiss }: GoogleChooserProps) {
         </div>
 
         <div className={styles.accounts}>
-          {GOOGLE_ACCOUNTS.map((account) => (
+          {accounts.map((account) => (
             <button
               key={account.email}
               type="button"

@@ -1,0 +1,52 @@
+.wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  background: var(--surface-page);
+}
+
+.card {
+  max-width: 420px;
+  text-align: center;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+}
+
+.title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--size-subheading);
+  font-weight: var(--weight-display);
+  line-height: var(--leading-subheading);
+  color: var(--ink);
+}
+
+.body {
+  margin: 0 0 var(--space-5);
+  font-size: var(--size-body);
+  line-height: var(--leading-body);
+  color: var(--ink-soft);
+}
+
+.button {
+  /* Controls are pills, containers are rounded rectangles. */
+  border-radius: var(--radius-pill);
+  border: 0;
+  padding: 0.7rem 1.4rem;
+  font: inherit;
+  font-weight: var(--weight-ui);
+  color: var(--milk);
+  background: var(--action-primary);
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--action-primary-hover);
+}
+
+.button:active {
+  background: var(--action-primary-active);
+}

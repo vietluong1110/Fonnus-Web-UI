@@ -300,7 +300,7 @@ export function ServicesSection() {
         )}
       </Card>
 
-      <SaveBar dirty={d.dirty} saving={d.saving} onSave={d.save} onCancel={d.cancel} sub={`${priced}/${total} dịch vụ có giá · ${LABELS.pricing[draft.pricing_disclosure_policy]}`} />
+      <SaveBar {...d.bar} sub={`${priced}/${total} dịch vụ có giá · ${LABELS.pricing[draft.pricing_disclosure_policy]}`} />
     </>
   )
 }
