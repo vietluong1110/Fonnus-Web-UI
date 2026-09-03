@@ -145,15 +145,3 @@ export function AskRail() {
     </aside>
   )
 }
-
-/** The rail folded into a pill for the page head of every other Lễ tân page (frame 18). */
-export function AskPill() {
-  const { config } = useConfig()
-  const { queue } = useQuestionQueue()
-  if (!queue.length) return null
-  return (
-    <a className={styles.pill} href={appHref('le-tan', 'kien-thuc')} title="Trả lời câu hỏi của lễ tân — mỗi câu điền một mục">
-      {config.agent_name || 'Linh'} hỏi — còn {queue.length} câu ▸
-    </a>
-  )
-}

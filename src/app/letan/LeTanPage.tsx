@@ -2,6 +2,9 @@ import type { ReactNode } from 'react'
 import { Badge } from '../../design-system'
 import { appHref } from '../../hooks/useRoute'
 import { Tabs, ui } from '../ui'
+import { LeTanHeader } from './LeTanHeader'
+import { SetupChatProvider } from './assistant/chatStore'
+import { SetupChat } from './assistant/SetupChat'
 import { ProfileTab } from './profile/ProfileTab'
 import { IdentitySection } from './profile/IdentitySection'
 import { VoiceSection } from './profile/VoiceSection'
@@ -17,16 +20,21 @@ import { FaqSection } from './knowledge/FaqSection'
 import { KeytermsSection } from './knowledge/KeytermsSection'
 import { DocumentsSection } from './knowledge/DocumentsSection'
 import { SkillsTab } from './skills/SkillsTab'
-import { AskPill } from './knowledge/AskRail'
+import styles from './LeTanPage.module.css'
 
 /*
  * Lễ tân — everything the owner tells the receptionist about the clinic.
  *
- *   #/app/le-tan/ho-so                 who she is: the hub, plus the opening call
+ *   #/app/le-tan/ho-so                 who she is: the hub, plus the assistant
  *   #/app/le-tan/ho-so/<section>       one persona section, full form
  *   #/app/le-tan/kien-thuc             what she knows: the hub + the question rail
  *   #/app/le-tan/kien-thuc/<section>   one knowledge section, full form
  *   #/app/le-tan/ky-nang/<skill>       what she may do: transfer, email, book
+ *
+ * Every page under the tab carries the same identity header: which
+ * receptionist this is, which line she answers on, and one press to hear her.
+ * The tab configures exactly one of them today, and that header is where the
+ * switcher goes the day a clinic runs two.
  */
 
 export type LeTanTab = 'ho-so' | 'kien-thuc' | 'ky-nang'
@@ -64,36 +72,68 @@ export const KNOWLEDGE_SECTIONS = {
 export type KnowledgeSectionKey = keyof typeof KNOWLEDGE_SECTIONS
 
 export function LeTanPage({ path }: { path: string[] }) {
+  // Above the routes, so walking into a section does not restart the
+  // conversation — it only changes the shape the assistant is rendered in.
+  return (
+    <SetupChatProvider>
+      <LeTanRoutes path={path} />
+    </SetupChatProvider>
+  )
+}
+
+function LeTanRoutes({ path }: { path: string[] }) {
   const tab = (TABS.some((t) => t.value === path[0]) ? path[0] : 'ho-so') as LeTanTab
 
   if (tab === 'ho-so' && path[1] && path[1] in PROFILE_SECTIONS) {
     const Section = PROFILE_SECTIONS[path[1] as ProfileSectionKey].component
-    return <Section />
+    return (
+      <div className={styles.docked}>
+        <LeTanHeader compact />
+        <Section />
+        {/* Docked rather than gone: "Mở mục" brought you here, and the next
+            question is usually about what you are now looking at. */}
+        <SetupChat variant="dock" />
+      </div>
+    )
   }
 
   if (tab === 'kien-thuc' && path[1] && path[1] in KNOWLEDGE_SECTIONS) {
-    const key = path[1] as KnowledgeSectionKey
-    const Section = KNOWLEDGE_SECTIONS[key].component
-    return <Section />
+    const Section = KNOWLEDGE_SECTIONS[path[1] as KnowledgeSectionKey].component
+    return (
+      <>
+        <LeTanHeader compact />
+        <Section />
+      </>
+    )
   }
 
   return (
     <>
-      <div className={ui.pageHead}>
-        <h1 className={ui.pageTitle}>Lễ tân</h1>
-        {tab !== 'kien-thuc' ? <AskPill /> : null}
-      </div>
+      <LeTanHeader />
       <Tabs
         ariaLabel="Mục Lễ tân"
         items={TABS.map((t) => ({ value: t.value, label: t.label, href: appHref('le-tan', t.value) }))}
         value={tab}
       />
-      {tab === 'ho-so' ? <ProfileTab /> : tab === 'kien-thuc' ? <KnowledgeHub /> : <SkillsTab path={path.slice(1)} />}
+      {tab === 'ho-so' ? (
+        <div className={styles.withRail}>
+          <div className={styles.withRailMain}>
+            <ProfileTab />
+          </div>
+          <div className={styles.withRailAside}>
+            <SetupChat variant="rail" />
+          </div>
+        </div>
+      ) : tab === 'kien-thuc' ? (
+        <KnowledgeHub />
+      ) : (
+        <SkillsTab path={path.slice(1)} />
+      )}
     </>
   )
 }
 
-/** Frame 18/19 head: back link, title, status badge, plus the floating question pill. */
+/** Section head: back link and the section's own title, under the identity header. */
 export function SectionHead({
   title,
   badge,
@@ -108,22 +148,17 @@ export function SectionHead({
   backHref?: string
 }) {
   return (
-    <>
-      <div className={ui.pageHead}>
-        <a className={ui.backLink} href={backHref}>
-          ‹ {backLabel}
-        </a>
-        <h1 className={ui.pageTitle}>{title}</h1>
-        {badge ? (
-          <Badge tone={badge.tone} dot>
-            {badge.label}
-          </Badge>
-        ) : null}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
-          <AskPill />
-          {actions}
-        </div>
-      </div>
-    </>
+    <div className={ui.pageHead}>
+      <a className={ui.backLink} href={backHref}>
+        ‹ {backLabel}
+      </a>
+      <h2 className={styles.sectionTitle}>{title}</h2>
+      {badge ? (
+        <Badge tone={badge.tone} dot>
+          {badge.label}
+        </Badge>
+      ) : null}
+      {actions ? <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>{actions}</div> : null}
+    </div>
   )
 }

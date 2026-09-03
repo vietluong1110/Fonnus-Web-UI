@@ -258,5 +258,62 @@ export function buildQuestions(cfg: ReceptionistConfig): Question[] {
     })
   }
 
+  /*
+   * Hồ sơ. Only two fields here are genuinely unanswerable-by-default: the
+   * greeting and the standing instructions. Voice, speed and style all ship
+   * with a working value, so asking about them would be asking a question the
+   * record can never mark as answered.
+   */
+  const agent = cfg.agent_name || 'Linh'
+
+  if (!cfg.greeting_script_custom.trim()) {
+    q.push({
+      id: 'greeting_script_custom',
+      path: ['ho-so', 'danh-tinh'],
+      sectionLabel: 'Hồ sơ · Lời chào',
+      text: `Anh chị muốn ${agent} chào khách bằng câu gì ạ? Em đang dùng câu mặc định.`,
+      chips: [
+        {
+          label: 'Dùng câu mặc định',
+          apply: (c) => ({
+            greeting_script_custom: `${c.business_name} xin nghe. Em là ${c.agent_name || 'Linh'}, trợ lý AI của phòng khám. Anh chị cần đặt lịch hay hỏi thông tin ạ?`,
+          }),
+        },
+      ],
+      placeholder: 'VD: Việt Smile xin nghe, em có thể giúp gì ạ?',
+      applyText: (_c, text) => {
+        if (text.trim().length < 10) return { error: 'Câu chào ngắn quá ạ — anh chị viết dài hơn một chút giúp em.' }
+        return { greeting_script_custom: text.trim() }
+      },
+      confirm: () => 'lời chào của phòng khám',
+    })
+  }
+
+  if (!cfg.tenant_instructions.trim()) {
+    q.push({
+      id: 'tenant_instructions',
+      path: ['ho-so', 'chi-dan'],
+      sectionLabel: 'Hồ sơ · Chỉ dẫn riêng',
+      text: `Có điều gì anh chị muốn ${agent} luôn làm hoặc luôn tránh khi nói với khách không ạ?`,
+      chips: [
+        {
+          label: 'Luôn mời đặt lịch tư vấn',
+          apply: () => ({ tenant_instructions: 'Luôn gợi ý khách đặt lịch tư vấn miễn phí.' }),
+        },
+        {
+          label: 'Không so sánh bác sĩ',
+          apply: () => ({
+            tenant_instructions: 'Khách hỏi bác sĩ nào giỏi nhất: nói tất cả bác sĩ đều được đào tạo bài bản, không so sánh.',
+          }),
+        },
+      ],
+      placeholder: 'VD: Xưng "em", gọi khách là "anh/chị"',
+      applyText: (c, text) => ({
+        tenant_instructions: (c.tenant_instructions.trim() ? c.tenant_instructions.trimEnd() + '\n' : '') + text.trim(),
+      }),
+      confirm: () => 'chỉ dẫn riêng',
+    })
+  }
+
   return q
 }

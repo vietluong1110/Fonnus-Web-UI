@@ -21,6 +21,20 @@ export function formatPhone(raw: string): string {
 }
 
 /**
+ * A published business line: 024 7307 7199.
+ *
+ * `formatPhone` above groups the ten digits of a mobile and truncates
+ * anything longer, which turns an eleven-digit landline into nonsense. Fixed
+ * lines carry a three-digit area code and eight subscriber digits, grouped in
+ * fours the way they are printed on a clinic's signage.
+ */
+export function formatBusinessPhone(raw: string): string {
+  const d = normalizePhone(raw)
+  if (d.length === 11) return `${d.slice(0, 3)} ${d.slice(3, 7)} ${d.slice(7)}`
+  return formatPhone(d)
+}
+
+/**
  * Mobile prefixes only. A landline (024…, 028…) can't receive the SMS code, so
  * it is caught here rather than after a code that never arrives.
  */

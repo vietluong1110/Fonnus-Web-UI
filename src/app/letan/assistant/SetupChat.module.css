@@ -1,0 +1,474 @@
+/*
+ * The Fonnus setup assistant, in two shapes.
+ *
+ *   rail  — a column beside a hub page, sticky, sized to the viewport.
+ *   dock  — a floating window pinned bottom-right on a sub-page, so walking
+ *           into a section to check something does not lose the conversation.
+ *           Minimizable, never dismissable: it is the fastest route through
+ *           setup, and an owner who closes it will not find it again.
+ *
+ * Both share every part below the shell.
+ */
+
+.shell {
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.rail {
+  position: sticky;
+  top: 24px;
+  /*
+   * Tall enough to be a conversation, never taller than the window. 216px is
+   * the chrome above and below it — page padding, the identity header, the
+   * tab row and their gaps — so on a short hub page nothing scrolls at all.
+   */
+  height: clamp(420px, calc(100vh - 216px), 720px);
+}
+
+.dock {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 40;
+  width: 360px;
+  height: min(468px, calc(100vh - 148px));
+  box-shadow: var(--shadow-overlay);
+  animation: fnRise var(--duration-slow) var(--ease-arc);
+}
+
+.dockMin {
+  height: auto;
+}
+
+/* ------------------------------------------------------------------ head */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-hairline);
+  background: var(--surface-card);
+  flex: 0 0 auto;
+}
+
+/* Fonnus's mark, not the orb: the orb is the receptionist's face. */
+.mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-warm);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.headName {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.headMeta {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.headButton {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.headButton:hover {
+  background: var(--action-ghost-hover);
+  color: var(--text-accent);
+}
+
+/* Minimized dock: the head alone, as a floating bar. */
+.minBar {
+  cursor: pointer;
+  border-bottom: none;
+}
+
+.count {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--cream);
+  background: var(--action-primary);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------- messages */
+
+.log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* A young conversation sits at the bottom of the panel like a real chat,
+   rather than hanging from the top of an empty box. */
+.log > :first-child {
+  margin-top: auto;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.turnUser {
+  align-items: flex-end;
+}
+
+.bubble {
+  max-width: 88%;
+  border-radius: 16px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Fonnus speaks in milk with a hairline: quieter than the clinic's own words,
+   and clearly not one of Linh's blush speech bubbles from the previews. */
+.bubbleAssistant {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  border-bottom-left-radius: 6px;
+}
+
+.bubbleUser {
+  background: var(--surface-warm);
+  border-bottom-right-radius: 6px;
+  max-width: 84%;
+}
+
+.bubbleSaved {
+  background: var(--surface-sage);
+  box-shadow: none;
+  color: var(--ink);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.savedIcon {
+  color: var(--success);
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.bubbleError {
+  background: var(--surface-rose);
+  box-shadow: none;
+}
+
+/* The line under a question: which section it fills, and a way straight there. */
+.context {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  padding-left: 2px;
+}
+
+.sectionLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.openLink {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-link);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.openLink:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+  text-decoration: none;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+/* --------------------------------------------------------------- composer */
+
+.composer {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border-hairline);
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface-card);
+}
+
+.dropping {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 5px 7px 5px 8px;
+  border-radius: 10px;
+  background: var(--surface-page);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.attachIcon {
+  color: var(--text-accent);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.attachText {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.attachName {
+  max-width: 132px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.attachSize {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+}
+
+.attachRemove {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  border-radius: 4px;
+}
+
+.attachRemove:hover {
+  color: var(--error);
+  background: var(--surface-rose);
+}
+
+.inputShell {
+  --ring: inset 0 0 0 1px var(--border-strong);
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: 8px 8px 8px 12px;
+  box-shadow: var(--ring);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.inputShell:hover {
+  --ring: inset 0 0 0 1px rgba(38, 31, 24, 0.36);
+}
+
+.inputShell:focus-within {
+  --ring:
+    inset 0 0 0 1.5px var(--focus-ring),
+    0 0 0 3px rgba(184, 92, 43, 0.13);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  resize: none;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  padding: 5px 0;
+  margin: 0;
+  max-height: 104px;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.input::placeholder {
+  color: rgba(92, 82, 72, 0.6);
+}
+
+.send {
+  appearance: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--action-primary);
+  color: var(--cream);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.send:hover {
+  background: var(--action-primary-hover);
+}
+
+.send:active {
+  transform: scale(var(--press-scale));
+}
+
+.send:disabled {
+  background: transparent;
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  cursor: not-allowed;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.skip {
+  margin-left: auto;
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.skip:hover {
+  color: var(--text-accent);
+}
+
+/* Narrow: the rail stops being a column, so it stops being sticky and tall. */
+@media (max-width: 1180px) {
+  .rail {
+    position: static;
+    height: auto;
+    min-height: 0;
+    max-height: 62vh;
+  }
+
+  .log {
+    min-height: 220px;
+  }
+}
+
+/* Narrow: the dock spans the width it is given, minus its margins. */
+@media (max-width: 640px) {
+  .dock {
+    left: 16px;
+    right: 16px;
+    /* Clear of the save bar, which spans the full width down here. */
+    bottom: 84px;
+    width: auto;
+    height: min(420px, calc(100vh - 220px));
+  }
+}

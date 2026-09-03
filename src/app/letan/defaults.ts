@@ -165,6 +165,8 @@ const packKeyterms: Keyterm[] = KEYTERMS_PACK.map((term, i) => ({
 
 export const DEFAULT_CONFIG: ReceptionistConfig = {
   agent_name: 'Linh',
+  // TODO: comes from the number-provisioning step in Số điện thoại.
+  assigned_phone: '02473077199',
 
   business_name: 'Nha khoa Việt Smile',
   business_name_spoken: '',

@@ -345,6 +345,12 @@
 .saveBar {
   position: sticky;
   bottom: 16px;
+  /*
+   * A floating panel pinned to the bottom-right (the Fonnus assistant, when a
+   * section page docks it) sets --dock-inset to the width it owns, so "Lưu
+   * thay đổi" never ends up underneath it. Zero everywhere else.
+   */
+  margin-right: var(--dock-inset, 0px);
   z-index: 5;
   align-self: stretch;
   display: flex;

@@ -231,6 +231,13 @@ export interface ReceptionistConfig {
   /* ---- [ext] persona ---- */
   /** The receptionist's given name, used in every self-introduction. */
   agent_name: string
+  /**
+   * [ext] The Fonnus number this receptionist answers on, chosen from the FPT
+   * inventory pool during setup. Owned by the "Số điện thoại" tab; the Lễ tân
+   * header only reads it, to say which line this receptionist *is*. Empty
+   * until a number is provisioned.
+   */
+  assigned_phone: string
 
   /* ---- A1 · Business identity and location ---- */
   business_name: string // R1
