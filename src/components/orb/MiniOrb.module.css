@@ -1,0 +1,72 @@
+/*
+ * The landing orb, shrunk.
+ *
+ * Rather than re-tune every inset, blur radius and shadow for a small size,
+ * the orb is laid out at the same 280px base as `Orb.module.css` and scaled
+ * into its box — the same trick `useOrbPlacement` uses on the landing page.
+ * A transform scales everything it renders, shadows and filters included, so
+ * a 40px orb is the 280px one photographed from further away rather than a
+ * second, thinner design.
+ *
+ * Waves and the "Nghe thử" label are deliberately absent: in the app this is
+ * an identity mark, not a call-to-action.
+ */
+.root {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.scale {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  transform-origin: 0 0;
+}
+
+/* Everything below is copied verbatim from Orb.module.css, minus the --amp
+   terms: nothing here is driven by a live voice, so the orb sits at rest. */
+
+.halo {
+  position: absolute;
+  inset: -16%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184, 92, 43, 0.3) 0%, rgba(184, 92, 43, 0) 70%);
+  filter: blur(10px);
+}
+
+.sphere {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #8a4118 0%,
+    #b85c2b 34%,
+    #ce8352 56%,
+    #efc5a4 76%,
+    #fbeddd 92%,
+    #fff6e8 100%
+  );
+  box-shadow: 0 20px 70px rgba(184, 92, 43, 0.32);
+}
+
+.field {
+  position: absolute;
+  left: -4%;
+  top: -4%;
+  width: 108%;
+  height: 108%;
+  filter: blur(7px);
+}
+
+.sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 32%, rgba(255, 246, 232, 0.12) 0%, rgba(255, 246, 232, 0) 55%);
+}

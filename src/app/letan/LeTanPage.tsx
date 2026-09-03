@@ -3,6 +3,9 @@ import { Badge } from '../../design-system'
 import { appHref } from '../../hooks/useRoute'
 import { Tabs, ui } from '../ui'
 import { ProfileTab } from './profile/ProfileTab'
+import { IdentitySection } from './profile/IdentitySection'
+import { VoiceSection } from './profile/VoiceSection'
+import { InstructionsSection } from './profile/InstructionsSection'
 import { KnowledgeHub } from './knowledge/KnowledgeHub'
 import { LocationSection } from './knowledge/LocationSection'
 import { HoursSection } from './knowledge/HoursSection'
@@ -19,7 +22,8 @@ import { AskPill } from './knowledge/AskRail'
 /*
  * Lễ tân — everything the owner tells the receptionist about the clinic.
  *
- *   #/app/le-tan/ho-so                 who she is: name, voice, greeting, steering
+ *   #/app/le-tan/ho-so                 who she is: the hub, plus the opening call
+ *   #/app/le-tan/ho-so/<section>       one persona section, full form
  *   #/app/le-tan/kien-thuc             what she knows: the hub + the question rail
  *   #/app/le-tan/kien-thuc/<section>   one knowledge section, full form
  *   #/app/le-tan/ky-nang/<skill>       what she may do: transfer, email, book
@@ -32,6 +36,18 @@ const TABS: { value: LeTanTab; label: string }[] = [
   { value: 'kien-thuc', label: 'Kiến thức' },
   { value: 'ky-nang', label: 'Kỹ năng' },
 ]
+
+/*
+ * Hồ sơ is a hub over three sections rather than one long form — the same
+ * shape as Kiến thức below it, so the whole tab reads one way.
+ */
+export const PROFILE_SECTIONS = {
+  'danh-tinh': { title: 'Danh tính và lời chào', component: IdentitySection },
+  'giong-noi': { title: 'Giọng nói và cách nói', component: VoiceSection },
+  'chi-dan': { title: 'Chỉ dẫn riêng', component: InstructionsSection },
+} as const
+
+export type ProfileSectionKey = keyof typeof PROFILE_SECTIONS
 
 export const KNOWLEDGE_SECTIONS = {
   'dia-diem': { title: 'Địa điểm và liên hệ', component: LocationSection },
@@ -49,6 +65,11 @@ export type KnowledgeSectionKey = keyof typeof KNOWLEDGE_SECTIONS
 
 export function LeTanPage({ path }: { path: string[] }) {
   const tab = (TABS.some((t) => t.value === path[0]) ? path[0] : 'ho-so') as LeTanTab
+
+  if (tab === 'ho-so' && path[1] && path[1] in PROFILE_SECTIONS) {
+    const Section = PROFILE_SECTIONS[path[1] as ProfileSectionKey].component
+    return <Section />
+  }
 
   if (tab === 'kien-thuc' && path[1] && path[1] in KNOWLEDGE_SECTIONS) {
     const key = path[1] as KnowledgeSectionKey
