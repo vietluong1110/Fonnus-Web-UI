@@ -1,50 +1,62 @@
-import { Button } from '../../../design-system'
-import { LABELS, WEEKDAY_SHORT } from '../defaults'
+import { Icon } from '../../../design-system'
+import { LABELS } from '../defaults'
 import type { Practitioner, PractitionerTitle } from '../model'
 import { newId } from '../model'
 import { useConfig, useDraft } from '../store'
-import { SectionHead } from '../LeTanPage'
-import { Card, ChipButton, ChipInput, EmptyState, IconButton, Notice, NumberField, SaveBar, SelectField, SpeechBubble, Switch, TextField, ui } from '../../ui'
+import { Card, ChipButton, ChipInput, EmptyState, IconButton, NumberField, SaveBar, SelectField, Switch, TextField, ui } from '../../ui'
 import { WeekdayPicker } from './HoursSection'
+import { TryPanel } from '../tryout/TryPanel'
+import { KnowledgeSection } from './KnowledgeSection'
 import styles from './Knowledge.module.css'
 
 const KEYS = ['practitioner_roster'] as const
 
 function blank(): Practitioner {
-  return { id: newId('dr'), practitioner_name: '', title_credential: 'BS', specialties: [], years_experience: null, working_days: [1, 2, 3, 4, 5], working_hours_note: '', bookable_by_name: false, languages: ['Tiếng Việt'], practitioner_note: '' }
+  return {
+    id: newId('dr'),
+    practitioner_name: '',
+    title_credential: 'BS',
+    specialties: [],
+    years_experience: null,
+    working_days: [1, 2, 3, 4, 5],
+    working_hours_note: '',
+    bookable_by_name: false,
+    languages: ['Tiếng Việt'],
+    practitioner_note: '',
+  }
 }
 
+/**
+ * `#/app/le-tan/kien-thuc/bac-si` — who works here.
+ *
+ * Vietnamese callers ask for a doctor by name. One card per doctor, stacked
+ * in the work column; ask the try-out panel for one and she reads the card.
+ */
 export function PractitionersSection() {
   const { config } = useConfig()
   const d = useDraft(KEYS, 'Bác sĩ')
   const { draft, set } = d
   const agent = config.agent_name || 'Linh'
+  const live = { ...config, ...draft }
   const specialtyIdeas = config.service_catalog.map((s) => s.service_name).slice(0, 8)
 
   const setRow = (id: string, patch: Partial<Practitioner>) => set('practitioner_roster', draft.practitioner_roster.map((p) => (p.id === id ? { ...p, ...patch } : p)))
-  const first = draft.practitioner_roster.find((p) => p.practitioner_name.trim())
+  const add = () => {
+    const row = blank()
+    set('practitioner_roster', [...draft.practitioner_roster, row])
+  }
 
   return (
-    <>
-      <SectionHead
-        title="Bác sĩ"
-        badge={draft.practitioner_roster.length ? { tone: 'success', label: `${draft.practitioner_roster.length} bác sĩ` } : { tone: 'neutral', label: 'Không bắt buộc' }}
-        actions={
-          <Button size="sm" variant="secondary" onClick={() => set('practitioner_roster', [...draft.practitioner_roster, blank()])}>
-            + Thêm bác sĩ
-          </Button>
-        }
-      />
-
-      <Notice tone="neutral" icon="practitioner">
-        Khách Việt hay hỏi đích danh: "bác sĩ Hùng hôm nay có ở phòng khám không?". Có danh sách này, {agent} trả lời được ngày làm việc và chuyên môn — và nghe đúng tên bác sĩ khi khách nói.
-      </Notice>
-
+    <KnowledgeSection
+      title="Bác sĩ"
+      lede={`Khách Việt hay hỏi đích danh: "bác sĩ Hùng hôm nay có ở phòng khám không?". Có danh sách này, ${agent} trả lời được ngày làm việc và chuyên môn — và nghe đúng tên bác sĩ khi khách nói.`}
+      rail={<TryPanel section="bac-si" config={live} />}
+      bar={<SaveBar {...d.bar} sub="Bác sĩ · tên bác sĩ cũng được thêm vào Từ hay nghe nhầm" />}
+    >
       {draft.practitioner_roster.length ? (
-        <div className={styles.pracGrid}>
-          {draft.practitioner_roster.map((p) => (
+        draft.practitioner_roster.map((p) => (
+          <div key={p.id}>
             <Card
-              key={p.id}
               title={p.practitioner_name ? `${p.title_credential} ${p.practitioner_name}` : 'Bác sĩ mới'}
               actions={<IconButton name="trash" label="Xoá bác sĩ" danger onClick={() => set('practitioner_roster', draft.practitioner_roster.filter((x) => x.id !== p.id))} />}
             >
@@ -56,18 +68,28 @@ export function PractitionersSection() {
                 <span className={ui.labelMuted}>Chuyên môn</span>
                 <ChipInput value={p.specialties} onChange={(v) => setRow(p.id, { specialties: v })} placeholder="VD: Chỉnh nha" />
                 <div className={ui.row}>
-                  {specialtyIdeas.filter((s) => !p.specialties.includes(s)).slice(0, 5).map((s) => (
-                    <ChipButton key={s} onClick={() => setRow(p.id, { specialties: [...p.specialties, s] })}>
-                      + {s}
-                    </ChipButton>
-                  ))}
+                  {specialtyIdeas
+                    .filter((s) => !p.specialties.includes(s))
+                    .slice(0, 5)
+                    .map((s) => (
+                      <ChipButton key={s} onClick={() => setRow(p.id, { specialties: [...p.specialties, s] })}>
+                        + {s}
+                      </ChipButton>
+                    ))}
                 </div>
               </div>
               <div className={ui.stackTight}>
                 <span className={ui.labelMuted}>Ngày có mặt</span>
                 <div className={ui.row}>
                   <WeekdayPicker ariaLabel="Ngày làm việc" value={p.working_days} onChange={(v) => setRow(p.id, { working_days: v })} />
-                  <TextField compact aria-label="Giờ riêng" value={p.working_hours_note} onChange={(e) => setRow(p.id, { working_hours_note: e.target.value })} placeholder="Giờ riêng, VD: chỉ buổi sáng" style={{ flex: 1, minWidth: 160 }} />
+                  <TextField
+                    compact
+                    aria-label="Giờ riêng"
+                    value={p.working_hours_note}
+                    onChange={(e) => setRow(p.id, { working_hours_note: e.target.value })}
+                    placeholder="Giờ riêng, VD: chỉ buổi sáng"
+                    style={{ flex: 1, minWidth: 160 }}
+                  />
                 </div>
               </div>
               <div className={ui.grid2}>
@@ -81,27 +103,29 @@ export function PractitionersSection() {
               <Switch
                 lined
                 label={`${agent} được hẹn đích danh bác sĩ này`}
-                hint={p.bookable_by_name ? `Bật: ${agent} ghi nhận yêu cầu gặp ${p.practitioner_name || 'bác sĩ'} nhưng nói rõ phòng khám sẽ xác nhận lại — chưa có lịch riêng từng bác sĩ.` : `Tắt (mặc định): ${agent} giữ hẹn chung, không hứa đích danh bác sĩ.`}
+                hint={
+                  p.bookable_by_name
+                    ? `Bật: ${agent} ghi nhận yêu cầu gặp ${p.practitioner_name || 'bác sĩ'} nhưng nói rõ phòng khám sẽ xác nhận lại — chưa có lịch riêng từng bác sĩ.`
+                    : `Tắt: ${agent} giữ hẹn chung, không hứa đích danh bác sĩ.`
+                }
                 checked={p.bookable_by_name}
                 onChange={(v) => setRow(p.id, { bookable_by_name: v })}
               />
             </Card>
-          ))}
-        </div>
+          </div>
+        ))
       ) : (
-        <EmptyState title="Chưa có bác sĩ nào" action={<Button size="sm" onClick={() => set('practitioner_roster', [blank()])}>+ Thêm bác sĩ đầu tiên</Button>}>
-          Không bắt buộc. Có danh sách, {agent} trả lời được "bác sĩ nào làm implant" và "hôm nay ai trực".
-        </EmptyState>
+        <Card>
+          <EmptyState title="Chưa có bác sĩ nào">Có danh sách, {agent} trả lời được "bác sĩ nào làm implant" và "hôm nay ai trực".</EmptyState>
+        </Card>
       )}
 
-      {first ? (
-        <SpeechBubble who={`${agent} nói — ví dụ`} speak text={`${first.title_credential} ${first.practitioner_name} làm việc ${first.working_days.length ? first.working_days.map((w) => WEEKDAY_SHORT[w]).join(', ') : 'theo lịch'}${first.working_hours_note ? `, ${first.working_hours_note.toLowerCase()}` : ''} ạ.${first.specialties.length ? ` Bác sĩ phụ trách ${first.specialties.join(', ').toLowerCase()}.` : ''}`}>
-          {first.title_credential} {first.practitioner_name} làm việc {first.working_days.length ? first.working_days.map((w) => WEEKDAY_SHORT[w]).join(', ') : 'theo lịch'}
-          {first.working_hours_note ? `, ${first.working_hours_note.toLowerCase()}` : ''} ạ.{first.specialties.length ? ` Bác sĩ phụ trách ${first.specialties.join(', ').toLowerCase()}.` : ''}
-        </SpeechBubble>
-      ) : null}
-
-      <SaveBar {...d.bar} sub="Bác sĩ · tên bác sĩ cũng được thêm vào Từ hay nghe nhầm" />
-    </>
+      <button type="button" className={styles.idea} onClick={add}>
+        <span className={styles.ideaPlus}>
+          <Icon name="plus" size={14} />
+        </span>
+        <span>{draft.practitioner_roster.length ? 'Thêm bác sĩ' : 'Thêm bác sĩ đầu tiên'}</span>
+      </button>
+    </KnowledgeSection>
   )
 }

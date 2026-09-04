@@ -206,6 +206,47 @@ export interface AssistantApi {
 }
 
 // ---------------------------------------------------------------------------
+// Receptionist preview — "gọi thử" on a config page
+// ---------------------------------------------------------------------------
+
+/**
+ * The line a caller "says" when they say nothing. The try-out panel sends it
+ * for the "Im lặng một lúc" prompt, and the receptionist answers with her
+ * silence nudge — the one behaviour that cannot be triggered by typing.
+ */
+export const RECEPTIONIST_SILENCE = '[im lặng]'
+
+export interface ReceptionistTurn {
+  /** What the caller said — typed, or transcribed in the browser. */
+  text: string
+  /** The conversation so far, oldest first. The opening greeting is not included. */
+  history: { role: 'caller' | 'agent'; text: string }[]
+  /** Which Lễ tân sub-page the panel sits on, so a model can weight that section. */
+  section?: string
+  /**
+   * The record as it is on screen — *including unsaved draft fields*. Unlike
+   * the setup assistant, this is not redundant with the server's copy: the
+   * whole point of the panel is hearing an edit before saving it.
+   */
+  config: ReceptionistConfig
+}
+
+export interface ReceptionistReply {
+  text: string
+  /**
+   * Server-side TTS of `text` in the tenant's voice, when the backend produced
+   * one in the same call. Null: the client voices it through `previewTts`, or
+   * the browser's own Vietnamese voice as a last resort.
+   */
+  audio: { url: string; duration_ms: number } | null
+}
+
+export interface ReceptionistApi {
+  /** `POST /receptionist/preview` — one caller line in, the receptionist's reply out. */
+  reply(turn: ReceptionistTurn, opts?: Signal): Promise<ReceptionistReply>
+}
+
+// ---------------------------------------------------------------------------
 // Voice
 // ---------------------------------------------------------------------------
 
@@ -303,10 +344,11 @@ export interface FonnusApi {
   auth: AuthApi
   tenant: TenantApi
   assistant: AssistantApi
+  receptionist: ReceptionistApi
   voice: VoiceApi
   leads: LeadsApi
 }
 
 /** The switchable groups. Keep in sync with `FonnusApi`'s keys. */
-export const API_GROUPS = ['auth', 'tenant', 'assistant', 'voice', 'leads'] as const
+export const API_GROUPS = ['auth', 'tenant', 'assistant', 'receptionist', 'voice', 'leads'] as const
 export type ApiGroup = (typeof API_GROUPS)[number]

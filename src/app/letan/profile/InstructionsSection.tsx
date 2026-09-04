@@ -1,55 +1,27 @@
 import { Icon } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
+import { INSTRUCTION_IDEAS } from '../instructions'
 import { SectionHead } from '../LeTanPage'
 import { useConfig, useDraft } from '../store'
+import { TryPanel } from '../tryout/TryPanel'
 import { Card, SaveBar, TextArea } from '../../ui'
-import { PreviewCard, Turn } from './preview'
 import styles from './Profile.module.css'
 
 const KEYS = ['tenant_instructions'] as const
-
-/*
- * Each suggestion carries the answer it produces, so the panel can show the
- * same caller question answered with and without it. Sample prices — a real
- * clinic's would come from the service catalogue.
- */
-const IDEAS: { text: string; answer: string }[] = [
-  {
-    text: 'Luôn gợi ý khách đặt lịch tư vấn miễn phí.',
-    answer:
-      'Dạ niềng răng bên em khoảng 25–45 triệu tuỳ ca ạ. Anh chị đặt một buổi tư vấn miễn phí để bác sĩ xem trực tiếp nhé ạ?',
-  },
-  {
-    text: 'Khách hỏi giá niềng răng: mời đến khám để bác sĩ tư vấn chính xác.',
-    answer: 'Dạ khoảng 25–45 triệu tuỳ ca ạ. Giá chính xác thì bác sĩ phải xem phim và khám trực tiếp mới báo được ạ.',
-  },
-  {
-    text: 'Xưng "em", gọi khách là "anh/chị", không dùng "quý khách".',
-    answer: 'Dạ niềng răng bên em khoảng 25–45 triệu tuỳ ca ạ. Anh chị cần em xem giúp lịch khám không ạ?',
-  },
-  {
-    text: 'Khách hỏi bác sĩ nào giỏi nhất: nói tất cả bác sĩ đều được đào tạo bài bản, không so sánh.',
-    answer:
-      'Dạ bên em bác sĩ nào cũng được đào tạo bài bản ạ, em không so sánh được. Anh chị đến khám, bác sĩ trực hôm đó tư vấn giúp mình nhé ạ.',
-  },
-]
-
-const PLAIN_ANSWER = 'Dạ niềng răng bên em khoảng 25–45 triệu tuỳ ca ạ.'
 
 /**
  * `#/app/le-tan/ho-so/chi-dan` — the standing orders.
  *
  * The textarea gets the whole work column and nothing sits beside it, so it
  * can be dragged as tall as the owner wants without shifting anything. The
- * panel answers the question a blank box cannot: what does writing this here
- * actually change about what the receptionist says. The instruction being
- * demonstrated is named inside the answer it produced, so the panel needs no
- * caption explaining itself.
+ * try-out panel answers the question a blank box cannot: what does writing
+ * this here actually change about what the receptionist says — ask her the
+ * price of braces before and after adding a line, and hear the difference.
  *
- * There is no compliance notice among the fields any more. What the
- * instructions cannot override (safety, the legal disclosure, emergency
- * transfer) is enforced server-side; a warning box in the form only made the
- * page read as something that could be got wrong.
+ * There is no compliance notice among the fields. What the instructions
+ * cannot override (safety, the legal disclosure, emergency transfer) is
+ * enforced server-side; a warning box in the form only made the page read as
+ * something that could be got wrong.
  */
 export function InstructionsSection() {
   const { config } = useConfig()
@@ -57,9 +29,8 @@ export function InstructionsSection() {
   const { draft, set } = d
 
   const agent = config.agent_name || 'Linh'
-  const unused = IDEAS.filter((i) => !draft.tenant_instructions.includes(i.text))
-  const lastUsed = IDEAS.filter((i) => draft.tenant_instructions.includes(i.text)).pop()
-  const shown = lastUsed ?? IDEAS[0]
+  const unused = INSTRUCTION_IDEAS.filter((i) => !draft.tenant_instructions.includes(i.text))
+  const live = { ...config, ...draft }
 
   const add = (text: string) =>
     set('tenant_instructions', (draft.tenant_instructions.trim() ? draft.tenant_instructions.trimEnd() + '\n' : '') + text)
@@ -68,7 +39,7 @@ export function InstructionsSection() {
     <>
       <SectionHead title="Chỉ dẫn riêng" backLabel="Hồ sơ" backHref={appHref('le-tan', 'ho-so')} />
       <p className={styles.lede}>
-        Những gì bạn dặn riêng {agent}, ngoài kiến thức về phòng khám. Viết như dặn một nhân viên mới — mỗi ý một câu.
+        Những gì bạn dặn riêng {agent}, ngoài kiến thức về phòng khám. Viết như dặn một nhân viên mới — mỗi ý một câu, rồi hỏi thử {agent} ở khung bên phải.
       </p>
 
       <div className={styles.work}>
@@ -77,7 +48,7 @@ export function InstructionsSection() {
             <TextArea
               value={draft.tenant_instructions}
               onChange={(e) => set('tenant_instructions', e.target.value)}
-              placeholder={`Ví dụ: ${IDEAS[0].text}`}
+              placeholder={`Ví dụ: ${INSTRUCTION_IDEAS[0].text}`}
               rows={9}
               maxLength={1500}
               aria-label="Chỉ dẫn riêng"
@@ -102,24 +73,7 @@ export function InstructionsSection() {
         </div>
 
         <aside className={styles.rail}>
-          <PreviewCard
-            title={agent}
-            meta="Cùng một câu hỏi — có và không có chỉ dẫn"
-            /* Rule 2 — every screen ends in something you can hear. This is
-               exactly the screen where hearing the difference is the argument
-               for writing anything at all. */
-            listen={{ text: shown.answer, label: 'Nghe câu có chỉ dẫn' }}
-          >
-            <Turn label="Khách hỏi" tone="caller">
-              “Niềng răng bên mình bao nhiêu tiền ạ?”
-            </Turn>
-            <Turn label="Không có chỉ dẫn" tone="locked">
-              “{PLAIN_ANSWER}”
-            </Turn>
-            <Turn label={lastUsed ? 'Có chỉ dẫn của bạn' : 'Có chỉ dẫn — ví dụ'} note={shown.text} noteIcon="instructions">
-              “{shown.answer}”
-            </Turn>
-          </PreviewCard>
+          <TryPanel section="chi-dan" config={live} />
         </aside>
       </div>
 

@@ -4,7 +4,8 @@ import type { PersonalityStyle, SpeakingSpeed, VoiceId } from '../model'
 import { SectionHead } from '../LeTanPage'
 import { useConfig, useDraft } from '../store'
 import { Card, PlayButton, SaveBar, SelectField, Segmented, Switch, TextField, ui } from '../../ui'
-import { PreviewCard, Turn, defaultGreeting } from './preview'
+import { defaultGreeting } from '../greeting'
+import { TryPanel } from '../tryout/TryPanel'
 import { VoicePicker } from './VoicePicker'
 import styles from './Profile.module.css'
 
@@ -65,7 +66,6 @@ export function VoiceSection() {
   const { draft, set } = d
 
   const agent = config.agent_name || 'Linh'
-  const voice = LABELS.voices[draft.voice_selection]
   const audition = defaultGreeting(config.business_name, agent)
 
   const pickVoice = (id: VoiceId) => {
@@ -219,24 +219,7 @@ export function VoiceSection() {
         </div>
 
         <aside className={styles.rail}>
-          <PreviewCard
-            title={agent}
-            meta={`${voice.desc} · nói ${LABELS.speed[draft.speaking_speed].toLowerCase()}`}
-            listen={{ text: STYLE_SAMPLE[draft.personality_style], label: 'Nghe câu mẫu' }}
-          >
-            <Turn label="Giữa cuộc gọi">“{STYLE_SAMPLE[draft.personality_style]}”</Turn>
-
-            {draft.silence_nudge_enabled ? (
-              <>
-                <div className={styles.panelDivider} />
-                <Turn label="Khi khách im lặng" tone="caller">
-                  <span className={styles.turnMuted}>Khách không nói gì</span>
-                </Turn>
-                <span className={styles.turnSilence}>sau {draft.silence_nudge_delay_seconds} giây im lặng…</span>
-                <Turn>“{draft.silence_nudge_script}”</Turn>
-              </>
-            ) : null}
-          </PreviewCard>
+          <TryPanel section="giong-noi" config={{ ...config, ...draft }} />
         </aside>
       </div>
 

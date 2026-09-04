@@ -265,18 +265,19 @@
   flex: 0 0 auto;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-link);
-  padding: 3px 9px;
+  /* Filled, the same pairing as the sidebar's active tab: on the blush panel
+     a hollow pill read as a tag, not as the way into the section. */
+  background: var(--terracotta);
+  --icon-accent: currentColor;
+  color: var(--cream);
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
-  box-shadow: inset 0 0 0 1px var(--border-strong);
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 .openLink:hover {
-  background: var(--action-ghost-hover);
-  box-shadow: inset 0 0 0 1px var(--terracotta);
+  background: var(--terracotta-deep);
+  color: var(--cream);
   text-decoration: none;
 }
 
@@ -285,6 +286,12 @@
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 2px;
+}
+
+/* On the blush panel a chip takes the same milk as the bubbles — it is an
+   answer you could give, and answers are speech. */
+.chips > button {
+  background: var(--surface-card);
 }
 
 /* --------------------------------------------------------------- composer */
@@ -411,6 +418,9 @@
   padding: 5px 0;
   margin: 0;
   max-height: 104px;
+  /* Sized to its content (and its placeholder) by the component; a
+     scrollbar only ever appeared on a one-line box holding a two-line hint. */
+  overflow-y: hidden;
 }
 
 .input:focus-visible {

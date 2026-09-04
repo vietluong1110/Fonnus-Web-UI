@@ -86,8 +86,8 @@ export function buildQuestions(cfg: ReceptionistConfig): Question[] {
   if (!cfg.operating_hours_confirmed) {
     q.push({
       id: 'operating_hours_confirmed',
-      path: ['kien-thuc', 'gio-lam-viec'],
-      sectionLabel: 'Kiến thức · Giờ làm việc',
+      path: ['kien-thuc', 'gio-mo-cua'],
+      sectionLabel: 'Kiến thức · Giờ mở cửa',
       text: 'Giờ làm việc em đang có là T2–T7 08:00–20:00, CN 08:00–12:00. Đúng chưa ạ?',
       chips: [
         { label: 'Đúng rồi', apply: () => ({ operating_hours_confirmed: true }) },
@@ -101,8 +101,8 @@ export function buildQuestions(cfg: ReceptionistConfig): Question[] {
   if (!cfg.holidays_confirmed) {
     q.push({
       id: 'holidays_confirmed',
-      path: ['kien-thuc', 'ngay-nghi'],
-      sectionLabel: 'Kiến thức · Ngày nghỉ',
+      path: ['kien-thuc', 'gio-mo-cua'],
+      sectionLabel: 'Kiến thức · Giờ mở cửa và ngày nghỉ',
       text: 'Tết 2027 em ghi nghỉ từ 14/02 đến 22/02. Phòng khám mình nghỉ đúng vậy không ạ?',
       chips: [{ label: 'Đúng rồi', apply: () => ({ holidays_confirmed: true }) }],
       applyText: (_c, text) => (/đúng|ok|rồi|ừ|phải/i.test(text) ? { holidays_confirmed: true } : { error: 'Anh/chị chỉnh ngày ở mục Ngày nghỉ giúp em ạ.' }),

@@ -21,6 +21,8 @@ import { tenantMock } from './tenant.mock'
 import { tenantLive } from './tenant.live'
 import { assistantMock } from './assistant.mock'
 import { assistantLive } from './assistant.live'
+import { receptionistMock } from './receptionist.mock'
+import { receptionistLive } from './receptionist.live'
 import { voiceMock } from './voice.mock'
 import { voiceLive } from './voice.live'
 import { leadsMock } from './leads.mock'
@@ -30,6 +32,7 @@ export const api: FonnusApi = {
   auth: isLive('auth') ? authLive : authMock,
   tenant: isLive('tenant') ? tenantLive : tenantMock,
   assistant: isLive('assistant') ? assistantLive : assistantMock,
+  receptionist: isLive('receptionist') ? receptionistLive : receptionistMock,
   voice: isLive('voice') ? voiceLive : voiceMock,
   leads: isLive('leads') ? leadsLive : leadsMock,
 }
@@ -37,7 +40,7 @@ export const api: FonnusApi = {
 // A one-line reminder in the console, so nobody debugs a mock for an hour
 // wondering why their breakpoint in the backend never hits.
 if (import.meta.env.DEV && HAS_MOCKS) {
-  const faked = (['auth', 'tenant', 'assistant', 'voice', 'leads'] as const).filter((g) => !isLive(g))
+  const faked = (['auth', 'tenant', 'assistant', 'receptionist', 'voice', 'leads'] as const).filter((g) => !isLive(g))
   // eslint-disable-next-line no-console
   console.info(
     `[fonnus] API mode: ${API_MODE}. Faked in the browser: ${faked.join(', ')}. ` +

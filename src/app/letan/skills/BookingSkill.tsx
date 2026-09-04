@@ -99,7 +99,7 @@ export function BookingSkill() {
         </div>
       </Card>
 
-      <Card title="Ngày nghỉ và ngoại lệ" subtitle="lấy từ Kiến thức · Lịch nghỉ — sửa ở đó" actions={<a className={ui.linkButton} href={appHref('le-tan', 'kien-thuc', 'ngay-nghi')}>Mở Lịch nghỉ</a>}>
+      <Card title="Ngày nghỉ và ngoại lệ" subtitle="lấy từ Kiến thức · Giờ mở cửa và ngày nghỉ — sửa ở đó" actions={<a className={ui.linkButton} href={appHref('le-tan', 'kien-thuc', 'gio-mo-cua')}>Mở Giờ mở cửa và ngày nghỉ</a>}>
         {upcoming.length ? (
           <div>
             {upcoming.map((h) => (

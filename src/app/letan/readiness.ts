@@ -53,7 +53,7 @@ export function computeReadiness(cfg: ReceptionistConfig): Readiness {
       gate: 'R1',
       label: 'Xác nhận giờ làm việc',
       done: cfg.operating_hours_confirmed && cfg.operating_hours_by_weekday.some((d) => d.open),
-      path: ['kien-thuc', 'gio-lam-viec'],
+      path: ['kien-thuc', 'gio-mo-cua'],
       effort: 20,
     },
     {
@@ -71,7 +71,7 @@ export function computeReadiness(cfg: ReceptionistConfig): Readiness {
       gate: 'R2',
       label: 'Xác nhận lịch nghỉ Tết và ngày lễ',
       done: cfg.holidays_confirmed,
-      path: ['kien-thuc', 'ngay-nghi'],
+      path: ['kien-thuc', 'gio-mo-cua'],
       effort: 40,
     },
     {

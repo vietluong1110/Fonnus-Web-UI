@@ -337,7 +337,7 @@ agent uses it. Any extraction result must therefore be *proposed*, never auto-ap
 
 ---
 
-## 5. TTS preview
+## 5. Hearing the receptionist: TTS preview and the try-out
 
 ### `POST /tts/preview`
 
@@ -356,6 +356,38 @@ synthesis, which ignores the chosen voice entirely and is not the product voice.
 > ⚠️ **Cost.** There is a play button on nearly every configuration section. A naive
 > implementation bills ElevenLabs for the same greeting a hundred times in one setup session.
 > Cache on a hash of `(text, voice, speed)`. See Q20.
+
+### `POST /receptionist/preview`
+
+The "gọi thử" panel beside every Lễ tân form. One caller line in, the receptionist's reply
+out — answered from the record **as sent**, not from the server's copy: the panel exists to
+hear an unsaved edit, so the request carries the whole draft.
+
+```jsonc
+// request
+{
+  "text": "Mai mấy giờ mở cửa?",
+  "history": [ { "role": "caller", "text": "Alo" }, { "role": "agent", "text": "Dạ, em là Linh…" } ],
+  "section": "gio-mo-cua",          // which sub-page the panel sits on; a hint, not a filter
+  "config": { /* ReceptionistConfig, draft fields included */ }
+}
+
+// 200
+{
+  "text": "Mai thứ Bảy phòng khám mở từ 08:00 đến 20:00, nghỉ trưa 12:00 đến 13:30 ạ.",
+  "audio": { "url": "https://.../preview/def.mp3", "duration_ms": 4100 }   // or null
+}
+```
+
+`text: "[im lặng]"` is the caller saying nothing: reply with the silence nudge
+(`silence_nudge_script`), or the closing line once `end_call_after_n_nudges` is reached.
+`audio` may be null — the client then voices `text` through `POST /tts/preview`, or the
+browser's own Vietnamese voice as a last resort. Today the reply comes from intent matching in
+the browser (`src/api/receptionist.mock.ts`); live it is the same model that takes real calls,
+reading the same record, so what the owner hears here is what a caller will hear.
+
+> Same cost note as TTS: the owner will ask the same three questions twenty times while
+> editing one price. Cache replies on a hash of `(text, history, config)`.
 
 ---
 

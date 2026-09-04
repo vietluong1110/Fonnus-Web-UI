@@ -16,7 +16,8 @@ import styles from './SetupChat.module.css'
  * the state lives in `chatStore`, above the routes.
  *
  *   rail   a column beside a hub page
- *   dock   a window pinned bottom-right on a section page
+ *   dock   a window pinned bottom-right on a section page; minimizable, and
+ *          dismissable with the X for the rest of that section
  *   phone  neither fits, so the panel splits: what stays in the page is the
  *          current question and its chips (a `prompt` card on a hub, a `fab`
  *          on a section page), and the conversation comes up as a `sheet`
@@ -56,7 +57,7 @@ function humanSize(bytes: number): string {
 export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
   const { config } = useConfig()
   const chat = useSetupChat()
-  const { messages, current, done, pageLabel, minimized, setMinimized } = chat
+  const { messages, current, done, pageLabel, minimized, setMinimized, hidden, setHidden } = chat
 
   const [text, setText] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
@@ -108,8 +109,15 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
+    // An empty textarea measures one line however long its placeholder is,
+    // which put a scrollbar on a box showing nothing but a wrapped hint. So
+    // the placeholder is measured as if it were the value.
+    const probe = !el.value && !!el.placeholder
+    if (probe) el.value = el.placeholder
     el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
+    const h = el.scrollHeight
+    if (probe) el.value = ''
+    el.style.height = `${h}px`
   }, [text, sheet, current?.placeholder])
 
   const addFiles = (files: FileList | File[]) => {
@@ -206,17 +214,30 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
           <Icon name="x" size={18} />
         </button>
       ) : docked ? (
-        <button
-          type="button"
-          className={styles.headButton}
-          aria-label={minimized ? 'Mở trợ lý' : 'Thu nhỏ trợ lý'}
-          onClick={(e) => {
-            e.stopPropagation()
-            setMinimized(!minimized)
-          }}
-        >
-          <Icon name={minimized ? 'chevron-up' : 'chevron-down'} size={18} />
-        </button>
+        <>
+          <button
+            type="button"
+            className={styles.headButton}
+            aria-label={minimized ? 'Mở trợ lý' : 'Thu nhỏ trợ lý'}
+            onClick={(e) => {
+              e.stopPropagation()
+              setMinimized(!minimized)
+            }}
+          >
+            <Icon name={minimized ? 'chevron-up' : 'chevron-down'} size={18} />
+          </button>
+          <button
+            type="button"
+            className={styles.headButton}
+            aria-label="Đóng trợ lý"
+            onClick={(e) => {
+              e.stopPropagation()
+              setHidden(true)
+            }}
+          >
+            <Icon name="x" size={18} />
+          </button>
+        </>
       ) : null}
     </div>
   )
@@ -236,6 +257,10 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
       ))}
     </div>
   ) : null
+
+  // Dismissed: the window is gone for this section. The phone keeps its
+  // button — there the assistant owns a corner of the screen, not a window.
+  if (docked && hidden && !phone) return null
 
   if (collapsedDock) {
     return (

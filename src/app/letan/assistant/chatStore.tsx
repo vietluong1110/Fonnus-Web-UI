@@ -5,7 +5,7 @@ import type { AssistantEvent, AttachmentRef, ChatPage } from '../../../api'
 import { newId } from '../model'
 import type { Question } from '../questions'
 import { useConfig } from '../store'
-import { useQuestionQueue } from '../knowledge/AskRail'
+import { useQuestionQueue } from './queue'
 
 /*
  * "Fonnus" — the setup assistant.
@@ -69,6 +69,9 @@ interface ChatStore {
   busy: boolean
   minimized: boolean
   setMinimized: (v: boolean) => void
+  /** The docked window was dismissed for this section — it comes back on the next one. */
+  hidden: boolean
+  setHidden: (v: boolean) => void
   answerWithChip: (label: string, patch: Record<string, unknown>, confirm: string) => void
   answerWithText: (text: string, attachments: Attachment[]) => void
 }
@@ -83,7 +86,16 @@ function opener(agent: string, page: ChatPage): string {
   return `Em là Fonnus. Em hỏi vài câu về những việc ${agent} được phép làm thay anh chị — trả lời tự nhiên là được ạ.`
 }
 
-export function SetupChatProvider({ page, children }: { page: ChatPage; children: ReactNode }) {
+export function SetupChatProvider({
+  page,
+  section,
+  children,
+}: {
+  page: ChatPage
+  /** The sub-page open under `page`, if any — its questions are asked first. */
+  section?: string
+  children: ReactNode
+}) {
   const { config, update } = useConfig()
   const { queue } = useQuestionQueue()
   const agent = config.agent_name || 'Linh'
@@ -96,6 +108,11 @@ export function SetupChatProvider({ page, children }: { page: ChatPage; children
    */
   const [minimized, setMinimized] = useState(true)
   const [busy, setBusy] = useState(false)
+
+  // Dismissed with the X: gone for this section, back — minimized — on the
+  // next. The hub rail is always there, so the conversation is never lost.
+  const [hidden, setHidden] = useState(false)
+  useEffect(() => setHidden(false), [section])
 
   // One history and one "already asked" marker per page.
   const [histories, setHistories] = useState<Partial<Record<ChatPage, ChatMessage[]>>>({})
@@ -113,8 +130,14 @@ export function SetupChatProvider({ page, children }: { page: ChatPage; children
 
   const history = histories[page] ?? [{ id: `open-${page}`, role: 'assistant' as const, text: opener(agent, page) }]
 
-  // Only this page's questions, in the order the queue offers them.
-  const pageQueue = useMemo(() => queue.filter((q) => q.path[0] === page), [queue, page])
+  // Only this page's questions. On a sub-page the ones about *that* section
+  // come first: the owner is looking at the price list, so ask about prices,
+  // not about parking. The order within each half is the queue's own.
+  const pageQueue = useMemo(() => {
+    const mine = queue.filter((q) => q.path[0] === page)
+    if (!section) return mine
+    return [...mine.filter((q) => q.path[1] === section), ...mine.filter((q) => q.path[1] !== section)]
+  }, [queue, page, section])
   const current = pageQueue[0]
 
   const messages = useMemo(() => {
@@ -244,10 +267,12 @@ export function SetupChatProvider({ page, children }: { page: ChatPage; children
       busy,
       minimized,
       setMinimized,
+      hidden,
+      setHidden,
       answerWithChip,
       answerWithText,
     }),
-    [page, messages, current, busy, minimized, answerWithChip, answerWithText],
+    [page, messages, current, busy, minimized, hidden, answerWithChip, answerWithText],
   )
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>

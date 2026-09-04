@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { messageFor } from '../../api'
 import { Badge } from '../../design-system'
 import { appHref } from '../../hooks/useRoute'
@@ -6,7 +6,7 @@ import { ContentSkeleton, RetryCard } from '../Boot'
 import { Tabs, ui } from '../ui'
 import { useConfig } from './store'
 import { LeTanHeader } from './LeTanHeader'
-import { SetupChatProvider } from './assistant/chatStore'
+import { SetupChatProvider, useSetupChat } from './assistant/chatStore'
 import { SetupChat } from './assistant/SetupChat'
 import { ProfileTab } from './profile/ProfileTab'
 import { IdentitySection } from './profile/IdentitySection'
@@ -15,7 +15,6 @@ import { InstructionsSection } from './profile/InstructionsSection'
 import { KnowledgeHub } from './knowledge/KnowledgeHub'
 import { LocationSection } from './knowledge/LocationSection'
 import { HoursSection } from './knowledge/HoursSection'
-import { HolidaysSection } from './knowledge/HolidaysSection'
 import { ServicesSection } from './knowledge/ServicesSection'
 import { InsuranceSection } from './knowledge/InsuranceSection'
 import { PractitionersSection } from './knowledge/PractitionersSection'
@@ -30,7 +29,7 @@ import styles from './LeTanPage.module.css'
  *
  *   #/app/le-tan/ho-so                 who she is: the hub, plus the assistant
  *   #/app/le-tan/ho-so/<section>       one persona section, full form
- *   #/app/le-tan/kien-thuc             what she knows: the hub + the question rail
+ *   #/app/le-tan/kien-thuc             what she knows: the hub, plus the assistant
  *   #/app/le-tan/kien-thuc/<section>   one knowledge section, full form
  *   #/app/le-tan/ky-nang/<skill>       what she may do: transfer, email, book
  *
@@ -60,10 +59,13 @@ export const PROFILE_SECTIONS = {
 
 export type ProfileSectionKey = keyof typeof PROFILE_SECTIONS
 
+/*
+ * Kiến thức is eight sections, not nine: hours and holidays are one page,
+ * because the caller's question — "mai có mở không" — needs both to answer.
+ */
 export const KNOWLEDGE_SECTIONS = {
   'dia-diem': { title: 'Địa điểm và liên hệ', component: LocationSection },
-  'gio-lam-viec': { title: 'Giờ làm việc', component: HoursSection },
-  'ngay-nghi': { title: 'Lịch nghỉ Tết và ngày lễ', component: HolidaysSection },
+  'gio-mo-cua': { title: 'Giờ mở cửa và ngày nghỉ', component: HoursSection },
   'dich-vu': { title: 'Dịch vụ và giá', component: ServicesSection },
   'bao-hiem': { title: 'BHYT, bảo hiểm và khám ban đầu', component: InsuranceSection },
   'bac-si': { title: 'Bác sĩ', component: PractitionersSection },
@@ -100,34 +102,34 @@ export function LeTanPage({ path }: { path: string[] }) {
   // conversation — it only changes the shape the assistant is rendered in.
   // Keyed by tab, so each page holds its own questions and its own thread.
   return (
-    <SetupChatProvider page={tab}>
+    <SetupChatProvider page={tab} section={path[1]}>
       <LeTanRoutes path={path} tab={tab} />
     </SetupChatProvider>
   )
 }
 
 function LeTanRoutes({ path, tab }: { path: string[]; tab: LeTanTab }) {
+  const { hidden } = useSetupChat()
 
-  if (tab === 'ho-so' && path[1] && path[1] in PROFILE_SECTIONS) {
-    const Section = PROFILE_SECTIONS[path[1] as ProfileSectionKey].component
+  // A section page under either hub: the form, with the assistant docked
+  // bottom-right rather than gone — "Mở mục" brought you here, and the next
+  // question is usually about what you are now looking at.
+  const Section =
+    tab === 'ho-so' && path[1] && path[1] in PROFILE_SECTIONS
+      ? PROFILE_SECTIONS[path[1] as ProfileSectionKey].component
+      : tab === 'kien-thuc' && path[1] && path[1] in KNOWLEDGE_SECTIONS
+        ? KNOWLEDGE_SECTIONS[path[1] as KnowledgeSectionKey].component
+        : null
+
+  if (Section) {
+    // Dismissed, the dock owns none of the right edge — the save bar reads
+    // the inset and spans the column again.
     return (
-      <div className={styles.docked}>
+      <div className={styles.docked} style={hidden ? ({ '--dock-inset': '0px' } as CSSProperties) : undefined}>
         <LeTanHeader compact />
         <Section />
-        {/* Docked rather than gone: "Mở mục" brought you here, and the next
-            question is usually about what you are now looking at. */}
         <SetupChat variant="dock" />
       </div>
-    )
-  }
-
-  if (tab === 'kien-thuc' && path[1] && path[1] in KNOWLEDGE_SECTIONS) {
-    const Section = KNOWLEDGE_SECTIONS[path[1] as KnowledgeSectionKey].component
-    return (
-      <>
-        <LeTanHeader compact />
-        <Section />
-      </>
     )
   }
 
@@ -139,19 +141,15 @@ function LeTanRoutes({ path, tab }: { path: string[]; tab: LeTanTab }) {
         items={TABS.map((t) => ({ value: t.value, label: t.label, href: appHref('le-tan', t.value) }))}
         value={tab}
       />
-      {tab === 'ho-so' ? (
+      {tab === 'ky-nang' ? (
+        <SkillsTab path={path.slice(1)} />
+      ) : (
         <div className={styles.withRail}>
-          <div className={styles.withRailMain}>
-            <ProfileTab />
-          </div>
+          <div className={styles.withRailMain}>{tab === 'ho-so' ? <ProfileTab /> : <KnowledgeHub />}</div>
           <div className={styles.withRailAside}>
             <SetupChat variant="rail" />
           </div>
         </div>
-      ) : tab === 'kien-thuc' ? (
-        <KnowledgeHub />
-      ) : (
-        <SkillsTab path={path.slice(1)} />
       )}
     </>
   )

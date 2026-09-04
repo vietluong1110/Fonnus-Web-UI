@@ -144,10 +144,9 @@ sub-tabs, all under `#/app/le-tan/`:
 | Path                       | What it configures                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------- |
 | `ho-so`                    | Who she is: name, voice (4 voices = gender × accent), speed, style, English, greeting, steering text, turn-taking |
-| `kien-thuc`                | Hub: readiness meter, section list with status, add-on sections, and the question rail      |
+| `kien-thuc`                | Hub: eight rows in three groups, each a one-line summary of what is set, beside the Fonnus assistant |
 | `kien-thuc/dia-diem`       | Business identity + address (R1), directions / parking / links / VAT, branches               |
-| `kien-thuc/gio-lam-viec`   | Weekly hours (R1, confirm the template), breaks, last intake, live "open now"                |
-| `kien-thuc/ngay-nghi`      | Holiday exceptions, pre-seeded with Vietnamese holidays incl. Tết (R2, confirm)              |
+| `kien-thuc/gio-mo-cua`     | Weekly hours (R1), breaks, last intake, live "open now", and holiday exceptions pre-seeded with Vietnamese holidays incl. Tết (R2) — one page, one confirmation |
 | `kien-thuc/dich-vu`        | Service catalogue (12 dental template rows), pricing policy, not-offered, bundles, payments, promotions |
 | `kien-thuc/bao-hiem`       | Clinic pack: BHYT / insurance (R2), consultation fee, facilities, what to bring              |
 | `kien-thuc/bac-si`         | Practitioner roster                                                                          |
@@ -186,10 +185,17 @@ and is safe with real patients. Each check deep-links to the page that fixes
 it. `isOpenNow` derives the catalogue's `is_open_now` from hours, breaks and
 holidays for the live indicator.
 
-**"Linh hỏi — bạn trả lời"** (`questions.ts`, `AskRail.tsx`) turns the missing
+**"Linh hỏi — bạn trả lời"** (`questions.ts`, `assistant/queue.ts`) turns the missing
 fields into one question at a time with quick-reply chips and a free-text
 line; every answer writes the field it belongs to, so the forms and the meter
 move at once. Skips are per browser session.
+
+**"Gọi thử"** (`letan/tryout/TryPanel.tsx`, `api/receptionist.*`) is the rail beside every
+Lễ tân form: a call you can hold. It opens with the compliance line and the greeting, then
+the owner types or speaks (the browser's own Vietnamese speech recognition) and the
+receptionist answers from the record as it is on screen, unsaved edits included, voiced as
+soon as the reply lands. Mocked, the reply is intent matching in `receptionist.mock.ts`;
+live it is `POST /receptionist/preview`.
 
 **"Nghe thử"** (`ui/speak.ts`) asks `api.voice.previewTts` to voice a line in
 the tenant's chosen voice. With no TTS server it falls back to the browser's

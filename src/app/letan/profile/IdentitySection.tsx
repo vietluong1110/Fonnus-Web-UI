@@ -1,38 +1,23 @@
 import { Icon } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
-import { LABELS } from '../defaults'
+import { DAYPARTS, daypartExample, defaultGreeting } from '../greeting'
 import { SectionHead } from '../LeTanPage'
 import { useConfig, useDraft } from '../store'
-import { GREETING_COMPLIANCE_BLOCK } from '../system'
+import { TryPanel } from '../tryout/TryPanel'
 import { Card, PlayButton, SaveBar, Switch, TextArea, TextField, ui } from '../../ui'
-import { PreviewCard, Turn, defaultGreeting } from './preview'
 import styles from './Profile.module.css'
 
 const KEYS = ['agent_name', 'greeting_script_custom', 'greeting_by_daypart', 'secondary_language'] as const
-
-const DAYPARTS = [
-  ['morning', 'Sáng · trước 12:00', 'sun', 'buổi sáng'],
-  ['afternoon', 'Chiều · 12:00 – 18:00', 'sunset', 'buổi chiều'],
-  ['evening', 'Tối · sau 18:00', 'after-hours', 'buổi tối'],
-] as const
-
-type Daypart = (typeof DAYPARTS)[number][0]
-
-/** Which of the three greetings a caller would hear if they rang right now. */
-function currentDaypart(hour = new Date().getHours()): Daypart {
-  if (hour < 12) return 'morning'
-  if (hour < 18) return 'afternoon'
-  return 'evening'
-}
 
 /**
  * `#/app/le-tan/ho-so/danh-tinh` — who answers, and what the clinic says first.
  *
  * The two lines of the call opening are not both editable: Fonnus speaks the
  * AI-disclosure and recording notice, then the clinic's greeting. The fixed
- * one is shown in the preview panel, where the caller meets it, rather than
+ * one is shown in the try-out panel, where the caller meets it, rather than
  * as a red compliance block among the inputs — it is a fact about the call,
- * not a task for the owner.
+ * not a task for the owner. The panel opens with both lines, from the draft,
+ * so a greeting is heard the moment it is typed.
  */
 export function IdentitySection() {
   const { config } = useConfig()
@@ -41,17 +26,8 @@ export function IdentitySection() {
 
   const agent = draft.agent_name.trim() || 'Linh'
   const fallback = defaultGreeting(config.business_name, agent)
-  const greeting = draft.greeting_script_custom.trim() || fallback
-  const voice = LABELS.voices[config.voice_selection]
-
-  // With dayparts on, the caller hears the greeting for the time of day they
-  // rang — so the preview shows that one, not the all-day line the caller
-  // would never get. Fixed at render; a page open across noon is not a case
-  // worth a timer.
   const dayparts = draft.greeting_by_daypart
-  const part = currentDaypart()
-  const partRow = DAYPARTS.find(([key]) => key === part) ?? DAYPARTS[0]
-  const spoken = dayparts.enabled ? dayparts[part].trim() || daypartExample(part, config.business_name) : greeting
+  const live = { ...config, ...draft }
 
   return (
     <>
@@ -139,32 +115,11 @@ export function IdentitySection() {
         </div>
 
         <aside className={styles.rail}>
-          <PreviewCard
-            title={agent}
-            meta={`${voice.desc}, ${voice.tone}`}
-            listen={{ text: `${GREETING_COMPLIANCE_BLOCK} ${spoken}`, label: 'Nghe cả đoạn mở đầu' }}
-          >
-            <Turn label="Fonnus đọc trước" locked tone="locked">
-              “{GREETING_COMPLIANCE_BLOCK}”
-            </Turn>
-            <Turn
-              label={dayparts.enabled ? `Lời chào ${partRow[3]}` : 'Lời chào của phòng khám'}
-              note={dayparts.enabled ? `Khách gọi lúc này nghe câu của ${partRow[3]}.` : undefined}
-              noteIcon={dayparts.enabled ? partRow[2] : undefined}
-            >
-              “{spoken}”
-            </Turn>
-          </PreviewCard>
+          <TryPanel section="danh-tinh" config={live} />
         </aside>
       </div>
 
       <SaveBar {...d.bar} sub="Danh tính và lời chào · áp dụng cho cuộc gọi tiếp theo" />
     </>
   )
-}
-
-function daypartExample(key: Daypart, business: string): string {
-  if (key === 'morning') return `${business} xin chào buổi sáng. Em có thể giúp gì cho anh chị ạ?`
-  if (key === 'afternoon') return `${business} xin nghe. Em có thể giúp gì cho anh chị ạ?`
-  return `${business} xin nghe. Ngoài giờ khám, em vẫn đặt lịch và ghi lời nhắn được ạ.`
 }
