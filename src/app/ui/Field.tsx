@@ -10,7 +10,7 @@ import styles from './Field.module.css'
  * Form controls for the app. Same skin as the design-system Input (milk
  * ground, 12px radius, 1px inset hairline that thickens to the focus ring), but
  * as CSS modules and with the extra control types the catalogue needs: select,
- * textarea, time, date, VND amount, phone.
+ * textarea, VND amount, phone. Dates and times are in Pickers.tsx.
  *
  * The focus ring is drawn once, by the `.control` shell: the inner input and
  * textarea suppress the global `:focus-visible` outline so a focused field shows
@@ -27,12 +27,14 @@ interface FieldFrameProps {
   htmlFor?: string
   style?: CSSProperties
   className?: string
+  /** Matches the label to a compact control — see `.fieldCompact`. */
+  compact?: boolean
   children: ReactNode
 }
 
-export function FieldFrame({ label, gate, hint, error, labelExtra, htmlFor, style, className, children }: FieldFrameProps) {
+export function FieldFrame({ label, gate, hint, error, labelExtra, htmlFor, style, className, compact, children }: FieldFrameProps) {
   return (
-    <div className={`${styles.field} ${className ?? ''}`} style={style}>
+    <div className={`${styles.field} ${compact ? styles.fieldCompact : ''} ${className ?? ''}`} style={style}>
       {label ? (
         <div className={styles.labelRow}>
           <label htmlFor={htmlFor} className={styles.label}>
@@ -116,7 +118,7 @@ export function TextField({
   const autoId = useId()
   const inputId = id ?? autoId
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className}>
+    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className} compact={compact}>
       <span
         className={`${styles.control} ${error ? styles.controlError : ''} ${readOnly ? styles.controlReadonly : ''} ${compact ? styles.compact : ''}`}
       >
@@ -352,7 +354,7 @@ export function SelectField<V extends string>({
   }
 
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className}>
+    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className} compact={compact}>
       <button
         ref={triggerRef}
         id={inputId}
@@ -407,16 +409,6 @@ export function SelectField<V extends string>({
         : null}
     </FieldFrame>
   )
-}
-
-/** "08:00" — native picker, tabular figures. */
-export function TimeField({ value, onChange, ...rest }: Omit<TextFieldProps, 'value' | 'onChange' | 'type'> & { value: string; onChange: (v: string) => void }) {
-  return <TextField type="time" value={value} onChange={(e) => onChange(e.target.value)} step={300} {...rest} />
-}
-
-/** ISO date — native picker. */
-export function DateField({ value, onChange, ...rest }: Omit<TextFieldProps, 'value' | 'onChange' | 'type'> & { value: string; onChange: (v: string) => void }) {
-  return <TextField type="date" value={value} onChange={(e) => onChange(e.target.value)} {...rest} />
 }
 
 export function formatVnd(n: number | null | undefined): string {

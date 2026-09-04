@@ -19,6 +19,22 @@
 }
 
 /*
+ * A compact control needs a compact label. The full-size pairing is a 13.5px
+ * label in ink over a 14px value; keep it over a 13px value and the label
+ * reads louder than the thing it names — which is backwards, since the value
+ * is what the owner wrote and the label is only chrome.
+ */
+.fieldCompact {
+  gap: 4px;
+}
+
+.fieldCompact .label {
+  font-size: var(--size-eyebrow);
+  line-height: var(--leading-eyebrow);
+  color: var(--ink-soft);
+}
+
+/*
  * One ring, drawn by the shell.
  *
  * The state lives in --ring rather than in competing `box-shadow` declarations,

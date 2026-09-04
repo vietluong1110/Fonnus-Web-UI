@@ -301,8 +301,6 @@ export function SaveBar({
 export function EmptyState({ title, children, action }: { title: ReactNode; children?: ReactNode; action?: ReactNode }) {
   return (
     <div className={styles.empty}>
-      {/* An empty calendar cell: Lưới lịch is the reference's own picture of "nothing here yet". */}
-      <Pattern name="grid" style={{ zIndex: -1 }} />
       <span className={styles.emptyTitle}>{title}</span>
       {children ? <span>{children}</span> : null}
       {action ? <div style={{ marginTop: 6 }}>{action}</div> : null}

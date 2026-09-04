@@ -80,6 +80,17 @@ npm run typecheck
   artwork rather than a set of token stops.
 - One shape rule so radii stop disagreeing: **controls are pills, containers are rounded
   rectangles.**
+- **Dates and times are drawn too**, for the same reason selects are: the
+  native pickers are system-blue and English on a Vietnamese page. Use
+  `DateField` / `DateRangeField` / `TimeField` from `src/app/ui` — never
+  `<input type="date">` or `type="time"`. They store ISO dates and 24-hour
+  `HH:MM` and only change the reading. A new anchored panel should use
+  `useAnchoredPopup` / `AnchoredPopup` from `ui/Pickers.tsx` rather than
+  writing the listeners again: pop-ups nest, and both the outside-press rule
+  and the "scroll by `scrollTop`, never `scrollIntoView`" rule live there.
+  One pair of native `type="time"` inputs is left, in `skills/BookingSkill.tsx`
+  — they sit *inside* a bordered pill, so they need that row reworked rather
+  than a drop-in swap. Convert them when that page is next touched.
 - **Icons are drawn, not installed.** Every icon, shape and pattern is an arc-and-dot
   drawing in `src/design-system/icons.ts` / `Shape.tsx` / `Pattern.tsx` with exactly one
   terracotta accent (`--icon-accent`). No Lucide, no stock set, no emoji glyphs (✓ ▾ →) in

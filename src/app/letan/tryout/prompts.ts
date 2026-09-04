@@ -17,7 +17,6 @@ export interface Prompt {
 const line = (label: string): Prompt => ({ label })
 
 export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
-  const agent = cfg.agent_name.trim() || 'Linh'
   const svc = cfg.service_catalog.filter((s) => s.service_name.trim())
   const priced = svc.find((s) => s.price_from != null && s.price_from > 0) ?? svc[0]
   const unpriced = svc.find((s) => s.price_from == null)
@@ -53,8 +52,6 @@ export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
       return [...faqs.slice(0, 3).map((f) => line(f.question.trim())), ...(faqs.length < 3 ? [line('Nhổ răng có đau không?'), line('Trẻ em mấy tuổi khám được?')] : [])].slice(0, 4)
     case 'tu-khoa':
       return [line(`Em muốn hỏi về ${term?.phonetic_hint.trim() || term?.term.trim() || 'in-vi-za-lai'}`), line(`Bên mình có làm ${term?.term.trim() || 'Invisalign'} không?`), line('Cho em hỏi giá implant')]
-    case 'tai-lieu':
-      return [line(`${priced?.service_name ?? 'Tẩy trắng răng'} bao nhiêu tiền?`), line('Phòng khám ở đâu?'), line(`${agent} ơi, mai có mở không?`)]
     default:
       return [line('Phòng khám ở đâu?'), line('Mai mấy giờ mở cửa?'), line('Có nhận bảo hiểm y tế không?')]
   }

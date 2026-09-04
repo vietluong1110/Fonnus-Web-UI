@@ -37,13 +37,16 @@ export type IndustryVertical =
 
 export type VatInvoiceOption = 'yes' | 'on_request' | 'no'
 
-/** A1 · `branch_list` — one row per extra location. All O. */
+/**
+ * A1 · `branch_list` — one row per extra location. All O. Three columns:
+ * the catalogue's `branch_hours_note` was dropped (Sept 2026) — a branch
+ * with its own hours is a branch with its own receptionist.
+ */
 export interface Branch {
   id: string
   branch_name: string
   branch_address: string
   branch_phone: string
-  branch_hours_note: string
 }
 
 /** Mon = 1 … Sat = 6, Sun = 0 — matches `Date.getDay()`. */
@@ -268,7 +271,6 @@ export interface ReceptionistConfig {
   /** [ext] the template is pre-filled; R1 asks the tenant to confirm it once. */
   operating_hours_confirmed: boolean
   break_periods: BreakPeriod[] // O
-  last_intake_time: string // O, "" = none
   holiday_exceptions: HolidayException[] // R2
   /** [ext] the Tết pre-seed counts as R2 only once the tenant has looked at it. */
   holidays_confirmed: boolean

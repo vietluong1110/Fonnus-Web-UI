@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { Icon } from '../../../design-system'
 import { MiniOrb } from '../../../components/orb/MiniOrb'
-import { RECEPTIONIST_SILENCE, api, isCanceled, messageFor } from '../../../api'
+import { api, isCanceled, messageFor } from '../../../api'
 import { LABELS } from '../defaults'
 import { opening } from '../greeting'
 import type { ReceptionistConfig } from '../model'
 import { newId } from '../model'
-import { ChipButton } from '../../ui'
 import { usePlayer } from '../../ui/speak'
 import { promptsFor } from './prompts'
 import { useVoiceInput } from './useVoiceInput'
@@ -21,9 +20,10 @@ import styles from './TryPanel.module.css'
  * greets you the way she greets a caller, from the greeting on the left.
  * From there it is a conversation: the mic listens whenever she is not
  * speaking, what you say is transcribed and sent, her reply is spoken the
- * moment it lands, and the mic opens again. There is no transcript to read
- * back; there is what you just said and what she is saying now, under the
- * orb, the way a call has a voice and not a log.
+ * moment it lands, and the mic opens again. There is no transcript at all —
+ * not hers, not yours. The stage shows the orb and one line of status, the
+ * way a call has a voice and not a log; only a failed turn puts words under
+ * the orb, because an error you cannot hear has to be read.
  *
  * She answers from the record *as it is on the left, unsaved edits included*
  * — that is what the panel is for. Typing does the same as speaking, for a
@@ -45,10 +45,8 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
   const [muted, setMuted] = useState(false)
   const [busy, setBusy] = useState(false)
   const [text, setText] = useState('')
-  /** What the caller last said — shown under the orb while she answers. */
-  const [heard, setHeard] = useState('')
-  /** What she is saying now, or the Vietnamese message for a failed turn. */
-  const [said, setSaid] = useState<{ text: string; error?: boolean } | null>(null)
+  /** The Vietnamese message for a failed turn — the one thing ever written under the orb. */
+  const [failure, setFailure] = useState<string | null>(null)
 
   const player = usePlayer({ voice: config.voice_selection, speed: config.speaking_speed })
   const history = useRef<{ role: 'caller' | 'agent'; text: string }[]>([])
@@ -58,7 +56,7 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
   configRef.current = config
 
   const speak = (id: string, line: string) => {
-    setSaid({ text: line })
+    setFailure(null)
     player.play(id, line)
   }
 
@@ -66,7 +64,6 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
     const line = raw.trim()
     if (!line || busy) return
     if (!live) setLive(true)
-    setHeard(line)
     setText('')
     setBusy(true)
     player.stop()
@@ -85,7 +82,7 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
       })
       .catch((e: unknown) => {
         if (isCanceled(e)) return
-        setSaid({ text: messageFor(e), error: true })
+        setFailure(messageFor(e))
       })
       .finally(() => {
         if (inFlight.current === ac) {
@@ -99,7 +96,6 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
 
   const wake = () => {
     setLive(true)
-    setHeard('')
     speak('opening', open.greeting)
   }
 
@@ -111,8 +107,7 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
     history.current = []
     setLive(false)
     setBusy(false)
-    setHeard('')
-    setSaid(null)
+    setFailure(null)
   }
 
   /*
@@ -153,10 +148,9 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
             : muted
               ? 'Micro đang tắt — gõ câu hỏi bên dưới'
               : mic.listening
-                ? 'Đang nghe — nói tự nhiên như gọi điện'
+                ? 'Đang nghe'
                 : 'Sẵn sàng'
 
-  const heardLine = mic.listening && mic.interim ? mic.interim : heard
   const micOn = live && !muted && mic.supported
 
   return (
@@ -195,13 +189,9 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
           {status}
         </span>
 
-        {live && heardLine ? (
-          <span className={styles.heard}>{heardLine === RECEPTIONIST_SILENCE ? '… bạn im lặng …' : `Bạn: “${heardLine}”`}</span>
-        ) : null}
-
-        {live && said ? (
-          <p className={`${styles.said} ${said.error ? styles.saidError : ''}`} aria-live="polite">
-            {said.error ? said.text : `“${said.text}”`}
+        {live && failure ? (
+          <p className={styles.failure} aria-live="polite">
+            {failure}
           </p>
         ) : null}
       </div>
@@ -209,9 +199,12 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
       <div className={styles.prompts}>
         <span className={styles.promptsLabel}>Thử hỏi</span>
         {prompts.map((p) => (
-          <ChipButton key={p.label} onClick={() => send(p.text ?? p.label)}>
-            {p.label}
-          </ChipButton>
+          <button key={p.label} type="button" className={styles.prompt} onClick={() => send(p.text ?? p.label)}>
+            <span className={styles.promptText}>{p.text ? p.label : `“${p.label}”`}</span>
+            <span className={styles.promptGo} aria-hidden="true">
+              <Icon name="arrow-up" size={14} />
+            </span>
+          </button>
         ))}
       </div>
 
