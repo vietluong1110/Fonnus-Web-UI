@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api, isLive } from '../../api'
+import type { SpeakingSpeed, VoiceId } from '../letan/model'
 import { useConfig } from '../letan/store'
 
 /*
@@ -8,10 +9,12 @@ import { useConfig } from '../letan/store'
  * Live, this is server-side TTS in the voice the tenant actually picked
  * (`api.voice.previewTts`). Mocked, `previewTts` resolves null and this falls
  * back to the browser's own Vietnamese voice — a stand-in that ignores the
- * chosen voice and speed entirely, and is not the product voice.
+ * chosen voice, and is not the product voice.
  *
- * Both paths land on the same `{ speaking, toggle, supported }`, so the ten
- * play buttons across the Lễ tân screens do not know which one they got.
+ * Two hooks share one transport: `useSpeak(text)` is a play button beside a
+ * field; `usePlayer()` is the try-out panel, which plays whichever reply just
+ * arrived and lets any earlier one be replayed. Only one thing speaks at a
+ * time, across every instance of either.
  */
 
 function pickVoice(): SpeechSynthesisVoice | null {
@@ -20,51 +23,100 @@ function pickVoice(): SpeechSynthesisVoice | null {
   return voices.find((v) => v.lang.toLowerCase().startsWith('vi')) ?? null
 }
 
-/** Only one thing speaks at a time, across every instance of this hook. */
-let currentUtterance: SpeechSynthesisUtterance | null = null
-let currentAudio: HTMLAudioElement | null = null
+/** The browser fallback at least honours the pace, if not the voice. */
+const RATE: Record<SpeakingSpeed, number> = { slow: 0.88, normal: 1, fast: 1.14 }
 
-export function useSpeak(text: string) {
-  const { config } = useConfig()
-  const [speaking, setSpeaking] = useState(false)
-  const [browserVoice, setBrowserVoice] = useState(false)
-  const mine = useRef<SpeechSynthesisUtterance | null>(null)
-  const myAudio = useRef<HTMLAudioElement | null>(null)
+let stopCurrent: (() => void) | null = null
 
+/**
+ * Starts voicing `text` and returns a function that stops it. `onEnd` fires
+ * exactly once: when playback finishes, fails, or is stopped — by the caller
+ * or by something else starting to speak.
+ */
+export function startSpeech(text: string, voice: VoiceId, speed: SpeakingSpeed, onEnd: () => void): () => void {
+  stopCurrent?.()
+
+  let done = false
+  let audio: HTMLAudioElement | null = null
+  let utterance: SpeechSynthesisUtterance | null = null
+
+  const finish = () => {
+    if (done) return
+    done = true
+    if (stopCurrent === stop) stopCurrent = null
+    onEnd()
+  }
+  const stop = () => {
+    if (done) return
+    if (audio) {
+      audio.pause()
+      audio = null
+    }
+    if (utterance && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      utterance = null
+      window.speechSynthesis.cancel()
+    }
+    finish()
+  }
+  stopCurrent = stop
+
+  api.voice
+    .previewTts({ text, voice, speed })
+    .then((clip) => {
+      if (done) return
+      if (clip) {
+        audio = new Audio(clip.url)
+        audio.onended = finish
+        audio.onerror = finish
+        void audio.play().catch(finish)
+        return
+      }
+      if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+        finish()
+        return
+      }
+      const synth = window.speechSynthesis
+      synth.cancel()
+      const u = new SpeechSynthesisUtterance(text)
+      const v = pickVoice()
+      if (v) u.voice = v
+      u.lang = 'vi-VN'
+      u.rate = RATE[speed]
+      u.onend = finish
+      u.onerror = finish
+      utterance = u
+      synth.speak(u)
+    })
+    .catch(finish)
+
+  return stop
+}
+
+function useBrowserVoice(): boolean {
+  const [has, setHas] = useState(false)
   useEffect(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
-    const check = () => setBrowserVoice(!!pickVoice())
+    const check = () => setHas(!!pickVoice())
     check()
     window.speechSynthesis.addEventListener('voiceschanged', check)
     return () => window.speechSynthesis.removeEventListener('voiceschanged', check)
   }, [])
+  return has
+}
+
+export function useSpeak(text: string) {
+  const { config } = useConfig()
+  const [speaking, setSpeaking] = useState(false)
+  const stopRef = useRef<(() => void) | null>(null)
+  const browserVoice = useBrowserVoice()
 
   const stop = useCallback(() => {
-    if (mine.current && currentUtterance === mine.current) window.speechSynthesis.cancel()
-    if (myAudio.current && currentAudio === myAudio.current) {
-      currentAudio.pause()
-      currentAudio = null
-    }
+    stopRef.current?.()
+    stopRef.current = null
     setSpeaking(false)
   }, [])
 
   useEffect(() => stop, [stop])
-
-  const speakInBrowser = useCallback(() => {
-    const synth = window.speechSynthesis
-    synth.cancel()
-    const u = new SpeechSynthesisUtterance(text)
-    const voice = pickVoice()
-    if (voice) u.voice = voice
-    u.lang = 'vi-VN'
-    u.rate = 1
-    u.onend = () => setSpeaking(false)
-    u.onerror = () => setSpeaking(false)
-    mine.current = u
-    currentUtterance = u
-    setSpeaking(true)
-    synth.speak(u)
-  }, [text])
 
   const toggle = useCallback(() => {
     if (speaking) {
@@ -72,26 +124,8 @@ export function useSpeak(text: string) {
       return
     }
     setSpeaking(true)
-
-    api.voice
-      .previewTts({ text, voice: config.voice_selection, speed: config.speaking_speed })
-      .then((clip) => {
-        if (!clip) {
-          // No server-side TTS in this mode — fall back to the browser's voice.
-          if (typeof window !== 'undefined' && 'speechSynthesis' in window) speakInBrowser()
-          else setSpeaking(false)
-          return
-        }
-        currentAudio?.pause()
-        const audio = new Audio(clip.url)
-        audio.onended = () => setSpeaking(false)
-        audio.onerror = () => setSpeaking(false)
-        myAudio.current = audio
-        currentAudio = audio
-        void audio.play().catch(() => setSpeaking(false))
-      })
-      .catch(() => setSpeaking(false))
-  }, [speaking, stop, text, config.voice_selection, config.speaking_speed, speakInBrowser])
+    stopRef.current = startSpeech(text, config.voice_selection, config.speaking_speed, () => setSpeaking(false))
+  }, [speaking, stop, text, config.voice_selection, config.speaking_speed])
 
   return {
     speaking,
@@ -103,4 +137,46 @@ export function useSpeak(text: string) {
      */
     supported: isLive('voice') || browserVoice,
   }
+}
+
+/**
+ * A player for a transcript: `play(id, text)` voices one line and reports
+ * which line is sounding, so every bubble can draw its own play/pause state.
+ * `voice` and `speed` default to the saved record; the Giọng nói page passes
+ * its draft so an unsaved pick is what you hear.
+ */
+export function usePlayer(overrides?: { voice?: VoiceId; speed?: SpeakingSpeed }) {
+  const { config } = useConfig()
+  const voice = overrides?.voice ?? config.voice_selection
+  const speed = overrides?.speed ?? config.speaking_speed
+  const [playingId, setPlayingId] = useState<string | null>(null)
+  const stopRef = useRef<(() => void) | null>(null)
+  const browserVoice = useBrowserVoice()
+
+  const stop = useCallback(() => {
+    stopRef.current?.()
+    stopRef.current = null
+    setPlayingId(null)
+  }, [])
+
+  useEffect(() => stop, [stop])
+
+  const play = useCallback(
+    (id: string, text: string) => {
+      stopRef.current?.()
+      setPlayingId(id)
+      stopRef.current = startSpeech(text, voice, speed, () => setPlayingId((cur) => (cur === id ? null : cur)))
+    },
+    [voice, speed],
+  )
+
+  const toggle = useCallback(
+    (id: string, text: string) => {
+      if (playingId === id) stop()
+      else play(id, text)
+    },
+    [playingId, play, stop],
+  )
+
+  return { playingId, play, toggle, stop, supported: isLive('voice') || browserVoice }
 }

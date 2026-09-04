@@ -60,6 +60,7 @@ src/api/
   tenant.mock.ts    Faked in the browser        │ mirror-image files
   tenant.live.ts    Real HTTP                   ┘
   assistant.mock.ts / assistant.live.ts
+  receptionist.mock.ts / receptionist.live.ts   the "gọi thử" panel's reply
   voice.mock.ts     / voice.live.ts
   leads.mock.ts     / leads.live.ts
 

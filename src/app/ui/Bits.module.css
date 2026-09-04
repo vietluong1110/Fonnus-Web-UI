@@ -420,8 +420,10 @@
     flex: 1 1 100%;
   }
 
-  .saveBar > :nth-child(2),
-  .saveBar > :nth-child(3) {
+  /* The two buttons — by element, not by index: the night-dots pattern is
+     the bar's first child, so `:nth-child(2)` was the *text*, which it
+     squeezed into a 74px column with the buttons beside it. */
+  .saveBar > button {
     flex: 1 1 0;
     justify-content: center;
   }

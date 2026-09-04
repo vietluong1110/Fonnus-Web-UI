@@ -1,103 +1,124 @@
-.layout {
+/*
+ * Kiến thức — the hub and its eight sub-pages.
+ *
+ * Built to the rules Hồ sơ set (Profile.module.css, rules 1–6), restated here
+ * rather than composed across files so each keeps its own cascade. Change the
+ * geometry in both places together:
+ *
+ *   one work column + one sticky rail — 380px, a 40px gutter, a hairline down
+ *   the middle of it; every screen ends in something you can hear; status is
+ *   a summary of what is set, never a "required" badge; blush means speech.
+ *
+ * What is specific to Kiến thức: the record is mostly *lists* — services,
+ * holidays, doctors, branches — and the lists used to be tables 820–920px
+ * wide. Beside a rail there is about 720px, so every list is now stacked
+ * rows of at most two lines, in the order the receptionist says them:
+ * "Cạo vôi răng, khách còn gọi là lấy cao răng — từ 300 đến 500 nghìn một
+ * lần, đặt hẹn được, 30 phút."
+ */
+
+/* --------------------------------------------------------- section page */
+
+.work {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 40px;
   align-items: start;
 }
 
-@media (max-width: 1000px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.work::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 400px;
+  width: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
 }
 
-/* Readiness card */
-.ready {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  background: var(--surface-card);
-  border: 1px solid var(--border-hairline);
-  border-radius: 16px;
-  padding: 16px 20px;
-}
-
-.readyPct {
-  font-family: var(--font-num);
-  font-weight: 600;
-  font-size: 28px;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-accent);
-  min-width: 64px;
-}
-
-.readyBody {
-  flex: 1;
-  min-width: 0;
+.col {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 20px;
+  min-width: 0;
 }
 
-.readyTitle {
-  font-size: 14px;
-  font-weight: 600;
+.rail {
+  position: sticky;
+  top: 24px;
+  min-width: 0;
 }
 
-.bar {
-  height: 8px;
-  background: var(--paper);
-  border: 1px solid var(--border-hairline);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.barFill {
-  height: 100%;
-  background: var(--lemongrass);
-  transition: width var(--duration-arc) var(--ease-arc);
-}
-
-.readyLevels {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  font-size: 12.5px;
+.lede {
+  margin: -6px 0 0;
+  max-width: calc(100% - 420px);
+  font-size: 13.5px;
+  line-height: 1.6;
   color: var(--ink-soft);
 }
 
-.level {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+@media (max-width: 1180px) {
+  .work {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* A grid instruction left on a flex column sizes every child to its own
+       max-content — see the note in LeTanPage.module.css. */
+    align-items: stretch;
+  }
+
+  .work::before {
+    display: none;
+  }
+
+  .col {
+    order: 2;
+  }
+
+  .rail {
+    position: static;
+    order: 1;
+  }
+
+  .lede {
+    max-width: none;
+  }
 }
 
-.levelDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(38, 31, 24, 0.16);
+/* ------------------------------------------------------------------- hub */
+
+.hub {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.levelOn {
-  background: var(--success);
-}
-
-/* Section rows */
-.rows {
+/* The rows, in groups. Same row vocabulary as the Hồ sơ hub. */
+.group {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+.groupLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding: 4px 2px 0;
+}
+
 .rowLink {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   background: var(--surface-card);
   border: 1px solid var(--border-hairline);
   border-radius: 14px;
-  padding: 14px 18px;
+  padding: 16px 18px;
   color: var(--ink);
   text-decoration: none;
   transition:
@@ -107,12 +128,13 @@
 
 .rowLink:hover {
   background: var(--action-secondary-hover);
+  transform: translateY(var(--lift-hover));
   text-decoration: none;
   color: var(--ink);
-  transform: translateY(var(--lift-hover));
 }
 
-.rowMissing {
+/* Nothing filled in yet — a dashed edge, not a warning colour. */
+.rowEmpty {
   border: 1px dashed var(--border-dashed);
 }
 
@@ -125,129 +147,142 @@
 .rowText {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
   flex: 1;
 }
 
 .rowTitle {
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .rowSub {
   font-size: 12.5px;
+  line-height: 1.5;
   color: var(--ink-soft);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rowSubAccent {
+.rowSubEmpty {
   color: var(--text-accent);
 }
 
-.rowEnd {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.rowChev {
+  color: var(--ink-soft);
+  display: inline-flex;
   flex: 0 0 auto;
 }
 
-.rowChevron {
-  color: var(--ink-soft);
-  display: inline-flex;
-}
-
-.addons {
+.hubFoot {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.addon {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  border: 1px dashed var(--border-dashed);
-  border-radius: 999px;
-  padding: 5px 14px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-accent);
-  white-space: nowrap;
-  text-decoration: none;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.addon:hover {
-  background: var(--action-ghost-hover);
-  text-decoration: none;
-}
-
-.addonFilled {
-  border-style: solid;
-  border-color: var(--border-strong);
-  color: var(--ink);
-}
-
-.addonCount {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
-}
-
-/* The rail */
-.rail {
-  background: var(--surface-warm);
-  border-radius: 20px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: sticky;
-  top: 20px;
-}
-
-.railHead {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.railTitle {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.railMeta {
-  margin-left: auto;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-
-.railFoot {
-  border-top: 1px solid var(--border-hairline);
-  padding-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 11.5px;
+  gap: 10px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--ink-soft);
+  padding: 2px 2px 0;
 }
 
-/* The rail folded into a pill, sitting in the page head on every other Lễ tân page. */
-/* Hours table */
+.hubFootIcon {
+  color: var(--ink-soft);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.resetLink {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.resetLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 639.98px) {
+  .rowLink {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 15px;
+  }
+
+  .rowIcon,
+  .rowChev {
+    margin-top: 1px;
+  }
+
+  .rowSub {
+    white-space: normal;
+    overflow: visible;
+  }
+}
+
+/* ------------------------------------------------------------- ideas */
+
+/* Whole sentences, so rows rather than pills (see Profile.module.css). The
+   same row, with a plus, is also how a list says "add one more". */
+.ideas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.idea {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  border: 1px dashed var(--border-dashed);
+  border-radius: var(--radius-md);
+  background: transparent;
+  padding: 10px 13px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.idea:hover {
+  background: var(--action-ghost-hover);
+  border-style: solid;
+  border-color: var(--terracotta);
+}
+
+.ideaPlus {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--text-accent);
+}
+
+/* ------------------------------------------------------------- hours */
+
 .dayRow {
   display: grid;
-  grid-template-columns: 96px 48px minmax(0, 1fr) auto;
+  grid-template-columns: 96px 48px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid var(--border-hairline);
+}
+
+.dayRow:last-child {
+  border-bottom: none;
 }
 
 .dayName {
@@ -296,7 +331,6 @@
   background: var(--ink-soft);
 }
 
-/* Weekday toggle pills */
 .days {
   display: inline-flex;
   gap: 4px;
@@ -329,134 +363,97 @@
   color: var(--cream);
 }
 
+/* --------------------------------------------------------- stacked rows */
+
 /*
- * Services table.
- *
- * The eight columns it used to have made eight separate questions out of what
- * the receptionist treats as three: what is it called, what does it cost, may
- * she book it. "từ / đến / đơn vị" are now one price control, and the duration
- * sits with the booking toggle it belongs to. The optional note is a second
- * line of the same row rather than a full-width strip that read like a new one.
+ * The list row: what a table row became once the table had no room. Two
+ * lines, a hairline between rows, the row you are editing tinted so the rail
+ * can say "this one". A row with nothing in the field that matters (a
+ * service with no price) takes a dashed edge — the same mark the hub uses.
  */
-.svcTable {
-  --svc-cols: minmax(150px, 1.3fr) minmax(130px, 1fr) 330px 172px 64px;
+.item {
   display: flex;
   flex-direction: column;
-  min-width: 920px;
-}
-
-.svcHead {
-  display: grid;
-  grid-template-columns: var(--svc-cols);
-  gap: 0 12px;
-  align-items: end;
-  padding: 0 12px 8px;
-  border-bottom: 1px solid var(--border-strong);
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.svcItem {
+  gap: 8px;
+  padding: 12px;
+  margin: 0 -12px;
   border-radius: var(--radius-md);
-  padding: 8px 12px;
   transition: background var(--duration-fast) var(--ease-out);
 }
 
-.svcItem + .svcItem {
+.item + .item {
   box-shadow: inset 0 1px 0 var(--border-hairline);
 }
 
-.svcItem:hover {
+.item:focus-within {
   background: var(--surface-page);
   box-shadow: none;
 }
 
-.svcItem:hover + .svcItem {
+.item:focus-within + .item {
   box-shadow: none;
 }
 
-.svcMain {
-  display: grid;
-  grid-template-columns: var(--svc-cols);
-  gap: 0 12px;
-  align-items: center;
-}
-
-/* No price yet: the receptionist will offer a visit instead of a number. */
-.svcWarn,
-.svcWarn:hover {
-  background: var(--surface-rose);
+.itemOpen {
+  border: 1px dashed var(--border-dashed);
   box-shadow: none;
 }
 
-.svcWarn + .svcItem {
+.itemOpen + .item {
   box-shadow: none;
 }
 
-.svcGroup {
+.itemPast {
+  opacity: 0.55;
+}
+
+.line {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   min-width: 0;
 }
 
-.svcGroup > :first-child {
-  flex: 1;
+.grow {
+  flex: 1 1 180px;
   min-width: 0;
 }
 
-.svcActions {
+.half {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.fixed {
+  flex: 0 0 auto;
+}
+
+.itemLabel {
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.itemActions {
   display: flex;
   align-items: center;
   gap: 2px;
-  justify-self: end;
-}
-
-.svcNote {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0 2px;
-  max-width: 720px;
-}
-
-.svcNoteLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+  margin-left: auto;
   flex: 0 0 auto;
-  font-size: 12px;
-  color: var(--ink-soft);
 }
 
-.svcNote > :nth-child(2) {
-  flex: 1;
-  min-width: 0;
+.itemSep {
+  width: 1px;
+  height: 22px;
+  background: var(--border-hairline);
+  margin: 0 4px;
+  flex: 0 0 auto;
 }
 
-.scroll {
-  overflow-x: auto;
-  margin: 0 calc(var(--pad-card) * -1);
-  padding: 0 var(--pad-card);
-}
+/* ------------------------------------------------------------ documents */
 
-/* Practitioner cards */
-.pracGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 20px;
-}
-
-@media (max-width: 900px) {
-  .pracGrid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* Drop zone */
 .drop {
   border: 1px dashed var(--border-dashed);
   border-radius: var(--radius-md);
@@ -484,4 +481,30 @@
   padding: 9px 0;
   border-bottom: 1px solid var(--border-hairline);
   font-size: 13.5px;
+}
+
+.fileName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- phone */
+
+@media (max-width: 639.98px) {
+  .dayRow {
+    grid-template-columns: 76px 48px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .timeRange > * {
+    width: 104px;
+  }
+
+  .item {
+    margin: 0 -4px;
+    padding: 12px 4px;
+  }
 }

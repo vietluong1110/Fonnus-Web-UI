@@ -1,0 +1,364 @@
+/*
+ * The try-out panel — a voice call in a milk panel, on the form's own
+ * ground, separated from the form by the gutter rule and nothing else
+ * (Profile.module.css, rule 4).
+ *
+ * The hierarchy, loudest first: the orb — awake it lifts and glows, listening
+ * it breathes, speaking it swells — then her line under it in ink, then the
+ * status and what you said in soft ink, then the prompts, then the composer
+ * at the foot with its two discs. The only filled controls are the send
+ * button and a live microphone: both terracotta, because both mean "she is
+ * about to hear you".
+ */
+
+.panel {
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ head */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15.5px;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+}
+
+.meta {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.end {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-link);
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.end:hover {
+  background: var(--action-ghost-hover);
+}
+
+/* ----------------------------------------------------------------- stage */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 28px 20px 18px;
+}
+
+/*
+ * The orb is the receptionist's face on the landing page and in the header;
+ * here it is also the call button. Asleep it sits flat with the muted mic on
+ * its shoulder; awake it lifts and casts a terracotta glow.
+ */
+.orb {
+  position: relative;
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0 0 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: block;
+  transition:
+    transform var(--duration-slow) var(--ease-arc),
+    filter var(--duration-slow) var(--ease-arc);
+}
+
+.orb:hover {
+  transform: translateY(-2px);
+}
+
+.orb:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
+}
+
+.orbLive,
+.orbLive:hover {
+  transform: translateY(-8px) scale(1.03);
+  filter: drop-shadow(0 18px 24px rgba(184, 92, 43, 0.32));
+}
+
+/* Listening: a ring that breathes out from the orb. */
+.orbListening::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 2px solid var(--terracotta);
+  animation: fnListen 1.6s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Speaking: a slow swell. */
+.orbSpeaking {
+  animation: fnSwell 1.3s ease-in-out infinite;
+}
+
+@keyframes fnListen {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes fnSwell {
+  0%,
+  100% {
+    transform: translateY(-8px) scale(1.03);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.07);
+  }
+}
+
+/* The muted microphone on the sleeping orb's shoulder: an ink disc with a
+   milk rim so it reads as sitting on the orb, not painted into it. */
+.badge {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  --icon-accent: var(--terracotta-night);
+  color: var(--cream-night);
+  box-shadow: 0 0 0 3px var(--surface-card);
+  display: grid;
+  place-items: center;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.status {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  min-height: 20px;
+}
+
+.statusError {
+  color: var(--error);
+}
+
+.heard {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 300px;
+  overflow-wrap: anywhere;
+}
+
+/* Her line: the one thing on the stage in full ink. */
+.said {
+  margin: 0;
+  max-width: 310px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.saidError {
+  font-size: 13px;
+  color: var(--error);
+}
+
+/* --------------------------------------------------------------- prompts */
+
+.prompts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 16px 14px;
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 12px;
+}
+
+.promptsLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-right: 2px;
+}
+
+/* -------------------------------------------------------------- composer */
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  color: var(--ink);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.input::placeholder {
+  color: var(--ink-soft);
+}
+
+.input:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+/*
+ * The mic and the send button: two 38px discs, controls are pills. The mic
+ * is hollow while it is off and takes the same terracotta as send while it
+ * listens — an open microphone is the loudest control on the panel, on
+ * purpose.
+ */
+.mic,
+.micOn,
+.send {
+  appearance: none;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.mic {
+  background: var(--surface-card);
+  color: var(--text-accent);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.mic:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+.mic:disabled {
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.micOn,
+.micOn:hover {
+  background: var(--action-primary);
+  --icon-accent: currentColor;
+  color: var(--text-on-accent);
+}
+
+.send {
+  background: var(--action-primary);
+  --icon-accent: currentColor;
+  color: var(--text-on-accent);
+}
+
+.send:hover {
+  background: var(--action-primary-hover);
+}
+
+.send:active,
+.mic:active,
+.micOn:active {
+  transform: scale(var(--press-scale));
+}
+
+.send:disabled {
+  background: transparent;
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------- phone / motion */
+
+@media (max-width: 639.98px) {
+  .input,
+  .mic,
+  .micOn,
+  .send {
+    height: 44px;
+  }
+
+  .mic,
+  .micOn,
+  .send {
+    width: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .orbLive,
+  .orbListening::after,
+  .orbSpeaking {
+    animation: none;
+    transition: none;
+  }
+}
