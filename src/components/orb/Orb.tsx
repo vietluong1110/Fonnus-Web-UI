@@ -80,7 +80,7 @@ export function Orb({ placement, speaking, getAmplitude, onClick }: OrbProps) {
         </span>
         <span ref={placement.labelRef} className={styles.label}>
           <span className={styles.labelStack}>
-            <Icon name="phone-call" size={30} />
+            <Icon name="answered" size={30} />
             <span className={styles.labelTitle}>Nghe thử</span>
             <span className={styles.labelNote}>Miễn phí</span>
           </span>

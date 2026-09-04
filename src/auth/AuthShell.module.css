@@ -21,6 +21,8 @@
   padding: 44px 56px 48px;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
+  isolation: isolate;
 }
 
 /*
@@ -29,6 +31,7 @@
  */
 .panelNight {
   background: var(--night);
+  --icon-accent: var(--terracotta-night);
   color: var(--cream-night);
   --panel-fg: var(--cream-night);
   --panel-muted: var(--text-muted-on-inverse);

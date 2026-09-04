@@ -130,7 +130,7 @@ export function LocationSection() {
                 <TextField compact aria-label="Địa chỉ chi nhánh" value={b.branch_address} onChange={(e) => setBranch(b.id, { branch_address: e.target.value })} placeholder="45 Nguyễn Huệ, Đà Nẵng" />
                 <TextField compact numeric inputMode="tel" aria-label="Số chi nhánh" value={b.branch_phone} onChange={(e) => setBranch(b.id, { branch_phone: e.target.value })} placeholder="0236 xxx xxxx" />
                 <TextField compact aria-label="Giờ riêng" value={b.branch_hours_note} onChange={(e) => setBranch(b.id, { branch_hours_note: e.target.value })} placeholder="T2–T6 08:00–17:00" />
-                <IconButton name="trash-2" label="Xoá chi nhánh" danger onClick={() => set('branch_list', draft.branch_list.filter((x) => x.id !== b.id))} />
+                <IconButton name="trash" label="Xoá chi nhánh" danger onClick={() => set('branch_list', draft.branch_list.filter((x) => x.id !== b.id))} />
               </TableRow>
             ))}
           </div>

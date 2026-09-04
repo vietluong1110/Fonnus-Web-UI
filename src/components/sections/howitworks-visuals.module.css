@@ -403,6 +403,7 @@
   padding: 10px 14px;
   border-radius: var(--radius-pill);
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
   font-size: var(--size-body-sm);
   font-weight: 500;

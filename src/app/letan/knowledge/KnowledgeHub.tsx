@@ -64,21 +64,21 @@ export function KnowledgeHub() {
   const rows: Row[] = [
     {
       key: 'dia-diem',
-      icon: 'map-pin',
+      icon: 'location',
       title: 'Địa điểm và liên hệ',
       sub: `${config.address_full || 'Chưa có địa chỉ'} · Nâng cao ${advancedLocation}/5 mục${config.branch_list.length ? ` · ${config.branch_list.length} chi nhánh` : ''}`,
       status: r.checks.filter((c) => ['business_name', 'city', 'address_full', 'industry_vertical'].includes(c.id)).every((c) => c.done) ? 'ok' : 'missing',
     },
     {
       key: 'gio-lam-viec',
-      icon: 'clock',
+      icon: 'hours',
       title: 'Giờ làm việc',
       sub: `${summarizeHours(config)}${config.break_periods.length ? ` · nghỉ trưa ${config.break_periods[0].from}–${config.break_periods[0].to}` : ''}${config.last_intake_time ? ` · nhận muộn nhất ${config.last_intake_time}` : ''}${config.operating_hours_confirmed ? '' : ' · giờ mẫu, cần bạn xác nhận'}`,
       status: config.operating_hours_confirmed ? 'ok' : 'missing',
     },
     {
       key: 'ngay-nghi',
-      icon: 'calendar-days',
+      icon: 'calendar',
       title: 'Lịch nghỉ Tết và ngày lễ',
       sub: config.holidays_confirmed
         ? `${config.holiday_exceptions.length} ngày nghỉ · ${tet ? `Tết ${fmtDate(tet.date_from)} – ${fmtDate(tet.date_to)}` : 'chưa có Tết'}`
@@ -87,14 +87,14 @@ export function KnowledgeHub() {
     },
     {
       key: 'dich-vu',
-      icon: 'banknote',
+      icon: 'price',
       title: 'Dịch vụ và giá',
       sub: `${priced}/${total} dịch vụ có giá · ${LABELS.pricing[config.pricing_disclosure_policy]}${priced < total ? ` · khoảng ${Math.max(1, Math.round(((total - priced) * 40) / 60))} phút` : ''}`,
       status: priced === total && total > 0 ? 'ok' : priced > 0 ? 'partial' : 'missing',
     },
     {
       key: 'bao-hiem',
-      icon: 'shield-check',
+      icon: 'privacy',
       title: 'BHYT, bảo hiểm và khám ban đầu',
       sub:
         config.insurance_bhyt_policy.option === 'unset'
@@ -137,7 +137,7 @@ export function KnowledgeHub() {
         <Button
           variant="secondary"
           size="sm"
-          icon={<Icon name="phone-call" size={16} />}
+          icon={<Icon name="answered" size={16} />}
           onClick={() => toast(`Gọi thử sẽ nối máy khi số Fonnus được cấp — xem mục Số điện thoại.`, 'neutral')}
         >
           Gọi thử
@@ -145,13 +145,13 @@ export function KnowledgeHub() {
       </div>
 
       {!r.r2Done ? (
-        <Notice tone="warm" icon="circle-alert">
+        <Notice tone="warm" icon="alert">
           {r.r1Done ? `${agent} nghe máy được ngay — nhưng chưa ${config.service_catalog.some((s) => s.price_from == null) ? 'báo giá được' : 'sẵn sàng đón khách thật'}.` : `${agent} còn thiếu thông tin cơ bản.`}{' '}
           Còn thiếu: {missingLabels.join(', ')}
           {r.missing.length > 3 ? ` và ${r.missing.length - 3} mục khác` : ''}.
         </Notice>
       ) : (
-        <Notice tone="sage" icon="circle-check">
+        <Notice tone="sage" icon="done">
           {agent} đã có đủ thông tin để nghe máy, báo giá và giữ hẹn. Mọi mục thêm bên dưới đều không bắt buộc.
         </Notice>
       )}

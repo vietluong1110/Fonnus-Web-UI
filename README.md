@@ -33,7 +33,7 @@ Output is a fully static site — `dist/` can be dropped on any host.
 src/
   Root.tsx                 picks the page for the current route
   App.tsx                  landing page composition + the three page-level settings
-  design-system/           Button, Icon, Badge, Input, Switch, Logo
+  design-system/           Button, Icon, Shape, Pattern, Badge, Input, Switch, Logo
   data/                    all copy and pricing, no markup
   hooks/                   useReveal, useIsNarrow, useCallDemo, useRoute
   api/                     every call to the backend — see "The backend seam"
@@ -47,7 +47,7 @@ src/
     tokens/                design tokens, copied verbatim from the bundle
     global.css             page resets + the shared keyframes
     section.module.css     shared section chrome (eyebrow, heading, card, …)
-public/                    icons, logo SVGs and the greeting audio, served as-is
+public/                    logo SVGs and the greeting audio, served as-is
 design-reference/          archived design handoff; not built, not imported
 docs/                      the API contract and the field-catalogue mapping
 CONTEXT.md                 product and market context
@@ -67,11 +67,13 @@ bundle's compiled `_ds_bundle.js` back into readable source. The full system
 `design-reference/_ds/fonnus-design-system-…/` — port more from there as they are
 needed rather than writing new ones.
 
-Icons are Lucide glyphs applied as CSS masks so they inherit `currentColor`, as
-the design system specifies. The bundle fetched them from a CDN at runtime;
-here they are vendored into `public/icons/`, so the page makes no network
-requests of its own. Web fonts still come from Google Fonts, via
-`styles/tokens/fonts.css` — self-host those before production.
+Icons, shapes and patterns are the Fonnus visual language ("Cung và chấm": every
+drawing is a rising arc and an ink dot on a 24 grid, one terracotta accent each).
+They are inline SVG drawn from `design-system/icons.ts`, `Shape.tsx` and
+`Pattern.tsx` — no icon library. `docs/visual-language.md` is the working copy
+of the rules; `design-reference/Fonnus Visual Language.dc.html` is the handoff.
+Web fonts still come from Google Fonts, via `styles/tokens/fonts.css` —
+self-host those before production.
 
 ## Routing
 

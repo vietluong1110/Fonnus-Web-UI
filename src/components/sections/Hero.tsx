@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { RefObject } from 'react'
-import { Button } from '../../design-system'
+import { Button, Pattern } from '../../design-system'
 import { stashPhone } from '../../auth/handoff'
 import { formatPhone, isValidPhone, normalizePhone } from '../../auth/phone'
 import { navigate } from '../../hooks/useRoute'
@@ -35,6 +35,8 @@ export function Hero({ dockRef }: HeroProps) {
       {/* Warm glow anchoring the orb's half of the composition. */}
       <div aria-hidden="true" className={styles.glow} />
       <div aria-hidden="true" className={styles.glowSoft} />
+      {/* Chấm nhịp behind the orb only: the one terracotta dot per tile is the call that got answered. */}
+      <Pattern name="dots" className={styles.dots} />
 
       {/* Same 1280px inner column every other section uses, so the headline
           lines up with the sections below instead of sitting further left. */}

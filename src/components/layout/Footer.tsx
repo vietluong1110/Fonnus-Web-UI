@@ -1,4 +1,5 @@
 import { CONTACT } from '../../data/content'
+import { Pattern } from '../../design-system'
 import styles from './Footer.module.css'
 
 const PAGE_LINKS = [
@@ -11,6 +12,8 @@ const PAGE_LINKS = [
 export function Footer() {
   return (
     <footer className={styles.footer}>
+      {/* Night takes the dots only. */}
+      <Pattern name="night-dots" style={{ zIndex: -1 }} />
       <div className={styles.inner}>
         <div className={styles.brand}>
           <img

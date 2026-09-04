@@ -80,7 +80,7 @@ export function SignUpPanel() {
             >
               {fromCaller ? (
                 <span className={styles.callerAvatar} aria-hidden="true">
-                  <Icon name="phone-incoming" size={16} />
+                  <Icon name="incoming" size={16} />
                 </span>
               ) : (
                 <span className={styles.orbAvatar} aria-hidden="true" />
@@ -154,7 +154,7 @@ export function SignInPanel() {
           {SIGNIN_PANEL.calls.map((call) => (
             <div key={call.number} className={styles.logRow}>
               <span className={styles.logIcon} aria-hidden="true">
-                <Icon name="phone-incoming" size={16} />
+                <Icon name="incoming" size={16} />
               </span>
               <span className={styles.logText}>
                 <span className={`${styles.logNumber} ${styles.num}`}>{call.number}</span>

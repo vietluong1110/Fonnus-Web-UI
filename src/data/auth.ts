@@ -25,7 +25,7 @@ export interface SceneLine {
  */
 export const SIGNUP_PANEL = {
   when: {
-    icon: 'moon' as IconName,
+    icon: 'after-hours' as IconName,
     time: '21:14',
     context: ['Tối thứ Sáu', 'Phòng khám đã đóng cửa'],
   },
@@ -60,7 +60,7 @@ export const SIGNUP_PANEL = {
  */
 export const SIGNIN_PANEL = {
   when: {
-    icon: 'clock' as IconName,
+    icon: 'hours' as IconName,
     time: '7:30',
     context: ['Sáng thứ Bảy', 'Trước giờ mở cửa'],
   },
@@ -72,8 +72,8 @@ export const SIGNIN_PANEL = {
     { number: '0911 ••• 882', meta: '06:48 · đặt lịch niềng răng', outcome: 'Đã đặt lịch', booked: true },
   ],
   tiles: [
-    { icon: 'calendar-check' as IconName, num: '3', label: 'lịch hẹn mới hôm nay' },
-    { icon: 'phone-call' as IconName, num: '1', label: 'lời nhắn cần gọi lại' },
+    { icon: 'appointment' as IconName, num: '3', label: 'lịch hẹn mới hôm nay' },
+    { icon: 'answered' as IconName, num: '1', label: 'lời nhắn cần gọi lại' },
   ],
   headline: 'Chào mừng bạn quay lại.',
   lede: 'Cuộc gọi đêm qua, lịch hẹn và báo cáo hôm nay của phòng khám đang chờ bạn.',

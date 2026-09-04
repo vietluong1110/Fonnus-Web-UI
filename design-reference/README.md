@@ -12,6 +12,7 @@ for the app, it is not here — see the repository root.
 | Path                     | What it is                                                     |
 | ------------------------ | -------------------------------------------------------------- |
 | `Fonnus Landing.dc.html` | The original prototype, one ~1,100-line design-canvas document  |
+| `Fonnus Visual Language.dc.html` | "6 · Hình hoạ": the icon, shape and pattern system — unpacked from the bundled export (Sept 2026) |
 | `support.js`             | The design-canvas runtime the prototype needs (`x-dc`, `sc-if`) |
 | `_ds/`                   | The full design system: 18 primitives, tokens, guidelines       |
 | `assets/SVG/`            | Logo marks the prototype links to                               |
@@ -20,7 +21,14 @@ for the app, it is not here — see the repository root.
 `_ds/` and `assets/` are the files it links, which is why they are still here
 even though the implementation carries its own copies.
 
-Only the **landing page** prototype is in this bundle. The auth screens and the
+`Fonnus Visual Language.dc.html` was delivered later as a self-contained bundle
+(fonts and runtime base64-inlined, ~1.1 MB). It is kept here unpacked: the
+artboard itself, linked to the same `support.js` and `_ds/…/tokens/` the landing
+prototype uses, so it opens the same way. The implementation of that system —
+and the ~20 icons drawn to extend it — is `src/design-system/icons.ts`,
+`Shape.tsx`, `Pattern.tsx`, documented in `docs/visual-language.md`.
+
+Only the **landing page** prototype and the **visual language** are in here. The auth screens and the
 app shell were built from separate design bundles (`Fonnus App Hi-fi.dc.html`
 and the context field catalogue) that were never committed here, so this archive
 will not answer questions about those.

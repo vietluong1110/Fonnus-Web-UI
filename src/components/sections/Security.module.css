@@ -1,3 +1,15 @@
+.withPattern {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.pattern {
+  z-index: -1;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 28%, rgba(0, 0, 0, 0.4) 52%, transparent 78%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 28%, rgba(0, 0, 0, 0.4) 52%, transparent 78%);
+}
+
 .heading {
   margin-bottom: 24px;
   max-width: 26ch;
@@ -32,6 +44,27 @@
 
 .cardRinged .cardTitle {
   color: var(--terracotta-deep);
+}
+
+/*
+ * One pictogram per card in a fixed 64px slot, so the three titles start on
+ * the same line whether the card holds an icon or a shape. The shape is drawn
+ * larger than the slot and pulled up with negative margins: its drawing sits
+ * in the lower half of its 200-grid, and this puts the visual centre of the
+ * arc-and-discs on the icons' centre line.
+ */
+.cardArt {
+  height: 64px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin: -4px 0 16px -4px;
+  color: var(--ink);
+}
+
+.cardShape {
+  align-self: flex-start;
+  margin: -25px 0 0 -10px;
 }
 
 .cardTitle {

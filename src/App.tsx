@@ -4,6 +4,7 @@ import { Hero } from './components/sections/Hero'
 import { MissedCalls } from './components/sections/MissedCalls'
 import { HowItWorks } from './components/sections/HowItWorks'
 import { Capabilities } from './components/sections/Capabilities'
+import { Band } from './components/sections/Band'
 import { Pricing } from './components/sections/Pricing'
 import { Faq } from './components/sections/Faq'
 import { Security } from './components/sections/Security'
@@ -41,6 +42,7 @@ export function App({
       <MissedCalls />
       <HowItWorks />
       <Capabilities />
+      <Band />
       <Pricing highlight={pricingHighlight} matrixDefaultOpen={matrixDefaultOpen} />
       <Faq />
       <Security />

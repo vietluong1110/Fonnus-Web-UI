@@ -181,19 +181,7 @@ function GroupTrigger({ group, open, onHold, onRelease, onToggle, onPick }: Trig
         className={`${styles.navLink} ${open ? styles.navLinkOpen : ''}`}
       >
         {group.label}
-        <svg
-          width="11"
-          height="11"
-          viewBox="0 0 24 24"
-          fill="none"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={open ? styles.chevronOpen : styles.chevron}
-          aria-hidden="true"
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        <Icon name="chevron-down" size={12} className={open ? styles.chevronOpen : styles.chevron} />
       </button>
 
       {open ? (

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Icon, Logo } from '../design-system'
+import { Icon, Logo, Pattern } from '../design-system'
 import { AUTH_FOOTNOTE } from '../data/auth'
 import { CONTACT } from '../data/content'
 import { hrefFor } from '../hooks/useRoute'
@@ -75,6 +75,8 @@ export function AuthShell({ variant, back = HOME, swap, children, overlay }: Aut
       </div>
 
       <aside className={`${styles.panel} ${isSignUp ? styles.panelNight : styles.panelWarm}`}>
+        {/* Night takes the dots only; blush takes the 45° arc ("Cung chéo"). */}
+        <Pattern name={isSignUp ? 'night-dots' : 'arcs'} style={{ zIndex: -1 }} />
         {isSignUp ? <SignUpPanel /> : <SignInPanel />}
       </aside>
 

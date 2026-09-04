@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, KeyboardEvent } from 'react'
-import { Icon, Logo } from '../../../design-system'
+import { Icon, Logo, Pattern } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
 import { PHONE_BREAKPOINT, useIsNarrow } from '../../../hooks/useIsNarrow'
@@ -34,13 +34,13 @@ import styles from './SetupChat.module.css'
  */
 
 const KIND_ICON: Record<AttachmentKind, IconName> = {
-  image: 'file-text',
-  pdf: 'file-text',
-  doc: 'file-text',
-  sheet: 'receipt',
-  slide: 'file-text',
-  text: 'file-text',
-  file: 'file-text',
+  image: 'document',
+  pdf: 'document',
+  doc: 'document',
+  sheet: 'sheet',
+  slide: 'document',
+  text: 'document',
+  file: 'document',
 }
 
 /** Long pastes become an attachment rather than flooding the composer. */
@@ -197,6 +197,9 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
       role={collapsedDock ? 'button' : undefined}
       tabIndex={collapsedDock ? 0 : undefined}
     >
+      {/* Cung chéo in the header strip only — blush means Fonnus speaking; the
+          conversation below stays plain so the bubbles are not read over texture. */}
+      <Pattern name="arcs" className={styles.headPattern} />
       {identity}
       {asSheet ? (
         <button type="button" className={styles.headButton} aria-label="Đóng trợ lý" onClick={() => setSheet(false)}>
@@ -271,7 +274,7 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
         {done ? (
           <div className={`${styles.promptQuestion} ${styles.promptDone}`}>
             <span className={styles.savedIcon}>
-              <Icon name="circle-check" size={15} />
+              <Icon name="done" size={15} />
             </span>
             <span>{agent} đã đủ thông tin ở mục này.</span>
           </div>
@@ -440,7 +443,7 @@ function Turn({ message }: { message: ChatMessage }) {
         <div className={bubbleClass}>
           {message.tone === 'saved' ? (
             <span className={styles.savedIcon}>
-              <Icon name="circle-check" size={15} />
+              <Icon name="done" size={15} />
             </span>
           ) : null}
           <span>{message.text}</span>

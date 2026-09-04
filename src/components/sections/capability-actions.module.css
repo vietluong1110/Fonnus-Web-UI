@@ -39,6 +39,7 @@
 .dayOn {
   composes: day;
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
   box-shadow: 0 6px 16px rgba(160, 78, 31, 0.26);
 }
@@ -181,6 +182,7 @@
 
 .avatarLinh {
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
 }
 

@@ -112,6 +112,7 @@
 .segmentOn,
 .segmentOn:hover {
   background: var(--terracotta);
+  --icon-accent: currentColor;
   color: var(--cream);
 }
 

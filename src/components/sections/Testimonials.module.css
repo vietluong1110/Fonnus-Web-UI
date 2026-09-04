@@ -1,6 +1,26 @@
-.heading {
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
   margin-bottom: 48px;
+}
+
+.heading {
+  margin: 0;
   max-width: 24ch;
+}
+
+.headShape {
+  flex: 0 0 auto;
+  color: var(--ink);
+  margin-bottom: -10px;
+}
+
+@media (max-width: 900px) {
+  .headShape {
+    display: none;
+  }
 }
 
 .grid {

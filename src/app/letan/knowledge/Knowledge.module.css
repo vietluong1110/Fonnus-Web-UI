@@ -324,6 +324,7 @@
 .dayOn,
 .dayOn:hover {
   background: var(--terracotta);
+  --icon-accent: currentColor;
   border-color: var(--terracotta);
   color: var(--cream);
 }

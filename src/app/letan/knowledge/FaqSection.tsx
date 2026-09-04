@@ -39,7 +39,7 @@ export function FaqSection() {
         }
       />
 
-      <Notice tone="neutral" icon="circle-help">
+      <Notice tone="neutral" icon="help">
         Chỗ cho mọi câu khách hay hỏi mà các mục khác chưa có. Viết câu trả lời như bạn nói với khách — {agent} đọc gần nguyên văn. Đừng đưa lời khuyên y khoa: {agent} sẽ chuyển máy cho bác sĩ thay vì trả lời.
       </Notice>
 
@@ -61,7 +61,7 @@ export function FaqSection() {
                 <TextArea label={`${agent} trả lời`} value={f.answer} onChange={(e) => setRow(f.id, { answer: e.target.value })} placeholder="VD: Có ạ, bác sĩ Hùng phụ trách. Anh chị đặt lịch để bác sĩ xem phim trước nhé." rows={2} maxLength={400} />
               </div>
               <div className={ui.row} style={{ justifyContent: 'flex-end' }}>
-                <IconButton name="trash-2" label="Xoá câu hỏi" danger onClick={() => set('faq_pairs', draft.faq_pairs.filter((x) => x.id !== f.id))} />
+                <IconButton name="trash" label="Xoá câu hỏi" danger onClick={() => set('faq_pairs', draft.faq_pairs.filter((x) => x.id !== f.id))} />
               </div>
             </Card>
           ))}

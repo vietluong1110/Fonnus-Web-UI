@@ -1,3 +1,5 @@
+import { Icon, Pattern, Shape } from '../../design-system'
+import type { IconName } from '../../design-system'
 import section from '../../styles/section.module.css'
 import styles from './Security.module.css'
 
@@ -6,27 +8,34 @@ interface Promise_ {
   body: string
   /** The promise this section is really built around. */
   ringed?: boolean
+  /** The pictogram above the title: an icon at shape scale, or one of the six shapes. */
+  art: { icon: IconName } | { shape: 'handoff' }
 }
 
 const PROMISES: Promise_[] = [
   {
     title: 'Xin phép trước khi ghi âm',
     body: 'Fonnus chia sẻ minh bạch cuộc gọi được xử lý bởi AI và được ghi âm. Người gọi đồng ý thì Fonnus mới tiếp tục.',
+    art: { icon: 'voice' },
   },
   {
     title: 'Dữ liệu là của phòng khám',
     body: 'Bản ghi âm và nội dung cuộc gọi chỉ tài khoản phòng khám xem được. Bạn yêu cầu xoá, chúng tôi xoá.',
+    art: { icon: 'privacy' },
   },
   {
     title: 'Chuyên môn y khoa: chuyển cho bác sĩ',
     body: 'Fonnus trả lời giá, giờ, lịch hẹn và thông tin phòng khám. Câu hỏi thuộc chuyên môn luôn được chuyển cho bác sĩ.',
     ringed: true,
+    art: { shape: 'handoff' },
   },
 ]
 
 export function Security() {
   return (
-    <section id="bao-mat" className={`${section.section} ${section.blush}`}>
+    <section id="bao-mat" className={`${section.section} ${section.blush} ${styles.withPattern}`}>
+      {/* Cung chéo: the 45° arc belongs on blush. It thins out under the cards. */}
+      <Pattern name="arcs" className={styles.pattern} />
       <div className={section.inner}>
         <div data-reveal="0" className={section.eyebrowDeep}>Bảo mật &amp; dữ liệu</div>
         <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
@@ -44,6 +53,13 @@ export function Security() {
               data-reveal={String(i)}
               className={promise.ringed ? styles.cardRinged : styles.card}
             >
+              <div className={styles.cardArt} aria-hidden="true">
+                {'shape' in promise.art ? (
+                  <Shape name={promise.art.shape} size={100} className={styles.cardShape} />
+                ) : (
+                  <Icon name={promise.art.icon} size={56} />
+                )}
+              </div>
               <div className={styles.cardTitle}>{promise.title}</div>
               <p className={styles.cardBody}>{promise.body}</p>
             </div>

@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import { Icon } from '../../design-system'
+import { Icon, Pattern } from '../../design-system'
 import { CHIPS, VOICES } from '../../data/callDemo'
 import type { CallDemo } from '../../hooks/useCallDemo'
 import styles from './CallOverlay.module.css'
@@ -14,6 +14,8 @@ export function CallOverlay({ demo, spotRef }: CallOverlayProps) {
   return (
     <>
       <div className={styles.screen}>
+        {/* Same treatment as the hero: Chấm nhịp behind the orb only. */}
+        <Pattern name="dots" className={styles.dots} />
         <div className={styles.topBar}>
           <div className={styles.who}>
             <span className={styles.whoDot} />
@@ -61,7 +63,7 @@ export function CallOverlay({ demo, spotRef }: CallOverlayProps) {
             aria-pressed={!demo.mic}
             className={demo.mic ? styles.idle : styles.active}
           >
-            <Icon name={demo.mic ? 'mic' : 'mic-off'} size={18} />
+            <Icon name={demo.mic ? 'voice' : 'voice-off'} size={18} />
           </button>
 
           <span className={styles.voiceAnchor}>
@@ -71,7 +73,7 @@ export function CallOverlay({ demo, spotRef }: CallOverlayProps) {
               aria-expanded={demo.voiceOpen}
               className={demo.voiceOpen ? styles.active : styles.idle}
             >
-              <Icon name="user-round" size={18} />
+              <Icon name="caller" size={18} />
             </button>
             {demo.voiceOpen ? <VoiceMenu demo={demo} /> : null}
           </span>

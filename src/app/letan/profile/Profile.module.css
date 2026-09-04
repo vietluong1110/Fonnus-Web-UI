@@ -572,6 +572,7 @@
 .optOn:hover,
 .optOn.optActive {
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
 }
 
@@ -644,6 +645,7 @@
 .tileOn,
 .tileOn:hover {
   background: var(--terracotta);
+  --icon-accent: currentColor;
   color: var(--cream);
   box-shadow: none;
 }

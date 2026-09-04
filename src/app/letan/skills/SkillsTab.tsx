@@ -17,9 +17,9 @@ import styles from './Skills.module.css'
 type SkillKey = 'chuyen-may' | 'gui-email' | 'dat-lich'
 
 const SKILLS: { key: SkillKey; label: string; icon: IconName; component: ComponentType }[] = [
-  { key: 'chuyen-may', label: 'Chuyển máy', icon: 'phone-forwarded', component: TransferSkill },
+  { key: 'chuyen-may', label: 'Chuyển máy', icon: 'handoff', component: TransferSkill },
   { key: 'gui-email', label: 'Gửi email', icon: 'mail', component: EmailSkill },
-  { key: 'dat-lich', label: 'Đặt lịch hẹn', icon: 'calendar-check', component: BookingSkill },
+  { key: 'dat-lich', label: 'Đặt lịch hẹn', icon: 'appointment', component: BookingSkill },
 ]
 
 export function SkillsTab({ path }: { path: string[] }) {

@@ -123,7 +123,7 @@ export function ForwardVisual() {
     <div ref={ref} data-played={played || undefined} className={styles.scene}>
       <div className={styles.pane}>
         <div className={styles.paneHead}>
-          <Icon name="phone-call" size={15} />
+          <Icon name="answered" size={15} />
           Hai cách bắt đầu
         </div>
 
@@ -189,7 +189,7 @@ export function ForwardVisual() {
           </div>
 
           <div className={styles.liveChip} style={at(1980)}>
-            <Icon name="shield-check" size={15} />
+            <Icon name="privacy" size={15} />
             {/* The full sentence wraps to two lines on a phone, so the narrow
                 screens get the half that carries the news. */}
             <span className={styles.chipLong}>Chọn xong là Fonnus bắt đầu nghe máy</span>
@@ -209,14 +209,14 @@ export function LiveCallVisual() {
     <div ref={ref} data-played={played || undefined} className={styles.scene}>
       <div className={styles.pane}>
         <div className={styles.paneHead}>
-          <Icon name="phone-incoming" size={15} />
+          <Icon name="incoming" size={15} />
           Cuộc gọi đến · 21:14
         </div>
 
         <div className={styles.paneBody}>
           <div className={styles.callRow} style={at(140)}>
             <span className={styles.ring}>
-              <Icon name="phone-incoming" size={18} />
+              <Icon name="incoming" size={18} />
             </span>
             <span className={styles.callWho}>
               <span className={styles.callNum}>0903 ••• 217</span>
@@ -253,7 +253,7 @@ export function LiveCallVisual() {
           </div>
 
           <div className={styles.doneChip} style={at(1740)}>
-            <Icon name="calendar-check" size={15} />
+            <Icon name="appointment" size={15} />
             <span className={styles.chipLong}>Đã đặt lịch · 15:00 thứ Năm 10/09</span>
             <span className={styles.chipShort}>Đã đặt lịch · 15:00 thứ Năm</span>
           </div>

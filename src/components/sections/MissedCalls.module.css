@@ -1,11 +1,33 @@
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 44px;
+}
+
 .heading {
   margin-bottom: 20px;
   max-width: 26ch;
 }
 
 .lede {
-  margin-bottom: 44px;
+  margin: 0;
   max-width: 60ch;
+}
+
+/* The shape sits on the heading's baseline, to the right, and only where
+   there is room beside a 26ch heading. */
+.headShape {
+  flex: 0 0 auto;
+  color: var(--ink);
+  margin-bottom: -6px;
+}
+
+@media (max-width: 900px) {
+  .headShape {
+    display: none;
+  }
 }
 
 /*
@@ -104,6 +126,7 @@
 .step:nth-child(2) .stepIcon {
   background: var(--surface-rose);
   color: var(--error);
+  --icon-accent: currentColor;
   box-shadow: none;
 }
 
@@ -124,6 +147,7 @@
 .trackFonnus .step:nth-child(3) .stepIcon {
   background: var(--action-primary);
   color: var(--cream);
+  --icon-accent: currentColor;
   border: none;
   box-shadow: 0 8px 20px rgba(160, 78, 31, 0.24);
 }
@@ -183,6 +207,7 @@
 /* Dark brown: the one place on this section that has to stop the eye. */
 .answer {
   background: var(--night);
+  --icon-accent: var(--terracotta-night);
   color: var(--cream-night);
   border-radius: var(--radius-card);
   padding: 28px;
@@ -191,6 +216,24 @@
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-between;
+}
+
+.answerLead {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.answerShape {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 620px) {
+  .answerShape {
+    display: none;
+  }
 }
 
 /* No measure cap: at 34ch the sentence broke before "mỗi tháng". */

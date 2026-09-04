@@ -157,7 +157,7 @@ export function BookingSkill() {
               { value: 'caller_id_date_name', label: 'Thêm: nói đúng tên người đặt (chặt hơn)' },
             ]}
           />
-          <Notice tone="neutral" icon="lock">
+          <Notice tone="neutral" icon="privacy">
             Quy tắc bảo vệ dữ liệu cá nhân — chỉ siết chặt thêm được, không nới lỏng. {agent} không đọc lịch hẹn cho người gọi từ số lạ.
           </Notice>
         </div>

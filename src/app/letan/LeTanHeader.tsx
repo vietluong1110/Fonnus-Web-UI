@@ -34,7 +34,7 @@ export function LeTanHeader({ compact = false }: { compact?: boolean }) {
         */}
         {phone ? (
           <span className={`${styles.phoneBadge} ${compact ? styles.phoneBadgeCompact : ''}`} title="Số khách gọi đến">
-            <Icon name="phone-incoming" size={compact ? 13 : 14} />
+            <Icon name="incoming" size={compact ? 13 : 14} />
             {formatBusinessPhone(phone)}
           </span>
         ) : (
@@ -66,7 +66,7 @@ export function LeTanHeader({ compact = false }: { compact?: boolean }) {
         <span className={styles.orbWrap}>
           <MiniOrb size={44} />
           <span className={styles.callIcon} aria-hidden="true">
-            <Icon name="phone-call" size={17} />
+            <Icon name="answered" size={17} />
           </span>
         </span>
         <span className={styles.tip} role="tooltip">

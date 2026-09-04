@@ -18,11 +18,11 @@ export interface NavEntry {
 }
 
 export const NAV: NavEntry[] = [
-  { key: 'tong-quan', label: 'Tổng quan', icon: 'house', segment: '' },
-  { key: 'cuoc-goi', label: 'Cuộc gọi', icon: 'phone-call', segment: 'cuoc-goi' },
-  { key: 'lich-hen', label: 'Lịch hẹn', icon: 'calendar-check', segment: 'lich-hen' },
-  { key: 'le-tan', label: 'Lễ tân', icon: 'user-round', segment: 'le-tan' },
-  { key: 'so-dien-thoai', label: 'Số điện thoại', icon: 'phone-incoming', segment: 'so-dien-thoai' },
+  { key: 'tong-quan', label: 'Tổng quan', icon: 'overview', segment: '' },
+  { key: 'cuoc-goi', label: 'Cuộc gọi', icon: 'answered', segment: 'cuoc-goi' },
+  { key: 'lich-hen', label: 'Lịch hẹn', icon: 'appointment', segment: 'lich-hen' },
+  { key: 'le-tan', label: 'Lễ tân', icon: 'caller', segment: 'le-tan' },
+  { key: 'so-dien-thoai', label: 'Số điện thoại', icon: 'incoming', segment: 'so-dien-thoai' },
   { key: 'cai-dat', label: 'Cài đặt', icon: 'settings', segment: 'cai-dat' },
 ]
 
@@ -175,7 +175,7 @@ function TabBar({
               className={`${styles.sheetItem} ${styles.menuItemDanger}`}
               onClick={() => void signOut()}
             >
-              <Icon name="log-out" size={19} />
+              <Icon name="sign-out" size={19} />
               Đăng xuất
             </button>
           </div>
@@ -253,7 +253,7 @@ function UserBlock({ clinic }: { clinic: string }) {
             Cài đặt tài khoản
           </a>
           <button type="button" className={`${styles.menuItem} ${styles.menuItemDanger}`} role="menuitem" onClick={() => void signOut()}>
-            <Icon name="log-out" size={16} />
+            <Icon name="sign-out" size={16} />
             Đăng xuất
           </button>
         </div>

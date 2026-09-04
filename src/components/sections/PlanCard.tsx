@@ -1,4 +1,4 @@
-import { Button } from '../../design-system'
+import { Button, Pattern } from '../../design-system'
 import type { Plan } from '../../data/pricing'
 import { hrefFor } from '../../hooks/useRoute'
 import styles from './PlanCard.module.css'
@@ -25,6 +25,12 @@ export function PlanCard({ plan, annual, highlighted, priceAnimation, revealOrde
       data-reveal={String(revealOrder)}
       className={`${cardClass} ${highlighted && !plan.featured && plan.price ? styles.highlighted : ''}`}
     >
+      {/* The recommended plan carries the brand tile, clipped to the card so the badge can still overhang. */}
+      {plan.featured ? (
+        <span className={styles.patternClip} aria-hidden="true">
+          <Pattern name="arcs" style={{ color: 'var(--cream)' }} />
+        </span>
+      ) : null}
       {plan.badge ? <span className={styles.badge}>{plan.badge}</span> : null}
 
       <div className={styles.name}>{plan.name}</div>

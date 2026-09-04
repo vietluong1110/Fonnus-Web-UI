@@ -1,0 +1,44 @@
+.band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--blush);
+  color: var(--ink);
+  padding: clamp(44px, 7vh, 76px) clamp(20px, 5vw, 64px);
+}
+
+/*
+ * The reference caps the pattern at 22% and never lets it run under the copy
+ * at that strength. A mask thins it towards the text column instead of
+ * cutting it off at a line.
+ */
+.pattern {
+  z-index: -1;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.45) 40%, #000 72%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.45) 40%, #000 72%);
+}
+
+.inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--terracotta-deep);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(28px, 3.6vw, 44px);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+  margin: 0;
+  max-width: 22ch;
+  text-wrap: pretty;
+}

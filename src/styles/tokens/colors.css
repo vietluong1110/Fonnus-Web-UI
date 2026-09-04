@@ -59,6 +59,9 @@
 --action-secondary-hover:#FBF3E4;
 --action-ghost-hover:rgba(184,92,43,.08);
 --focus-ring:var(--terracotta);
+/* The one terracotta part of every icon, shape and pattern (see design-system/icons.ts).
+   Night surfaces switch it to --terracotta-night; a terracotta surface sets it to currentColor. */
+--icon-accent:var(--terracotta);
 --chart-1:var(--terracotta);
 --chart-2:var(--lemongrass);
 --chart-3:var(--ink-soft);
@@ -85,6 +88,7 @@
 --action-secondary:var(--night-surface);
 --action-secondary-hover:#372D22;
 --action-ghost-hover:rgba(224,138,80,.12);
+--icon-accent:var(--terracotta-night);
 --chart-1:var(--terracotta-night);
 --chart-2:var(--lemongrass-night);
 --chart-3:rgba(243,233,218,.5);

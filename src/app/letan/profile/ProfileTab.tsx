@@ -38,7 +38,7 @@ export function ProfileTab() {
   const rows: Row[] = [
     {
       segment: 'danh-tinh',
-      icon: 'user-round',
+      icon: 'caller',
       title: 'Danh tính và lời chào',
       sub: [
         agent,
@@ -48,7 +48,7 @@ export function ProfileTab() {
     },
     {
       segment: 'giong-noi',
-      icon: 'volume-2',
+      icon: 'volume',
       title: 'Giọng nói và cách nói',
       sub: [
         voice.desc,
@@ -58,7 +58,7 @@ export function ProfileTab() {
     },
     {
       segment: 'chi-dan',
-      icon: 'clipboard-list',
+      icon: 'instructions',
       title: 'Chỉ dẫn riêng',
       sub: instructions
         ? `${instructions.split('\n').filter(Boolean).length} chỉ dẫn cho ${agent}`
@@ -88,7 +88,7 @@ export function ProfileTab() {
 
       <div className={styles.hubFoot}>
         <span className={styles.hubFootIcon}>
-          <Icon name="book-open" size={16} />
+          <Icon name="guide" size={16} />
         </span>
         <span>
           Những gì {agent} <em>biết</em> về phòng khám — giá, giờ mở cửa, bác sĩ — nằm ở tab{' '}

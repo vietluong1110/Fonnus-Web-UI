@@ -116,7 +116,7 @@ export function InstructionsSection() {
             <Turn label="Không có chỉ dẫn" tone="locked">
               “{PLAIN_ANSWER}”
             </Turn>
-            <Turn label={lastUsed ? 'Có chỉ dẫn của bạn' : 'Có chỉ dẫn — ví dụ'} note={shown.text} noteIcon="clipboard-list">
+            <Turn label={lastUsed ? 'Có chỉ dẫn của bạn' : 'Có chỉ dẫn — ví dụ'} note={shown.text} noteIcon="instructions">
               “{shown.answer}”
             </Turn>
           </PreviewCard>
