@@ -60,7 +60,7 @@ Legend: ✅ present and named identically · ⚠️ present but differs (see not
 | `parking_info` | `parking_info` | ✅ |
 | `digital_links` | `digital_links` | ✅ |
 | `vat_invoice_policy` | `vat_invoice_policy` | ⚠️ modelled as `{ option, note }`; the catalogue says "dropdown + note" without naming the two parts |
-| `branch_list` | `branch_list: Branch[]` | ✅ all four columns |
+| `branch_list` | `branch_list: Branch[]` | ✅ name, address, phone — `branch_hours_note` dropped from the catalogue Sept 2026 |
 
 ### A2 · Hours and open-state
 
@@ -68,7 +68,6 @@ Legend: ✅ present and named identically · ⚠️ present but differs (see not
 |---|---|---|
 | `operating_hours_by_weekday` | `operating_hours_by_weekday: DayHours[]` | ✅ |
 | `break_periods` | `break_periods: BreakPeriod[]` | ⚠️ model adds `days: Weekday[]` (empty = every open day). The catalogue gives no columns |
-| `last_intake_time` | `last_intake_time` | ✅ |
 | `is_open_now` | — | ➖ **SD.** Computed client-side by `readiness.ts → isOpenNow()`. See *Derived fields* |
 | `current_datetime_local` | — | ➖ **SD.** Per-call runtime injection; no UI |
 | `holiday_exceptions` | `holiday_exceptions: HolidayException[]` | ⚠️ the catalogue's `date_range` is split into `date_from` / `date_to`. Model adds `seeded` `[ext]` |
@@ -140,6 +139,10 @@ Every field maps ✅ and identically: `endpointing_silence_ms`, `silence_nudge_e
 ### A8 · Knowledge and behaviour steering
 
 `tenant_instructions` ✅ · `knowledge_files` ✅ · `website_scrape_url` ✅ · `faq_pairs` ✅
+
+`knowledge_files` and `website_scrape_url` have no form of their own: the owner hands a
+file or a URL to the Fonnus assistant, which reads it and proposes values for the
+Kiến thức sections. The model keeps both fields so the record still mirrors the catalogue.
 
 ### A9 · Compliance and safety
 

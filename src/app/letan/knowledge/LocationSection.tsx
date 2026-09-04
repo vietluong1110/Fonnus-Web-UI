@@ -26,8 +26,9 @@ const KEYS = [
  * `#/app/le-tan/kien-thuc/dia-diem` — where the clinic is.
  *
  * Name and address are the two things every call needs; the rest is what
- * lets her give directions like a person who has been there. The branch
- * table is gone — a branch is three lines, name and number, address, hours.
+ * lets her give directions like a person who has been there. A branch is
+ * three fields — name, number, address — because that is all she reads out
+ * to a caller who rang the wrong one.
  */
 export function LocationSection() {
   const { config } = useConfig()
@@ -119,20 +120,18 @@ export function LocationSection() {
 
       <Card title="Chi nhánh khác" subtitle={`khách gọi nhầm nơi, ${agent} đọc địa chỉ và số của chi nhánh đúng`}>
         {draft.branch_list.length ? (
-          <div>
-            {draft.branch_list.map((b) => (
-              <div key={b.id} className={styles.item}>
-                <div className={styles.line}>
-                  <TextField className={styles.grow} compact aria-label="Tên chi nhánh" value={b.branch_name} onChange={(e) => setBranch(b.id, { branch_name: e.target.value })} placeholder="Chi nhánh Đà Nẵng" />
-                  <TextField className={styles.half} compact numeric inputMode="tel" aria-label="Số chi nhánh" value={b.branch_phone} onChange={(e) => setBranch(b.id, { branch_phone: e.target.value })} placeholder="0236 xxx xxxx" />
-                  <div className={styles.itemActions}>
-                    <IconButton name="trash" label="Xoá chi nhánh" danger onClick={() => set('branch_list', draft.branch_list.filter((x) => x.id !== b.id))} />
-                  </div>
+          <div className={styles.entries}>
+            {draft.branch_list.map((b, i) => (
+              <div key={b.id} className={styles.entry}>
+                <div className={styles.entryHead}>
+                  <span className={styles.entryTitle}>Chi nhánh {i + 1}</span>
+                  <IconButton name="trash" label="Xoá chi nhánh" danger onClick={() => set('branch_list', draft.branch_list.filter((x) => x.id !== b.id))} />
                 </div>
-                <div className={styles.line}>
-                  <TextField className={styles.grow} compact aria-label="Địa chỉ chi nhánh" value={b.branch_address} onChange={(e) => setBranch(b.id, { branch_address: e.target.value })} placeholder="Địa chỉ: 45 Nguyễn Huệ, Đà Nẵng" />
-                  <TextField className={styles.half} compact aria-label="Giờ riêng" value={b.branch_hours_note} onChange={(e) => setBranch(b.id, { branch_hours_note: e.target.value })} placeholder="Giờ riêng nếu khác: T2–T6 08:00–17:00" />
+                <div className={ui.grid2}>
+                  <TextField label="Tên chi nhánh" value={b.branch_name} onChange={(e) => setBranch(b.id, { branch_name: e.target.value })} placeholder="VD: Chi nhánh Đà Nẵng" />
+                  <TextField label="Số điện thoại" numeric inputMode="tel" value={b.branch_phone} onChange={(e) => setBranch(b.id, { branch_phone: e.target.value })} placeholder="VD: 0236 xxx xxxx" />
                 </div>
+                <TextField label="Địa chỉ" value={b.branch_address} onChange={(e) => setBranch(b.id, { branch_address: e.target.value })} placeholder="VD: 45 Nguyễn Huệ, Đà Nẵng" />
               </div>
             ))}
           </div>
@@ -142,7 +141,7 @@ export function LocationSection() {
         <button
           type="button"
           className={styles.idea}
-          onClick={() => set('branch_list', [...draft.branch_list, { id: newId('br'), branch_name: '', branch_address: '', branch_phone: '', branch_hours_note: '' }])}
+          onClick={() => set('branch_list', [...draft.branch_list, { id: newId('br'), branch_name: '', branch_address: '', branch_phone: '' }])}
         >
           <span className={styles.ideaPlus}>
             <Icon name="plus" size={14} />

@@ -20,7 +20,6 @@ import { InsuranceSection } from './knowledge/InsuranceSection'
 import { PractitionersSection } from './knowledge/PractitionersSection'
 import { FaqSection } from './knowledge/FaqSection'
 import { KeytermsSection } from './knowledge/KeytermsSection'
-import { DocumentsSection } from './knowledge/DocumentsSection'
 import { SkillsTab } from './skills/SkillsTab'
 import styles from './LeTanPage.module.css'
 
@@ -60,8 +59,11 @@ export const PROFILE_SECTIONS = {
 export type ProfileSectionKey = keyof typeof PROFILE_SECTIONS
 
 /*
- * Kiến thức is eight sections, not nine: hours and holidays are one page,
+ * Kiến thức is seven sections, not eight: hours and holidays are one page,
  * because the caller's question — "mai có mở không" — needs both to answer.
+ * There is no "tài liệu" page: a price list, a leaflet or a website goes to
+ * the Fonnus assistant, which reads it and files what it finds into the
+ * sections below.
  */
 export const KNOWLEDGE_SECTIONS = {
   'dia-diem': { title: 'Địa điểm và liên hệ', component: LocationSection },
@@ -71,7 +73,6 @@ export const KNOWLEDGE_SECTIONS = {
   'bac-si': { title: 'Bác sĩ', component: PractitionersSection },
   'cau-hoi': { title: 'Câu hỏi thường gặp', component: FaqSection },
   'tu-khoa': { title: 'Từ hay nghe nhầm', component: KeytermsSection },
-  'tai-lieu': { title: 'Tài liệu và website', component: DocumentsSection },
 } as const
 
 export type KnowledgeSectionKey = keyof typeof KNOWLEDGE_SECTIONS

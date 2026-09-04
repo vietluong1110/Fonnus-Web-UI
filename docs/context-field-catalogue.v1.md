@@ -73,7 +73,6 @@ Other locations. Exists so the agent can redirect a caller who wants the wrong b
 | branch_name [row] | Label | Chi nhánh Đà Nẵng | TE | O |
 | branch_address [row] | Address | 45 Nguyễn Huệ, Đà Nẵng | TE | O |
 | branch_phone [row] | Number to redirect to | 0236 xxx xxxx | TE | O |
-| branch_hours_note [row] | Hours if they differ from the main site | "T2-T6 08:00-17:00" | TE | O |
 
 ## A2. Hours and open-state
 
@@ -81,7 +80,6 @@ Other locations. Exists so the agent can redirect a caller who wants the wrong b
 |---|---|---|---|---|
 | operating_hours_by_weekday | 7-row day/open/close table, pre-filled by vertical template, tenant confirms or edits | T2-T7 08:00-20:00, CN 08:00-12:00 | TE (table, template default) | **R1** |
 | break_periods | Closed windows inside an open day | 12:00-13:30 | TE (table) | O |
-| last_intake_time | Latest arrival accepted before close | 19:00 | TE (time) | O |
 | is_open_now | Computed from hours, breaks, holidays. Gates booking vs after-hours behaviour | true | SD | **R1 (auto)** |
 | current_datetime_local | Injected clock so "ngày mai" and "thứ 7 này" resolve correctly | 2026-08-19T14:30+07 | SD | **R1 (auto)** |
 

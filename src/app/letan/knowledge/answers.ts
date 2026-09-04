@@ -167,14 +167,11 @@ export function hoursExchange(cfg: ReceptionistConfig, now = new Date()): Exchan
   }
 }
 
-export function intakeExchange(cfg: ReceptionistConfig): Exchange {
-  const t = cfg.last_intake_time
-  return {
-    segment: 'gio-mo-cua',
-    q: 'Em qua sát giờ đóng cửa có kịp không ạ?',
-    a: t ? `Phòng khám nhận khách muộn nhất ${t} ạ, anh chị đến trước giờ đó giúp em nhé.` : null,
-    missing: 'Chưa có giờ nhận khách muộn nhất',
-  }
+/** "Sát giờ đóng cửa qua có kịp không?" — she reads today's closing time. */
+export function closingToday(cfg: ReceptionistConfig, now = new Date()): string {
+  const row = cfg.operating_hours_by_weekday.find((r) => r.day === (now.getDay() as Weekday))
+  if (!row || !row.open) return hoursOn(cfg, now, 'Hôm nay')
+  return `Dạ, hôm nay phòng khám mở đến ${row.to} ạ, anh chị đến trước giờ đó giúp em nhé.`
 }
 
 export function tetExchange(cfg: ReceptionistConfig): Exchange {

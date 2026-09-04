@@ -6,7 +6,7 @@ import { newId } from '../model'
 import { pricedCount } from '../readiness'
 import { useConfig, useDraft } from '../store'
 import { PRICE_QUALIFIER } from '../system'
-import { Card, Checkbox, ChipInput, DateField, IconButton, MoneyField, MoneyRangeField, SaveBar, SelectField, Switch, TableHead, TableRow, TextField, ui } from '../../ui'
+import { Card, Checkbox, ChipInput, DateRangeField, IconButton, MoneyField, MoneyRangeField, SaveBar, SelectField, Switch, TableHead, TableRow, TextField, ui } from '../../ui'
 import { localIso } from './answers'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
@@ -257,9 +257,7 @@ export function ServicesSection() {
                   </div>
                   <div className={styles.line}>
                     <TextField className={styles.grow} compact aria-label="Nội dung ưu đãi" value={p.promo_description} onChange={(e) => setPromo(p.id, { promo_description: e.target.value })} placeholder={`${agent} nói gì: Giảm 20% tẩy trắng`} />
-                    <DateField compact aria-label="Từ ngày" value={p.valid_from} onChange={(v) => setPromo(p.id, { valid_from: v })} style={{ width: 150 }} />
-                    <span className={styles.timeSep}>–</span>
-                    <DateField compact aria-label="Đến ngày" value={p.valid_to} onChange={(v) => setPromo(p.id, { valid_to: v })} min={p.valid_from} style={{ width: 150 }} />
+                    <DateRangeField compact aria-label="Thời gian áp dụng" from={p.valid_from} to={p.valid_to} onChange={(r) => setPromo(p.id, { valid_from: r.from, valid_to: r.to })} style={{ width: 220 }} />
                   </div>
                 </div>
               )

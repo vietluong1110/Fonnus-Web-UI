@@ -19,11 +19,11 @@ import styles from './Knowledge.module.css'
  * answered on every sub-page instead — the try-out panel beside each form —
  * so the hub is only the rows: what is set, and where to change it.
  *
- * Eight ways in, in two groups plus one source. Group one is what callers
- * ask; group two is what makes her answers better; the last row is where
- * Fonnus reads things for you. Same row vocabulary as the Hồ sơ hub, and the
- * same rule: nothing is "bắt buộc" — an empty row is dashed, and that is the
- * whole nudge.
+ * Seven ways in, in two groups. Group one is what callers ask; group two is
+ * what makes her answers better. Same row vocabulary as the Hồ sơ hub, and
+ * the same rule: nothing is "bắt buộc" — an empty row is dashed, and that is
+ * the whole nudge. Files and websites have no row of their own: they go to
+ * the assistant beside the hub, which reads them into these sections.
  */
 
 interface Row {
@@ -50,8 +50,6 @@ export function KnowledgeHub() {
   const faqs = config.faq_pairs.filter((f) => f.question.trim() && f.answer.trim()).length
   const mine = config.keyterms.filter((k) => k.source === 'tenant').length
   const derived = derivedKeyterms(config).length
-  const files = config.knowledge_files.length
-  const site = config.website_scrape_url.trim()
   const hoursDone = config.operating_hours_confirmed && config.holidays_confirmed
 
   const asked: Row[] = [
@@ -123,17 +121,6 @@ export function KnowledgeHub() {
     },
   ]
 
-  const source: Row = {
-    segment: 'tai-lieu',
-    icon: 'document',
-    title: 'Tài liệu và website',
-    sub:
-      files || site
-        ? [files ? `${files} tệp` : null, site || null].filter(Boolean).join(' · ')
-        : 'Gửi bảng giá, tờ rơi hoặc website — Fonnus đọc và gợi ý điền các mục trên',
-    empty: !(files || site),
-  }
-
   const row = (r: Row) => (
     <a key={r.segment} className={`${styles.rowLink} ${r.empty ? styles.rowEmpty : ''}`} href={appHref('le-tan', 'kien-thuc', r.segment)}>
       <span className={styles.rowIcon}>
@@ -159,11 +146,6 @@ export function KnowledgeHub() {
       <div className={styles.group}>
         <span className={styles.groupLabel}>Để {agent} trả lời hay hơn</span>
         {better.map(row)}
-      </div>
-
-      <div className={styles.group}>
-        <span className={styles.groupLabel}>Fonnus đọc giúp bạn</span>
-        {row(source)}
       </div>
 
       <div className={styles.hubFoot}>

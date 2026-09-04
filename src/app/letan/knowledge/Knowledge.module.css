@@ -1,5 +1,5 @@
 /*
- * Kiến thức — the hub and its eight sub-pages.
+ * Kiến thức — the hub and its seven sub-pages.
  *
  * Built to the rules Hồ sơ set (Profile.module.css, rules 1–6), restated here
  * rather than composed across files so each keeps its own cascade. Change the
@@ -272,46 +272,6 @@
 
 /* ------------------------------------------------------------- hours */
 
-.dayRow {
-  display: grid;
-  grid-template-columns: 96px 48px minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-hairline);
-}
-
-.dayRow:last-child {
-  border-bottom: none;
-}
-
-.dayName {
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.dayClosed {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-
-.timeRange {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.timeRange > * {
-  width: 118px;
-}
-
-.timeSep {
-  color: var(--ink-soft);
-  font-size: 13px;
-  width: auto !important;
-}
-
 .openNow {
   display: inline-flex;
   align-items: center;
@@ -361,6 +321,322 @@
   --icon-accent: currentColor;
   border-color: var(--terracotta);
   color: var(--cream);
+}
+
+/* --------------------------------------------------------------- entries */
+
+/*
+ * An entry is one thing in a list that is too wide to be a row — a branch,
+ * a holiday. A bordered card inside the card, on the same ground, with the
+ * fields laid out the way the main form lays them out. Focusing one firms
+ * up its edge; nothing tints, so the form stays one colour.
+ */
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.entry:focus-within {
+  border-color: var(--border-strong);
+}
+
+.entryHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -4px -6px -2px 0;
+}
+
+.entryTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/*
+ * The holiday list: four columns, not a flex line.
+ *
+ * A row is name · when · what · delete, and the last three are fixed widths
+ * so every pill in a column starts and ends on the same two verticals —
+ * the reason this list read as messy was that each row sized itself from
+ * its own name. The head row names the columns once, quietly, and the only
+ * rules are the hairlines between rows.
+ */
+.holidays {
+  display: flex;
+  flex-direction: column;
+}
+
+.holiday,
+.holidayHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/*
+ * 9px of padding around a 36px name field is the 54px this row used to get
+ * from `min-height`. It is stated as padding now so the row can collapse to
+ * nothing for its entrance — a floor would have stopped it halfway.
+ */
+.holiday {
+  padding: 9px 0;
+  border-top: 1px solid var(--border-hairline);
+}
+
+/*
+ * A new holiday grows into place instead of appearing under the cursor.
+ *
+ * It is added at the top, so without this every row below it jumps down by
+ * 54px in one frame. The wrapper animates `grid-template-rows` from `0fr` to
+ * `1fr` — the only way to reach a natural height without measuring it first —
+ * and the rows below slide down with it. The motion is the house idiom and
+ * nothing else: one lift-and-settle on `--ease-arc`, 200ms, no bounce.
+ *
+ * The clipping and the class both go at `animationend`; a permanent
+ * `overflow: hidden` here would cut the outset focus ring off the pills.
+ */
+.holidayEnter {
+  display: grid;
+  grid-template-rows: 0fr;
+  animation: holidayIn var(--duration-base) var(--ease-arc) forwards;
+}
+
+.holidayEnter > .holiday {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@keyframes holidayIn {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holidayEnter {
+    grid-template-rows: 1fr;
+    animation: none;
+  }
+
+  /* No animation means no `animationend`, so this class can outlive the
+     entrance here; it must not clip anything while it does. */
+  .holidayEnter > .holiday {
+    overflow: visible;
+  }
+}
+
+.holidayHead {
+  padding: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* The three columns. The pills inside fill their column edge to edge. */
+.holidayName {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.holidayWhen {
+  flex: 0 0 202px;
+}
+
+.holidayWhat {
+  flex: 0 0 172px;
+}
+
+.holidayEnd {
+  flex: 0 0 34px;
+  display: inline-flex;
+  justify-content: flex-end;
+}
+
+.holidayWhen > *,
+.holidayWhat > * {
+  width: 100%;
+}
+
+.holidayWhen button,
+.holidayWhat button {
+  width: 100%;
+  justify-content: space-between;
+}
+
+/*
+ * The name is written straight onto the row — a box only while you are in
+ * it — at the body size every other text input in the app uses, one step
+ * above the 13px on the pills beside it. The name is the row's content and
+ * the pills are its controls; 14.5px was off the type scale altogether.
+ */
+.holidayInput {
+  height: 36px;
+  padding: 0 10px;
+  margin-left: -10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  line-height: var(--leading-body-sm);
+  font-weight: 500;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.holidayInput::placeholder {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.holidayInput:hover {
+  background: var(--action-ghost-hover);
+}
+
+.holidayInput:focus-visible {
+  outline: none;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+.closurePill {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 9px 0 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.closurePill:hover,
+.closurePillOpen,
+.closurePillOpen:hover {
+  background: var(--action-ghost-hover);
+}
+
+.closurePillOpen {
+  border-color: var(--terracotta);
+}
+
+.closurePill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
+}
+
+.closureText {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Closed is an ink dot; partly open is the planner's work colour. */
+.closureDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--ink-soft);
+}
+
+.closurePartial .closureDot {
+  background: var(--terracotta);
+}
+
+.closureChevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+}
+
+.closurePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* "Từ" and "Đến" side by side, each under its own label — a range needs
+   saying which end is which more than it needs a dash between them. */
+.closureTimes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 859.98px) {
+  .holidayHead {
+    display: none;
+  }
+
+  .holiday {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 12px 0;
+  }
+
+  .holidayName {
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .holidayWhen,
+  .holidayWhat {
+    flex: 1 1 150px;
+    order: 2;
+  }
+
+  .holidayEnd {
+    order: 2;
+  }
+}
+
+.hoursSaid {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.hoursSaidWho {
+  font-weight: 600;
+  color: var(--ink);
 }
 
 /* --------------------------------------------------------- stacked rows */
@@ -452,57 +728,9 @@
   flex: 0 0 auto;
 }
 
-/* ------------------------------------------------------------ documents */
-
-.drop {
-  border: 1px dashed var(--border-dashed);
-  border-radius: var(--radius-md);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: 13.5px;
-  cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.drop:hover,
-.dropOver {
-  background: var(--action-ghost-hover);
-}
-
-.fileRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--border-hairline);
-  font-size: 13.5px;
-}
-
-.fileName {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* ------------------------------------------------------------- phone */
 
 @media (max-width: 639.98px) {
-  .dayRow {
-    grid-template-columns: 76px 48px minmax(0, 1fr);
-    gap: 8px;
-  }
-
-  .timeRange > * {
-    width: 104px;
-  }
-
   .item {
     margin: 0 -4px;
     padding: 12px 4px;

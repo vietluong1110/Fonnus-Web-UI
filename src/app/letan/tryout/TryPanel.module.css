@@ -4,9 +4,9 @@
  * (Profile.module.css, rule 4).
  *
  * The hierarchy, loudest first: the orb — awake it lifts and glows, listening
- * it breathes, speaking it swells — then her line under it in ink, then the
- * status and what you said in soft ink, then the prompts, then the composer
- * at the foot with its two discs. The only filled controls are the send
+ * it breathes, speaking it swells — then one line of status in soft ink, then
+ * the prompts as a list of lines to say, then the composer at the foot with
+ * its two discs. The only filled controls are the send
  * button and a live microphone: both terracotta, because both mean "she is
  * about to hear you".
  */
@@ -185,39 +185,33 @@
   color: var(--error);
 }
 
-.heard {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-  max-width: 300px;
-  overflow-wrap: anywhere;
-}
-
-/* Her line: the one thing on the stage in full ink. */
-.said {
+/* A failed turn is the only text under the orb: you cannot hear an error. */
+.failure {
   margin: 0;
   max-width: 310px;
-  font-size: 14.5px;
-  line-height: 1.6;
-  color: var(--ink);
-  overflow-wrap: anywhere;
-}
-
-.saidError {
   font-size: 13px;
+  line-height: 1.5;
   color: var(--error);
+  overflow-wrap: anywhere;
 }
 
 /* --------------------------------------------------------------- prompts */
 
+/*
+ * The prompts are whole sentences a caller would say, and in a 380px column
+ * a sentence is a line, not a chip: chips of that length wrap one per row
+ * and leave the rest of the row empty. So they are a list — each prompt a
+ * full-width row, quoted like a line of dialogue, with the send arrow at the
+ * far end so the row reads as "say this". Two lines wrap cleanly; nothing is
+ * truncated, because the point is to read the line aloud.
+ */
 .prompts {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 16px 14px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 12px 10px 10px;
   border-top: 1px solid var(--border-hairline);
-  padding-top: 12px;
 }
 
 .promptsLabel {
@@ -226,7 +220,67 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin-right: 2px;
+  padding: 0 6px 4px;
+}
+
+.prompt {
+  appearance: none;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 6px 6px 8px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.prompt:hover {
+  background: var(--action-ghost-hover);
+}
+
+.prompt:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+.prompt:active {
+  transform: scale(var(--press-scale));
+}
+
+.promptText {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The arrow is the send button's, at a whisper, so the row and the composer say the same thing. */
+.promptGo {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-soft);
+  --icon-accent: currentColor;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.prompt:hover .promptGo {
+  color: var(--text-accent);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
 }
 
 /* -------------------------------------------------------------- composer */

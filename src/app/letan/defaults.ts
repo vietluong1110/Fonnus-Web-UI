@@ -191,7 +191,6 @@ export const DEFAULT_CONFIG: ReceptionistConfig = {
   ],
   operating_hours_confirmed: false,
   break_periods: [{ id: 'brk-lunch', days: [], from: '12:00', to: '13:30' }],
-  last_intake_time: '',
   holiday_exceptions: HOLIDAY_SEED,
   holidays_confirmed: false,
 

@@ -144,15 +144,14 @@ sub-tabs, all under `#/app/le-tan/`:
 | Path                       | What it configures                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------- |
 | `ho-so`                    | Who she is: name, voice (4 voices = gender × accent), speed, style, English, greeting, steering text, turn-taking |
-| `kien-thuc`                | Hub: eight rows in three groups, each a one-line summary of what is set, beside the Fonnus assistant |
+| `kien-thuc`                | Hub: seven rows in two groups, each a one-line summary of what is set, beside the Fonnus assistant. Files and websites go to the assistant, which reads them into the sections |
 | `kien-thuc/dia-diem`       | Business identity + address (R1), directions / parking / links / VAT, branches               |
-| `kien-thuc/gio-mo-cua`     | Weekly hours (R1), breaks, last intake, live "open now", and holiday exceptions pre-seeded with Vietnamese holidays incl. Tết (R2) — one page, one confirmation |
+| `kien-thuc/gio-mo-cua`     | Weekly hours and breaks (R1) painted on a drag calendar, live "open now", and holiday exceptions pre-seeded with Vietnamese holidays incl. Tết (R2) — one page, one confirmation |
 | `kien-thuc/dich-vu`        | Service catalogue (12 dental template rows), pricing policy, not-offered, bundles, payments, promotions |
 | `kien-thuc/bao-hiem`       | Clinic pack: BHYT / insurance (R2), consultation fee, facilities, what to bring              |
 | `kien-thuc/bac-si`         | Practitioner roster                                                                          |
 | `kien-thuc/cau-hoi`        | FAQ pairs                                                                                    |
 | `kien-thuc/tu-khoa`        | STT keyterms: derived + vertical pack (read-only) + tenant additions                         |
-| `kien-thuc/tai-lieu`       | Knowledge files + website URL (October scope; records intent only)                           |
 | `ky-nang/chuyen-may`       | Escalation targets (R1), triggers, after-hours behaviour, emergency line, red flags, system safety scripts |
 | `ky-nang/gui-email`        | Email rules per call intent, recipients, templates with insertable variables                 |
 | `ky-nang/dat-lich`         | Booking windows per weekday, slots / duration / buffer / cap, confirmation, policies, identity rule |
@@ -216,8 +215,53 @@ rather than competing `box-shadow` / `background` declarations, so `:hover` and
 the "on" state resolve by cascade order instead of by specificity.
 
 Prices are one `MoneyRangeField`, not two boxes under two headings: a range is
-one answer, the way the receptionist says it. Date and time inputs stay native
-— their pickers are calendars and clocks, not lists.
+one answer, the way the receptionist says it.
+
+A `compact` field carries a compact label: 12px in soft ink rather than 13.5px
+in full ink. The full-size pairing puts a 13.5px label over a 14px value; keep
+it over a 13px value and the label is louder than the thing it names, which is
+backwards — the value is what the owner wrote, the label is only chrome.
+
+**Dates and times** (`ui/Pickers.tsx`) are drawn for the same reason selects
+are. The native pickers are the one piece of chrome on these screens that is
+not ours: system blue, and English — "AM", "PM", a month-first date — on a page
+that is otherwise Vietnamese. Three controls replace them, exported from
+`app/ui` and meant to be reused wherever a date or a time is edited:
+
+| Control | For | Reads |
+|---|---|---|
+| `DateField` | one date | `14/02/2027` |
+| `DateRangeField` | a span — a holiday, a promotion | `14/02 – 22/02/2027` |
+| `TimeField` | a clock time | `08:30` |
+
+Values are what the catalogue stores — ISO dates and 24-hour `HH:MM` — and only
+the reading changes, so nothing downstream knows the difference. The calendar
+is Monday-first with Vietnamese month names; a range is picked start-then-end
+with the band following the pointer. `TimeField` is a text input first: `8h30`,
+`8:30`, `08.30` and `0830` all parse, and the quarter-hour list is an offer, not
+the only way in. `pill` swaps the field skin for a pill, for a picker that sits
+in a row rather than in a form.
+
+All three (and any panel that needs the same behaviour — see `ClosurePill` on
+the hours page) hang off `useAnchoredPopup` / `AnchoredPopup` from the same
+file: one implementation of measuring, flipping above the trigger, and closing
+on an outside press. Three rules there are load-bearing and were each a bug
+first.
+
+Pop-ups nest, and all of them are portalled to `<body>`, so none contains
+another and "outside" cannot be read from the DOM. They keep a stack instead:
+a press closes a pop-up unless it landed inside it, on its trigger, or inside
+one opened *from* it. Pressing the holiday panel closes the time list it
+opened and stays; pressing the page closes both; Escape peels one layer.
+
+A list scrolls itself by setting its own `scrollTop`, never with
+`scrollIntoView`, which fires a scroll event that escapes the pop-up and reads
+to the panel underneath as "the page moved".
+
+And the highlighted row follows the keyboard only. Hovering a row must not
+move the cursor a list auto-scrolls to: scrolling drags a new row under a
+still pointer, which would hover, which would scroll, and the list runs away
+to one end. The mouse highlights in CSS; arrows scroll from the key handler.
 
 ## The hero
 

@@ -1,0 +1,330 @@
+/*
+ * The week planner — a calendar you paint.
+ *
+ * Two voices only: terracotta is work (the receptionist is on), sage is a
+ * break (she says "gọi lại sau"). The legend keys are pills, because they
+ * are controls; the painted blocks are rounded rectangles, because they are
+ * not. Row height is fixed in the component (ROW_H) — the grid's own
+ * background lines are sized from it inline so the two never drift apart.
+ */
+
+.planner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------- legend */
+
+.legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.key {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px 0 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-card);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.key:hover {
+  background: var(--action-ghost-hover);
+}
+
+.key:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+}
+
+.work .swatch {
+  background: var(--terracotta);
+}
+
+.break .swatch {
+  background: var(--surface-sage);
+  box-shadow: inset 0 0 0 1px var(--chart-2);
+}
+
+/* The chosen key is filled with its own colour, so what you will paint is what you see. */
+.work.keyOn,
+.work.keyOn:hover {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--cream);
+}
+
+.work.keyOn .swatch {
+  background: var(--cream);
+}
+
+.break.keyOn,
+.break.keyOn:hover {
+  background: var(--surface-sage);
+  border-color: var(--chart-2);
+  color: var(--ink);
+}
+
+.legendHint {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  margin-left: 4px;
+}
+
+.legendNote {
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+/* ----------------------------------------------------------------- sheet */
+
+.sheet {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.corner {
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.dayHead {
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border-left: 1px solid var(--border-hairline);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dayHead:first-child {
+  border-left: none;
+}
+
+.dayToday {
+  color: var(--text-accent);
+}
+
+.dayShort {
+  display: none;
+}
+
+.hoursCol {
+  position: relative;
+}
+
+.hourLabel {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  line-height: 1;
+}
+
+.hourLabel:first-child {
+  transform: none;
+}
+
+.hourLabel:last-child {
+  transform: translateY(-100%);
+}
+
+/*
+ * The grid: hour lines are painted as a background so they cost nothing
+ * per row; the half-hour line is the same hairline at half strength. The
+ * pointer handlers live here — one element captures the whole drag.
+ */
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background-image: linear-gradient(to bottom, var(--border-hairline) 0, var(--border-hairline) 1px, transparent 1px, transparent 50%, rgba(38, 31, 24, 0.05) 50%, rgba(38, 31, 24, 0.05) calc(50% + 1px), transparent calc(50% + 1px));
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.gridDragging {
+  cursor: crosshair;
+}
+
+.col {
+  position: relative;
+  border-left: 1px solid var(--border-hairline);
+  min-width: 0;
+}
+
+.col:first-child {
+  border-left: none;
+}
+
+.colToday {
+  background: rgba(184, 92, 43, 0.04);
+}
+
+.block {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border-radius: 6px;
+  padding: 3px 6px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blockWork {
+  background: var(--terracotta);
+  color: var(--cream);
+}
+
+.blockBreak {
+  background: var(--surface-sage);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--chart-2);
+}
+
+.blockLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nowLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--terracotta-deep);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.nowLine::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--terracotta-deep);
+}
+
+/* What the drag will paint, drawn over the columns until the pointer lifts. */
+.pending {
+  position: absolute;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.pendingWork {
+  background: rgba(184, 92, 43, 0.35);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.pendingBreak {
+  background: rgba(110, 127, 83, 0.28);
+  box-shadow: inset 0 0 0 1.5px var(--chart-2);
+}
+
+.pendingErase {
+  background: rgba(255, 251, 242, 0.55);
+  box-shadow: inset 0 0 0 1.5px var(--ink-soft);
+}
+
+/* ------------------------------------------------------------------ foot */
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footLink {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-link);
+  cursor: pointer;
+}
+
+.footLink:hover {
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------------- phone */
+
+@media (max-width: 639.98px) {
+  .sheet {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .dayLong {
+    display: none;
+  }
+
+  .dayShort {
+    display: inline;
+  }
+
+  .hourLabel {
+    right: 5px;
+    font-size: 10px;
+  }
+
+  /* Forty-pixel columns cannot hold a clock; the hour gutter is the label. */
+  .blockLabel {
+    display: none;
+  }
+}

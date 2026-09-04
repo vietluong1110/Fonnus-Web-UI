@@ -24,7 +24,7 @@ import {
   hoursOn,
   insuranceExchange,
   instalmentExchange,
-  intakeExchange,
+  closingToday,
   localIso,
   parkingExchange,
   prepExchange,
@@ -203,7 +203,7 @@ function reply(turn: ReceptionistTurn, now: Date): string {
 
   // When.
   if (any(t, [/tet/, /nghi le/, /ngay le/, /le (nay|nao)/, /30\/4/, /2\/9/, /ngay nghi/, /nghi (ngay|hom) nao/])) return tetExchange(cfg).a ?? `Dạ, phòng khám chưa có lịch nghỉ lễ ạ. ${UNRESOLVABLE_FALLBACK_SCRIPT}`
-  if (any(t, [/sat gio/, /muon (nhat|qua)/, /tre (qua|nhat)/, /kip khong/, /con nhan khach/])) return intakeExchange(cfg).a ?? `Dạ, phòng khám nhận khách đến tận giờ đóng cửa ạ.`
+  if (any(t, [/sat gio/, /muon (nhat|qua)/, /tre (qua|nhat)/, /kip khong/, /con nhan khach/])) return closingToday(cfg, now)
   if (any(t, [/may gio/, /gio (mo|lam|dong|kham)/, /mo cua/, /dong cua/, /co mo/, /co lam/, /lam viec/, /chu nhat/, /cuoi tuan/, /thu (hai|ba|tu|nam|sau|bay)/, /hom nay/, /ngay mai/, /\bmai\b/])) {
     const day = dayIn(t, now)
     if (day) return hoursOn(cfg, day.date, day.label)
