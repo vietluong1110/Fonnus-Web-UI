@@ -19,7 +19,7 @@ export function CallLogVisual() {
         {calls.map((call) => (
           <div key={call.number} className={styles.logRow}>
             <span className={styles.logIcon}>
-              <Icon name="phone-incoming" size={18} />
+              <Icon name="incoming" size={18} />
             </span>
             <span className={styles.logText}>
               <span className={styles.logNumber}>{call.number}</span>

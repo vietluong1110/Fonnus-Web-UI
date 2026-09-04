@@ -1,4 +1,4 @@
-import { Button, Icon } from '../../design-system'
+import { Button, Icon, Shape } from '../../design-system'
 import type { IconName } from '../../design-system'
 import section from '../../styles/section.module.css'
 import styles from './MissedCalls.module.css'
@@ -16,15 +16,15 @@ interface Step {
  * decoded first.
  */
 const TODAY: Step[] = [
-  { icon: 'moon', when: '20:15', what: 'Khách gọi sau giờ làm' },
-  { icon: 'phone-missed', when: 'Máy reo', what: 'Không có ai nghe' },
-  { icon: 'user-round-x', when: '20:16', what: 'Khách gọi nơi khác' },
+  { icon: 'after-hours', when: '20:15', what: 'Khách gọi sau giờ làm' },
+  { icon: 'missed', when: 'Máy reo', what: 'Không có ai nghe' },
+  { icon: 'caller-lost', when: '20:16', what: 'Khách gọi nơi khác' },
 ]
 
 const WITH_FONNUS: Step[] = [
-  { icon: 'moon', when: '20:15', what: 'Khách gọi sau giờ làm' },
-  { icon: 'phone-call', when: '3 hồi chuông', what: 'Fonnus nghe máy' },
-  { icon: 'calendar-check', when: '20:17', what: 'Lịch hẹn vào sổ' },
+  { icon: 'after-hours', when: '20:15', what: 'Khách gọi sau giờ làm' },
+  { icon: 'answered', when: '3 hồi chuông', what: 'Fonnus nghe máy' },
+  { icon: 'appointment', when: '20:17', what: 'Lịch hẹn vào sổ' },
 ]
 
 /** "Cái giá của một cuộc gọi nhỡ" — why this is a problem worth solving. */
@@ -32,13 +32,22 @@ export function MissedCalls() {
   return (
     <section id="vi-sao" className={section.section}>
       <div className={section.inner}>
-        <div data-reveal="0" className={section.eyebrow}>Cái giá của một cuộc gọi nhỡ</div>
-        <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
-          Người gọi không để lại lời nhắn. Họ gọi phòng khám tiếp theo.
-        </h2>
-        <p data-reveal="2" className={`${section.lede} ${styles.lede}`}>
-          Cùng một cuộc gọi lúc 8 giờ tối — hai kết cục khác nhau.
-        </p>
+        <div className={styles.head}>
+          <div>
+            <div data-reveal="0" className={section.eyebrow}>Cái giá của một cuộc gọi nhỡ</div>
+            <h2 data-reveal="1" className={`${section.heading} ${styles.heading}`}>
+              Người gọi không để lại lời nhắn. Họ gọi phòng khám tiếp theo.
+            </h2>
+            <p data-reveal="2" className={`${section.lede} ${styles.lede}`}>
+              Cùng một cuộc gọi lúc 8 giờ tối — hai kết cục khác nhau.
+            </p>
+          </div>
+          {/* "Cuộc gọi được trả lời": three arcs rising from one point — the
+              section's answer, drawn before it is argued. */}
+          <div data-reveal="2" className={styles.headShape}>
+            <Shape name="rising-arcs" size={176} />
+          </div>
+        </div>
 
         <div className={styles.tracks}>
           <Track
@@ -56,7 +65,11 @@ export function MissedCalls() {
         </div>
 
         <div data-reveal="0" className={styles.answer}>
-          <div className={styles.answerText}>Fonnus nghe máy 24/7, từ 2.500.000 đ mỗi tháng.</div>
+          <div className={styles.answerLead}>
+            {/* The closed ring: no hour of the day left empty. */}
+            <Shape name="always-on" size={84} className={styles.answerShape} />
+            <div className={styles.answerText}>Fonnus nghe máy 24/7, từ 2.500.000 đ mỗi tháng.</div>
+          </div>
           <a href="#bang-gia" style={{ textDecoration: 'none' }}>
             <Button variant="inverse">Xem bảng giá</Button>
           </a>

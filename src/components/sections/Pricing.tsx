@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Switch } from '../../design-system'
+import { Button, Pattern, Switch } from '../../design-system'
 import { PLANS } from '../../data/pricing'
 import type { PlanName } from '../../data/pricing'
 import section from '../../styles/section.module.css'
@@ -54,6 +54,7 @@ export function Pricing({ highlight = 'Tiêu chuẩn', matrixDefaultOpen = false
         </div>
 
         <div data-reveal="0" className={styles.enterprise}>
+          <Pattern name="night-dots" style={{ zIndex: -1 }} />
           <div className={styles.enterpriseBody}>
             <div className={styles.enterpriseTitle}>Doanh nghiệp</div>
             <p className={styles.enterpriseText}>

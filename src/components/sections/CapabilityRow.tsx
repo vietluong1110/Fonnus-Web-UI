@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { Icon } from '../../design-system'
 import section from '../../styles/section.module.css'
 import styles from './CapabilityRow.module.css'
 
@@ -35,7 +36,9 @@ export function CapabilityRow({
         <div className={section.checkList}>
           {points.map((point) => (
             <div key={point} style={{ display: 'flex', gap: 10 }}>
-              <span className={section.checkMark}>✓</span> {point}
+              <span className={section.checkMark}>
+                <Icon name="check" size={16} />
+              </span> {point}
             </div>
           ))}
         </div>

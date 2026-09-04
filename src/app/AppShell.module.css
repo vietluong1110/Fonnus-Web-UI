@@ -78,6 +78,7 @@
 .itemOn,
 .itemOn:hover {
   background: var(--terracotta);
+  --icon-accent: currentColor;
   color: var(--cream);
   font-weight: 600;
 }

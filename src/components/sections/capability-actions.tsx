@@ -21,7 +21,7 @@ export function BookingAction() {
   return (
     <div className={styles.card}>
       <div className={styles.cardHead}>
-        <Icon name="calendar-check" size={17} />
+        <Icon name="appointment" size={17} />
         Lịch hẹn đã vào sổ
       </div>
 
@@ -40,7 +40,7 @@ export function BookingAction() {
         </span>
         <span className={styles.slotBooked}>
           <span className={styles.slotTime}>15:00</span> 0903 ••• 217 · khám tổng quát
-          <Icon name="calendar-check" size={15} />
+          <Icon name="appointment" size={15} />
         </span>
         <span className={styles.slotFree}>
           <span className={styles.slotTime}>16:00</span> Trống
@@ -61,7 +61,7 @@ export function PriceAction() {
   return (
     <div className={styles.card}>
       <div className={styles.cardHead}>
-        <Icon name="list-checks" size={17} />
+        <Icon name="list" size={17} />
         Lấy từ bảng giá của phòng khám
       </div>
 
@@ -84,7 +84,7 @@ export function TransferAction() {
   return (
     <div className={styles.card}>
       <div className={styles.cardHead}>
-        <Icon name="phone-call" size={17} />
+        <Icon name="answered" size={17} />
         Đã nối máy cho người thật
       </div>
 
@@ -103,7 +103,7 @@ export function TransferAction() {
 
         <span className={styles.who}>
           <span className={styles.avatarStaff}>
-            <Icon name="user-round" size={18} />
+            <Icon name="caller" size={18} />
           </span>
           <span className={styles.whoText}>
             <span className={styles.whoName}>BS. Trần Minh</span>

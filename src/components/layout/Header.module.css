@@ -103,13 +103,13 @@
 }
 
 .chevron {
-  stroke: var(--ink-soft);
+  color: var(--ink-soft);
   transition: transform var(--duration-fast) var(--ease-out);
 }
 
 /* Open: the chevron flips and takes the brand colour — the one accent up here. */
 .chevronOpen {
-  stroke: var(--terracotta);
+  color: var(--terracotta);
   transform: rotate(180deg);
   transition: transform var(--duration-fast) var(--ease-out);
 }
@@ -184,6 +184,7 @@
 /* The demo row is the one action in the menu, so its mark is filled. */
 .panelRowDemo .panelIcon {
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
 }
 

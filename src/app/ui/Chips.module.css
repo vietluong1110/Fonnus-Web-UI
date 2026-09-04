@@ -42,6 +42,7 @@
 
 .chipSelected {
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
   box-shadow: none;
 }
@@ -63,6 +64,7 @@
 .chipButtonSelected {
   composes: chipButton;
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
   box-shadow: none;
 }

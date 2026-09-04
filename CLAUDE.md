@@ -80,6 +80,12 @@ npm run typecheck
   artwork rather than a set of token stops.
 - One shape rule so radii stop disagreeing: **controls are pills, containers are rounded
   rectangles.**
+- **Icons are drawn, not installed.** Every icon, shape and pattern is an arc-and-dot
+  drawing in `src/design-system/icons.ts` / `Shape.tsx` / `Pattern.tsx` with exactly one
+  terracotta accent (`--icon-accent`). No Lucide, no stock set, no emoji glyphs (✓ ▾ →) in
+  markup — draw the missing icon in the same grammar and mark it `[ext]`. A night surface
+  sets `--icon-accent: var(--terracotta-night)`; a terracotta surface sets it to
+  `currentColor`. Rules and catalogue: `docs/visual-language.md`.
 
 ## Things that are load-bearing and look like they are not
 

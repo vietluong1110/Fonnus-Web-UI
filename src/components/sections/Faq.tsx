@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { Icon } from '../../design-system'
 import { FAQS } from '../../data/content'
 import section from '../../styles/section.module.css'
 import styles from './Faq.module.css'
@@ -29,7 +30,9 @@ export function Faq() {
                   className={styles.question}
                 >
                   <span>{item.q}</span>
-                  <span className={styles.sign}>{open ? '—' : '+'}</span>
+                  <span className={open ? styles.signOpen : styles.sign} aria-hidden="true">
+                    <Icon name="plus" size={18} />
+                  </span>
                 </button>
                 <div id={panelId} className={open ? styles.answerWrapOpen : styles.answerWrap}>
                   <div className={styles.answerClip}>

@@ -13,7 +13,7 @@ const KEYS = ['agent_name', 'greeting_script_custom', 'greeting_by_daypart', 'se
 const DAYPARTS = [
   ['morning', 'Sáng · trước 12:00', 'sun', 'buổi sáng'],
   ['afternoon', 'Chiều · 12:00 – 18:00', 'sunset', 'buổi chiều'],
-  ['evening', 'Tối · sau 18:00', 'moon', 'buổi tối'],
+  ['evening', 'Tối · sau 18:00', 'after-hours', 'buổi tối'],
 ] as const
 
 type Daypart = (typeof DAYPARTS)[number][0]

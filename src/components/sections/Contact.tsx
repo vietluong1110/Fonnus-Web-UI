@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { api, messageFor } from '../../api'
-import { Button, Input } from '../../design-system'
+import { Button, Input, Icon } from '../../design-system'
 import { CONTACT } from '../../data/content'
 import { hrefFor } from '../../hooks/useRoute'
 import section from '../../styles/section.module.css'
@@ -65,7 +65,9 @@ export function Contact() {
           <div className={styles.points}>
             {POINTS.map((point) => (
               <div key={point} style={{ display: 'flex', gap: 10 }}>
-                <span className={section.checkMark}>✓</span> {point}
+                <span className={section.checkMark}>
+                  <Icon name="check" size={16} />
+                </span> {point}
               </div>
             ))}
           </div>
@@ -87,7 +89,9 @@ export function Contact() {
         <div data-reveal="1" data-reveal-from="right" className={styles.formCard}>
           {sent ? (
             <div className={styles.sent}>
-              <span className={styles.sentTick}>✓</span>
+              <span className={styles.sentTick}>
+                <Icon name="done" size={28} />
+              </span>
               <div className={styles.sentTitle}>Đã nhận thông tin</div>
               <p className={styles.sentBody}>
                 Chúng tôi sẽ gọi lại trong 24 giờ. Nếu cần gấp, gọi trực tiếp {CONTACT.phone}.

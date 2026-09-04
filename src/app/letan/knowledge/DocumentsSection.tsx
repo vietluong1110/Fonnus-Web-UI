@@ -103,7 +103,7 @@ export function DocumentsSection() {
               if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click()
             }}
           >
-            <Icon name="file-text" size={22} />
+            <Icon name="document" size={22} />
             <span style={{ color: 'var(--ink)', fontWeight: 500 }}>Kéo thả hoặc bấm để chọn</span>
             <span className={ui.hint}>PDF, Word, Excel, ảnh · tối đa 20 MB mỗi tệp</span>
             <input ref={inputRef} type="file" accept={ACCEPT} multiple hidden onChange={(e) => void addFiles(e.target.files)} />
@@ -116,11 +116,11 @@ export function DocumentsSection() {
             <div>
               {draft.knowledge_files.map((f) => (
                 <div key={f.id} className={styles.fileRow}>
-                  <Icon name="file-text" size={16} color="var(--text-accent)" />
+                  <Icon name="document" size={16} color="var(--text-accent)" />
                   <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
                   <span className={`${ui.num} ${ui.hint}`}>{fmtSize(f.size)}</span>
                   <Badge tone={f.status === 'indexed' ? 'success' : 'neutral'}>{f.status === 'indexed' ? 'Đã đọc' : 'Chờ đọc'}</Badge>
-                  <IconButton name="trash-2" label="Bỏ tệp" danger onClick={() => set('knowledge_files', draft.knowledge_files.filter((x) => x.id !== f.id))} />
+                  <IconButton name="trash" label="Bỏ tệp" danger onClick={() => set('knowledge_files', draft.knowledge_files.filter((x) => x.id !== f.id))} />
                 </div>
               ))}
             </div>

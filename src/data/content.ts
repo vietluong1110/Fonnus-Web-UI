@@ -25,8 +25,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Sản phẩm',
     items: [
-      { label: 'Nghe thử Linh', desc: 'Gọi thử ngay trên trình duyệt', icon: 'phone-call', demo: true },
-      { label: 'Khả năng', desc: 'Đặt lịch, báo giá, chuyển máy', icon: 'calendar-check', href: '#kha-nang' },
+      { label: 'Nghe thử Linh', desc: 'Gọi thử ngay trên trình duyệt', icon: 'answered', demo: true },
+      { label: 'Khả năng', desc: 'Đặt lịch, báo giá, chuyển máy', icon: 'appointment', href: '#kha-nang' },
       {
         label: 'Cách hoạt động',
         desc: 'Giữ nguyên số phòng khám đang dùng',
@@ -39,14 +39,14 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Tin cậy',
     items: [
-      { label: 'Vì sao Fonnus', desc: 'Cuộc gọi nhỡ đang lấy đi bao nhiêu', icon: 'phone-missed', href: '#vi-sao' },
+      { label: 'Vì sao Fonnus', desc: 'Cuộc gọi nhỡ đang lấy đi bao nhiêu', icon: 'missed', href: '#vi-sao' },
       {
         label: 'Bảo mật & dữ liệu',
         desc: 'Dữ liệu bệnh nhân lưu tại Việt Nam',
-        icon: 'shield-check',
+        icon: 'privacy',
         href: '#bao-mat',
       },
-      { label: 'Câu hỏi thường gặp', desc: 'Những điều chủ phòng khám hay hỏi', icon: 'list-checks', href: '#faq' },
+      { label: 'Câu hỏi thường gặp', desc: 'Những điều chủ phòng khám hay hỏi', icon: 'list', href: '#faq' },
     ],
   },
   { label: 'Liên hệ', href: '#lien-he' },

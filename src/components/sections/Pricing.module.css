@@ -33,8 +33,12 @@
 
 /* Full width now that Guided Setup is gone: one clear enterprise line. */
 .enterprise {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   margin-top: var(--gap-card);
   background: var(--night);
+  --icon-accent: var(--terracotta-night);
   color: var(--cream-night);
   border-radius: var(--radius-lg);
   padding: 28px;

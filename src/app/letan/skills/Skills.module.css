@@ -56,6 +56,7 @@
 .subItemOn,
 .subItemOn:hover {
   background: var(--terracotta);
+  --icon-accent: currentColor;
   color: var(--cream);
   font-weight: 600;
 }
@@ -103,6 +104,7 @@
 
 .targetOrderFirst {
   background: var(--terracotta);
+  --icon-accent: currentColor;
   border-color: var(--terracotta);
   color: var(--cream);
 }

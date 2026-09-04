@@ -1,106 +1,78 @@
-import type { CSSProperties, HTMLAttributes } from 'react'
+import type { CSSProperties, SVGAttributes } from 'react'
+import { ICONS } from './icons'
+import type { IconName, IconPrim } from './icons'
+
+export type { IconName } from './icons'
 
 /*
- * SUBSTITUTION (see design-system readme): the brand supplied no icon set.
- * Lucide (rounded caps, 2px stroke) is the closest match to the mark's geometry.
- * The glyph is applied as a CSS mask so it always inherits currentColor.
+ * Inline SVG, not a CSS mask: a Fonnus icon has two colours — ink from
+ * `currentColor`, and the one terracotta accent from `--icon-accent`. A mask
+ * can only paint one.
  *
- * The design-system bundle pulled these from a jsDelivr CDN; here they are
- * vendored into `public/icons/` at build time so the page has no runtime
- * network dependency. Icon names are lucide-static file names — add a name
- * here and copy the matching SVG from `node_modules/lucide-static/icons/`.
+ * `--icon-accent` is `--terracotta` on light surfaces and `--terracotta-night`
+ * on night ones (colors.css). A surface that is itself terracotta sets it to
+ * `currentColor`, which collapses the icon to a single colour rather than
+ * losing the accent into the ground.
+ *
+ * Stroke compensates for size so the shape never changes, only the line: at
+ * 16px the stroke is 2.2 and the dot a touch bigger; from 32px up it thins
+ * to 1.8 (the reference's "Bù nét theo cỡ").
  */
-export type IconName =
-  | 'arrow-right'
-  | 'arrow-up'
-  | 'badge-check'
-  | 'banknote'
-  | 'bell-ring'
-  | 'book-open'
-  | 'building-2'
-  | 'calendar-check'
-  | 'calendar-days'
-  | 'check'
-  | 'chevron-down'
-  | 'chevron-left'
-  | 'chevron-right'
-  | 'chevron-up'
-  | 'circle-alert'
-  | 'circle-check'
-  | 'circle-help'
-  | 'clipboard-list'
-  | 'clock'
-  | 'ear'
-  | 'file-text'
-  | 'globe'
-  | 'grip-vertical'
-  | 'hand-coins'
-  | 'house'
-  | 'info'
-  | 'languages'
-  | 'list-checks'
-  | 'lock'
-  | 'log-out'
-  | 'mail'
-  | 'map-pin'
-  | 'menu'
-  | 'mic'
-  | 'mic-off'
-  | 'moon'
-  | 'pause'
-  | 'pencil'
-  | 'percent'
-  | 'phone-call'
-  | 'phone-forwarded'
-  | 'phone-incoming'
-  | 'phone-missed'
-  | 'play'
-  | 'plus'
-  | 'receipt'
-  | 'search'
-  | 'settings'
-  | 'shield-check'
-  | 'stethoscope'
-  | 'sun'
-  | 'sunset'
-  | 'timer'
-  | 'trash-2'
-  | 'triangle-alert'
-  | 'user-round'
-  | 'user-round-x'
-  | 'users'
-  | 'volume-2'
-  | 'x'
 
-export interface IconProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
+export interface IconProps extends Omit<SVGAttributes<SVGSVGElement>, 'color' | 'name'> {
   name: IconName
   size?: number
+  /** Ink colour. Defaults to `currentColor`. */
   color?: string
+  /** Accent colour. Defaults to the surface's `--icon-accent`. */
+  accent?: string
   style?: CSSProperties
 }
 
-export function Icon({ name, size = 20, color = 'currentColor', style, ...rest }: IconProps) {
-  const url = `url(${import.meta.env.BASE_URL}icons/${name}.svg)`
+function baseStroke(size: number): number {
+  if (size <= 16) return 2.2
+  if (size >= 32) return 1.8
+  return 2
+}
+
+export function Icon({ name, size = 20, color = 'currentColor', accent, style, ...rest }: IconProps) {
+  const prims: IconPrim[] = ICONS[name]
+  const base = baseStroke(size)
+  const scale = base / 2
+  const small = size <= 16
+  const accentColor = accent ?? 'var(--icon-accent, var(--terracotta))'
+
   return (
-    <span
+    <svg
       aria-hidden="true"
-      style={{
-        display: 'inline-block',
-        width: size,
-        height: size,
-        flex: '0 0 auto',
-        background: color,
-        WebkitMaskImage: url,
-        maskImage: url,
-        WebkitMaskSize: 'contain',
-        maskSize: 'contain',
-        WebkitMaskRepeat: 'no-repeat',
-        maskRepeat: 'no-repeat',
-        WebkitMaskPosition: 'center',
-        maskPosition: 'center',
-        ...style,
-      }}
+      focusable="false"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={base}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ display: 'inline-block', flex: '0 0 auto', color, ...style }}
       {...rest}
-    />
+    >
+      {prims.map((p, i) => {
+        const paint = p.accent ? accentColor : 'currentColor'
+        const w = p.w != null ? p.w * scale : undefined
+        if ('d' in p) {
+          return <path key={i} d={p.d} stroke={paint} strokeWidth={w} />
+        }
+        if ('c' in p) {
+          const [cx, cy, r] = p.c
+          if (p.fill) {
+            return <circle key={i} cx={cx} cy={cy} r={small ? r + 0.2 : r} fill={paint} stroke="none" />
+          }
+          return <circle key={i} cx={cx} cy={cy} r={r} stroke={paint} strokeWidth={w} />
+        }
+        const [x, y, rw, rh, rx] = p.r
+        return <rect key={i} x={x} y={y} width={rw} height={rh} rx={rx} stroke={paint} strokeWidth={w} />
+      })}
+    </svg>
   )
 }

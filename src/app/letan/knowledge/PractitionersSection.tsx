@@ -36,7 +36,7 @@ export function PractitionersSection() {
         }
       />
 
-      <Notice tone="neutral" icon="stethoscope">
+      <Notice tone="neutral" icon="practitioner">
         Khách Việt hay hỏi đích danh: "bác sĩ Hùng hôm nay có ở phòng khám không?". Có danh sách này, {agent} trả lời được ngày làm việc và chuyên môn — và nghe đúng tên bác sĩ khi khách nói.
       </Notice>
 
@@ -46,7 +46,7 @@ export function PractitionersSection() {
             <Card
               key={p.id}
               title={p.practitioner_name ? `${p.title_credential} ${p.practitioner_name}` : 'Bác sĩ mới'}
-              actions={<IconButton name="trash-2" label="Xoá bác sĩ" danger onClick={() => set('practitioner_roster', draft.practitioner_roster.filter((x) => x.id !== p.id))} />}
+              actions={<IconButton name="trash" label="Xoá bác sĩ" danger onClick={() => set('practitioner_roster', draft.practitioner_roster.filter((x) => x.id !== p.id))} />}
             >
               <div className={ui.grid2}>
                 <SelectField<PractitionerTitle> label="Chức danh" value={p.title_credential} onChange={(v) => setRow(p.id, { title_credential: v })} options={LABELS.titles.map((t) => ({ value: t, label: t }))} />

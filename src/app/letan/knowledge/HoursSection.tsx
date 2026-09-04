@@ -58,13 +58,14 @@ export function HoursSection() {
       <SectionHead title="Giờ làm việc" badge={draft.operating_hours_confirmed ? { tone: 'success', label: 'Đủ' } : { tone: 'warning', label: 'Cần xác nhận' }} />
 
       {!draft.operating_hours_confirmed ? (
-        <Notice tone="warm" icon="circle-alert">
+        <Notice tone="warm" icon="alert">
           Giờ mẫu theo ngành nha khoa. Sửa cho đúng phòng khám rồi bấm Lưu — {agent} chỉ đọc giờ sau khi bạn xác nhận.
         </Notice>
       ) : null}
 
       <Card
         gate="R1"
+        pattern="grid"
         title="Giờ mở cửa trong tuần"
         actions={
           <span className={styles.openNow} title="Tính từ giờ làm việc, nghỉ trưa và ngày nghỉ">
@@ -127,7 +128,7 @@ export function HoursSection() {
                   <span className={styles.timeSep}>–</span>
                   <TimeField compact aria-label="Kết thúc nghỉ" value={b.to} onChange={(v) => setBreak(b.id, { to: v })} />
                   <span style={{ marginLeft: 'auto', width: 'auto' }}>
-                    <IconButton name="trash-2" label="Xoá" danger onClick={() => set('break_periods', draft.break_periods.filter((x) => x.id !== b.id))} />
+                    <IconButton name="trash" label="Xoá" danger onClick={() => set('break_periods', draft.break_periods.filter((x) => x.id !== b.id))} />
                   </span>
                 </div>
                 <div className={ui.row}>

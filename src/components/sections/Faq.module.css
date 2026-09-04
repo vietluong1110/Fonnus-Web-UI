@@ -37,10 +37,17 @@
   color: var(--ink);
 }
 
+/* The plus turns into the close cross by rotating — one glyph, two states. */
 .sign {
   color: var(--terracotta);
-  font-size: 13px;
   flex: 0 0 auto;
+  display: inline-flex;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.signOpen {
+  composes: sign;
+  transform: rotate(45deg);
 }
 
 /*

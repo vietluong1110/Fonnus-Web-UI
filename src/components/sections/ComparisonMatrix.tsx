@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Icon } from '../../design-system'
 import { COMPARISON_MATRIX } from '../../data/pricing'
 import styles from './ComparisonMatrix.module.css'
 
@@ -17,7 +18,9 @@ export function ComparisonMatrix({ defaultOpen = false }: ComparisonMatrixProps)
     <div data-reveal="0" style={{ marginTop: 40 }}>
       <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className={styles.toggle}>
         <span>{open ? 'Thu gọn bảng so sánh đầy đủ' : 'Xem bảng so sánh đầy đủ'}</span>
-        <span className={open ? styles.caretOpen : styles.caret}>▾</span>
+        <span className={open ? styles.caretOpen : styles.caret} aria-hidden="true">
+          <Icon name="chevron-down" size={16} />
+        </span>
       </button>
 
       {/*

@@ -1,5 +1,9 @@
 .footer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: var(--night);
+  --icon-accent: var(--terracotta-night);
   color: var(--cream-night);
   padding: clamp(48px, 8vh, 80px) clamp(20px, 5vw, 64px) 40px;
 }

@@ -21,6 +21,7 @@
   border: none;
   border-radius: 50%;
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
   display: grid;
   place-items: center;

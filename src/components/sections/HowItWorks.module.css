@@ -85,6 +85,8 @@
   composes: bullet;
   background: var(--action-primary);
   color: var(--cream);
+  /* On a terracotta ground the accent would vanish into it: one colour. */
+  --icon-accent: currentColor;
   box-shadow: 0 10px 24px rgba(160, 78, 31, 0.28);
 }
 

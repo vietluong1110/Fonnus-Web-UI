@@ -59,7 +59,7 @@
   margin: 0;
 }
 
-/* A checkmark line: "✓ Không cần tải gì" */
+/* A checkmark line: the micro check glyph, then the point. */
 .check {
   display: flex;
   gap: 10px;
@@ -70,6 +70,10 @@
 .checkMark {
   color: var(--terracotta-deep);
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 1.6em;
 }
 
 .checkList {

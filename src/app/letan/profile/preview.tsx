@@ -95,7 +95,7 @@ export function Turn({
     <div className={styles.turn}>
       {label ? (
         <span className={styles.turnLabel}>
-          {locked ? <Icon name="lock" size={12} /> : null}
+          {locked ? <Icon name="privacy" size={12} /> : null}
           {label}
         </span>
       ) : null}

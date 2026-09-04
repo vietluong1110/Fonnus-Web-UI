@@ -22,14 +22,14 @@ const STEPS: Step[] = [
     visual: <SetupVisual />,
   },
   {
-    icon: 'phone-call',
+    icon: 'incoming',
     eyebrow: 'Bước 2 · 3 phút',
     title: 'Cài số điện thoại',
     body: 'Dùng số Fonnus cấp, hoặc chuyển tiếp cuộc gọi từ số hiện tại của phòng khám sang Fonnus.',
     visual: <ForwardVisual />,
   },
   {
-    icon: 'calendar-check',
+    icon: 'answered',
     eyebrow: 'Bước 3 · từ đây, 24/7',
     title: 'Bệnh nhân gọi, Fonnus trả lời',
     body: 'Đặt lịch, báo giá và hỗ trợ 24/7 bằng tiếng Việt tự nhiên.',

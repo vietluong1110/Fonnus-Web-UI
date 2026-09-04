@@ -83,12 +83,12 @@ export function TransferSkill() {
                     error={t.phone && !phoneOk(t.phone) ? 'Số chưa đủ 10 số.' : null}
                   />
                   <TextField compact aria-label="Tên người nhận" value={t.name} onChange={(e) => setTarget(t.id, { name: e.target.value })} placeholder="Tên người nhận, VD: chị Lan" />
-                  <IconButton name="trash-2" label="Xoá số" danger onClick={() => set('escalation_targets', draft.escalation_targets.filter((x) => x.id !== t.id))} />
+                  <IconButton name="trash" label="Xoá số" danger onClick={() => set('escalation_targets', draft.escalation_targets.filter((x) => x.id !== t.id))} />
                 </div>
               ))}
             </div>
           ) : (
-            <Notice tone="warm" icon="circle-alert">
+            <Notice tone="warm" icon="alert">
               Chưa có số nào. Đây là thông tin quan trọng nhất trong toàn bộ Lễ tân — không có nó, {agent} không chuyển được cuộc gọi nào cho người thật.
             </Notice>
           )}

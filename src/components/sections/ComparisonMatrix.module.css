@@ -13,7 +13,7 @@
 }
 
 .caret {
-  font-size: 11px;
+  display: inline-flex;
   transition: transform var(--duration-base) var(--ease-out);
 }
 

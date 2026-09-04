@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { Button, Icon } from '../../design-system'
+import { Button, Icon, Pattern } from '../../design-system'
 import type { IconName } from '../../design-system'
 import { useSpeak } from './speak'
 import styles from './Bits.module.css'
@@ -76,6 +76,8 @@ export function Notice({
 }) {
   return (
     <div className={noticeClass[tone]} style={style} role={tone === 'rose' ? 'alert' : undefined}>
+      {/* Dấu thanh is the one pattern allowed on sage — the resolved state. */}
+      {tone === 'sage' ? <Pattern name="ticks" style={{ zIndex: -1 }} /> : null}
       {icon ? <Icon name={icon} size={16} style={{ marginTop: 2 }} /> : null}
       <div className={styles.noticeBody}>{children}</div>
       {actions ? <div className={styles.noticeActions}>{actions}</div> : null}
@@ -119,6 +121,7 @@ export function SpeechBubble({
   return (
     <div className={styles.bubbleRow} style={style}>
       <div className={bubbleClass[speaker]} style={{ width: '100%' }}>
+        {speaker === 'handoff' ? <Pattern name="ticks" style={{ zIndex: -1 }} /> : null}
         {speak ? <PlayButton text={voiced} /> : null}
         <div className={`${styles.bubbleText} ${muted ? styles.bubbleMuted : ''}`}>
           {who ? <div className={styles.bubbleWho}>{who}</div> : null}
@@ -271,6 +274,8 @@ export function SaveBar({
   if (!dirty) return null
   return (
     <div className={styles.saveBar} role="region" aria-label="Lưu thay đổi">
+      {/* Night surfaces take the dots only — arcs read too loud on brown. */}
+      <Pattern name="night-dots" style={{ zIndex: -1 }} />
       <div className={styles.saveBarText}>
         <div>{error ? 'Chưa lưu được' : label}</div>
         {error ? (
@@ -296,6 +301,8 @@ export function SaveBar({
 export function EmptyState({ title, children, action }: { title: ReactNode; children?: ReactNode; action?: ReactNode }) {
   return (
     <div className={styles.empty}>
+      {/* An empty calendar cell: Lưới lịch is the reference's own picture of "nothing here yet". */}
+      <Pattern name="grid" style={{ zIndex: -1 }} />
       <span className={styles.emptyTitle}>{title}</span>
       {children ? <span>{children}</span> : null}
       {action ? <div style={{ marginTop: 6 }}>{action}</div> : null}

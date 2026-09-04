@@ -166,19 +166,19 @@ export function ServicesSection() {
 
                     <div className={styles.svcActions}>
                       <IconButton
-                        name="pencil"
+                        name="edit"
                         label={showNote ? 'Ghi chú của dịch vụ này' : 'Thêm ghi chú'}
                         disabled={showNote}
                         onClick={() => setOpenNote(s.id)}
                       />
-                      <IconButton name="trash-2" label="Xoá dịch vụ" danger onClick={() => set('service_catalog', draft.service_catalog.filter((x) => x.id !== s.id))} />
+                      <IconButton name="trash" label="Xoá dịch vụ" danger onClick={() => set('service_catalog', draft.service_catalog.filter((x) => x.id !== s.id))} />
                     </div>
                   </div>
 
                   {showNote ? (
                     <div className={styles.svcNote}>
                       <span className={styles.svcNoteLabel}>
-                        <Icon name="pencil" size={12} /> Ghi chú
+                        <Icon name="edit" size={12} /> Ghi chú
                       </span>
                       <TextField
                         compact
@@ -253,7 +253,7 @@ export function ServicesSection() {
                 <TextField compact aria-label="Tên combo" value={b.bundle_name} onChange={(e) => setBundle(b.id, { bundle_name: e.target.value })} placeholder="Cạo vôi + tẩy trắng" />
                 <MoneyField compact aria-label="Giá combo" value={b.price} onChange={(v) => setBundle(b.id, { price: v })} />
                 <TextField compact aria-label="Ghi chú combo" value={b.note} onChange={(e) => setBundle(b.id, { note: e.target.value })} placeholder="Áp dụng khách mới" />
-                <IconButton name="trash-2" label="Xoá combo" danger onClick={() => set('package_bundles', draft.package_bundles.filter((x) => x.id !== b.id))} />
+                <IconButton name="trash" label="Xoá combo" danger onClick={() => set('package_bundles', draft.package_bundles.filter((x) => x.id !== b.id))} />
               </TableRow>
             ))}
           </div>
@@ -289,7 +289,7 @@ export function ServicesSection() {
                     <DateField compact aria-label="Từ ngày" value={p.valid_from} onChange={(v) => setPromo(p.id, { valid_from: v })} />
                     <DateField compact aria-label="Đến ngày" value={p.valid_to} onChange={(v) => setPromo(p.id, { valid_to: v })} min={p.valid_from} />
                     <Badge tone={st.tone}>{st.label}</Badge>
-                    <IconButton name="trash-2" label="Xoá ưu đãi" danger onClick={() => set('active_promotions', draft.active_promotions.filter((x) => x.id !== p.id))} />
+                    <IconButton name="trash" label="Xoá ưu đãi" danger onClick={() => set('active_promotions', draft.active_promotions.filter((x) => x.id !== p.id))} />
                   </TableRow>
                 )
               })}

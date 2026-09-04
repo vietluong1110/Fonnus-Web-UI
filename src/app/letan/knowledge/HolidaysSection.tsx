@@ -29,13 +29,14 @@ export function HolidaysSection() {
       <SectionHead title="Lịch nghỉ Tết và ngày lễ" badge={draft.holidays_confirmed ? { tone: 'success', label: 'Đủ' } : { tone: 'warning', label: 'Cần xác nhận' }} />
 
       {!draft.holidays_confirmed ? (
-        <Notice tone="warm" icon="calendar-days">
+        <Notice tone="warm" icon="calendar">
           Fonnus điền sẵn ngày lễ Việt Nam. Tết là ngày hay bị hỏi nhất — kiểm tra ngày nghỉ Tết của phòng khám rồi bấm Lưu.
         </Notice>
       ) : null}
 
       <Card
         gate="R2"
+        pattern="grid"
         title="Ngày nghỉ"
         subtitle={`${agent} báo khách ngày mở cửa lại và không đặt hẹn vào ngày nghỉ`}
         actions={
@@ -97,7 +98,7 @@ export function HolidaysSection() {
                     ) : (
                       <span className={ui.hint}>—</span>
                     )}
-                    <IconButton name="trash-2" label="Xoá" danger onClick={() => set('holiday_exceptions', draft.holiday_exceptions.filter((x) => x.id !== h.id))} />
+                    <IconButton name="trash" label="Xoá" danger onClick={() => set('holiday_exceptions', draft.holiday_exceptions.filter((x) => x.id !== h.id))} />
                   </TableRow>
                 )
               })}

@@ -143,6 +143,7 @@
   right: 0;
   z-index: 20;
   background: var(--night);
+  --icon-accent: var(--terracotta-night);
   color: var(--cream-night);
   font-family: var(--font-ui);
   font-size: 12px;

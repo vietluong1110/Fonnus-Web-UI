@@ -59,6 +59,9 @@
 /* ------------------------------------------------------------------ head */
 
 .head {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -125,6 +128,12 @@
 }
 
 /* Minimized dock: the head alone, as a floating bar. */
+/* Held at about 8%, under the tile's own 14%: a strip this small wants texture, not a picture. */
+.headPattern {
+  z-index: -1;
+  opacity: 0.6;
+}
+
 .minBar {
   cursor: pointer;
   border-bottom: none;
@@ -422,6 +431,7 @@
   place-items: center;
   flex: 0 0 auto;
   background: var(--action-primary);
+  --icon-accent: currentColor;
   color: var(--cream);
   cursor: pointer;
   transition:
