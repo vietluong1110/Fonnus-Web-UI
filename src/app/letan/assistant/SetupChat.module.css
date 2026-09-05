@@ -2,10 +2,11 @@
  * The Fonnus setup assistant, in four shapes.
  *
  *   rail   — a column beside a hub page, sticky, sized to the viewport.
- *   dock   — a floating window pinned bottom-right on a sub-page, so walking
- *            into a section to check something does not lose the conversation.
- *            Minimizable, never dismissable: it is the fastest route through
- *            setup, and an owner who closes it will not find it again.
+ *   dock   — a window on a sub-page, so walking into a section to check
+ *            something does not lose the conversation. Wide, it stands at the
+ *            foot of the rail column (`.dockAside`); stacked, it floats
+ *            bottom-right (`.dock`) until the save bar comes up, when it
+ *            becomes the phone's button riding above the bar (`.fabInline`).
  *   sheet  — the same panel, full width off the bottom edge of a phone.
  *   prompt — what stands in for the rail on a phone: the current question and
  *            its chips as one compact card, which opens the sheet.
@@ -52,6 +53,26 @@
   animation: fnRise var(--duration-slow) var(--ease-arc);
 }
 
+/*
+ * Wide: the window lives at the foot of the section page's rail column, under
+ * the preview, and sticks to the bottom of the viewport the way the save bar
+ * sticks in the form column beside it — the same 16px, so the two share a
+ * bottom edge with the gutter rule between them. `margin-top: auto` rests it
+ * on the column's floor when the page is short enough not to scroll.
+ */
+.dockAside {
+  position: sticky;
+  bottom: 16px;
+  z-index: 6;
+  margin-top: auto;
+  width: 100%;
+  height: min(468px, calc(100vh - 148px));
+  box-shadow: var(--shadow-overlay);
+  animation: fnRise var(--duration-slow) var(--ease-arc);
+}
+
+/* Minimized: the head alone. After both window rules, or the height above
+   wins and a collapsed window is 468px of empty blush under its own bar. */
 .dockMin {
   height: auto;
 }
@@ -477,7 +498,7 @@
 
 /* Tablet: the rail stops being a column, so it stops being sticky and tall.
    It keeps the panel shape — there is still room for a conversation. */
-@media (max-width: 1180px) {
+@media (max-width: 1180.98px) {
   .rail {
     position: static;
     height: auto;
@@ -505,9 +526,14 @@
 
 .sheet {
   position: fixed;
-  left: 0;
+  /* Under the content, not the window: the shell publishes what the sidebar owns. */
+  left: var(--sidebar-w, 0px);
   right: 0;
   bottom: 0;
+  /* A phone's width even on a tablet — a conversation 1100px wide is a
+     letterbox — centred in the room the sidebar leaves. */
+  max-width: 720px;
+  margin: 0 auto;
   z-index: 70;
   /*
    * As tall as the conversation, and no taller. A fixed-height sheet over a
@@ -615,10 +641,10 @@
 
 /*
  * A section page is a form, and the form comes first — so on a phone the dock
- * is a button rather than a window. It sits directly above the tab bar and
- * stays there; the save bar is the thing that moves, lifting itself clear via
- * the `--dock-lift` the page publishes. Sizing this off the save bar instead
- * would mean guessing at a height that changes with how the message wraps.
+ * is a button rather than a window. Clean, it sits directly above the tab bar
+ * (`.fab`, fixed). With unsaved changes it is handed to the save bar, which
+ * sits it above its own right corner (`.fabInline`, in flow) — so nothing
+ * here guesses at a bar height that changes with how the message wraps.
  */
 .fab {
   position: fixed;
@@ -641,6 +667,10 @@
 
 .fab:active {
   transform: scale(var(--press-scale));
+}
+
+.fabInline {
+  position: static;
 }
 
 /* One unanswered question is worth a dot; a count would be a debt. */

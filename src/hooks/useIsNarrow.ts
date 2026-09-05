@@ -31,3 +31,11 @@ export function useIsNarrow(breakpoint = NARROW_BREAKPOINT) {
  * `<`, so the two would disagree at exactly 640px otherwise.
  */
 export const PHONE_BREAKPOINT = 640
+
+/**
+ * Below this width a section page's preview rail stacks above the form, and
+ * the setup assistant loses the rail column it docks in — it floats instead,
+ * and gives way to a button when the save bar comes up. CSS matches this as
+ * `@media (max-width: 1180.98px)`, for the same reason as the phone query.
+ */
+export const RAIL_BREAKPOINT = 1181

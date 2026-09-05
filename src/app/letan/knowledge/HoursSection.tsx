@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Icon } from '../../../design-system'
+import { useElementWidth } from '../../../hooks/useElementWidth'
 import { WEEKDAYS, WEEKDAY_SHORT } from '../defaults'
 import type { ClosureType, HolidayException, Weekday } from '../model'
 import { newId } from '../model'
@@ -11,6 +12,18 @@ import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
 import { WeekPlanner } from './WeekPlanner'
 import styles from './Knowledge.module.css'
+
+/*
+ * How the holiday list lays a row out, by the list's own width — the column
+ * beside a rail is narrower than a tablet's full width, so the viewport is the
+ * wrong thing to ask. The layout itself is container queries on `.holidays`
+ * in Knowledge.module.css; these are the same two thresholds for the parts of
+ * a row that are text and so cannot be changed from CSS. Change both together.
+ */
+/** Under this the date pill drops the year: "14–22/02" for "14/02 – 22/02/2027". */
+const HOLIDAY_SHORT_DATES = 660
+/** Under this a row is two lines and the pills are exact halves; the closure pill drops its "Mở". */
+const HOLIDAY_STACKED = 560
 
 const KEYS = ['operating_hours_by_weekday', 'operating_hours_confirmed', 'break_periods', 'holiday_exceptions', 'holidays_confirmed'] as const
 
@@ -42,7 +55,7 @@ export function WeekdayPicker({ value, onChange, ariaLabel }: { value: Weekday[]
  * the panel is an anchored pop-up like the calendar beside it, so a time
  * list opening inside it does not take it down.
  */
-function ClosurePill({ holiday: h, onChange }: { holiday: HolidayException; onChange: (patch: Partial<HolidayException>) => void }) {
+function ClosurePill({ holiday: h, short, onChange }: { holiday: HolidayException; /** Hours without the "Mở" — the terracotta dot says it — for a pill too narrow for both. */ short: boolean; onChange: (patch: Partial<HolidayException>) => void }) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const close = useCallback(() => setOpen(false), [])
@@ -60,7 +73,7 @@ function ClosurePill({ holiday: h, onChange }: { holiday: HolidayException; onCh
         onClick={() => setOpen((o) => !o)}
       >
         <span className={styles.closureDot} aria-hidden="true" />
-        <span className={styles.closureText}>{partial ? `Mở ${h.modified_hours!.from}–${h.modified_hours!.to}` : 'Nghỉ cả ngày'}</span>
+        <span className={styles.closureText}>{partial ? `${short ? '' : 'Mở '}${h.modified_hours!.from}–${h.modified_hours!.to}` : 'Nghỉ cả ngày'}</span>
         <span className={styles.closureChevron}>
           <Icon name="chevron-down" size={14} />
         </span>
@@ -126,6 +139,9 @@ function summarizeBreaks(cfg: { break_periods: { days: Weekday[]; from: string; 
 export function HoursSection() {
   const { config } = useConfig()
   const d = useDraft(KEYS, 'Giờ mở cửa và ngày nghỉ')
+  const [holidaysRef, holidaysWidth] = useElementWidth()
+  const shortDates = holidaysWidth > 0 && holidaysWidth < HOLIDAY_SHORT_DATES
+  const stackedRows = holidaysWidth > 0 && holidaysWidth < HOLIDAY_STACKED
   const { draft, set, patch } = d
   const agent = config.agent_name || 'Linh'
   const live = { ...config, ...draft }
@@ -211,7 +227,7 @@ export function HoursSection() {
       <Card title="Ngày nghỉ" subtitle={`${agent} báo ngày mở cửa lại và không đặt hẹn vào ngày nghỉ`}>
         {!draft.holidays_confirmed ? <span className={ui.hint}>Fonnus điền sẵn ngày lễ Việt Nam. Tết là ngày hay bị hỏi nhất — kiểm tra ngày nghỉ Tết của phòng khám rồi bấm Xác nhận.</span> : null}
         {holidays.length ? (
-          <div className={styles.holidays}>
+          <div className={styles.holidays} ref={holidaysRef}>
             <div className={styles.holidayHead} aria-hidden="true">
               <span className={styles.holidayName}>Dịp nghỉ</span>
               <span className={styles.holidayWhen}>Ngày</span>
@@ -236,10 +252,10 @@ export function HoursSection() {
                     autoFocus={!h.holiday_label && !h.seeded}
                   />
                   <span className={styles.holidayWhen}>
-                    <DateRangeField pill aria-label="Ngày nghỉ" from={h.date_from} to={h.date_to} onChange={(r) => setHoliday(h.id, { date_from: r.from, date_to: r.to })} />
+                    <DateRangeField pill reading={shortDates ? 'short' : 'full'} aria-label="Ngày nghỉ" from={h.date_from} to={h.date_to} onChange={(r) => setHoliday(h.id, { date_from: r.from, date_to: r.to })} />
                   </span>
                   <span className={styles.holidayWhat}>
-                    <ClosurePill holiday={h} onChange={(patch) => setHoliday(h.id, patch)} />
+                    <ClosurePill holiday={h} short={stackedRows} onChange={(patch) => setHoliday(h.id, patch)} />
                   </span>
                   <span className={styles.holidayEnd}>
                     <IconButton name="trash" label="Xoá ngày nghỉ" danger onClick={() => set('holiday_exceptions', draft.holiday_exceptions.filter((x) => x.id !== h.id))} />

@@ -1,12 +1,13 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { messageFor } from '../../api'
 import { Badge } from '../../design-system'
 import { appHref } from '../../hooks/useRoute'
 import { ContentSkeleton, RetryCard } from '../Boot'
-import { Tabs, ui } from '../ui'
+import { BottomStackProvider, Tabs, ui } from '../ui'
 import { useConfig } from './store'
 import { LeTanHeader } from './LeTanHeader'
-import { SetupChatProvider, useSetupChat } from './assistant/chatStore'
+import { SetupChatProvider } from './assistant/chatStore'
 import { SetupChat } from './assistant/SetupChat'
 import { ProfileTab } from './profile/ProfileTab'
 import { IdentitySection } from './profile/IdentitySection'
@@ -110,11 +111,15 @@ export function LeTanPage({ path }: { path: string[] }) {
 }
 
 function LeTanRoutes({ path, tab }: { path: string[]; tab: LeTanTab }) {
-  const { hidden } = useSetupChat()
+  // Whether a section's save bar is on screen. While it is, the floating
+  // assistant stands down and the bar carries the assistant's button instead
+  // — see the slots note in SetupChat.
+  const [barShown, setBarShown] = useState(false)
 
   // A section page under either hub: the form, with the assistant docked
-  // bottom-right rather than gone — "Mở mục" brought you here, and the next
-  // question is usually about what you are now looking at.
+  // rather than gone — "Mở mục" brought you here, and the next question is
+  // usually about what you are now looking at. The section frame mounts the
+  // `aside` slot in its rail column; the two slots for stacked widths are here.
   const Section =
     tab === 'ho-so' && path[1] && path[1] in PROFILE_SECTIONS
       ? PROFILE_SECTIONS[path[1] as ProfileSectionKey].component
@@ -123,14 +128,12 @@ function LeTanRoutes({ path, tab }: { path: string[]; tab: LeTanTab }) {
         : null
 
   if (Section) {
-    // Dismissed, the dock owns none of the right edge — the save bar reads
-    // the inset and spans the column again.
     return (
-      <div className={styles.docked} style={hidden ? ({ '--dock-inset': '0px' } as CSSProperties) : undefined}>
+      <BottomStackProvider above={<SetupChat variant="dock" at="stack" />} onPresence={setBarShown}>
         <LeTanHeader compact />
         <Section />
-        <SetupChat variant="dock" />
-      </div>
+        <SetupChat variant="dock" at="float" suppressed={barShown} />
+      </BottomStackProvider>
     )
   }
 

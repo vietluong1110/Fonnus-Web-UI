@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { ChangeEvent, ClipboardEvent, DragEvent, KeyboardEvent } from 'react'
 import { Icon, Logo, Pattern } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
-import { PHONE_BREAKPOINT, useIsNarrow } from '../../../hooks/useIsNarrow'
+import { PHONE_BREAKPOINT, RAIL_BREAKPOINT, useIsNarrow } from '../../../hooks/useIsNarrow'
 import { ChipButton } from '../../ui'
 import { newId } from '../model'
 import { useConfig } from '../store'
@@ -16,12 +17,22 @@ import styles from './SetupChat.module.css'
  * the state lives in `chatStore`, above the routes.
  *
  *   rail   a column beside a hub page
- *   dock   a window pinned bottom-right on a section page; minimizable, and
- *          dismissable with the X for the rest of that section
+ *   dock   a window on a section page; minimizable, and dismissable with the
+ *          X for the rest of that section. Where it stands depends on the
+ *          width, so a section page mounts it in three slots (`at`), of
+ *          which at most one draws at a time:
+ *            aside  wide: at the foot of the rail column under the preview,
+ *                   sticky to the bottom edge, level with the save bar
+ *            float  stacked: a fixed window bottom-right (tablet) or a
+ *                   button above the tab bar (phone) while the form is clean
+ *            stack  stacked, with unsaved changes: a button handed to the
+ *                   save bar, which sits it above its own right corner —
+ *                   a window there would fight the bar for the same edge
  *   phone  neither fits, so the panel splits: what stays in the page is the
  *          current question and its chips (a `prompt` card on a hub, a `fab`
  *          on a section page), and the conversation comes up as a `sheet`
- *          over the page when it is asked for.
+ *          over the page when it is asked for. The tablet's stack button
+ *          opens the same sheet.
  *
  * The split matters more than it looks. A full panel above the hub on a phone
  * pushed all three sections off the screen, so the page opened on a chat box
@@ -54,7 +65,19 @@ function humanSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
+export type DockSlot = 'aside' | 'float' | 'stack'
+
+export function SetupChat({
+  variant,
+  at = 'float',
+  suppressed = false,
+}: {
+  variant: 'rail' | 'dock'
+  /** Which slot of a section page this dock instance is mounted in — see the note above. */
+  at?: DockSlot
+  /** The float slot stands down while the save bar is up: the stack slot has the assistant then. */
+  suppressed?: boolean
+}) {
   const { config } = useConfig()
   const chat = useSetupChat()
   const { messages, current, done, pageLabel, minimized, setMinimized, hidden, setHidden } = chat
@@ -68,9 +91,20 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const phone = useIsNarrow(PHONE_BREAKPOINT)
+  const stacked = useIsNarrow(RAIL_BREAKPOINT)
   const agent = config.agent_name || 'Linh'
   const docked = variant === 'dock'
-  const asSheet = phone && sheet
+
+  // The one shape this instance draws right now, from the width and the slot.
+  // `hidden` (the X) only ever takes a window down; a button is never dismissed.
+  let shape: 'none' | 'window' | 'fab' | 'prompt'
+  if (!docked) shape = phone ? 'prompt' : 'window'
+  else if (at === 'aside') shape = stacked || hidden ? 'none' : 'window'
+  else if (at === 'stack') shape = stacked ? 'fab' : 'none'
+  else if (!stacked || suppressed) shape = 'none'
+  else shape = phone ? 'fab' : hidden ? 'none' : 'window'
+  const opensSheet = shape === 'fab' || shape === 'prompt'
+  const asSheet = opensSheet && sheet
 
   // Keep the newest turn in view; the log is the only scrolling region.
   useEffect(() => {
@@ -94,11 +128,11 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
     }
   }, [asSheet])
 
-  // Leaving the phone (a rotation, a resized window) must not leave the page
-  // scroll-locked behind a sheet that is no longer rendered.
+  // Growing out of the button (a rotation, a resized window) must not leave
+  // the page scroll-locked behind a sheet that is no longer rendered.
   useEffect(() => {
-    if (!phone) setSheet(false)
-  }, [phone])
+    if (!opensSheet) setSheet(false)
+  }, [opensSheet])
 
   /*
    * The composer grows with its content, up to the cap in CSS. It also has to
@@ -177,11 +211,10 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
 
   const shellClass = asSheet
     ? `${styles.shell} ${styles.sheet}`
-    : `${styles.shell} ${docked ? styles.dock : styles.rail} ${docked && minimized ? styles.dockMin : ''}`
+    : `${styles.shell} ${docked ? (at === 'aside' ? styles.dockAside : styles.dock) : styles.rail} ${docked && minimized ? styles.dockMin : ''}`
 
-  // Minimizing is a desktop gesture on a window. A phone has no window to
-  // minimize — it has the button below, which is already the collapsed state.
-  const collapsedDock = !phone && docked && minimized
+  // Minimizing is a gesture on a window. A button is already the collapsed state.
+  const collapsedDock = shape === 'window' && docked && minimized
 
   // Who is asking, on every shape. The page, not a count: a number counting
   // down how much is left to answer reads as a debt, and it is the first thing
@@ -258,9 +291,8 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
     </div>
   ) : null
 
-  // Dismissed: the window is gone for this section. The phone keeps its
-  // button — there the assistant owns a corner of the screen, not a window.
-  if (docked && hidden && !phone) return null
+  // Not this slot's turn at this width, or dismissed for this section.
+  if (shape === 'none') return null
 
   if (collapsedDock) {
     return (
@@ -275,12 +307,12 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
    * form and the form comes first; the rail becomes a card because a hub page
    * has nothing more useful to lead with than the question itself.
    */
-  if (phone && !sheet) {
-    if (docked) {
+  if (opensSheet && !sheet) {
+    if (shape === 'fab') {
       return (
         <button
           type="button"
-          className={styles.fab}
+          className={`${styles.fab} ${at === 'stack' ? styles.fabInline : ''}`}
           aria-label={`Mở trợ lý thiết lập Fonnus${done ? '' : ' — đang có câu hỏi'}`}
           onClick={() => setSheet(true)}
         >
@@ -421,12 +453,16 @@ export function SetupChat({ variant }: { variant: 'rail' | 'dock' }) {
     </aside>
   )
 
+  // Portalled, like every pop-up: the stack slot's button lives inside the
+  // save bar's sticky stack, and a sticky box is a stacking context — a sheet
+  // rendered in place there sat under the tab bar however high its z-index.
   if (asSheet) {
-    return (
+    return createPortal(
       <>
         <div className={styles.sheetScrim} onClick={() => setSheet(false)} />
         {panel}
-      </>
+      </>,
+      document.body,
     )
   }
 

@@ -208,6 +208,27 @@ export function fmtRange(from: string, to: string): string {
   return fy === ty ? `${fd}/${fm} – ${td}/${tm}/${ty}` : `${fmtDMY(from)} – ${fmtDMY(to)}`
 }
 
+/** "14/02" — the day and month alone. */
+function fmtDM(iso: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return ''
+  const [, m, d] = iso.split('-')
+  return `${d}/${m}`
+}
+
+/**
+ * The short reading, for a pill with no room for the year: "14–22/02" within
+ * a month, "30/04–01/05" across one, "01/01" for a single day. A list of
+ * upcoming dates says which year on its own; the calendar behind the pill
+ * says it again for anyone who asks.
+ */
+export function fmtRangeShort(from: string, to: string): string {
+  if (!from) return ''
+  if (!to || to === from) return fmtDM(from)
+  const [fy, fm, fd] = from.split('-')
+  const [ty, tm, td] = to.split('-')
+  return fy === ty && fm === tm ? `${fd}–${td}/${fm}` : `${fmtDM(from)}–${fmtDM(to)}`
+}
+
 const MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
 const DAY_HEADS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
 
@@ -312,6 +333,8 @@ interface PickerFrameProps {
   compact?: boolean
   /** A pill trigger, for a control that sits in a row rather than in a form. */
   pill?: boolean
+  /** `short` drops the year from the reading — for a row too narrow to carry it. Only the reading changes. */
+  reading?: 'full' | 'short'
   'aria-label'?: string
   id?: string
 }
@@ -360,7 +383,7 @@ function Trigger({
 }
 
 /** One ISO date. */
-export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', label, gate, hint, error, style, className, compact, pill, id, 'aria-label': ariaLabel }: PickerFrameProps & { value: string; onChange: (iso: string) => void; min?: string; placeholder?: string }) {
+export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', label, gate, hint, error, style, className, compact, pill, reading = 'full', id, 'aria-label': ariaLabel }: PickerFrameProps & { value: string; onChange: (iso: string) => void; min?: string; placeholder?: string }) {
   const autoId = useId()
   const inputId = id ?? autoId
   const [open, setOpen] = useState(false)
@@ -376,7 +399,7 @@ export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', 
 
   return (
     <FieldFrame label={label} gate={gate} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
-      <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={value ? fmtDMY(value) : placeholder} empty={!value} ariaLabel={ariaLabel} />
+      <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={value ? (reading === 'short' ? fmtDM(value) : fmtDMY(value)) : placeholder} empty={!value} ariaLabel={ariaLabel} />
       {open && place ? (
         <AnchoredPopup place={place} panelRef={panelRef} width={CAL_W} label={ariaLabel ?? 'Chọn ngày'}>
           <MonthGrid
@@ -398,7 +421,7 @@ export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', 
 }
 
 /** Two ISO dates, inclusive. Pick the first day, then the last; one day is a range of one. */
-export function DateRangeField({ from, to, onChange, min, placeholder = 'Chọn ngày', label, gate, hint, error, style, className, compact, pill, id, 'aria-label': ariaLabel }: PickerFrameProps & { from: string; to: string; onChange: (r: { from: string; to: string }) => void; min?: string; placeholder?: string }) {
+export function DateRangeField({ from, to, onChange, min, placeholder = 'Chọn ngày', label, gate, hint, error, style, className, compact, pill, reading = 'full', id, 'aria-label': ariaLabel }: PickerFrameProps & { from: string; to: string; onChange: (r: { from: string; to: string }) => void; min?: string; placeholder?: string }) {
   const autoId = useId()
   const inputId = id ?? autoId
   const [open, setOpen] = useState(false)
@@ -437,7 +460,7 @@ export function DateRangeField({ from, to, onChange, min, placeholder = 'Chọn 
 
   return (
     <FieldFrame label={label} gate={gate} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
-      <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={from ? fmtRange(from, to) : placeholder} empty={!from} ariaLabel={ariaLabel} />
+      <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={from ? (reading === 'short' ? fmtRangeShort : fmtRange)(from, to) : placeholder} empty={!from} ariaLabel={ariaLabel} />
       {open && place ? (
         <AnchoredPopup place={place} panelRef={panelRef} width={CAL_W} label={ariaLabel ?? 'Chọn khoảng ngày'}>
           <MonthGrid month={month} onMonth={setMonth} from={shownFrom} to={shownTo} hover={pendingFrom ? hover : null} min={min} onPick={pick} onHover={setHover} />

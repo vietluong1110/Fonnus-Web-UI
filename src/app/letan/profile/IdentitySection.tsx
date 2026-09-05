@@ -1,7 +1,6 @@
 import { Icon } from '../../../design-system'
-import { appHref } from '../../../hooks/useRoute'
 import { DAYPARTS, daypartExample, defaultGreeting } from '../greeting'
-import { SectionHead } from '../LeTanPage'
+import { ProfileSection } from './ProfileSection'
 import { useConfig, useDraft } from '../store'
 import { TryPanel } from '../tryout/TryPanel'
 import { Card, PlayButton, SaveBar, Switch, TextArea, TextField, ui } from '../../ui'
@@ -30,96 +29,86 @@ export function IdentitySection() {
   const live = { ...config, ...draft }
 
   return (
-    <>
-      <SectionHead title="Danh tính và lời chào" backLabel="Hồ sơ" backHref={appHref('le-tan', 'ho-so')} />
-      <p className={styles.lede}>
-        Khách vừa bấm gọi. Đây là tám giây đầu tiên: ai đang nghe máy, và phòng khám chào thế nào.
-      </p>
+    <ProfileSection
+      title="Danh tính và lời chào"
+      lede="Khách vừa bấm gọi. Đây là tám giây đầu tiên: ai đang nghe máy, và phòng khám chào thế nào."
+      rail={<TryPanel section="danh-tinh" config={live} />}
+      bar={<SaveBar {...d.bar} sub="Danh tính và lời chào · áp dụng cho cuộc gọi tiếp theo" />}
+    >
+      <Card title="Tên lễ tân">
+        <TextField
+          value={draft.agent_name}
+          onChange={(e) => set('agent_name', e.target.value)}
+          placeholder="Linh"
+          maxLength={24}
+          hint={`${agent} dùng tên này khi tự giới thiệu trong mọi cuộc gọi. Đây cũng là tên bạn thấy khắp ứng dụng.`}
+        />
+      </Card>
 
-      <div className={styles.work}>
-        <div className={styles.col}>
-          <Card title="Tên lễ tân">
-            <TextField
-              value={draft.agent_name}
-              onChange={(e) => set('agent_name', e.target.value)}
-              placeholder="Linh"
-              maxLength={24}
-              hint={`${agent} dùng tên này khi tự giới thiệu trong mọi cuộc gọi. Đây cũng là tên bạn thấy khắp ứng dụng.`}
-            />
-          </Card>
+      <Card title="Lời chào của phòng khám" subtitle="Câu thứ hai khách nghe">
+        <TextArea
+          value={draft.greeting_script_custom}
+          onChange={(e) => set('greeting_script_custom', e.target.value)}
+          placeholder={fallback}
+          rows={3}
+          maxLength={280}
+          aria-label="Lời chào của phòng khám"
+          hint={
+            draft.greeting_script_custom.trim() ? (
+              <button type="button" className={ui.linkButton} onClick={() => set('greeting_script_custom', '')}>
+                Dùng lại câu mặc định
+              </button>
+            ) : (
+              'Đang dùng câu mặc định. Viết như bạn nói với khách.'
+            )
+          }
+        />
 
-          <Card title="Lời chào của phòng khám" subtitle="Câu thứ hai khách nghe">
-            <TextArea
-              value={draft.greeting_script_custom}
-              onChange={(e) => set('greeting_script_custom', e.target.value)}
-              placeholder={fallback}
-              rows={3}
-              maxLength={280}
-              aria-label="Lời chào của phòng khám"
-              hint={
-                draft.greeting_script_custom.trim() ? (
-                  <button type="button" className={ui.linkButton} onClick={() => set('greeting_script_custom', '')}>
-                    Dùng lại câu mặc định
-                  </button>
-                ) : (
-                  'Đang dùng câu mặc định. Viết như bạn nói với khách.'
-                )
-              }
-            />
+        <div className={ui.divider} />
 
-            <div className={ui.divider} />
+        <Switch
+          label="Lời chào khác theo buổi"
+          hint="Sáng, chiều và tối mỗi buổi một câu — tối nhắc khách là đã ngoài giờ khám."
+          checked={dayparts.enabled}
+          onChange={(v) => set('greeting_by_daypart', { ...dayparts, enabled: v })}
+        />
 
-            <Switch
-              label="Lời chào khác theo buổi"
-              hint="Sáng, chiều và tối mỗi buổi một câu — tối nhắc khách là đã ngoài giờ khám."
-              checked={dayparts.enabled}
-              onChange={(v) => set('greeting_by_daypart', { ...dayparts, enabled: v })}
-            />
+        {dayparts.enabled ? (
+          <div className={ui.stackTight} style={{ gap: 12 }}>
+            {DAYPARTS.map(([key, label, icon]) => {
+              const example = daypartExample(key, config.business_name)
+              return (
+                <div key={key} className={styles.daypart}>
+                  <TextField
+                    label={
+                      <span className={styles.daypartLabel}>
+                        <Icon name={icon} size={14} /> {label}
+                      </span>
+                    }
+                    value={dayparts[key]}
+                    placeholder={example}
+                    onChange={(e) => set('greeting_by_daypart', { ...dayparts, [key]: e.target.value })}
+                  />
+                  <PlayButton text={dayparts[key] || example} label={`Nghe thử lời chào ${label.split(' ·')[0].toLowerCase()}`} />
+                </div>
+              )
+            })}
+          </div>
+        ) : null}
+      </Card>
 
-            {dayparts.enabled ? (
-              <div className={ui.stackTight} style={{ gap: 12 }}>
-                {DAYPARTS.map(([key, label, icon]) => {
-                  const example = daypartExample(key, config.business_name)
-                  return (
-                    <div key={key} className={styles.daypart}>
-                      <TextField
-                        label={
-                          <span className={styles.daypartLabel}>
-                            <Icon name={icon} size={14} /> {label}
-                          </span>
-                        }
-                        value={dayparts[key]}
-                        placeholder={example}
-                        onChange={(e) => set('greeting_by_daypart', { ...dayparts, [key]: e.target.value })}
-                      />
-                      <PlayButton text={dayparts[key] || example} label={`Nghe thử lời chào ${label.split(' ·')[0].toLowerCase()}`} />
-                    </div>
-                  )
-                })}
-              </div>
-            ) : null}
-          </Card>
-
-          <Card title="Ngôn ngữ">
-            <Switch
-              label="Trả lời khi khách nói tiếng Anh"
-              hint={
-                draft.secondary_language
-                  ? `${agent} chuyển sang tiếng Anh khi nghe khách nói tiếng Anh.`
-                  : `Đang tắt: ${agent} xin lỗi khéo rồi chuyển máy cho nhân viên.`
-              }
-              checked={draft.secondary_language}
-              onChange={(v) => set('secondary_language', v)}
-            />
-          </Card>
-        </div>
-
-        <aside className={styles.rail}>
-          <TryPanel section="danh-tinh" config={live} />
-        </aside>
-      </div>
-
-      <SaveBar {...d.bar} sub="Danh tính và lời chào · áp dụng cho cuộc gọi tiếp theo" />
-    </>
+      <Card title="Ngôn ngữ">
+        <Switch
+          label="Trả lời khi khách nói tiếng Anh"
+          hint={
+            draft.secondary_language
+              ? `${agent} chuyển sang tiếng Anh khi nghe khách nói tiếng Anh.`
+              : `Đang tắt: ${agent} xin lỗi khéo rồi chuyển máy cho nhân viên.`
+          }
+          checked={draft.secondary_language}
+          onChange={(v) => set('secondary_language', v)}
+        />
+      </Card>
+    </ProfileSection>
   )
 }
