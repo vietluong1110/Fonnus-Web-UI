@@ -59,7 +59,11 @@ function ClosurePill({ holiday: h, short, onChange }: { holiday: HolidayExceptio
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const close = useCallback(() => setOpen(false), [])
-  const { place, panelRef } = useAnchoredPopup(triggerRef, open, close, { width: 292, height: 150 })
+  // 292px when there is room under the pill; near the window's edge it gives
+  // up to 36px of that before it is moved left, so it stays the pill's panel
+  // rather than a box pushed across the row. The floor is what "Nghỉ cả ngày"
+  // and "Mở một phần" need as two equal halves with room to breathe.
+  const { place, panelRef } = useAnchoredPopup(triggerRef, open, close, { width: 292, height: 150, minWidth: 256 })
   const partial = h.closure_type === 'modified' && h.modified_hours
 
   return (
@@ -79,9 +83,10 @@ function ClosurePill({ holiday: h, short, onChange }: { holiday: HolidayExceptio
         </span>
       </button>
       {open && place ? (
-        <AnchoredPopup place={place} panelRef={panelRef} width={292} label="Hôm đó phòng khám">
+        <AnchoredPopup place={place} panelRef={panelRef} label="Hôm đó phòng khám">
           <div className={styles.closurePanel}>
             <Segmented<ClosureType>
+              fill
               ariaLabel="Kiểu đóng cửa"
               value={h.closure_type}
               onChange={(v) => onChange({ closure_type: v, modified_hours: v === 'modified' ? (h.modified_hours ?? { from: '08:00', to: '12:00' }) : null })}

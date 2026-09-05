@@ -105,6 +105,21 @@
   border-left: 1px solid var(--border-hairline);
 }
 
+/* `fill`: the whole row, split evenly. Padding gives way to the split, so a
+   narrow container narrows the segments rather than overflowing them. */
+.segmentedFill {
+  display: flex;
+  width: auto;
+}
+
+.segmentedFill .segment {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .segment:hover {
   background: var(--action-ghost-hover);
 }
