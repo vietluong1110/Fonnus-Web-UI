@@ -1,11 +1,18 @@
 /*
- * The week planner — a calendar you paint.
+ * The week planner — a calendar of shifts.
  *
- * Two voices only: terracotta is work (the receptionist is on), sage is a
- * break (she says "gọi lại sau"). The legend keys are pills, because they
- * are controls; the painted blocks are rounded rectangles, because they are
- * not. Row height is fixed in the component (ROW_H) — the grid's own
- * background lines are sized from it inline so the two never drift apart.
+ * One voice: terracotta is a shift (the receptionist is on). The gap
+ * between two shifts is the break, the same clay at a tenth under the arcs
+ * pattern, because it is derived, not drawn — quieter than what makes it.
+ * Shifts and gaps are rounded rectangles (they are not controls, though
+ * they open one); the day headers, the nudges and every button in a panel
+ * are pills.
+ *
+ * The sheet scrolls inside itself: a whole day is 48 half-hour rows and the
+ * window shows sixteen of them, opened on six in the morning. Row height is
+ * fixed in the component (ROW_H) — the grid's own background lines are
+ * sized from it inline so the two never drift apart. The header's height
+ * is read from the DOM by the component, so change `--head-h` freely.
  */
 
 .planner {
@@ -21,79 +28,38 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px 14px;
 }
 
 .key {
-  appearance: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 14px 0 10px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-strong);
-  background: var(--surface-card);
-  font-family: var(--font-ui);
+  gap: 7px;
   font-size: 13px;
   font-weight: 500;
   color: var(--ink);
-  cursor: pointer;
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out);
-}
-
-.key:hover {
-  background: var(--action-ghost-hover);
-}
-
-.key:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
 }
 
 .swatch {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 4px;
   flex: 0 0 auto;
 }
 
-.work .swatch {
+.swatchWork {
   background: var(--terracotta);
 }
 
-.break .swatch {
-  background: var(--surface-sage);
-  box-shadow: inset 0 0 0 1px var(--chart-2);
-}
-
-/* The chosen key is filled with its own colour, so what you will paint is what you see. */
-.work.keyOn,
-.work.keyOn:hover {
-  background: var(--terracotta);
-  border-color: var(--terracotta);
-  color: var(--cream);
-}
-
-.work.keyOn .swatch {
-  background: var(--cream);
-}
-
-.break.keyOn,
-.break.keyOn:hover {
-  background: var(--surface-sage);
-  border-color: var(--chart-2);
-  color: var(--ink);
+.swatchGap {
+  background: rgba(184, 92, 43, 0.1);
+  box-shadow: inset 0 0 0 1px var(--border-dashed);
 }
 
 .legendHint {
   font-size: 12.5px;
   line-height: 1.4;
   color: var(--ink-soft);
-  margin-left: 4px;
 }
 
 .legendNote {
@@ -104,9 +70,9 @@
 /* ----------------------------------------------------------------- sheet */
 
 .sheet {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  --head-h: 46px;
+  --gutter: 52px;
+  position: relative;
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -115,38 +81,179 @@
   -webkit-user-select: none;
 }
 
-.corner {
-  border-bottom: 1px solid var(--border-hairline);
+/* A soft edge where the day continues out of view, below the header and above the foot. */
+.sheet::before,
+.sheet::after {
+  content: '';
+  position: absolute;
+  left: var(--gutter);
+  right: 10px;
+  height: 28px;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out);
 }
 
-.days {
+.sheet::before {
+  top: var(--head-h);
+  background: linear-gradient(to bottom, var(--surface-card), transparent);
+}
+
+.sheet::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--surface-card), transparent);
+}
+
+.canUp::before,
+.canDown::after {
+  opacity: 1;
+}
+
+/*
+ * The scroll container. Sixteen hours plus the header, and never taller than
+ * the window minus room for the legend above and the read-back below.
+ */
+.scroller {
+  height: calc(var(--head-h) + 640px);
+  max-height: 78vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* A thin pill in the ink, on no track — the calendar's own scrollbar, not the system's. */
+.scroller::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 3px solid var(--surface-card);
+  background-clip: padding-box;
+}
+
+.scroller::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-soft);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .scroller {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}
+
+/* ------------------------------------------------------------------ head */
+
+.head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: var(--gutter) repeat(7, minmax(0, 1fr));
+  height: var(--head-h);
+  background: var(--surface-card);
   border-bottom: 1px solid var(--border-hairline);
 }
 
+.corner {
+  border-right: none;
+}
+
+/* A day's header is a pill-less button: the whole cell, tinted on hover, opening the day's panel. */
 .dayHead {
-  padding: 8px 4px;
-  text-align: center;
+  position: relative;
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 4px 6px 4px 8px;
+  border: none;
+  border-left: 1px solid var(--border-hairline);
+  background: transparent;
+  font-family: var(--font-ui);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.dayHead:hover,
+.dayHeadOpen {
+  background: var(--action-ghost-hover);
+}
+
+.dayHead:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
+
+.dayName {
+  display: block;
+  max-width: 100%;
   font-size: 12.5px;
   font-weight: 600;
+  line-height: 1.3;
   color: var(--ink-soft);
-  border-left: 1px solid var(--border-hairline);
+}
+
+.dayToday .dayName {
+  color: var(--text-accent);
+}
+
+.dayLong,
+.dayShort {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dayHead:first-child {
-  border-left: none;
-}
-
-.dayToday {
-  color: var(--text-accent);
-}
-
 .dayShort {
   display: none;
+}
+
+/* The chevron says "this opens"; it shows itself when the pointer arrives, and takes no room from the name. */
+.dayChevron {
+  position: absolute;
+  top: 7px;
+  right: 5px;
+  display: inline-flex;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.dayHead:hover .dayChevron,
+.dayHead:focus-visible .dayChevron,
+.dayHeadOpen .dayChevron {
+  opacity: 0.8;
+}
+
+.dayCaption {
+  font-family: var(--font-num);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.dayClosed .dayCaption {
+  opacity: 0.7;
+}
+
+/* ------------------------------------------------------------------ body */
+
+.body {
+  display: grid;
+  grid-template-columns: var(--gutter) minmax(0, 1fr);
 }
 
 .hoursCol {
@@ -157,6 +264,7 @@
   position: absolute;
   right: 8px;
   transform: translateY(-50%);
+  font-family: var(--font-num);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
@@ -164,29 +272,44 @@
 }
 
 .hourLabel:first-child {
-  transform: none;
+  transform: translateY(2px);
 }
 
 .hourLabel:last-child {
-  transform: translateY(-100%);
+  transform: translateY(calc(-100% - 2px));
 }
 
 /*
- * The grid: hour lines are painted as a background so they cost nothing
- * per row; the half-hour line is the same hairline at half strength. The
- * pointer handlers live here — one element captures the whole drag.
+ * The grid: one hairline an hour, painted as a background so it costs
+ * nothing per row — the half hours are felt, not drawn. One element
+ * takes every pointer event and reads what was pressed from data attributes.
+ * A finger may scroll it (pan-y); a held finger drags — see the component.
  */
 .grid {
   position: relative;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  background-image: linear-gradient(to bottom, var(--border-hairline) 0, var(--border-hairline) 1px, transparent 1px, transparent 50%, rgba(38, 31, 24, 0.05) 50%, rgba(38, 31, 24, 0.05) calc(50% + 1px), transparent calc(50% + 1px));
-  touch-action: none;
+  background-image: linear-gradient(to bottom, var(--border-hairline) 0, var(--border-hairline) 1px, transparent 1px);
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+}
+
+.grid[data-drag='draw'] {
   cursor: crosshair;
 }
 
-.gridDragging {
-  cursor: crosshair;
+.grid[data-drag='move'] {
+  cursor: grabbing;
+}
+
+.grid[data-drag='resize'] {
+  cursor: ns-resize;
+}
+
+.grid[data-drag] .shift,
+.grid[data-drag] .gap,
+.grid[data-drag] .handle {
+  cursor: inherit;
 }
 
 .col {
@@ -195,37 +318,54 @@
   min-width: 0;
 }
 
-.col:first-child {
-  border-left: none;
-}
-
 .colToday {
   background: rgba(184, 92, 43, 0.04);
 }
 
-.block {
+/* A closed day is faintly hatched, so "closed" and "not filled yet" stop looking the same. */
+.colClosed {
+  background-image: repeating-linear-gradient(135deg, transparent 0 7px, rgba(38, 31, 24, 0.035) 7px 8px);
+}
+
+/* ----------------------------------------------------------------- shift */
+
+.shift {
   position: absolute;
-  left: 2px;
-  right: 2px;
+  left: 3px;
+  right: 3px;
+  z-index: 2;
   border-radius: 6px;
   padding: 3px 6px;
   overflow: hidden;
-  pointer-events: none;
-}
-
-.blockWork {
   background: var(--terracotta);
   color: var(--cream);
+  --icon-accent: currentColor;
+  cursor: grab;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
 }
 
-.blockBreak {
-  background: var(--surface-sage);
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--chart-2);
+.shift:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 4px var(--focus-ring);
+  z-index: 3;
 }
 
-.blockLabel {
+/* The one with its panel open. */
+.shiftActive {
+  z-index: 3;
+  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 3.5px var(--terracotta-deep);
+}
+
+/* The one under the pointer: lifted, and above everything until it lands. */
+.shiftDragging {
+  z-index: 5;
+  box-shadow: 0 6px 18px rgba(38, 31, 24, 0.22);
+}
+
+.shiftLabel {
   display: block;
+  position: relative;
+  font-family: var(--font-num);
   font-size: 11px;
   font-weight: 500;
   line-height: 1.3;
@@ -235,6 +375,112 @@
   text-overflow: ellipsis;
 }
 
+/*
+ * The edges you drag to change when a shift starts or ends. The zone is
+ * seven pixels; the grip that marks it appears when the pointer is near.
+ */
+.handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 7px;
+  z-index: 1;
+  cursor: ns-resize;
+}
+
+.handleBottom {
+  top: auto;
+  bottom: 0;
+}
+
+.handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--cream);
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.handleBottom::after {
+  top: auto;
+  bottom: 2px;
+}
+
+.shift:hover .handle::after,
+.shiftActive .handle::after,
+.shiftDragging .handle::after {
+  opacity: 0.75;
+}
+
+/* ------------------------------------------------------------------- gap */
+
+/*
+ * The break: a shift's own colour at a tenth, with the arcs ("Cung chéo")
+ * drawn over it in the same clay — quieter than a shift, and visibly made
+ * of the same stuff, because it is the shifts on either side that make it.
+ * Not sage: green is a state, and this is not a success.
+ */
+.gap {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  z-index: 2;
+  border-radius: 6px;
+  padding: 3px 6px;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgba(184, 92, 43, 0.1);
+  color: var(--terracotta);
+  cursor: pointer;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.gap:hover {
+  box-shadow: inset 0 0 0 1px var(--border-dashed);
+}
+
+.gap:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 4px var(--focus-ring);
+  z-index: 3;
+}
+
+.gapActive {
+  z-index: 3;
+  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 3.5px var(--terracotta-deep);
+}
+
+.gapLabel {
+  display: block;
+  position: relative;
+  z-index: 1;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gapWord {
+  font-weight: 500;
+}
+
+.gapTime {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------------- now */
+
 .nowLine {
   position: absolute;
   left: 0;
@@ -242,7 +488,8 @@
   height: 2px;
   background: var(--terracotta-deep);
   pointer-events: none;
-  z-index: 2;
+  z-index: 4;
+  opacity: 0.85;
 }
 
 .nowLine::before {
@@ -256,61 +503,243 @@
   background: var(--terracotta-deep);
 }
 
-/* What the drag will paint, drawn over the columns until the pointer lifts. */
-.pending {
+/* ---------------------------------------------------------------- nudges */
+
+/* "Trước 06:00" / "Sau 22:00": there is more day that way, and a press goes there. */
+.nudge {
   position: absolute;
-  border-radius: 6px;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.pendingWork {
-  background: rgba(184, 92, 43, 0.35);
-  box-shadow: inset 0 0 0 1.5px var(--terracotta);
-}
-
-.pendingBreak {
-  background: rgba(110, 127, 83, 0.28);
-  box-shadow: inset 0 0 0 1.5px var(--chart-2);
-}
-
-.pendingErase {
-  background: rgba(255, 251, 242, 0.55);
-  box-shadow: inset 0 0 0 1.5px var(--ink-soft);
-}
-
-/* ------------------------------------------------------------------ foot */
-
-.foot {
-  display: flex;
+  left: calc(var(--gutter) + (100% - var(--gutter)) / 2);
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px 0 7px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-raise);
+  font-family: var(--font-num);
+  font-size: 11.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 
-.footLink {
-  padding: 0;
-  border: none;
-  background: none;
+.nudge:hover {
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
+
+.nudge:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
+}
+
+.nudgeTop {
+  top: calc(var(--head-h) + 8px);
+}
+
+.nudgeBottom {
+  bottom: 8px;
+}
+
+/* ---------------------------------------------------------------- panels */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px;
+  outline: none;
+}
+
+.panelHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.panelTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.panelDay {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* "Từ" and "Đến" side by side, each under its own label. */
+.panelTimes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.panelActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* The last action takes whatever width is left, so the row ends at the panel's edge. */
+.panelActions > :last-child {
+  flex: 1 1 auto;
+}
+
+.panelBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
   font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-link);
+  color: var(--ink);
   cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
-.footLink:hover {
-  text-decoration: underline;
+.panelBtn:hover {
+  background: var(--action-ghost-hover);
+}
+
+.panelBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
+}
+
+.panelDanger {
+  color: var(--error);
+}
+
+.panelDanger:hover {
+  background: var(--surface-rose);
+  border-color: var(--error);
+}
+
+.panelPrimary,
+.panelPrimary:hover {
+  background: var(--action-primary);
+  border-color: var(--action-primary);
+  color: var(--text-on-accent);
+  --icon-accent: currentColor;
+}
+
+.panelPrimary:hover {
+  background: var(--action-primary-hover);
+  border-color: var(--action-primary-hover);
+}
+
+.panelPrimary:disabled {
+  background: transparent;
+  border-color: var(--border-hairline);
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+.dayOpen {
+  padding-bottom: 2px;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.copyTitle {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* Six equal chips across the panel: the row is the control, so it takes the panel's width. */
+.copyDays {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.copyDay {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  min-width: 0;
+  height: 32px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.copyDay:hover {
+  background: var(--action-ghost-hover);
+}
+
+.copyDayOn,
+.copyDayOn:hover {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--cream);
+}
+
+.copyHint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ----------------------------------------------------------------- touch */
+
+@media (pointer: coarse) {
+  .handle {
+    height: 12px;
+  }
+
+  .shiftActive .handle::after {
+    opacity: 0.9;
+  }
 }
 
 /* ----------------------------------------------------------------- phone */
 
 @media (max-width: 639.98px) {
   .sheet {
-    grid-template-columns: 44px minmax(0, 1fr);
+    --head-h: 34px;
+    --gutter: 42px;
   }
 
-  .dayLong {
+  .scroller {
+    height: calc(var(--head-h) + 560px);
+    max-height: 70vh;
+  }
+
+  .dayLong,
+  .dayChevron,
+  .dayCaption {
     display: none;
   }
 
@@ -323,8 +752,21 @@
     font-size: 10px;
   }
 
+  .shift,
+  .gap {
+    left: 1px;
+    right: 1px;
+    border-radius: 4px;
+    padding: 2px 3px;
+  }
+
   /* Forty-pixel columns cannot hold a clock; the hour gutter is the label. */
-  .blockLabel {
+  .shiftLabel,
+  .gapTime {
     display: none;
+  }
+
+  .gapLabel {
+    font-size: 10px;
   }
 }

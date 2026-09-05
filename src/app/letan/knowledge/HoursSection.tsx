@@ -134,9 +134,10 @@ function summarizeBreaks(cfg: { break_periods: { days: Weekday[]; from: string; 
  * break and Tết added together before she can answer, and the rail here
  * does exactly that sum for tomorrow.
  *
- * Hours and breaks are one calendar you paint (`WeekPlanner`), not two
+ * Hours and breaks are one calendar of shifts (`WeekPlanner`), not two
  * lists of times: an owner knows their week as a shape, and the shape is
- * what they draw. Holidays stay a list, because a holiday is a date.
+ * what they draw — the gap between two shifts is the break. Holidays stay
+ * a list, because a holiday is a date.
  *
  * Both ship pre-filled from the dental template and are only *hers* once
  * the owner has looked at them — one "Xác nhận" at the foot confirms both.
@@ -208,7 +209,7 @@ export function HoursSection() {
     >
       <Card
         title="Giờ làm việc trong tuần"
-        subtitle="tô giờ làm việc và giờ nghỉ trên lịch"
+        subtitle="kéo ca làm việc lên lịch, giờ nghỉ là khoảng trống giữa hai ca"
         actions={
           <span className={styles.openNow} title="Tính từ giờ làm việc, giờ nghỉ và ngày nghỉ">
             <span className={`${styles.openDot} ${open ? '' : styles.closedDot}`} />
