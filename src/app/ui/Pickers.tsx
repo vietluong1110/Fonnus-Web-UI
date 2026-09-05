@@ -28,9 +28,17 @@ import styles from './Pickers.module.css'
 export interface Place {
   left: number
   top: number
+  /** What the pop-up was placed at — its `size.width`, or less when it was allowed to shrink. */
+  width: number
 }
 
 const GAP = 6
+/* The pop-up's clearance from the window's edge: 8px above and below, 16px
+   at the sides. Sideways is measured against the document's client width,
+   not `innerWidth`, which counts the scrollbar — with it a panel "8px from
+   the edge" sat under the scrollbar, touching it. */
+const EDGE_Y = 8
+const EDGE_X = 16
 
 /*
  * Every open pop-up, oldest first. Pop-ups nest — a time list opens from
@@ -57,7 +65,18 @@ const layers: Layer[] = []
  * closes on an outside press, a scroll of the page, or Escape. See `layers`
  * above for what "outside" means once pop-ups start opening each other.
  */
-export function useAnchoredPopup(triggerRef: RefObject<HTMLElement | null>, open: boolean, close: () => void, size: { width: number; height: number }) {
+export function useAnchoredPopup(
+  triggerRef: RefObject<HTMLElement | null>,
+  open: boolean,
+  close: () => void,
+  /**
+   * `width` is what the pop-up wants; with `minWidth` it may give up some
+   * of that to keep its left edge under the trigger's rather than being
+   * pushed across the page — a pop-up near the right edge shrinks first
+   * and moves second, and never below `minWidth`.
+   */
+  size: { width: number; height: number; minWidth?: number },
+) {
   const [place, setPlace] = useState<Place | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   // Read by the layer, which is registered once per opening and must not be
@@ -95,16 +114,18 @@ export function useAnchoredPopup(triggerRef: RefObject<HTMLElement | null>, open
     const el = triggerRef.current
     if (!el) return
     const r = el.getBoundingClientRect()
-    const height = Math.min(panelRef.current?.offsetHeight || size.height, window.innerHeight - 16)
+    const height = Math.min(panelRef.current?.offsetHeight || size.height, window.innerHeight - 2 * EDGE_Y)
     const under = r.bottom + GAP
     const over = r.top - GAP - height
-    const fitsUnder = under + height <= window.innerHeight - 8
-    const top = !fitsUnder && over >= 8 ? over : Math.max(8, Math.min(under, window.innerHeight - 8 - height))
-    const left = Math.max(8, Math.min(r.left, window.innerWidth - size.width - 8))
+    const fitsUnder = under + height <= window.innerHeight - EDGE_Y
+    const top = !fitsUnder && over >= EDGE_Y ? over : Math.max(EDGE_Y, Math.min(under, window.innerHeight - EDGE_Y - height))
+    const vw = document.documentElement.clientWidth
+    const width = size.minWidth === undefined ? size.width : Math.max(size.minWidth, Math.min(size.width, vw - EDGE_X - r.left))
+    const left = Math.max(EDGE_X, Math.min(r.left, vw - width - EDGE_X))
     // Same numbers means the same object, so the effect below settles instead
     // of re-running on an identity that changed but said nothing new.
-    setPlace((prev) => (prev && prev.left === left && prev.top === top ? prev : { left, top }))
-  }, [triggerRef, size.width, size.height])
+    setPlace((prev) => (prev && prev.left === left && prev.top === top && prev.width === width ? prev : { left, top, width }))
+  }, [triggerRef, size.width, size.height, size.minWidth])
 
   useLayoutEffect(() => {
     if (!open) {
@@ -176,9 +197,10 @@ export function useAnchoredPopup(triggerRef: RefObject<HTMLElement | null>, open
   return { place, panelRef }
 }
 
-export function AnchoredPopup({ place, panelRef, width, children, label }: { place: Place; panelRef: RefObject<HTMLDivElement | null>; width?: number; children: ReactNode; label?: string }) {
+/** The panel at `place`, as wide as it was placed — the hook's `size.width`, or what it shrank to. */
+export function AnchoredPopup({ place, panelRef, children, label }: { place: Place; panelRef: RefObject<HTMLDivElement | null>; children: ReactNode; label?: string }) {
   return createPortal(
-    <div ref={panelRef} data-popup="" role="dialog" aria-label={label} className={styles.popup} style={{ left: place.left, top: place.top, width }}>
+    <div ref={panelRef} data-popup="" role="dialog" aria-label={label} className={styles.popup} style={{ left: place.left, top: place.top, width: place.width }}>
       {children}
     </div>,
     document.body,
@@ -401,7 +423,7 @@ export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', 
     <FieldFrame label={label} gate={gate} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
       <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={value ? (reading === 'short' ? fmtDM(value) : fmtDMY(value)) : placeholder} empty={!value} ariaLabel={ariaLabel} />
       {open && place ? (
-        <AnchoredPopup place={place} panelRef={panelRef} width={CAL_W} label={ariaLabel ?? 'Chọn ngày'}>
+        <AnchoredPopup place={place} panelRef={panelRef} label={ariaLabel ?? 'Chọn ngày'}>
           <MonthGrid
             month={month}
             onMonth={setMonth}
@@ -462,7 +484,7 @@ export function DateRangeField({ from, to, onChange, min, placeholder = 'Chọn 
     <FieldFrame label={label} gate={gate} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
       <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={from ? (reading === 'short' ? fmtRangeShort : fmtRange)(from, to) : placeholder} empty={!from} ariaLabel={ariaLabel} />
       {open && place ? (
-        <AnchoredPopup place={place} panelRef={panelRef} width={CAL_W} label={ariaLabel ?? 'Chọn khoảng ngày'}>
+        <AnchoredPopup place={place} panelRef={panelRef} label={ariaLabel ?? 'Chọn khoảng ngày'}>
           <MonthGrid month={month} onMonth={setMonth} from={shownFrom} to={shownTo} hover={pendingFrom ? hover : null} min={min} onPick={pick} onHover={setHover} />
           <div className={styles.popupFoot}>{pendingFrom ? 'Chọn ngày cuối — hoặc chọn lại ngày đó nếu nghỉ một ngày' : 'Chọn ngày đầu'}</div>
         </AnchoredPopup>
@@ -638,7 +660,7 @@ export function TimeField({ value, onChange, min, max, placeholder = '--:--', la
         />
       </span>
       {open && place ? (
-        <AnchoredPopup place={place} panelRef={panelRef} width={TIME_W} label={ariaLabel ?? 'Chọn giờ'}>
+        <AnchoredPopup place={place} panelRef={panelRef} label={ariaLabel ?? 'Chọn giờ'}>
           <div className={styles.timeList} role="listbox">
             {times.map((t, i) => (
               <div

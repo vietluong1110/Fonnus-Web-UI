@@ -75,14 +75,17 @@ export function Segmented<V extends string>({
   onChange,
   options,
   ariaLabel,
+  fill,
 }: {
   value: V
   onChange: (v: V) => void
   options: readonly { value: V; label: ReactNode }[]
   ariaLabel?: string
+  /** Span the container, the options sharing it equally — for a control that is a panel's whole top row. */
+  fill?: boolean
 }) {
   return (
-    <div className={styles.segmented} role="radiogroup" aria-label={ariaLabel}>
+    <div className={`${styles.segmented} ${fill ? styles.segmentedFill : ''}`} role="radiogroup" aria-label={ariaLabel}>
       {options.map((o) => (
         <button
           key={o.value}
