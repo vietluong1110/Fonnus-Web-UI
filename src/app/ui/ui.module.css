@@ -48,11 +48,28 @@
   padding: 16px 20px;
 }
 
+/*
+ * Two columns, not a wrapping row: the title and its subtitle take the
+ * space that is left, and the card's action stays pinned to the top right
+ * corner at every width. As a flex row the action was the widest thing on
+ * the line and so the first to wrap — inline on a desktop and below the
+ * subtitle in a column beside the rail, which is the one place the reader
+ * needs to know where it lives. The subtitle wraps instead; it is a
+ * sentence, and sentences are allowed to.
+ */
 .cardHead {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
+}
+
+.cardHeadText {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 4px 10px;
+  min-width: 0;
 }
 
 .cardTitle {
@@ -71,9 +88,9 @@
 }
 
 .cardActions {
-  margin-left: auto;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
 }
 

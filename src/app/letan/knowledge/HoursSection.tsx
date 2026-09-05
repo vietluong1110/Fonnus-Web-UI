@@ -6,7 +6,7 @@ import type { ClosureType, HolidayException, Weekday } from '../model'
 import { newId } from '../model'
 import { isOpenNow, summarizeHours } from '../readiness'
 import { useConfig, useDraft } from '../store'
-import { AnchoredPopup, Card, DateRangeField, EmptyState, IconButton, SaveBar, Segmented, TimeField, ui, useAnchoredPopup } from '../../ui'
+import { AddButton, AnchoredPopup, Card, DateRangeField, EmptyState, IconButton, SaveBar, Segmented, TimeField, ui, useAnchoredPopup, useAppear } from '../../ui'
 import { localIso } from './answers'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
@@ -166,29 +166,24 @@ export function HoursSection() {
   // newest first — it appears where the button was pressed, and does not
   // jump down the list the moment its dates are set.
   const [fresh, setFresh] = useState<string[]>([])
-  // Rows still playing their entrance. Separate from `fresh`, which lasts the
-  // visit: this clears the moment the animation ends, so the wrapper stops
-  // clipping and an outset focus ring is never cut off.
-  const [entering, setEntering] = useState<string[]>([])
-
-  /*
-   * `animationend` normally clears this, but it never fires when the
-   * animation does not run — a reduced-motion setting, or a tab hidden
-   * before the row appeared. Without a fallback the wrapper would keep
-   * clipping and eat the focus ring off the pills inside it, so the class
-   * comes off on a timer well past the 200ms the entrance takes.
-   */
-  useEffect(() => {
-    if (!entering.length) return
-    const t = window.setTimeout(() => setEntering([]), 600)
-    return () => window.clearTimeout(t)
-  }, [entering])
   const upcoming = draft.holiday_exceptions.filter((h) => h.date_to >= today)
   const holidays = [
     ...fresh.map((id) => upcoming.find((h) => h.id === id)).filter((h): h is HolidayException => !!h),
     ...upcoming.filter((h) => !fresh.includes(h.id)).sort((a, b) => a.date_from.localeCompare(b.date_from)),
   ]
   const setHoliday = (id: string, patch: Partial<HolidayException>) => set('holiday_exceptions', draft.holiday_exceptions.map((h) => (h.id === id ? { ...h, ...patch } : h)))
+  const rows = useAppear(holidays.map((h) => h.id))
+
+  /*
+   * A new holiday lands at the top of the list, where the eye already is
+   * after pressing the card head's button — not at the foot, where it would
+   * be below the fold on a list of any length.
+   */
+  const addHoliday = () => {
+    const id = newId('hol')
+    setFresh((f) => [id, ...f])
+    set('holiday_exceptions', [{ id, holiday_label: '', date_from: today, date_to: today, closure_type: 'closed', modified_hours: null, seeded: false }, ...draft.holiday_exceptions])
+  }
 
   const confirmed = draft.operating_hours_confirmed && draft.holidays_confirmed
   const anyOpen = draft.operating_hours_by_weekday.some((r) => r.open)
@@ -230,7 +225,11 @@ export function HoursSection() {
         </p>
       </Card>
 
-      <Card title="Ngày nghỉ" subtitle={`${agent} báo ngày mở cửa lại và không đặt hẹn vào ngày nghỉ`}>
+      <Card
+        title="Ngày nghỉ"
+        subtitle={`${agent} báo ngày mở cửa lại và không đặt hẹn vào ngày nghỉ`}
+        actions={<AddButton label="Thêm ngày nghỉ" onClick={addHoliday} />}
+      >
         {!draft.holidays_confirmed ? <span className={ui.hint}>Fonnus điền sẵn ngày lễ Việt Nam. Tết là ngày hay bị hỏi nhất — kiểm tra ngày nghỉ Tết của phòng khám rồi bấm Xác nhận.</span> : null}
         {holidays.length ? (
           <div className={styles.holidays} ref={holidaysRef}>
@@ -241,53 +240,30 @@ export function HoursSection() {
               <span className={styles.holidayEnd} />
             </div>
             {holidays.map((h) => (
-              <div
-                key={h.id}
-                className={entering.includes(h.id) ? styles.holidayEnter : undefined}
-                onAnimationEnd={(e) => {
-                  if (e.target === e.currentTarget) setEntering((ids) => ids.filter((x) => x !== h.id))
-                }}
-              >
-                <div className={styles.holiday}>
-                  <input
-                    className={`${styles.holidayName} ${styles.holidayInput}`}
-                    value={h.holiday_label}
-                    onChange={(e) => setHoliday(h.id, { holiday_label: e.target.value })}
-                    placeholder="Tên ngày nghỉ"
-                    aria-label="Tên ngày nghỉ"
-                    autoFocus={!h.holiday_label && !h.seeded}
-                  />
-                  <span className={styles.holidayWhen}>
-                    <DateRangeField pill reading={shortDates ? 'short' : 'full'} aria-label="Ngày nghỉ" from={h.date_from} to={h.date_to} onChange={(r) => setHoliday(h.id, { date_from: r.from, date_to: r.to })} />
-                  </span>
-                  <span className={styles.holidayWhat}>
-                    <ClosurePill holiday={h} short={stackedRows} onChange={(patch) => setHoliday(h.id, patch)} />
-                  </span>
-                  <span className={styles.holidayEnd}>
-                    <IconButton name="trash" label="Xoá ngày nghỉ" danger onClick={() => set('holiday_exceptions', draft.holiday_exceptions.filter((x) => x.id !== h.id))} />
-                  </span>
-                </div>
+              <div key={h.id} ref={rows.ref(h.id)} className={styles.holiday}>
+                <input
+                  className={`${styles.holidayName} ${styles.holidayInput}`}
+                  value={h.holiday_label}
+                  onChange={(e) => setHoliday(h.id, { holiday_label: e.target.value })}
+                  placeholder="Tên ngày nghỉ"
+                  aria-label="Tên ngày nghỉ"
+                  autoFocus={!h.holiday_label && !h.seeded}
+                />
+                <span className={styles.holidayWhen}>
+                  <DateRangeField pill reading={shortDates ? 'short' : 'full'} aria-label="Ngày nghỉ" from={h.date_from} to={h.date_to} onChange={(r) => setHoliday(h.id, { date_from: r.from, date_to: r.to })} />
+                </span>
+                <span className={styles.holidayWhat}>
+                  <ClosurePill holiday={h} short={stackedRows} onChange={(patch) => setHoliday(h.id, patch)} />
+                </span>
+                <span className={styles.holidayEnd}>
+                  <IconButton name="trash" label="Xoá ngày nghỉ" danger onClick={() => rows.leave(h.id, () => set('holiday_exceptions', (list) => list.filter((x) => x.id !== h.id)))} />
+                </span>
               </div>
             ))}
           </div>
         ) : (
           <EmptyState title="Chưa có ngày nghỉ">Thêm Tết và các ngày lễ để {agent} không hẹn khách vào ngày phòng khám đóng cửa.</EmptyState>
         )}
-        <button
-          type="button"
-          className={styles.idea}
-          onClick={() => {
-            const id = newId('hol')
-            setFresh((f) => [id, ...f])
-            setEntering((e) => [id, ...e])
-            set('holiday_exceptions', [{ id, holiday_label: '', date_from: today, date_to: today, closure_type: 'closed', modified_hours: null, seeded: false }, ...draft.holiday_exceptions])
-          }}
-        >
-          <span className={styles.ideaPlus}>
-            <Icon name="plus" size={14} />
-          </span>
-          <span>Thêm ngày nghỉ</span>
-        </button>
       </Card>
     </KnowledgeSection>
   )

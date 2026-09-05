@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Icon } from '../../../design-system'
 import type { FaqPair } from '../model'
 import { newId } from '../model'
 import { useConfig, useDraft } from '../store'
-import { Card, EmptyState, IconButton, SaveBar, TextArea, TextField } from '../../ui'
+import { AddButton, Card, EmptyState, IconButton, SaveBar, Suggestion, Suggestions, TextArea, TextField, useAppear } from '../../ui'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
 import styles from './Knowledge.module.css'
@@ -23,9 +22,15 @@ const IDEAS = [
 /**
  * `#/app/le-tan/kien-thuc/cau-hoi` — everything the other pages do not cover.
  *
- * A question and the answer she reads almost verbatim, one card each. The
- * suggestions are whole sentences, so rows rather than pills; the try-out
- * panel offers the clinic's own questions back as prompts.
+ * A question and the answer she reads almost verbatim, one block each inside
+ * the card that holds them — the same shape as a branch on Địa điểm or a
+ * doctor on Bác sĩ.
+ *
+ * The suggestions sit under the same card rather than in one of their own:
+ * they write into this list, and a reader should not have to carry the link
+ * between two cards to see that. They are whole sentences, so rows rather
+ * than pills. The try-out panel offers the clinic's own questions back as
+ * prompts.
  */
 export function FaqSection() {
   const { config } = useConfig()
@@ -41,6 +46,7 @@ export function FaqSection() {
     set('faq_pairs', [...draft.faq_pairs, { id, question, answer: '' }])
     setFocused(id)
   }
+  const rows = useAppear(draft.faq_pairs.map((f) => f.id))
   const asked = new Set(draft.faq_pairs.map((f) => f.question.trim()))
   const unused = IDEAS.filter((q) => !asked.has(q))
   const answered = draft.faq_pairs.filter((f) => f.question.trim() && f.answer.trim()).length
@@ -52,48 +58,44 @@ export function FaqSection() {
       rail={<TryPanel section="cau-hoi" config={live} />}
       bar={<SaveBar {...d.bar} sub={`${answered} câu có trả lời · ${agent} dùng từ cuộc gọi tiếp theo`} />}
     >
-      {draft.faq_pairs.length ? (
-        draft.faq_pairs.map((f, i) => (
-          <div key={f.id} onFocusCapture={() => setFocused(f.id)}>
-            <Card
-              title={`Câu hỏi ${i + 1}`}
-              actions={<IconButton name="trash" label="Xoá câu hỏi" danger onClick={() => set('faq_pairs', draft.faq_pairs.filter((x) => x.id !== f.id))} />}
-            >
-              <TextField label="Khách hỏi" value={f.question} onChange={(e) => setRow(f.id, { question: e.target.value })} placeholder="Khách hỏi gì?" autoFocus={focused === f.id && !f.question} />
-              <TextArea
-                label={`${agent} trả lời`}
-                value={f.answer}
-                onChange={(e) => setRow(f.id, { answer: e.target.value })}
-                placeholder="VD: Có ạ, bác sĩ Hùng phụ trách. Anh chị đặt lịch để bác sĩ xem phim trước nhé."
-                rows={2}
-                maxLength={400}
-              />
-            </Card>
+      <Card
+        title="Câu hỏi của phòng khám"
+        subtitle={draft.faq_pairs.length ? `${answered}/${draft.faq_pairs.length} câu có trả lời` : `${agent} đọc gần nguyên văn câu bạn viết`}
+        actions={<AddButton label="Thêm câu hỏi" onClick={() => add()} />}
+      >
+        {draft.faq_pairs.length ? (
+          <div className={styles.entries}>
+            {draft.faq_pairs.map((f, i) => (
+              <div key={f.id} ref={rows.ref(f.id)} className={styles.entry} onFocusCapture={() => setFocused(f.id)}>
+                <div className={styles.entryHead}>
+                  <span className={styles.entryTitle}>Câu hỏi {i + 1}</span>
+                  <IconButton name="trash" label="Xoá câu hỏi" danger onClick={() => rows.leave(f.id, () => set('faq_pairs', (list) => list.filter((x) => x.id !== f.id)))} />
+                </div>
+                <TextField label="Khách hỏi" value={f.question} onChange={(e) => setRow(f.id, { question: e.target.value })} placeholder="Khách hỏi gì?" autoFocus={focused === f.id && !f.question} />
+                <TextArea
+                  label={`${agent} trả lời`}
+                  value={f.answer}
+                  onChange={(e) => setRow(f.id, { answer: e.target.value })}
+                  placeholder="VD: Có ạ, bác sĩ Hùng phụ trách. Anh chị đặt lịch để bác sĩ xem phim trước nhé."
+                  rows={2}
+                  maxLength={400}
+                />
+              </div>
+            ))}
           </div>
-        ))
-      ) : (
-        <Card>
+        ) : (
           <EmptyState title="Chưa có câu hỏi nào">Bấm một gợi ý bên dưới, hoặc thêm câu của riêng phòng khám.</EmptyState>
-        </Card>
-      )}
+        )}
 
-      <Card title={unused.length ? 'Gợi ý cho phòng khám nha khoa' : 'Thêm câu hỏi'} subtitle={unused.length ? 'bấm để thêm, rồi viết câu trả lời' : undefined}>
-        <div className={styles.ideas}>
-          {unused.map((q) => (
-            <button key={q} type="button" className={styles.idea} onClick={() => add(q)}>
-              <span className={styles.ideaPlus}>
-                <Icon name="plus" size={14} />
-              </span>
-              <span>{q}</span>
-            </button>
-          ))}
-          <button type="button" className={styles.idea} onClick={() => add()}>
-            <span className={styles.ideaPlus}>
-              <Icon name="plus" size={14} />
-            </span>
-            <span>Câu hỏi của riêng phòng khám</span>
-          </button>
-        </div>
+        {unused.length ? (
+          <Suggestions hint="cho phòng khám nha khoa">
+            {unused.map((q) => (
+              <Suggestion key={q} onClick={() => add(q)}>
+                {q}
+              </Suggestion>
+            ))}
+          </Suggestions>
+        ) : null}
       </Card>
     </KnowledgeSection>
   )

@@ -1,5 +1,5 @@
 import { createContext, useContext, useLayoutEffect, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactNode, Ref } from 'react'
 import { Button, Icon, Pattern } from '../../design-system'
 import type { IconName } from '../../design-system'
 import { useSpeak } from './speak'
@@ -350,12 +350,82 @@ export function TableHead({ columns, children }: { columns: string; children: Re
   )
 }
 
-export function TableRow({ columns, children, warn, style }: { columns: string; children: ReactNode; warn?: boolean; style?: CSSProperties }) {
+export function TableRow({ columns, children, warn, style, ref }: { columns: string; children: ReactNode; warn?: boolean; style?: CSSProperties; /** For `useAppear`, so a table row grows and collapses like every other list row. */ ref?: Ref<HTMLDivElement> }) {
   return (
-    <div className={`${styles.tr} ${warn ? styles.trWarn : ''}`} style={{ gridTemplateColumns: columns, ...style }}>
+    <div ref={ref} className={`${styles.tr} ${warn ? styles.trWarn : ''}`} style={{ gridTemplateColumns: columns, ...style }}>
       {children}
     </div>
   )
 }
 
 export const tableStyles = styles
+
+/* -------------------------------------------------- AddButton / DeleteButton
+
+ * The two actions every list on this app needs, as one pair of pills.
+ *
+ * `AddButton` belongs in the head of the card it adds to — top right, in the
+ * `actions` slot — never at the foot of the list. A list that grows pushes a
+ * foot button off the screen, so the way to add the second row ends up
+ * somewhere different from the way you added the first; in the head it stays
+ * where it was put, and it reads as "this card's action" rather than as
+ * another row. The one dashed thing under a list is the empty state, or a
+ * `Suggestion`, and both are content rather than chrome.
+ *
+ * `DeleteButton` is the same pill with the word written out and the error
+ * colour held back until it is pointed at. Use `IconButton name="trash"` for
+ * a row's own delete, where there is no room for a word.
+ */
+
+export function AddButton({ label, onClick, band = false }: { label: string; onClick: () => void; /** Slightly smaller, for a group band inside a card rather than the card's own head. */ band?: boolean }) {
+  return (
+    <button type="button" className={`${styles.addBtn} ${band ? styles.addBtnBand : ''}`} onClick={onClick}>
+      <Icon name="plus" size={13} />
+      {label}
+    </button>
+  )
+}
+
+export function DeleteButton({ label, icon = true, band = false, onClick }: { label: string; icon?: boolean; band?: boolean; onClick: () => void }) {
+  return (
+    <button type="button" className={`${styles.delBtn} ${band ? styles.delBtnBand : ''}`} onClick={onClick}>
+      {icon ? <Icon name="trash" size={14} /> : null}
+      {label}
+    </button>
+  )
+}
+
+/* ----------------------------------------------------------- Suggestions
+
+ * Dashed means *content you can take*, and only that: a suggestion here, or
+ * the empty state above it. It stopped meaning anything when it was also the
+ * add button, because then half the dashed things on a page were controls.
+ *
+ * A suggestion list sits inside the card it writes into, under a hairline
+ * with the word "Gợi ý" on it — a separate card made the reader carry the
+ * link between the two themselves, and put the examples furthest away
+ * exactly when the box above was still blank.
+ */
+
+export function Suggestions({ label = 'Gợi ý', hint, children }: { label?: string; hint?: ReactNode; children: ReactNode }) {
+  return (
+    <div className={styles.suggests}>
+      <div className={styles.suggestsRule}>
+        <span className={styles.suggestsLabel}>{label}</span>
+        {hint ? <span className={styles.suggestsHint}>{hint}</span> : null}
+      </div>
+      <div className={styles.suggestsList}>{children}</div>
+    </div>
+  )
+}
+
+export function Suggestion({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+  return (
+    <button type="button" className={styles.suggest} onClick={onClick}>
+      <span className={styles.suggestPlus}>
+        <Icon name="plus" size={14} />
+      </span>
+      <span>{children}</span>
+    </button>
+  )
+}

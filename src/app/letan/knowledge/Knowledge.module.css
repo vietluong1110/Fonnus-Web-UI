@@ -240,50 +240,6 @@
   }
 }
 
-/* ------------------------------------------------------------- ideas */
-
-/* Whole sentences, so rows rather than pills (see Profile.module.css). The
-   same row, with a plus, is also how a list says "add one more". */
-.ideas {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.idea {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  width: 100%;
-  text-align: left;
-  appearance: none;
-  border: 1px dashed var(--border-dashed);
-  border-radius: var(--radius-md);
-  background: transparent;
-  padding: 10px 13px;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--ink);
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
-}
-
-.idea:hover {
-  background: var(--action-ghost-hover);
-  border-style: solid;
-  border-color: var(--terracotta);
-}
-
-.ideaPlus {
-  display: inline-flex;
-  flex: 0 0 auto;
-  margin-top: 2px;
-  color: var(--text-accent);
-}
-
 /* ------------------------------------------------------------- hours */
 
 .openNow {
@@ -416,53 +372,6 @@
 .holiday {
   padding: 9px 0;
   border-top: 1px solid var(--border-hairline);
-}
-
-/*
- * A new holiday grows into place instead of appearing under the cursor.
- *
- * It is added at the top, so without this every row below it jumps down by
- * 54px in one frame. The wrapper animates `grid-template-rows` from `0fr` to
- * `1fr` — the only way to reach a natural height without measuring it first —
- * and the rows below slide down with it. The motion is the house idiom and
- * nothing else: one lift-and-settle on `--ease-arc`, 200ms, no bounce.
- *
- * The clipping and the class both go at `animationend`; a permanent
- * `overflow: hidden` here would cut the outset focus ring off the pills.
- */
-.holidayEnter {
-  display: grid;
-  grid-template-rows: 0fr;
-  animation: holidayIn var(--duration-base) var(--ease-arc) forwards;
-}
-
-.holidayEnter > .holiday {
-  overflow: hidden;
-  min-height: 0;
-}
-
-@keyframes holidayIn {
-  from {
-    grid-template-rows: 0fr;
-    opacity: 0;
-  }
-  to {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .holidayEnter {
-    grid-template-rows: 1fr;
-    animation: none;
-  }
-
-  /* No animation means no `animationend`, so this class can outlive the
-     entrance here; it must not clip anything while it does. */
-  .holidayEnter > .holiday {
-    overflow: visible;
-  }
 }
 
 .holidayHead {
@@ -813,30 +722,6 @@
 }
 
 /* "+ Thêm nhóm" in a card head, "+ Thêm" on a band: the same quiet pill. */
-.svcGroupAdd {
-  appearance: none;
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: 0 0 auto;
-  height: 28px;
-  padding: 0 9px 0 7px;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-ui);
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-accent);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.svcGroupAdd:hover {
-  background: var(--action-ghost-hover);
-}
-
 /* The fold's handle: the same chevron a row turns, on its own button. */
 .svcGroupChevron {
   appearance: none;
@@ -1216,41 +1101,6 @@
   margin: -6px -8px -4px 0;
 }
 
-/* Delete, written out. Quiet until pointed at, then the error colour it deserves. */
-.svcDelete {
-  appearance: none;
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-soft);
-  cursor: pointer;
-  white-space: nowrap;
-  flex: 0 0 auto;
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
-}
-
-.svcDelete:hover {
-  background: var(--surface-rose);
-  color: var(--error);
-}
-
-/* On a band it matches the add pill beside it. */
-.svcGroupHead .svcDelete {
-  height: 28px;
-  padding: 0 9px;
-  font-size: 12.5px;
-}
-
 /*
  * Under 560px of list: the other names, the meta and the unit go — the name
  * is what runs out first, and the unit is one press away in the editor. The
@@ -1588,4 +1438,10 @@
   .svcGroupEmpty {
     padding: 12px 10px;
   }
+}
+
+/* With no groups the empty state speaks for the card; the list must not
+   still spend the card's 14px gap on nothing. */
+.services:empty {
+  display: none;
 }

@@ -1,4 +1,4 @@
-import { Badge, Button } from '../../../design-system'
+import { Badge } from '../../../design-system'
 import { formatPhone, isValidPhone, normalizePhone } from '../../../auth/phone'
 import { LABELS } from '../defaults'
 import type { AfterHoursRoutineBehavior, EscalationTarget, EscalationWindow } from '../model'
@@ -13,7 +13,7 @@ import {
   SYMPTOM_CAPTURE_RULE,
   UNRESOLVABLE_FALLBACK_SCRIPT,
 } from '../system'
-import { Card, ChipInput, Disclosure, GateTag, IconButton, Notice, RadioGroup, SaveBar, SelectField, SpeechBubble, TextField, ui } from '../../ui'
+import { AddButton, Card, ChipInput, Disclosure, GateTag, IconButton, Notice, RadioGroup, SaveBar, SelectField, SpeechBubble, TextField, ui, useAppear } from '../../ui'
 import styles from './Skills.module.css'
 
 const KEYS = ['escalation_targets', 'escalation_window', 'escalation_triggers_custom', 'after_hours_routine_behavior', 'callback_policy', 'after_hours_emergency_target', 'emergency_red_flags_custom'] as const
@@ -30,6 +30,7 @@ export function TransferSkill() {
   const agent = config.agent_name || 'Linh'
 
   const setTarget = (id: string, patch: Partial<EscalationTarget>) => set('escalation_targets', draft.escalation_targets.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+  const rows = useAppear(draft.escalation_targets.map((t) => t.id))
   const first = draft.escalation_targets.find((t) => t.name.trim() || t.phone.trim())
   const who = first?.name.trim() || 'nhân viên'
   const hasTarget = draft.escalation_targets.some((t) => phoneOk(t.phone))
@@ -59,18 +60,18 @@ export function TransferSkill() {
 
         <div className={ui.stackTight}>
           <div className={ui.cardHead}>
-            <span className={ui.label}>Số máy nhận</span>
-            <span className={ui.cardSub}>{agent} gọi số đầu tiên; không ai nghe thì thử số kế tiếp</span>
+            <div className={ui.cardHeadText}>
+              <span className={ui.label}>Số máy nhận</span>
+              <span className={ui.cardSub}>{agent} gọi số đầu tiên; không ai nghe thì thử số kế tiếp</span>
+            </div>
             <div className={ui.cardActions}>
-              <Button variant="ghost" size="sm" onClick={() => set('escalation_targets', [...draft.escalation_targets, { id: newId('esc'), phone: '', name: '' }])}>
-                + Thêm số
-              </Button>
+              <AddButton label="Thêm số" onClick={() => set('escalation_targets', [...draft.escalation_targets, { id: newId('esc'), phone: '', name: '' }])} />
             </div>
           </div>
           {draft.escalation_targets.length ? (
             <div className={styles.targets}>
               {draft.escalation_targets.map((t, i) => (
-                <div key={t.id} className={styles.targetRow}>
+                <div key={t.id} ref={rows.ref(t.id)} className={styles.targetRow}>
                   <span className={`${styles.targetOrder} ${i === 0 ? styles.targetOrderFirst : ''}`}>{i + 1}</span>
                   <TextField
                     compact
@@ -83,7 +84,7 @@ export function TransferSkill() {
                     error={t.phone && !phoneOk(t.phone) ? 'Số chưa đủ 10 số.' : null}
                   />
                   <TextField compact aria-label="Tên người nhận" value={t.name} onChange={(e) => setTarget(t.id, { name: e.target.value })} placeholder="Tên người nhận, VD: chị Lan" />
-                  <IconButton name="trash" label="Xoá số" danger onClick={() => set('escalation_targets', draft.escalation_targets.filter((x) => x.id !== t.id))} />
+                  <IconButton name="trash" label="Xoá số" danger onClick={() => rows.leave(t.id, () => set('escalation_targets', (list) => list.filter((x) => x.id !== t.id)))} />
                 </div>
               ))}
             </div>

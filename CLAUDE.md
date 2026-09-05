@@ -4,7 +4,9 @@ Conventions that are **decisions, not accidents**. Each one looks like something
 "fixing" until you know why it is there. Read this before the first edit.
 
 `README.md` explains how the app is built. `docs/` explains how it will meet the backend.
-This file only lists the things an outsider gets wrong.
+`design-reference/ui-ux-principles.md` is the standing UI/UX rulebook for every `#/app`
+screen — **read it before redesigning one, and add to it after**. This file only lists
+the things an outsider gets wrong.
 
 ---
 
@@ -91,6 +93,11 @@ npm run typecheck
   One pair of native `type="time"` inputs is left, in `skills/BookingSkill.tsx`
   — they sit *inside* a bordered pill, so they need that row reworked rather
   than a drop-in swap. Convert them when that page is next touched.
+- The shape of a list is fixed: one `Card` per list, its `AddButton` in the head's
+  `actions` slot, repeated records as `entries`/`entry` blocks inside it, an `EmptyState`
+  when it is empty, and `Suggestions` inside the same card when there are ready-made
+  lines to adopt. Dashed means *content* — an empty state or a suggestion — never a
+  button that makes a row. Reasons and the checks: `design-reference/ui-ux-principles.md`.
 - **Icons are drawn, not installed.** Every icon, shape and pattern is an arc-and-dot
   drawing in `src/design-system/icons.ts` / `Shape.tsx` / `Pattern.tsx` with exactly one
   terracotta accent (`--icon-accent`). No Lucide, no stock set, no emoji glyphs (✓ ▾ →) in
@@ -132,7 +139,8 @@ npm run typecheck
 - Blush (`--surface-warm`) means **speech**: the Fonnus assistant panel, and the
   receptionist's own line inside a call preview. Never a callout or a badge inside a
   form — that is what drained the tint of meaning last time.
-- `design-reference/` is an archive. Nothing imports it and nothing builds it.
+- `design-reference/` is an archive. Nothing imports it and nothing builds it — with one
+  exception: `ui-ux-principles.md`, which is a living document and is meant to be edited.
 
 ## Before you finish
 

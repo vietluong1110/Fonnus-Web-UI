@@ -82,9 +82,11 @@ export function Card({
       {pattern ? <Pattern name={pattern} style={{ zIndex: -1 }} /> : null}
       {title || actions ? (
         <div className={ui.cardHead}>
-          {title ? <h3 className={ui.cardTitle}>{title}</h3> : null}
-          {gate ? <GateTag gate={gate} /> : null}
-          {subtitle ? <span className={ui.cardSub}>{subtitle}</span> : null}
+          <div className={ui.cardHeadText}>
+            {title ? <h3 className={ui.cardTitle}>{title}</h3> : null}
+            {gate ? <GateTag gate={gate} /> : null}
+            {subtitle ? <span className={ui.cardSub}>{subtitle}</span> : null}
+          </div>
           {actions ? <div className={ui.cardActions}>{actions}</div> : null}
         </div>
       ) : null}

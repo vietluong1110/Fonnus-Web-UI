@@ -545,48 +545,6 @@
 
 /* ------------------------------------------------------- standing orders */
 
-.ideas {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Whole sentences, so rows rather than pills: a pill has to stay on one line
-   and these ran off the edge of the card when they could not. */
-.idea {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  width: 100%;
-  text-align: left;
-  appearance: none;
-  border: 1px dashed var(--border-dashed);
-  border-radius: var(--radius-md);
-  background: transparent;
-  padding: 10px 13px;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--ink);
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
-}
-
-.idea:hover {
-  background: var(--action-ghost-hover);
-  border-style: solid;
-  border-color: var(--terracotta);
-}
-
-.ideaPlus {
-  display: inline-flex;
-  flex: 0 0 auto;
-  margin-top: 2px;
-  color: var(--text-accent);
-}
-
 /* --------------------------------------------------------------- dayparts */
 
 .daypart {

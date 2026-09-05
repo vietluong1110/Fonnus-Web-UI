@@ -1,11 +1,9 @@
-import { Icon } from '../../../design-system'
 import type { Keyterm } from '../model'
 import { newId } from '../model'
 import { useConfig, useDraft } from '../store'
-import { Card, Chip, EmptyState, IconButton, SaveBar, TableHead, TableRow, TextField, ui } from '../../ui'
+import { AddButton, Card, Chip, EmptyState, IconButton, SaveBar, TableHead, TableRow, TextField, ui, useAppear } from '../../ui'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
-import styles from './Knowledge.module.css'
 
 const KEYS = ['keyterms'] as const
 const COLS = 'minmax(0, 1fr) minmax(0, 1fr) 32px'
@@ -42,6 +40,7 @@ export function KeytermsSection() {
 
   const setRow = (id: string, patch: Partial<Keyterm>) => set('keyterms', draft.keyterms.map((k) => (k.id === id ? { ...k, ...patch } : k)))
   const add = () => set('keyterms', [...draft.keyterms, { id: newId('kt'), term: '', phonetic_hint: '', source: 'tenant' }])
+  const rows = useAppear(mine.map((k) => k.id))
 
   return (
     <KnowledgeSection
@@ -50,7 +49,7 @@ export function KeytermsSection() {
       rail={<TryPanel section="tu-khoa" config={live} />}
       bar={<SaveBar {...d.bar} sub="Từ hay nghe nhầm · áp dụng cho cuộc gọi tiếp theo" />}
     >
-      <Card title="Từ của phòng khám" subtitle="thêm từ và cách khách thường đọc">
+      <Card title="Từ của phòng khám" subtitle="thêm từ và cách khách thường đọc" actions={<AddButton label="Thêm từ" onClick={add} />}>
         {mine.length ? (
           <div>
             <TableHead columns={COLS}>
@@ -59,22 +58,16 @@ export function KeytermsSection() {
               <span />
             </TableHead>
             {mine.map((k) => (
-              <TableRow key={k.id} columns={COLS}>
+              <TableRow key={k.id} ref={rows.ref(k.id)} columns={COLS}>
                 <TextField compact aria-label="Từ" value={k.term} onChange={(e) => setRow(k.id, { term: e.target.value })} placeholder="VD: Invisalign" />
                 <TextField compact aria-label="Cách đọc" value={k.phonetic_hint} onChange={(e) => setRow(k.id, { phonetic_hint: e.target.value })} placeholder="VD: in-vi-za-lai" />
-                <IconButton name="trash" label="Xoá từ" danger onClick={() => set('keyterms', draft.keyterms.filter((x) => x.id !== k.id))} />
+                <IconButton name="trash" label="Xoá từ" danger onClick={() => rows.leave(k.id, () => set('keyterms', (list) => list.filter((x) => x.id !== k.id)))} />
               </TableRow>
             ))}
           </div>
         ) : (
           <EmptyState title="Chưa thêm từ nào">Ví dụ: "Hẻm Sư Vạn Hạnh", "Osstem", "Nha khoa Kim" (đối thủ khách hay nhắc).</EmptyState>
         )}
-        <button type="button" className={styles.idea} onClick={add}>
-          <span className={styles.ideaPlus}>
-            <Icon name="plus" size={14} />
-          </span>
-          <span>{mine.length ? 'Thêm từ' : 'Thêm từ đầu tiên'}</span>
-        </button>
       </Card>
 
       <Card title="Tự lấy từ các mục khác" subtitle="đổi tên dịch vụ hay thêm bác sĩ, danh sách này tự cập nhật">
