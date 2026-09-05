@@ -1,10 +1,8 @@
-import { Icon } from '../../../design-system'
 import { INSTRUCTION_IDEAS } from '../instructions'
 import { ProfileSection } from './ProfileSection'
 import { useConfig, useDraft } from '../store'
 import { TryPanel } from '../tryout/TryPanel'
-import { Card, SaveBar, TextArea } from '../../ui'
-import styles from './Profile.module.css'
+import { Card, SaveBar, Suggestion, Suggestions, TextArea } from '../../ui'
 
 const KEYS = ['tenant_instructions'] as const
 
@@ -16,6 +14,11 @@ const KEYS = ['tenant_instructions'] as const
  * try-out panel answers the question a blank box cannot: what does writing
  * this here actually change about what the receptionist says — ask her the
  * price of braces before and after adding a line, and hear the difference.
+ *
+ * The examples live in the same card as the box they write into, under the
+ * hairline. They were a card of their own, which read as a second, unrelated
+ * section and put the examples furthest from the reader at the one moment
+ * they are worth most: when the box above is still empty.
  *
  * There is no compliance notice among the fields. What the instructions
  * cannot override (safety, the legal disclosure, emergency transfer) is
@@ -55,22 +58,17 @@ export function InstructionsSection() {
           aria-label="Chỉ dẫn riêng"
           hint="Kéo góc dưới bên phải để ô cao thêm."
         />
-      </Card>
 
-      {unused.length ? (
-        <Card title="Gợi ý cho phòng khám nha khoa" subtitle="Bấm để thêm vào ô trên">
-          <div className={styles.ideas}>
+        {unused.length ? (
+          <Suggestions hint="bấm để thêm vào ô trên">
             {unused.map((i) => (
-              <button key={i.text} type="button" className={styles.idea} onClick={() => add(i.text)}>
-                <span className={styles.ideaPlus}>
-                  <Icon name="plus" size={14} />
-                </span>
-                <span>{i.text}</span>
-              </button>
+              <Suggestion key={i.text} onClick={() => add(i.text)}>
+                {i.text}
+              </Suggestion>
             ))}
-          </div>
-        </Card>
-      ) : null}
+          </Suggestions>
+        ) : null}
+      </Card>
     </ProfileSection>
   )
 }

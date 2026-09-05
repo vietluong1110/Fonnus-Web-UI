@@ -1,9 +1,8 @@
-import { Icon } from '../../../design-system'
 import { LABELS } from '../defaults'
 import type { Branch, IndustryVertical, VatInvoiceOption } from '../model'
 import { newId } from '../model'
 import { useConfig, useDraft } from '../store'
-import { Card, Disclosure, EmptyState, IconButton, PlayButton, SaveBar, SelectField, TextField, ui } from '../../ui'
+import { AddButton, Card, Disclosure, EmptyState, IconButton, PlayButton, SaveBar, SelectField, TextField, ui, useAppear } from '../../ui'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
 import styles from './Knowledge.module.css'
@@ -40,6 +39,8 @@ export function LocationSection() {
   const advanced = [draft.business_name_spoken, draft.location_landmarks, draft.directions_note, draft.parking_info, draft.digital_links].filter(Boolean).length
   const spokenName = draft.business_name_spoken.trim() || draft.business_name
   const setBranch = (id: string, patch: Partial<Branch>) => set('branch_list', draft.branch_list.map((b) => (b.id === id ? { ...b, ...patch } : b)))
+  const addBranch = () => set('branch_list', [...draft.branch_list, { id: newId('br'), branch_name: '', branch_address: '', branch_phone: '' }])
+  const rows = useAppear(draft.branch_list.map((b) => b.id))
 
   return (
     <KnowledgeSection
@@ -118,14 +119,18 @@ export function LocationSection() {
         </Disclosure>
       </Card>
 
-      <Card title="Chi nhánh khác" subtitle={`khách gọi nhầm nơi, ${agent} đọc địa chỉ và số của chi nhánh đúng`}>
+      <Card
+        title="Chi nhánh khác"
+        subtitle={`khách gọi nhầm nơi, ${agent} đọc địa chỉ và số của chi nhánh đúng`}
+        actions={<AddButton label="Thêm chi nhánh" onClick={addBranch} />}
+      >
         {draft.branch_list.length ? (
           <div className={styles.entries}>
             {draft.branch_list.map((b, i) => (
-              <div key={b.id} className={styles.entry}>
+              <div key={b.id} ref={rows.ref(b.id)} className={styles.entry}>
                 <div className={styles.entryHead}>
                   <span className={styles.entryTitle}>Chi nhánh {i + 1}</span>
-                  <IconButton name="trash" label="Xoá chi nhánh" danger onClick={() => set('branch_list', draft.branch_list.filter((x) => x.id !== b.id))} />
+                  <IconButton name="trash" label="Xoá chi nhánh" danger onClick={() => rows.leave(b.id, () => set('branch_list', (list) => list.filter((x) => x.id !== b.id)))} />
                 </div>
                 <div className={ui.grid2}>
                   <TextField label="Tên chi nhánh" value={b.branch_name} onChange={(e) => setBranch(b.id, { branch_name: e.target.value })} placeholder="VD: Chi nhánh Đà Nẵng" />
@@ -138,16 +143,6 @@ export function LocationSection() {
         ) : (
           <EmptyState title="Chỉ có một địa điểm">Nếu phòng khám có chi nhánh khác, thêm vào để {agent} chuyển khách gọi nhầm nơi thay vì nói không biết.</EmptyState>
         )}
-        <button
-          type="button"
-          className={styles.idea}
-          onClick={() => set('branch_list', [...draft.branch_list, { id: newId('br'), branch_name: '', branch_address: '', branch_phone: '' }])}
-        >
-          <span className={styles.ideaPlus}>
-            <Icon name="plus" size={14} />
-          </span>
-          <span>Thêm chi nhánh</span>
-        </button>
       </Card>
     </KnowledgeSection>
   )

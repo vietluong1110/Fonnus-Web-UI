@@ -16,10 +16,15 @@ export {
   SaveBar,
   BottomStackProvider,
   EmptyState,
+  AddButton,
+  DeleteButton,
+  Suggestions,
+  Suggestion,
   TableHead,
   TableRow,
   tableStyles,
 } from './Bits'
 export type { TabItem } from './Bits'
+export { useAppear } from './appear'
 export { ToastProvider, useToast } from './Toast'
 export { default as ui } from './ui.module.css'

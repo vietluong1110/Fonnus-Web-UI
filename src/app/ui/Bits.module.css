@@ -559,3 +559,153 @@
 .cellStrong {
   font-weight: 500;
 }
+
+/* --------------------------------------------- AddButton / DeleteButton */
+
+/*
+ * Both are ghost pills, sized to sit on the card head's 17px title line
+ * without lifting it. Terracotta for the add — it is the one thing on the
+ * head worth reaching for — and ink-soft for the delete until it is pointed
+ * at, when it takes the colour it deserves.
+ */
+.addBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-accent);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.addBtn:hover {
+  background: var(--action-ghost-hover);
+}
+
+.delBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.delBtn:hover {
+  background: var(--surface-rose);
+  color: var(--error);
+}
+
+/* On a group band inside a card, both step down so the band stays a band. */
+.addBtnBand {
+  height: 28px;
+  padding: 0 9px 0 7px;
+  font-size: 12.5px;
+}
+
+.delBtnBand {
+  height: 28px;
+  padding: 0 9px;
+  font-size: 12.5px;
+}
+
+/* ------------------------------------------------------------ Suggestions */
+
+.suggests {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* A hairline with the word sitting on it: the label names what follows
+   without spending a heading on it, and the rule carries on past the word so
+   the group still reads as one band rather than as a second card. */
+.suggestsRule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.suggestsRule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-hairline);
+}
+
+.suggestsHint {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 12.5px;
+}
+
+.suggestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Whole sentences, so rows rather than pills: a pill has to stay on one line
+   and these ran off the edge of the card when they could not. */
+.suggest {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  border: 1px dashed var(--border-dashed);
+  border-radius: var(--radius-md);
+  background: transparent;
+  padding: 10px 13px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.suggest:hover {
+  background: var(--action-ghost-hover);
+  border-style: solid;
+  border-color: var(--terracotta);
+}
+
+.suggestPlus {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--text-accent);
+}

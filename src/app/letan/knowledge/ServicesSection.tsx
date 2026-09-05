@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { PointerEvent as ReactPointerEvent, ReactNode, RefObject, TransitionEvent } from 'react'
+import type { PointerEvent as ReactPointerEvent, ReactNode, Ref, RefObject, TransitionEvent } from 'react'
 import { Icon } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { useElementWidth } from '../../../hooks/useElementWidth'
@@ -9,7 +9,7 @@ import { newId } from '../model'
 import { pricedCount } from '../readiness'
 import { useConfig, useDraft } from '../store'
 import { PRICE_QUALIFIER } from '../system'
-import { Card, ChipButton, ChipInput, DateRangeField, EmptyState, MoneyField, NumberField, RadioGroup, SaveBar, Segmented, SelectField, Switch, TextField, ui } from '../../ui'
+import { AddButton, Card, ChipButton, ChipInput, DateRangeField, DeleteButton, EmptyState, MoneyField, NumberField, RadioGroup, SaveBar, Segmented, SelectField, Switch, TextField, ui, useAppear } from '../../ui'
 import { bundleSentence, localIso, priceSentence, priceShort, promoOffer, promoSentence } from './answers'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
@@ -289,6 +289,7 @@ function useFlip(listRef: RefObject<HTMLDivElement | null>, active: boolean) {
  */
 function ExpandRow({
   rowId,
+  rowRef,
   group,
   open,
   mounted,
@@ -300,6 +301,8 @@ function ExpandRow({
   children,
 }: {
   rowId: string
+  /** From `useAppear`: the row grows into place and collapses out of it. */
+  rowRef?: Ref<HTMLDivElement>
   group?: string
   open: boolean
   mounted: boolean
@@ -328,6 +331,7 @@ function ExpandRow({
   }
   return (
     <div
+      ref={rowRef}
       className={`${styles.svc} ${open ? styles.svcOpen : ''} ${unfilled ? styles.svcUnfilled : ''} ${dragging ? styles.svcDragging : ''}`}
       data-row-id={rowId}
       data-group={group}
@@ -388,26 +392,6 @@ function PriceCell({ from, to, unit }: { from: number | null; to: number | null;
       {price}
       {unit && price !== 'miễn phí' ? <span className={styles.svcUnit}> {LABELS.priceUnit[unit]}</span> : null}
     </>
-  )
-}
-
-/** A delete written out as a word. Quiet until pointed at, then the error colour it deserves. */
-function DeleteButton({ label, icon = true, onClick }: { label: string; icon?: boolean; onClick: () => void }) {
-  return (
-    <button type="button" className={styles.svcDelete} onClick={onClick}>
-      {icon ? <Icon name="trash" size={14} /> : null}
-      {label}
-    </button>
-  )
-}
-
-/** "+ Thêm nhóm" in a card head, "+ Thêm" on a group band: the same quiet pill. */
-function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button type="button" className={styles.svcGroupAdd} onClick={onClick}>
-      <Icon name="plus" size={13} />
-      {label}
-    </button>
   )
 }
 
@@ -521,8 +505,8 @@ export function ServicesSection() {
 
   const setRow = (id: string, p: Partial<ServiceRow>) => set('service_catalog', rows.map((s) => (s.id === id ? { ...s, ...p } : s)))
   const removeRow = (id: string) => {
-    set('service_catalog', rows.filter((s) => s.id !== id))
     close(id)
+    svcRows.leave(id, () => set('service_catalog', (list) => list.filter((s) => s.id !== id)))
   }
   const renameGroup = (from: string, to: string) => {
     const k = groupKeys.current.get(from)
@@ -538,7 +522,13 @@ export function ServicesSection() {
   const removeGroup = (name: string) => {
     const ids = rows.filter((s) => groupOf(s) === name).map((s) => s.id)
     if (openId && ids.includes(openId)) close(openId)
-    patch({ service_groups: groupNames.filter((n) => n !== name), service_catalog: rows.filter((s) => groupOf(s) !== name) })
+    // The heading collapses with everything under it, as one block.
+    groupRows.leave(groupKey(name), () =>
+      patch((d) => ({
+        service_groups: groupNamesOf(d).filter((n) => n !== name),
+        service_catalog: d.service_catalog.filter((s) => groupOf(s) !== name),
+      })),
+    )
   }
   const addRow = (group: string) => {
     const id = newId('svc')
@@ -578,6 +568,15 @@ export function ServicesSection() {
     set('service_catalog', result)
   }
 
+  /*
+   * The four lists on this page grow and shrink the same way as every other
+   * list in the app. Services are keyed off the whole catalogue rather than
+   * per group, so a row dragged from one heading to another is a move and
+   * not an arrival — it must not play the entrance on landing.
+   */
+  const svcRows = useAppear(rows.map((s) => s.id))
+  const groupRows = useAppear(groupNames.map((n) => groupKey(n)))
+
   const listRef = useRef<HTMLDivElement | null>(null)
   const drag = useRowDrag(
     listRef,
@@ -592,6 +591,7 @@ export function ServicesSection() {
   const named = rows.filter((s) => s.service_name.trim())
   const nameOf = (id: string) => rows.find((s) => s.id === id)?.service_name.trim() ?? ''
 
+  const bundleRows = useAppear(draft.package_bundles.map((b) => b.id))
   const setBundle = (id: string, p: Partial<Bundle>) => set('package_bundles', draft.package_bundles.map((b) => (b.id === id ? { ...b, ...p } : b)))
   const addBundle = () => {
     const id = newId('bd')
@@ -600,8 +600,8 @@ export function ServicesSection() {
     openRow(id)
   }
   const removeBundle = (id: string) => {
-    set('package_bundles', draft.package_bundles.filter((b) => b.id !== id))
     close(id)
+    bundleRows.leave(id, () => set('package_bundles', (list) => list.filter((b) => b.id !== id)))
   }
 
   /*
@@ -610,6 +610,7 @@ export function ServicesSection() {
    * catalogue field still holds a sentence for the backend while the tenant
    * edits parts of one.
    */
+  const promoRows = useAppear(draft.active_promotions.map((p) => p.id))
   const setPromo = (id: string, p: Partial<Promotion>) =>
     set(
       'active_promotions',
@@ -626,8 +627,8 @@ export function ServicesSection() {
     openRow(id)
   }
   const removePromo = (id: string) => {
-    set('active_promotions', draft.active_promotions.filter((p) => p.id !== id))
     close(id)
+    promoRows.leave(id, () => set('active_promotions', (list) => list.filter((p) => p.id !== id)))
   }
   const togglePromoService = (p: Promotion, serviceId: string) => {
     const list = p.promo_services ?? []
@@ -690,6 +691,11 @@ export function ServicesSection() {
       </Card>
 
       <Card title="Bảng giá" subtitle={`${priced}/${total} dịch vụ có giá`} actions={<AddButton label="Thêm nhóm" onClick={addGroup} />}>
+        {groups.length === 0 ? (
+          <EmptyState title="Chưa có bảng giá">
+            Thêm một nhóm — VD: "Điều trị" — rồi liệt kê dịch vụ và giá bên dưới. Khách hỏi "cạo vôi bao nhiêu", {agent} đọc đúng con số thay vì hẹn gọi lại.
+          </EmptyState>
+        ) : null}
         <div className={`${styles.services} ${styles.servicesGrouped} ${drag.dragId ? styles.servicesDragging : ''}`} ref={listRef}>
           {groups.map((g) => {
             const key = groupKey(g.name)
@@ -699,7 +705,7 @@ export function ServicesSection() {
               setFolded((f) => (f.includes(key) ? f.filter((k) => k !== key) : [...f, key]))
             }
             return (
-              <section key={key} className={`${styles.svcGroupCard} ${isOpen ? '' : styles.svcGroupFolded}`} data-flip={key}>
+              <section key={key} ref={groupRows.ref(key)} className={`${styles.svcGroupCard} ${isOpen ? '' : styles.svcGroupFolded}`} data-flip={key}>
                 {/* The band is the fold's handle; presses on what it carries — the name, the buttons — stay theirs. */}
                 <div
                   className={styles.svcGroupHead}
@@ -719,8 +725,8 @@ export function ServicesSection() {
                     onBlur={() => setFreshGroup(null)}
                   />
                   <span className={styles.svcGroupCount}>{g.rows.length} dịch vụ</span>
-                  <AddButton label="Thêm" onClick={() => addRow(g.name)} />
-                  <DeleteButton label="Xoá" icon={false} onClick={() => removeGroup(g.name)} />
+                  <AddButton band label="Thêm" onClick={() => addRow(g.name)} />
+                  <DeleteButton band label="Xoá" icon={false} onClick={() => removeGroup(g.name)} />
                   <button type="button" className={styles.svcGroupChevron} aria-expanded={isOpen} aria-label={`${isOpen ? 'Thu gọn' : 'Mở'} nhóm ${g.name || 'chưa đặt tên'}`} onClick={toggleFold}>
                     <span className={`${styles.svcChevron} ${isOpen ? styles.svcChevronOpen : ''}`}>
                       <Icon name="chevron-down" size={16} />
@@ -736,6 +742,7 @@ export function ServicesSection() {
                       <ExpandRow
                         key={s.id}
                         rowId={s.id}
+                        rowRef={svcRows.ref(s.id)}
                         group={g.name}
                         open={openId === s.id}
                         mounted={openId === s.id || closingId === s.id}
@@ -832,6 +839,7 @@ export function ServicesSection() {
                 <ExpandRow
                   key={b.id}
                   rowId={b.id}
+                  rowRef={bundleRows.ref(b.id)}
                   open={openId === b.id}
                   mounted={openId === b.id || closingId === b.id}
                   unfilled={b.price == null}
@@ -892,6 +900,7 @@ export function ServicesSection() {
                 <ExpandRow
                   key={p.id}
                   rowId={p.id}
+                  rowRef={promoRows.ref(p.id)}
                   open={openId === p.id}
                   mounted={openId === p.id || closingId === p.id}
                   unfilled={picked.length === 0}

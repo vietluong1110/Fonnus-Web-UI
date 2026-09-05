@@ -176,8 +176,16 @@ export function useConfig(): ConfigStore {
 
 export interface Draft<K extends ConfigKey> {
   draft: Pick<ReceptionistConfig, K>
-  set: <P extends K>(key: P, value: ReceptionistConfig[P]) => void
-  patch: (partial: Partial<Pick<ReceptionistConfig, K>>) => void
+  /**
+   * `set('branch_list', next)` — or an updater, `set('branch_list', (list) =>
+   * …)`, when the new value has to be built from whatever the draft holds
+   * *now* rather than at the render that made the handler. A removal that
+   * waits for its row to finish collapsing needs the updater: two deletes
+   * inside the same 200ms both close over the same array, and the second one
+   * would put the first row back.
+   */
+  set: <P extends K>(key: P, value: ReceptionistConfig[P] | ((prev: ReceptionistConfig[P]) => ReceptionistConfig[P])) => void
+  patch: (partial: Partial<Pick<ReceptionistConfig, K>> | ((prev: Pick<ReceptionistConfig, K>) => Partial<Pick<ReceptionistConfig, K>>)) => void
   dirty: boolean
   saving: boolean
   /** Vietnamese, ready to render. Cleared by the next edit or a successful save. */
@@ -233,14 +241,14 @@ export function useDraft<K extends ConfigKey>(keys: readonly K[], label: string)
 
   const dirty = useMemo(() => keys.some((k) => !same(draft[k], base.current[k])), [draft, keys])
 
-  const set = useCallback(<P extends K>(key: P, value: ReceptionistConfig[P]) => {
+  const set = useCallback(<P extends K>(key: P, value: ReceptionistConfig[P] | ((prev: ReceptionistConfig[P]) => ReceptionistConfig[P])) => {
     setError(null)
-    setDraft((d) => ({ ...d, [key]: value }))
+    setDraft((d) => ({ ...d, [key]: typeof value === 'function' ? (value as (prev: ReceptionistConfig[P]) => ReceptionistConfig[P])(d[key]) : value }))
   }, [])
 
-  const patch = useCallback((partial: Partial<Pick<ReceptionistConfig, K>>) => {
+  const patch = useCallback((partial: Partial<Pick<ReceptionistConfig, K>> | ((prev: Pick<ReceptionistConfig, K>) => Partial<Pick<ReceptionistConfig, K>>)) => {
     setError(null)
-    setDraft((d) => ({ ...d, ...partial }))
+    setDraft((d) => ({ ...d, ...(typeof partial === 'function' ? partial(d) : partial) }))
   }, [])
 
   const save = useCallback(
