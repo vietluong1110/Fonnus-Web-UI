@@ -383,6 +383,7 @@ export function SelectField<V extends string>({
             <div
               ref={listRef}
               id={listId}
+              data-popup=""
               role="listbox"
               aria-label={ariaLabel ?? (typeof label === 'string' ? label : undefined)}
               className={styles.popup}
@@ -516,7 +517,7 @@ export function MoneyRangeField({
   toDisabled,
 }: MoneyRangeFieldProps) {
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} style={style} className={className}>
+    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} style={style} className={className} compact={compact}>
       <span className={`${styles.control} ${styles.rangeShell} ${error ? styles.controlError : ''} ${compact ? styles.compact : ''}`}>
         <input
           className={styles.rangeInput}

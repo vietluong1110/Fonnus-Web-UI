@@ -307,6 +307,9 @@
 .affix {
   color: var(--ink-soft);
   font-size: var(--size-body-sm);
+  /* Inherited 1.65 line-height made a suffixed control taller than the
+     field beside it — the affix must never set the shell's height. */
+  line-height: 1;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;

@@ -76,13 +76,15 @@ Legend: ✅ present and named identically · ⚠️ present but differs (see not
 
 | Catalogue | Model | |
 |---|---|---|
-| `service_catalog` | `service_catalog: ServiceRow[]` | ⚠️ all eight columns ✅; model adds `id` and `from_template` `[ext]` |
+| `service_catalog` | `service_catalog: ServiceRow[]` | ⚠️ all eight columns ✅; model adds `id`, `from_template` and `service_group` `[ext]` |
+| — | `service_groups: string[]` | `[ext]` the price list's headings, in order — see the `[ext]` table |
 | `pricing_disclosure_policy` | `pricing_disclosure_policy` | ✅ `'exact' \| 'range' \| 'defer'` |
 | `services_not_offered` | `services_not_offered` | ✅ |
-| `package_bundles` | `package_bundles: Bundle[]` | ⚠️ catalogue says "table" with no columns; model defines `{ bundle_name, price, note }` |
+| `package_bundles` | `package_bundles: Bundle[]` | ⚠️ catalogue says "table" with no columns; model defines `{ bundle_name, price, service_ids, note }` — `service_ids` `[ext]` points at `service_catalog` rows by `id`, so it depends on Q5 (stable ids) |
 | `instalment_options` | `instalment_options` | ✅ |
 | `payment_methods` | `payment_methods` | ✅ `cash \| transfer \| card \| momo \| zalopay` |
-| `active_promotions` | `active_promotions: Promotion[]` | ✅ |
+| — | `payment_methods_other: string[]` | `[ext]` free-text methods the enum does not name — see the `[ext]` table |
+| `active_promotions` | `active_promotions: Promotion[]` | ⚠️ model adds `promo_services` (service id + percent) and `promo_condition` `[ext]`; `promo_description` is now **derived** from them by the UI, never typed |
 
 ### A4 · Scheduling and booking
 
@@ -239,6 +241,11 @@ because six of the fifteen built sections write at least one of them.
 | `greeting_by_daypart` | Optional per-daypart greetings (`{ enabled, morning, afternoon, evening }`) | Wireframe 16. An extension of `greeting_script_custom` | Store as JSONB, or drop and keep one greeting |
 | `email_rules: EmailRule[]` | Per-intent email notification rules, with recipients and templates | The whole Kỹ năng → "Gửi email" skill. **Not in catalogue v1 at all** | **Needs a decision.** This is a feature, not a field — it implies an outbound email service |
 | `ServiceRow.from_template` | Did this row come from the vertical template? | Lets the UI tag a row "mẫu" so the tenant knows what still needs checking | Store, or re-derive server-side when seeding |
+| `ServiceRow.service_group` | The price-list heading a service sits under ("Tổng quát", "Thẩm mỹ"), free text the owner renames | Every Vietnamese clinic's bảng giá is grouped, and a clinic with 30 rows cannot scan a flat list. The agent never voices the heading | Store as a column on the row |
+| `service_groups: string[]` | The headings themselves, in display order | A heading has to be able to stand **empty** — the owner names a group before filling it, and dragging the last row out must not delete it. A list derived from the rows cannot represent that. The UI reads the union (list first, then any name still on a row) so the two halves cannot drift apart and no row can be hidden | Store as an ordered array on the tenant, or a small `service_groups` table with a position column |
+| `Promotion.promo_services` | `{ service_id, discount_percent }[]` — which services an offer discounts, and by how much | "Giảm 20% tẩy trắng" is structured data the agent has to apply per service; as prose it could not be checked against the price list or expired per row | Store as a join table keyed on the service id (depends on Q5, stable ids) |
+| `payment_methods_other` | Ways to pay the five-value enum does not name | Vietnamese clinics take wallets and bank apps the enum was fixed before; an owner who cannot enter theirs simply leaves the field wrong | Store as a string array beside the enum, or widen the enum and keep this for the tail |
+| `Promotion.promo_condition` | "Áp dụng khách mới" — what a caller must satisfy | The catalogue has only `promo_description`, which is now the *derived* sentence | Store as a column |
 | `HolidayException.seeded` | Was this row pre-seeded by Fonnus? | Same purpose, for holidays | Same |
 | `id` on every entity row | Client-generated row key | React list keys and edit targeting. `model.ts:343` says "the server replaces them on save" | **Decide explicitly** — see open questions Q5 |
 | `escalation_triggers_custom`, `emergency_red_flags_custom` | The tenant half of a split field | See *Split fields* above | Two columns recommended |

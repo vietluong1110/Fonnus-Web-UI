@@ -29,6 +29,13 @@ import {
   parkingExchange,
   prepExchange,
   priceSentence,
+  promoOffer,
+  promoSentence,
+  bundleName,
+  bundleSentence,
+  notOfferedSentence,
+  paymentSentence,
+  shortVnd,
   summarizeWeek,
   tetExchange,
 } from '../app/letan/knowledge/answers'
@@ -172,20 +179,30 @@ function reply(turn: ReceptionistTurn, now: Date): string {
 
   // Money.
   if (/tra gop/.test(t)) return instalmentExchange(cfg).a ?? `Dạ, câu này em chưa rõ ạ. ${UNRESOLVABLE_FALLBACK_SCRIPT}`
-  if (any(t, [/thanh toan/, /chuyen khoan/, /the tin dung/, /quet the/, /momo/, /zalopay/, /tien mat/])) {
-    const ways = cfg.payment_methods.map((m) => LABELS.payment[m].toLowerCase())
-    return ways.length ? `Dạ, phòng khám nhận ${ways.join(', ')} ạ.` : `Dạ, phòng khám nhận tiền mặt ạ.`
-  }
+  if (any(t, [/thanh toan/, /chuyen khoan/, /the tin dung/, /quet the/, /momo/, /zalopay/, /tien mat/])) return paymentSentence(cfg.payment_methods, cfg.payment_methods_other)
   if (any(t, [/uu dai/, /khuyen mai/, /giam gia/, /chuong trinh/])) {
     const today = localIso(now)
     const live = cfg.active_promotions.filter((p) => p.promo_name.trim() && (!p.valid_from || p.valid_from <= today) && (!p.valid_to || today <= p.valid_to))
-    return live.length ? `Dạ có ạ, ${live.map((p) => p.promo_description.trim() || p.promo_name.trim()).join('; ')}. Áp dụng đến hết ${live[0].valid_to.slice(8, 10)}/${live[0].valid_to.slice(5, 7)} ạ.` : `Dạ, hiện phòng khám chưa có chương trình ưu đãi nào ạ.`
+    if (!live.length) return `Dạ, hiện phòng khám chưa có chương trình ưu đãi nào ạ.`
+    // One offer is said in full; several are joined, and only the first keeps its dates.
+    if (live.length === 1) return promoSentence(live[0], cfg.service_catalog)
+    return `Dạ có ạ, phòng khám đang ${live.map((p) => promoOffer(p, cfg.service_catalog) || p.promo_name.trim()).join('; ')} ạ. Anh chị quan tâm chương trình nào để em nói rõ hơn ạ?`
   }
   if (any(t, [/bhyt/, /bao hiem/])) return insuranceExchange(cfg).a ?? `Dạ, câu này em xin ghi nhận và nhờ nhân viên gọi lại anh chị ạ.`
 
   // A service, named.
-  const notOffered = cfg.services_not_offered.map(fold).find((n) => n && t.includes(n))
-  if (notOffered) return `Dạ, hiện phòng khám không làm ${notOffered} ạ. Em xin lỗi anh chị.`
+  const notOffered = cfg.services_not_offered.find((n) => n.trim() && t.includes(fold(n)))
+  if (notOffered) return notOfferedSentence(notOffered)
+  // A combo before the services: its name is usually two of them joined.
+  const bundles = cfg.package_bundles.filter((b) => b.bundle_name.trim())
+  const bundle = bundles.filter((b) => t.includes(fold(b.bundle_name))).sort((a, b) => b.bundle_name.length - a.bundle_name.length)[0]
+  if (bundle) return bundleSentence(bundle, cfg.service_catalog)
+  // "gói" and "gọi" fold to the same letters, so a bare /goi/ would catch "gọi lại".
+  if (any(t, [/combo/, /goi (dich vu|combo|nao|gi)/, /tron goi/, /co goi/])) {
+    if (!bundles.length) return `Dạ, hiện phòng khám chưa có gói combo nào ạ.`
+    const list = bundles.map((b) => `${bundleName(b).charAt(0).toLowerCase()}${bundleName(b).slice(1)}${b.price != null ? ` ${shortVnd(b.price)}` : ''}`)
+    return `Dạ, phòng khám có gói ${list.join('; gói ')} ạ. Anh chị quan tâm gói nào để em nói rõ hơn ạ?`
+  }
   const svc = serviceIn(cfg, t)
   if (svc) {
     let line = priceSentence(svc, cfg.pricing_disclosure_policy)

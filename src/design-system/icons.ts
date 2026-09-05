@@ -248,6 +248,14 @@ export const ICONS = {
   info: [RING, { c: [12, 8.2, 1.4], fill: true }, { d: 'M12 11.4v5.2', accent: true }],
   /** [ext] Trợ giúp — the ring with a terracotta question hook. */
   help: [RING, { d: 'M9.4 9.6a2.6 2.6 0 1 1 3.9 2.3c-.8.5-1.3 1-1.3 1.9v.4', accent: true }, { c: [12, 16.8, 1.3], fill: true }],
+  /** [ext] Tiền mặt — a banknote, the coin in the middle. */
+  cash: [{ r: [3, 6.5, 18, 11, 2.5] }, { c: [12, 12, 2.8], accent: true }],
+  /** [ext] Chuyển khoản — money out and money back. */
+  transfer: [{ d: 'M4 9.4h13.2' }, { d: 'M14.4 6.6 17.8 9.4 14.4 12.2', accent: true }, { d: 'M20 14.6H6.8' }, { d: 'M9.6 11.8 6.2 14.6 9.6 17.4' }],
+  /** [ext] Thẻ — a card and its stripe. */
+  card: [{ r: [3, 6, 18, 12, 2.5] }, { d: 'M3 10.4h18', accent: true }],
+  /** [ext] Ví điện tử — a wallet, the clasp pocket on the right. */
+  wallet: [{ r: [3.5, 6.5, 17, 11, 2.5] }, { d: 'M14.6 10.4h5.9v3.2h-5.9a1.6 1.6 0 0 1 0-3.2z', accent: true }],
   /** [ext] Xoá — a bin; the handle arc is the accent. */
   trash: [
     { d: 'M5 7.2h14' },
@@ -258,6 +266,15 @@ export const ICONS = {
   edit: [
     { d: 'M5 19l3.5-.8L18.9 7.8a2.1 2.1 0 0 0-3-3L5.4 15.2z' },
     { d: 'M14.6 6.2l3.2 3.2', accent: true },
+  ],
+  /** [ext] Kéo thả — a handle of six dots; one is the accent. */
+  grip: [
+    { c: [9, 6.8, 1.4], fill: true },
+    { c: [15, 6.8, 1.4], fill: true },
+    { c: [9, 12, 1.4], fill: true, accent: true },
+    { c: [15, 12, 1.4], fill: true },
+    { c: [9, 17.2, 1.4], fill: true },
+    { c: [15, 17.2, 1.4], fill: true },
   ],
   /** [ext] Đăng xuất — a door edge and the arrow leaving it. */
   'sign-out': [

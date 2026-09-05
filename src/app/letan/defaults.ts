@@ -47,6 +47,7 @@ const hours = (day: Weekday, open: boolean, from = '08:00', to = '20:00'): DayHo
 
 const service = (
   id: string,
+  service_group: string,
   service_name: string,
   service_aliases: string[],
   price_from: number | null,
@@ -66,32 +67,66 @@ const service = (
   service_note,
   is_bookable,
   from_template: true,
+  service_group,
 })
 
-/** Twelve common dental services, priced where the market range is well known. */
+/*
+ * The four headings a Vietnamese dental price list is laid out under. Free
+ * text on each row — the owner renames them on the page — so these are the
+ * template's starting names, not an enumeration.
+ */
+const GENERAL = 'Tổng quát'
+const COSMETIC = 'Thẩm mỹ'
+const ORTHO = 'Chỉnh nha và Implant'
+const KIDS = 'Trẻ em'
+
+/** Twelve common dental services, priced where the market range is well known, in price-list order. */
 export const DENTAL_SERVICE_TEMPLATE: ServiceRow[] = [
-  service('svc-cao-voi', 'Cạo vôi răng', ['lấy cao răng'], 300_000, 500_000, 'lan', 30),
-  service(
-    'svc-tay-trang',
-    'Tẩy trắng răng',
-    ['làm trắng răng'],
-    1_500_000,
-    2_500_000,
-    'lan',
-    60,
-    'Không áp dụng răng nhiễm tetracycline',
-  ),
-  service('svc-tram', 'Trám răng', ['hàn răng'], 200_000, 500_000, 'rang', 30),
-  service('svc-implant', 'Cấy ghép implant', ['trồng răng'], null, null, 'rang', 90),
-  service('svc-nieng', 'Niềng răng', ['chỉnh nha'], 30_000_000, 90_000_000, 'lieu-trinh', 30, '', false),
-  service('svc-nho-khon', 'Nhổ răng khôn', ['nhổ răng số 8'], 1_000_000, 3_000_000, 'rang', 45),
-  service('svc-nho-thuong', 'Nhổ răng thường', [], 300_000, 800_000, 'rang', 30),
-  service('svc-boc-su', 'Bọc răng sứ', ['răng sứ'], 2_000_000, 8_000_000, 'rang', 60),
-  service('svc-dan-su', 'Dán sứ veneer', ['veneer'], 6_000_000, 12_000_000, 'rang', 60),
-  service('svc-tuy', 'Điều trị tuỷ', ['chữa tuỷ', 'lấy tuỷ'], 800_000, 2_000_000, 'rang', 60),
-  service('svc-tre-em', 'Khám răng trẻ em', ['nha khoa trẻ em'], 100_000, 300_000, 'lan', 30),
-  service('svc-kham', 'Khám tổng quát', ['khám răng'], 0, 0, 'lan', 20),
+  service('svc-kham', GENERAL, 'Khám tổng quát', ['khám răng'], 0, 0, 'lan', 20),
+  service('svc-cao-voi', GENERAL, 'Cạo vôi răng', ['lấy cao răng'], 300_000, 500_000, 'lan', 30),
+  service('svc-tram', GENERAL, 'Trám răng', ['hàn răng'], 200_000, 500_000, 'rang', 30),
+  service('svc-tuy', GENERAL, 'Điều trị tuỷ', ['chữa tuỷ', 'lấy tuỷ'], 800_000, 2_000_000, 'rang', 60),
+  service('svc-nho-thuong', GENERAL, 'Nhổ răng thường', [], 300_000, 800_000, 'rang', 30),
+  service('svc-nho-khon', GENERAL, 'Nhổ răng khôn', ['nhổ răng số 8'], 1_000_000, 3_000_000, 'rang', 45),
+  service('svc-tay-trang', COSMETIC, 'Tẩy trắng răng', ['làm trắng răng'], 1_500_000, 2_500_000, 'lan', 60, 'Không áp dụng răng nhiễm tetracycline'),
+  service('svc-boc-su', COSMETIC, 'Bọc răng sứ', ['răng sứ'], 2_000_000, 8_000_000, 'rang', 60),
+  service('svc-dan-su', COSMETIC, 'Dán sứ veneer', ['veneer'], 6_000_000, 12_000_000, 'rang', 60),
+  service('svc-nieng', ORTHO, 'Niềng răng', ['chỉnh nha'], 30_000_000, 90_000_000, 'lieu-trinh', 30, '', false),
+  service('svc-implant', ORTHO, 'Cấy ghép implant', ['trồng răng'], null, null, 'rang', 90),
+  service('svc-tre-em', KIDS, 'Khám răng trẻ em', ['nha khoa trẻ em'], 100_000, 300_000, 'lan', 30),
 ]
+
+/**
+ * The heading a row sits under. A row saved before `service_group` existed
+ * carries none: a template row goes back under its template heading by id,
+ * anything else is ungrouped until the owner names a group for it.
+ */
+export function groupOf(s: ServiceRow): string {
+  return s.service_group ?? DENTAL_SERVICE_TEMPLATE.find((t) => t.id === s.id)?.service_group ?? ''
+}
+
+/**
+ * The price list's headings, in order: the record's own list first — which is
+ * what keeps a heading the owner emptied — then any name found on a row that
+ * the list has lost. Reading it this way means neither half can hide a row.
+ */
+export function groupNamesOf(cfg: { service_groups: string[]; service_catalog: ServiceRow[] }): string[] {
+  const names = [...(cfg.service_groups ?? [])]
+  for (const s of cfg.service_catalog) {
+    const g = groupOf(s)
+    if (!names.includes(g)) names.push(g)
+  }
+  return names
+}
+
+/** The four headings the dental template ships under. */
+export const DENTAL_SERVICE_GROUPS = [GENERAL, COSMETIC, ORTHO, KIDS]
+
+/** Things a dental clinic is often asked for and often does not do — one tap adds one to `services_not_offered`. */
+export const DENTAL_NOT_OFFERED_IDEAS = ['Chỉnh nha trẻ dưới 12 tuổi', 'Phẫu thuật hàm mặt', 'Gây mê toàn thân', 'Cấp cứu ngoài giờ', 'Khám tại nhà']
+
+/** Ways to answer "có trả góp không" without typing — the first is the most common truth. */
+export const INSTALMENT_IDEAS = ['Không hỗ trợ trả góp', 'Trả góp 0% qua thẻ tín dụng, đơn từ 10 triệu', 'Trả góp qua công ty tài chính cho niềng răng và implant']
 
 /** Vietnamese public holidays, pre-seeded. Tết is the one that breaks agents. */
 export const HOLIDAY_SEED: HolidayException[] = [
@@ -194,12 +229,14 @@ export const DEFAULT_CONFIG: ReceptionistConfig = {
   holiday_exceptions: HOLIDAY_SEED,
   holidays_confirmed: false,
 
+  service_groups: DENTAL_SERVICE_GROUPS,
   service_catalog: DENTAL_SERVICE_TEMPLATE,
   pricing_disclosure_policy: 'range',
   services_not_offered: [],
   package_bundles: [],
   instalment_options: '',
   payment_methods: ['cash', 'transfer'],
+  payment_methods_other: [],
   active_promotions: [],
 
   ai_bookable_slots_per_day: 6,
@@ -318,6 +355,8 @@ export const LABELS = {
     range: 'Khoảng giá (khuyên dùng)',
     defer: 'Không báo giá — mời đến khám',
   },
+  /** The same three, short enough for a segmented control; `pricing` keeps the long reading for summaries. */
+  pricingShort: { range: 'Khoảng giá', exact: 'Giá chính xác', defer: 'Không báo giá' },
   payment: { cash: 'Tiền mặt', transfer: 'Chuyển khoản', card: 'Thẻ', momo: 'MoMo', zalopay: 'ZaloPay' },
   confirmation: { sms: 'SMS', zalo: 'Zalo', none: 'Không gửi' },
   afterHours: {
