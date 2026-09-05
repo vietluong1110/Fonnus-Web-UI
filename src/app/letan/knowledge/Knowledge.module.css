@@ -24,7 +24,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
   gap: 40px;
-  align-items: start;
+  /* Both columns run the full height of the row: the preview sticks to the
+     top of the rail and the assistant to its foot, the save bar to the foot
+     of the form column — and a sticky child needs the tall box to move in. */
+  align-items: stretch;
 }
 
 .work::before {
@@ -46,9 +49,17 @@
 }
 
 .rail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* The preview, pinned to the top of the rail. The assistant window, when the
+   page mounts one, pins itself to the rail's foot (`.dockAside` in SetupChat). */
+.railTop {
   position: sticky;
   top: 24px;
-  min-width: 0;
 }
 
 .lede {
@@ -59,7 +70,7 @@
   color: var(--ink-soft);
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1180.98px) {
   .work {
     display: flex;
     flex-direction: column;
@@ -78,8 +89,11 @@
   }
 
   .rail {
-    position: static;
     order: 1;
+  }
+
+  .railTop {
+    position: static;
   }
 
   .lede {
@@ -380,6 +394,11 @@
 .holidays {
   display: flex;
   flex-direction: column;
+  /* The rows answer to this list's width, not the viewport's: the column is
+     narrow on a 1200px desktop with the rail beside it and wide on an 860px
+     tablet with the rail stacked above. HoursSection measures the same box
+     for the parts of a row that are text. Thresholds live in one place there. */
+  container: holidays / inline-size;
 }
 
 .holiday,
@@ -483,6 +502,7 @@
 .holidayWhen button,
 .holidayWhat button {
   width: 100%;
+  min-width: 0;
   justify-content: space-between;
 }
 
@@ -600,30 +620,63 @@
   gap: 10px;
 }
 
-@media (max-width: 859.98px) {
+/*
+ * Under 660px of list: still one line, but the date pill gives up its year
+ * (`reading="short"` in HoursSection) and 52px with it — the name column is
+ * what runs out first, and "Tết Nguyên Đán 2027" needs ~170px to be a name.
+ */
+@container holidays (max-width: 659.98px) {
+  .holidayWhen {
+    flex-basis: 150px;
+  }
+}
+
+/*
+ * Under 560px: two lines a row. The name takes the first with the delete
+ * beside it, and the two pills split the second exactly in half — a fixed
+ * share, not a share of their own text, which is what had every row's pills
+ * start and end on different verticals.
+ */
+@container holidays (max-width: 559.98px) {
   .holidayHead {
     display: none;
   }
 
   .holiday {
     flex-wrap: wrap;
-    gap: 8px 10px;
+    gap: 10px;
     padding: 12px 0;
   }
 
+  /* The whole first line but the delete: its 34px and the 10px gap. Stated
+     as a basis so the date pill cannot squeeze in beside a short name. */
   .holidayName {
-    flex: 1 1 100%;
+    flex: 1 1 calc(100% - 44px);
+    order: 1;
+  }
+
+  .holidayEnd {
     order: 1;
   }
 
   .holidayWhen,
   .holidayWhat {
-    flex: 1 1 150px;
+    flex: 0 0 calc(50% - 5px);
     order: 2;
+    min-width: 0;
   }
 
-  .holidayEnd {
-    order: 2;
+  /* A hair tighter than the pills are in a form row: on a 375px phone each
+     half is ~140px, and the roomier chrome cost the last letter. */
+  .holidayWhen button,
+  .holidayWhat button {
+    padding: 0 8px 0 10px;
+    gap: 6px;
+  }
+
+  /* Two pixels more for the date: "30/04–01/05" was one pixel over. */
+  .holidayWhen button {
+    padding: 0 7px 0 9px;
   }
 }
 

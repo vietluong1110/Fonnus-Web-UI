@@ -1,7 +1,6 @@
-import { appHref } from '../../../hooks/useRoute'
 import { LABELS } from '../defaults'
 import type { PersonalityStyle, SpeakingSpeed, VoiceId } from '../model'
-import { SectionHead } from '../LeTanPage'
+import { ProfileSection } from './ProfileSection'
 import { useConfig, useDraft } from '../store'
 import { Card, PlayButton, SaveBar, SelectField, Segmented, Switch, TextField, ui } from '../../ui'
 import { defaultGreeting } from '../greeting'
@@ -75,155 +74,145 @@ export function VoiceSection() {
   }
 
   return (
-    <>
-      <SectionHead title="Giọng nói và cách nói" backLabel="Hồ sơ" backHref={appHref('le-tan', 'ho-so')} />
-      <p className={styles.lede}>
-        Nghe thử rồi hãy chọn — giọng, tốc độ và phong cách ở đây đều bấm nghe được ngay.
-      </p>
+    <ProfileSection
+      title="Giọng nói và cách nói"
+      lede="Nghe thử rồi hãy chọn — giọng, tốc độ và phong cách ở đây đều bấm nghe được ngay."
+      rail={<TryPanel section="giong-noi" config={{ ...config, ...draft }} />}
+      bar={<SaveBar {...d.bar} sub="Giọng nói và cách nói · áp dụng cho cuộc gọi tiếp theo" />}
+    >
+      <Card title="Giọng nói">
+        <VoicePicker value={draft.voice_selection} onChange={pickVoice} sampleText={audition} />
+        <span className={ui.hint}>
+          Fonnus chọn sẵn giọng theo thành phố của phòng khám ({config.city}). Đổi lúc nào cũng được — mọi giọng đều nghe thử được ngay trong danh sách.
+        </span>
+      </Card>
 
-      <div className={styles.work}>
-        <div className={styles.col}>
-          <Card title="Giọng nói">
-            <VoicePicker value={draft.voice_selection} onChange={pickVoice} sampleText={audition} />
-            <span className={ui.hint}>
-              Fonnus chọn sẵn giọng theo thành phố của phòng khám ({config.city}). Đổi lúc nào cũng được — mọi giọng đều nghe thử được ngay trong danh sách.
-            </span>
-          </Card>
-
-          <Card title="Cách nói">
-            <div className={ui.stackTight}>
-              <span className={ui.label}>Tốc độ</span>
-              <Segmented<SpeakingSpeed>
-                ariaLabel="Tốc độ nói"
-                value={draft.speaking_speed}
-                onChange={(v) => set('speaking_speed', v)}
-                options={(['slow', 'normal', 'fast'] as SpeakingSpeed[]).map((v) => ({ value: v, label: LABELS.speed[v] }))}
-              />
-              <span className={ui.hint}>{SPEED_HINT[draft.speaking_speed]}</span>
-            </div>
-
-            <div className={ui.divider} />
-
-            <div className={ui.stackTight}>
-              <span className={ui.label}>Phong cách — nghe thử từng kiểu rồi chọn</span>
-              <div className={styles.tiles} role="radiogroup" aria-label="Phong cách">
-                {(['professional_warm', 'friendly', 'formal'] as PersonalityStyle[]).map((v) => {
-                  const on = draft.personality_style === v
-                  return (
-                    <div key={v} className={`${styles.tile} ${on ? styles.tileOn : ''}`}>
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={on}
-                        className={styles.tileButton}
-                        onClick={() => set('personality_style', v)}
-                      >
-                        <span className={styles.tileName}>{LABELS.style[v]}</span>
-                        <span className={styles.tileSample}>“{STYLE_SAMPLE[v]}”</span>
-                      </button>
-                      <PlayButton text={STYLE_SAMPLE[v]} label={`Nghe câu mẫu ${LABELS.style[v]}`} />
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </Card>
-
-          <Card title="Nhịp trò chuyện" subtitle="nâng cao">
-            <p className={ui.hint} style={{ margin: '-4px 0 2px' }}>
-              Đã chỉnh sẵn cho khách Việt. Chỉ sửa nếu nghe thử thấy {agent} chen lời khách, hoặc bắt khách chờ lâu.
-            </p>
-
-            <div className={`${styles.paceBlock} ${styles.paceFirst}`}>
-              <div className={styles.paceHead}>
-                <span className={ui.label}>Chờ khách nói xong</span>
-                <span className={styles.paceValue}>{seconds(draft.endpointing_silence_ms)}</span>
-              </div>
-              <input
-                type="range"
-                className={styles.range}
-                min={300}
-                max={1500}
-                step={50}
-                value={draft.endpointing_silence_ms}
-                onChange={(e) => set('endpointing_silence_ms', Number(e.target.value))}
-                aria-label="Chờ khách nói xong"
-              />
-              <div className={styles.rangeScale}>
-                <span>Đáp nhanh</span>
-                <span>Từ tốn</span>
-              </div>
-              <span className={ui.hint}>{pacing(draft.endpointing_silence_ms)}</span>
-            </div>
-
-            <div className={styles.paceBlock}>
-              <Switch
-                label="Hỏi lại khi khách im lặng"
-                checked={draft.silence_nudge_enabled}
-                onChange={(v) => set('silence_nudge_enabled', v)}
-              />
-              {draft.silence_nudge_enabled ? (
-                <>
-                  <div className={styles.sentence}>
-                    <span>Khách im lặng</span>
-                    <SelectField
-                      compact
-                      aria-label="Số giây im lặng"
-                      value={String(draft.silence_nudge_delay_seconds)}
-                      onChange={(v) => set('silence_nudge_delay_seconds', Number(v))}
-                      options={['5', '7', '10', '15'].map((s) => ({ value: s, label: `${s} giây` }))}
-                      style={{ width: 106 }}
-                    />
-                    <span>thì {agent} hỏi lại:</span>
-                  </div>
-                  <TextField
-                    value={draft.silence_nudge_script}
-                    onChange={(e) => set('silence_nudge_script', e.target.value)}
-                    aria-label="Câu hỏi lại"
-                    suffix={<PlayButton text={draft.silence_nudge_script} label="Nghe câu hỏi lại" />}
-                  />
-                </>
-              ) : null}
-            </div>
-
-            <div className={styles.paceBlock}>
-              <Switch
-                label="Tự kết thúc khi không ai đáp"
-                checked={draft.end_call_after_silence_enabled}
-                onChange={(v) => set('end_call_after_silence_enabled', v)}
-              />
-              {draft.end_call_after_silence_enabled ? (
-                <>
-                  <div className={styles.sentence}>
-                    <span>Hỏi lại</span>
-                    <SelectField
-                      compact
-                      aria-label="Số lần hỏi lại"
-                      value={String(draft.end_call_after_n_nudges)}
-                      onChange={(v) => set('end_call_after_n_nudges', Number(v))}
-                      options={['1', '2', '3'].map((s) => ({ value: s, label: `${s} lần` }))}
-                      style={{ width: 100 }}
-                    />
-                    <span>mà vẫn im lặng thì {agent} chào rồi cúp máy:</span>
-                  </div>
-                  <TextField
-                    value={draft.call_closing_script}
-                    onChange={(e) => set('call_closing_script', e.target.value)}
-                    aria-label="Câu chào trước khi ngắt máy"
-                    suffix={<PlayButton text={draft.call_closing_script} label="Nghe câu chào cuối" />}
-                  />
-                </>
-              ) : null}
-            </div>
-          </Card>
+      <Card title="Cách nói">
+        <div className={ui.stackTight}>
+          <span className={ui.label}>Tốc độ</span>
+          <Segmented<SpeakingSpeed>
+            ariaLabel="Tốc độ nói"
+            value={draft.speaking_speed}
+            onChange={(v) => set('speaking_speed', v)}
+            options={(['slow', 'normal', 'fast'] as SpeakingSpeed[]).map((v) => ({ value: v, label: LABELS.speed[v] }))}
+          />
+          <span className={ui.hint}>{SPEED_HINT[draft.speaking_speed]}</span>
         </div>
 
-        <aside className={styles.rail}>
-          <TryPanel section="giong-noi" config={{ ...config, ...draft }} />
-        </aside>
-      </div>
+        <div className={ui.divider} />
 
-      <SaveBar {...d.bar} sub="Giọng nói và cách nói · áp dụng cho cuộc gọi tiếp theo" />
-    </>
+        <div className={ui.stackTight}>
+          <span className={ui.label}>Phong cách — nghe thử từng kiểu rồi chọn</span>
+          <div className={styles.tiles} role="radiogroup" aria-label="Phong cách">
+            {(['professional_warm', 'friendly', 'formal'] as PersonalityStyle[]).map((v) => {
+              const on = draft.personality_style === v
+              return (
+                <div key={v} className={`${styles.tile} ${on ? styles.tileOn : ''}`}>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    className={styles.tileButton}
+                    onClick={() => set('personality_style', v)}
+                  >
+                    <span className={styles.tileName}>{LABELS.style[v]}</span>
+                    <span className={styles.tileSample}>“{STYLE_SAMPLE[v]}”</span>
+                  </button>
+                  <PlayButton text={STYLE_SAMPLE[v]} label={`Nghe câu mẫu ${LABELS.style[v]}`} />
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Nhịp trò chuyện" subtitle="nâng cao">
+        <p className={ui.hint} style={{ margin: '-4px 0 2px' }}>
+          Đã chỉnh sẵn cho khách Việt. Chỉ sửa nếu nghe thử thấy {agent} chen lời khách, hoặc bắt khách chờ lâu.
+        </p>
+
+        <div className={`${styles.paceBlock} ${styles.paceFirst}`}>
+          <div className={styles.paceHead}>
+            <span className={ui.label}>Chờ khách nói xong</span>
+            <span className={styles.paceValue}>{seconds(draft.endpointing_silence_ms)}</span>
+          </div>
+          <input
+            type="range"
+            className={styles.range}
+            min={300}
+            max={1500}
+            step={50}
+            value={draft.endpointing_silence_ms}
+            onChange={(e) => set('endpointing_silence_ms', Number(e.target.value))}
+            aria-label="Chờ khách nói xong"
+          />
+          <div className={styles.rangeScale}>
+            <span>Đáp nhanh</span>
+            <span>Từ tốn</span>
+          </div>
+          <span className={ui.hint}>{pacing(draft.endpointing_silence_ms)}</span>
+        </div>
+
+        <div className={styles.paceBlock}>
+          <Switch
+            label="Hỏi lại khi khách im lặng"
+            checked={draft.silence_nudge_enabled}
+            onChange={(v) => set('silence_nudge_enabled', v)}
+          />
+          {draft.silence_nudge_enabled ? (
+            <>
+              <div className={styles.sentence}>
+                <span>Khách im lặng</span>
+                <SelectField
+                  compact
+                  aria-label="Số giây im lặng"
+                  value={String(draft.silence_nudge_delay_seconds)}
+                  onChange={(v) => set('silence_nudge_delay_seconds', Number(v))}
+                  options={['5', '7', '10', '15'].map((s) => ({ value: s, label: `${s} giây` }))}
+                  style={{ width: 106 }}
+                />
+                <span>thì {agent} hỏi lại:</span>
+              </div>
+              <TextField
+                value={draft.silence_nudge_script}
+                onChange={(e) => set('silence_nudge_script', e.target.value)}
+                aria-label="Câu hỏi lại"
+                suffix={<PlayButton text={draft.silence_nudge_script} label="Nghe câu hỏi lại" />}
+              />
+            </>
+          ) : null}
+        </div>
+
+        <div className={styles.paceBlock}>
+          <Switch
+            label="Tự kết thúc khi không ai đáp"
+            checked={draft.end_call_after_silence_enabled}
+            onChange={(v) => set('end_call_after_silence_enabled', v)}
+          />
+          {draft.end_call_after_silence_enabled ? (
+            <>
+              <div className={styles.sentence}>
+                <span>Hỏi lại</span>
+                <SelectField
+                  compact
+                  aria-label="Số lần hỏi lại"
+                  value={String(draft.end_call_after_n_nudges)}
+                  onChange={(v) => set('end_call_after_n_nudges', Number(v))}
+                  options={['1', '2', '3'].map((s) => ({ value: s, label: `${s} lần` }))}
+                  style={{ width: 100 }}
+                />
+                <span>mà vẫn im lặng thì {agent} chào rồi cúp máy:</span>
+              </div>
+              <TextField
+                value={draft.call_closing_script}
+                onChange={(e) => set('call_closing_script', e.target.value)}
+                aria-label="Câu chào trước khi ngắt máy"
+                suffix={<PlayButton text={draft.call_closing_script} label="Nghe câu chào cuối" />}
+              />
+            </>
+          ) : null}
+        </div>
+      </Card>
+    </ProfileSection>
   )
 }

@@ -232,7 +232,7 @@
 
 /* Narrow: one column, and the assistant goes on top — it is the fastest way
    through setup, so it should not be something you scroll to find. */
-@media (max-width: 1180px) {
+@media (max-width: 1180.98px) {
   .withRail {
     display: flex;
     flex-direction: column;
@@ -260,29 +260,6 @@
 
   .withRailAside {
     order: 1;
-  }
-}
-
-/*
- * A section page with the assistant docked bottom-right. The wrapper draws
- * nothing — it only publishes how much of the right edge is spoken for, which
- * the sticky save bar reads so its buttons stay reachable.
- */
-.docked {
-  display: contents;
-  --dock-inset: 396px;
-}
-
-/*
- * Phone: the assistant is a button over the page, not a window beside it — so
- * it owns none of the right edge, and instead owns a strip of the bottom one.
- * `--dock-lift` is the height of that strip: the save bar reads it and stacks
- * above the button rather than under it.
- */
-@media (max-width: 639.98px) {
-  .docked {
-    --dock-inset: 0px;
-    --dock-lift: 68px;
   }
 }
 

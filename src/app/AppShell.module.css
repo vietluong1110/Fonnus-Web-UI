@@ -21,6 +21,16 @@
   --tabbar-h: 0px;
 }
 
+/*
+ * Width of the sidebar, published for the same reason as `--tabbar-h`: the
+ * assistant's sheet slides up under the content, not under the window. On
+ * the root rather than the shell because the sheet is portalled to <body>,
+ * where nothing inside the shell is inherited. Restated in each width below.
+ */
+:root {
+  --sidebar-w: 216px;
+}
+
 .sidebar {
   position: sticky;
   top: 0;
@@ -254,6 +264,10 @@
     grid-template-columns: 64px minmax(0, 1fr);
   }
 
+  :root {
+    --sidebar-w: 64px;
+  }
+
   .sidebar {
     padding: 18px 10px 14px;
   }
@@ -315,6 +329,10 @@
   .shell {
     --tabbar-h: 60px;
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  :root {
+    --sidebar-w: 0px;
   }
 
   .sidebar {

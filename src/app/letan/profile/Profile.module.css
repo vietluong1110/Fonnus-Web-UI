@@ -24,7 +24,7 @@
  *      the same reset in LeTanPage.module.css.
  *   6. Under 640px the page is a phone: one column, controls at least 44px
  *      tall, nothing pinned to the bottom edge without going through
- *      `--tabbar-h` / `--dock-lift`.
+ *      `--tabbar-h` or the save bar's own stack.
  */
 
 /*
@@ -38,7 +38,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
   gap: 40px;
-  align-items: start;
+  /* Both columns run the full height of the row: the preview sticks to the
+     top of the rail and the assistant to its foot, the save bar to the foot
+     of the form column — and a sticky child needs the tall box to move in. */
+  align-items: stretch;
 }
 
 /* Full height of the taller column, not of the panel: the panel is sticky and
@@ -63,9 +66,17 @@
 }
 
 .rail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* The preview, pinned to the top of the rail. The assistant window, when the
+   page mounts one, pins itself to the rail's foot (`.dockAside` in SetupChat). */
+.railTop {
   position: sticky;
   top: 24px;
-  min-width: 0;
 }
 
 /*
@@ -87,14 +98,14 @@
  * back to being one column — and moves *above* the fields rather than below
  * them, because hearing what the caller hears is the point of the page.
  */
-@media (max-width: 1180px) {
+@media (max-width: 1180.98px) {
   .work {
     display: flex;
     flex-direction: column;
     /* The 40px above is the width of a gutter with a rule down it; stacked
-       there is no gutter. And `align-items: start` above is a grid
-       instruction — left in place on a flex column it stops the stacked
-       cards filling the width. */
+       there is no gutter. And the reset stays even though the grid above is
+       `stretch` now: a grid `align-items` left on a flex column once stopped
+       the stacked cards filling the width. */
     gap: 20px;
     align-items: stretch;
   }
@@ -108,8 +119,11 @@
   }
 
   .rail {
-    position: static;
     order: 1;
+  }
+
+  .railTop {
+    position: static;
   }
 
   .lede {

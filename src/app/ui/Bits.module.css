@@ -353,16 +353,31 @@
 }
 
 /* Sticky save bar */
-.saveBar {
+
+/*
+ * The bottom edge of a section page is one sticky stack, and the save bar is
+ * its anchor. Anything else that wants that edge while there are unsaved
+ * changes — the assistant's button, on a width where the page has no rail
+ * column to keep the assistant in — comes in through `BottomStackProvider`
+ * and sits above the bar's right corner, rising with it. Nothing measures
+ * the bar: its height changes with how the message wraps.
+ *
+ * `margin-top: auto` is for the stretched form column of a wide page: the
+ * stack rests on the column's floor, level with the assistant window at the
+ * foot of the rail beside it, rather than hanging under the last card.
+ */
+.saveStack {
   position: sticky;
   bottom: 16px;
-  /*
-   * A floating panel pinned to the bottom-right (the Fonnus assistant, when a
-   * section page docks it) sets --dock-inset to the width it owns, so "Lưu
-   * thay đổi" never ends up underneath it. Zero everywhere else.
-   */
-  margin-right: var(--dock-inset, 0px);
   z-index: 5;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.saveBar {
   align-self: stretch;
   display: flex;
   align-items: center;
@@ -397,11 +412,9 @@
 }
 
 /*
- * Phone. Three things want the bottom of the screen: the tab bar owns the
- * edge, the assistant sits just above it (--dock-lift, published by whichever
- * page put it there — 0 on a page with no assistant), and this bar stacks on
- * top of both. None of them may overlap, and none of them may be reached by
- * guessing at a height.
+ * Phone. The tab bar owns the bottom edge (`--tabbar-h`, published by the
+ * shell) and the stack sits clear of it; the assistant's button is inside the
+ * stack, so nothing here is reached by guessing at a height.
  *
  * The bar itself stops being one row: "Bạn có thay đổi chưa lưu" plus a
  * subtitle plus two buttons on a 358px line wraps into four ragged lines with
@@ -409,8 +422,11 @@
  * two buttons split the second.
  */
 @media (max-width: 639.98px) {
+  .saveStack {
+    bottom: calc(16px + var(--tabbar-h, 0px));
+  }
+
   .saveBar {
-    bottom: calc(16px + var(--tabbar-h, 0px) + var(--dock-lift, 0px));
     flex-wrap: wrap;
     gap: 8px 10px;
     padding: 12px 14px;
