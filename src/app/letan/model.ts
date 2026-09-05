@@ -110,6 +110,16 @@ export interface ServiceRow {
   is_bookable: boolean
   /** [ext] rows that came from the vertical template, so the UI can say "mẫu". */
   from_template: boolean
+  /**
+   * [ext] The heading this row sits under on the price list — "Tổng quát",
+   * "Thẩm mỹ" — free text the owner names. Groups are *derived* from the rows
+   * (a group is every row carrying the same name), so there is no second list
+   * to keep in step and no orphan reference; renaming a group renames its
+   * rows. Empty = not grouped. Rows saved before this field existed carry
+   * none; `groupOf()` in defaults.ts puts a template row back under its
+   * template heading by id.
+   */
+  service_group: string
 }
 
 export type PricingDisclosurePolicy = 'exact' | 'range' | 'defer'
@@ -122,14 +132,37 @@ export interface Bundle {
   bundle_name: string
   /** VND */
   price: number | null
+  /**
+   * [ext] The `service_catalog` rows this price covers, by `id`, so the
+   * agent can say what the package contains. Depends on ids being stable
+   * across a save (open question Q5); a row that is gone is simply skipped.
+   */
+  service_ids: string[]
+  /** Conditions — "áp dụng khách mới". */
   note: string
+}
+
+/** [ext] One service a promotion applies to, and how much comes off it. */
+export interface PromoService {
+  service_id: string
+  /** Percent off, 0–100. Null = the offer applies but is not a percentage. */
+  discount_percent: number | null
 }
 
 /** A3 · `active_promotions` — auto-expire (O). */
 export interface Promotion {
   id: string
   promo_name: string
+  /**
+   * The line the agent voices. **Derived**, not typed: the editor writes it
+   * from the structured fields below on every change, so the catalogue field
+   * still carries a sentence for the backend while the tenant edits parts.
+   */
   promo_description: string
+  /** [ext] Which services are discounted, and by how much. */
+  promo_services: PromoService[]
+  /** [ext] "Áp dụng khách mới" — what a caller must satisfy to get it. */
+  promo_condition: string
   valid_from: string
   valid_to: string
 }
@@ -276,12 +309,27 @@ export interface ReceptionistConfig {
   holidays_confirmed: boolean
 
   /* ---- A3 · Services and pricing ---- */
+  /**
+   * [ext] The price list's headings, in the order they are shown. The rows
+   * carry the name they sit under (`ServiceRow.service_group`); this list is
+   * what lets a heading exist with nothing under it yet — a group the owner
+   * has named but not filled. A name on a row that is missing here is
+   * appended when the page reads the record, so the two cannot drift apart.
+   */
+  service_groups: string[]
   service_catalog: ServiceRow[] // R2
   pricing_disclosure_policy: PricingDisclosurePolicy // R2, default range
   services_not_offered: string[] // O
   package_bundles: Bundle[] // O
   instalment_options: string // O
   payment_methods: PaymentMethod[] // O
+  /**
+   * [ext] Ways to pay that the enum above does not name — "Quẹt thẻ Visa tại
+   * quầy", a clinic's own instalment partner. Free text, said in the same
+   * breath as the known ones. The five-value enum cannot cover a market where
+   * new wallets appear every year.
+   */
+  payment_methods_other: string[]
   active_promotions: Promotion[] // O
 
   /* ---- A4 · Scheduling and booking ---- */

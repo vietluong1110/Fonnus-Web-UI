@@ -270,12 +270,13 @@ sends every row.
 
 ```jsonc
 {
+  "service_groups": ["Tổng quát", "Thẩm mỹ", "Chỉnh nha và Implant", "Trẻ em"],
   "service_catalog": [
     { "id": "svc-cao-voi", "service_name": "Cạo vôi răng",
       "service_aliases": ["lấy cao răng"],
       "price_from": 300000, "price_to": 500000, "price_unit": "lan",
       "duration": 30, "service_note": "", "is_bookable": true,
-      "from_template": true }
+      "from_template": true, "service_group": "Tổng quát" }
   ],
   "pricing_disclosure_policy": "range"
 }

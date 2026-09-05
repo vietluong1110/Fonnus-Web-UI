@@ -109,9 +109,14 @@ proposals a designer may redraw, not as canon — each is marked `[ext]` in
 | `alert`        | `circle-alert`, `triangle-alert` | the ring, terracotta stem, ink dot           |
 | `info`         | `info`                     | the ring, ink dot, terracotta stem                 |
 | `help`         | `circle-help`              | the ring, terracotta question hook                 |
+| `cash`         | `banknote`                 | a banknote, terracotta coin in the middle          |
+| `transfer`     | `arrow-left-right`         | two opposed arrows, the outbound one terracotta    |
+| `card`         | `credit-card`              | a card, terracotta stripe                          |
+| `wallet`       | `wallet`                   | a wallet, terracotta clasp pocket                  |
 | `trash`        | `trash-2`                  | a bin, terracotta handle arc                       |
 | `edit`         | `pencil`                   | a pencil, terracotta tip                           |
 | `sign-out`     | `log-out`                  | a door edge, terracotta arrow leaving              |
+| `grip`         | `grip-vertical`            | six dots, one terracotta — a row that can be dragged |
 
 Lucide is gone from the codebase (`lucide-static` removed, `public/icons/`
 deleted). Do not bring a stock set back for a one-off — draw the icon here and

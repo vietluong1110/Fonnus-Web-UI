@@ -143,3 +143,55 @@
   font-size: 12.5px;
   color: var(--ink-soft);
 }
+
+/*
+ * `boxed`: the chip row as a tag *field*. Same skin as `.control` in
+ * Field.module.css — milk ground, 12px radius, the inset hairline that
+ * thickens to the focus ring — because it is a field, and one that holds
+ * chips should not look like a different species from one that holds text.
+ *
+ * The box is what tells a set of chosen tags apart from a row of suggestions
+ * sitting under it: inside is yours, outside is on offer.
+ */
+.boxed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+  cursor: text;
+  min-width: 0;
+}
+
+.boxed:hover {
+  box-shadow: inset 0 0 0 1px rgba(38, 31, 24, 0.36);
+}
+
+.boxed:focus-within {
+  box-shadow:
+    inset 0 0 0 1.5px var(--focus-ring),
+    0 0 0 3px rgba(184, 92, 43, 0.13);
+}
+
+/* Grows to fill the last line, so the whole width of the box is clickable. */
+.boxedInput {
+  flex: 1 1 140px;
+  min-width: 120px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  line-height: 1.5;
+  color: var(--ink);
+  padding: 3px 2px;
+}
+
+.boxedInput::placeholder {
+  color: rgba(92, 82, 72, 0.6);
+}

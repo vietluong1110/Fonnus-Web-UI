@@ -62,6 +62,14 @@ interface ChipInputProps {
   systemTitle?: string
   emptyText?: string
   validate?: (raw: string) => string | null
+  /**
+   * Draw it as a tag *field* — one bordered box, the chips inside it, and the
+   * input always at the end — instead of a bare row of chips with an "+ Thêm"
+   * button. Use it when the set is the whole point of a card and needs to read
+   * as something you type into: the box says "what is in here is yours",
+   * which is what tells it apart from a row of suggestions underneath.
+   */
+  boxed?: boolean
 }
 
 export function ChipInput({
@@ -75,6 +83,7 @@ export function ChipInput({
   systemTitle,
   emptyText,
   validate,
+  boxed,
 }: ChipInputProps) {
   const [adding, setAdding] = useState(false)
   const [draft, setDraft] = useState('')
@@ -110,6 +119,53 @@ export function ChipInput({
   }
 
   const nothing = !value.length && !locked.length && !system.length
+
+  if (boxed) {
+    return (
+      <div
+        className={styles.boxed}
+        onMouseDown={(e) => {
+          // A press on the box's own padding lands in the input, the way a
+          // press anywhere in a text field does. A press on a chip is the chip's.
+          if (e.target === e.currentTarget) {
+            e.preventDefault()
+            inputRef.current?.focus()
+          }
+        }}
+      >
+        {system.map((s) => (
+          <Chip key={`sys-${s}`} system title={systemTitle}>
+            {s}
+          </Chip>
+        ))}
+        {locked.map((s) => (
+          <Chip key={`lock-${s}`} locked title={lockedTitle}>
+            {s}
+          </Chip>
+        ))}
+        {value.map((v) => (
+          <Chip key={v} onRemove={() => onChange(value.filter((x) => x !== v))}>
+            {v}
+          </Chip>
+        ))}
+        <input
+          ref={inputRef}
+          className={styles.boxedInput}
+          value={draft}
+          placeholder={placeholder}
+          onChange={(e) => {
+            setDraft(e.target.value)
+            setError(null)
+          }}
+          onKeyDown={onKey}
+          onBlur={commit}
+          aria-invalid={!!error}
+          aria-label={typeof placeholder === 'string' ? placeholder : undefined}
+          title={error ?? undefined}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className={styles.wrap}>

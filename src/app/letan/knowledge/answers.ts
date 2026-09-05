@@ -1,6 +1,6 @@
 import { LABELS, WEEKDAY_LONG } from '../defaults'
 import { summarizeHours } from '../readiness'
-import type { InsuranceOption, PricingDisclosurePolicy, ReceptionistConfig, ServiceRow, Weekday } from '../model'
+import type { Bundle, InsuranceOption, PaymentMethod, PricingDisclosurePolicy, Promotion, ReceptionistConfig, ServiceRow, Weekday } from '../model'
 import { PRICE_QUALIFIER } from '../system'
 import { formatVnd } from '../../ui'
 
@@ -46,6 +46,84 @@ export function shortVnd(n: number): string {
   if (n >= 1_000_000 && n % 100_000 === 0) return `${(n / 1_000_000).toString().replace('.', ',')} triệu`
   if (n >= 1_000 && n % 1_000 === 0) return `${n / 1_000} nghìn`
   return `${formatVnd(n)} đồng`
+}
+
+/**
+ * A price as the list shows it: "300–500 nghìn", "1,5 triệu", "800 nghìn – 2
+ * triệu", "miễn phí". The spoken shape rather than "300.000 – 500.000 đ": it is
+ * what she says, and it is a third of the width, which is what lets a price
+ * sit in one column of a one-line row. Null = no price yet.
+ */
+export function priceShort(from: number | null, to: number | null): string | null {
+  if (from == null) return null
+  if (from === 0 && (to ?? 0) === 0) return 'miễn phí'
+  if (to == null || to === from) return shortVnd(from)
+  const [a, ...unitA] = shortVnd(from).split(' ')
+  const [b, ...unitB] = shortVnd(to).split(' ')
+  return unitA.join(' ') === unitB.join(' ') ? `${a}–${b} ${unitA.join(' ')}` : `${shortVnd(from)} – ${shortVnd(to)}`
+}
+
+/** Wallets are brands and keep their capitals; "Tiền mặt" is a common noun and does not. */
+const PAYMENT_PROPER_NOUNS: PaymentMethod[] = ['momo', 'zalopay']
+
+/** "Dạ, phòng khám nhận tiền mặt, chuyển khoản ạ." — the named methods, then the clinic's own. */
+export function paymentSentence(methods: PaymentMethod[], other: string[] = []): string {
+  const ways = [
+    ...methods.map((m) => (PAYMENT_PROPER_NOUNS.includes(m) ? LABELS.payment[m] : LABELS.payment[m].toLowerCase())),
+    ...other.map((o) => mid(o.trim())).filter(Boolean),
+  ]
+  return ways.length ? `Dạ, phòng khám nhận ${ways.join(', ')} ạ.` : 'Dạ, phòng khám nhận tiền mặt ạ.'
+}
+
+/** The clean deflection for something on `services_not_offered` — said instead of an improvised answer. */
+export function notOfferedSentence(item: string): string {
+  return `Dạ, hiện phòng khám không làm ${mid(item.trim())} ạ. Em xin lỗi anh chị.`
+}
+
+/** "Gói cạo vôi và tẩy trắng gồm cạo vôi răng và tẩy trắng răng, giá 2 triệu, áp dụng khách mới ạ." */
+/** The combo's name without a leading "gói" — the sentence supplies its own, and "Gói gói gia đình" is what came out otherwise. */
+export function bundleName(b: Bundle): string {
+  return b.bundle_name.trim().replace(/^(gói|combo)\s+/i, '') || 'này'
+}
+
+export function bundleSentence(b: Bundle, catalog: ServiceRow[]): string {
+  const name = bundleName(b)
+  const parts = (b.service_ids ?? []).map((id) => catalog.find((s) => s.id === id)?.service_name.trim()).filter((n): n is string => !!n).map(mid)
+  const has = parts.length ? ` gồm ${parts.length > 1 ? `${parts.slice(0, -1).join(', ')} và ${parts[parts.length - 1]}` : parts[0]}` : ''
+  if (b.price == null) return `Gói ${mid(name)}${has} thì em xin ghi nhận, nhân viên sẽ báo giá lại anh chị ạ.`
+  const note = b.note.trim() ? `, ${mid(b.note.trim().replace(/[.\s]+$/, ''))}` : ''
+  return `Gói ${mid(name)}${has}, giá ${shortVnd(b.price)}${note} ạ. ${PRICE_QUALIFIER}`
+}
+
+/**
+ * The offer itself, without the "dạ có ạ" around it — what goes into the
+ * catalogue's `promo_description` so the field still holds a sentence while
+ * the tenant edits services and percentages instead of prose.
+ *
+ * "giảm" is said once for the whole list, not once per service: "giảm 20%
+ * tẩy trắng răng và 10% cạo vôi răng" is how a receptionist says it.
+ */
+export function promoOffer(p: Promotion, catalog: ServiceRow[]): string {
+  const items = (p.promo_services ?? [])
+    .map((ps) => {
+      const name = catalog.find((s) => s.id === ps.service_id)?.service_name.trim()
+      return name ? { name: mid(name), pct: ps.discount_percent } : null
+    })
+    .filter((x): x is { name: string; pct: number | null } => !!x)
+  if (!items.length) return p.promo_name.trim()
+  const parts = items.map((i) => (i.pct != null ? `${i.pct}% ${i.name}` : i.name))
+  const joined = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} và ${parts[parts.length - 1]}` : parts[0]
+  return items.some((i) => i.pct != null) ? `giảm ${joined}` : `có ưu đãi cho ${joined}`
+}
+
+/** "Dạ có ạ, phòng khám đang giảm 20% tẩy trắng răng, áp dụng đến hết 30/09, cho khách mới ạ." */
+export function promoSentence(p: Promotion, catalog: ServiceRow[]): string {
+  const offer = promoOffer(p, catalog)
+  if (!offer) return 'Dạ, hiện phòng khám chưa có chương trình ưu đãi nào ạ.'
+  // Not "áp dụng đến hết": the condition clause below often starts with "áp dụng" too.
+  const until = p.valid_to ? `, đến hết ${fmtDate(p.valid_to)}` : ''
+  const cond = (p.promo_condition ?? '').trim() ? `, ${mid((p.promo_condition ?? '').trim().replace(/[.\s]+$/, ''))}` : ''
+  return `Dạ có ạ, phòng khám đang ${offer}${until}${cond} ạ.`
 }
 
 /** What the agent would say for one service under the chosen policy. */

@@ -20,6 +20,7 @@ export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
   const svc = cfg.service_catalog.filter((s) => s.service_name.trim())
   const priced = svc.find((s) => s.price_from != null && s.price_from > 0) ?? svc[0]
   const unpriced = svc.find((s) => s.price_from == null)
+  const implant = svc.find((s) => /implant/i.test(s.service_name)) ?? svc[svc.length - 1]
   const doctor = cfg.practitioner_roster.find((p) => p.practitioner_name.trim())
   const doctorName = doctor ? doctor.practitioner_name.trim().split(' ').pop() : 'Hùng'
   const faqs = cfg.faq_pairs.filter((f) => f.question.trim())
@@ -40,6 +41,7 @@ export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
       return [
         line(`${priced?.service_name ?? 'Cạo vôi răng'} bao nhiêu tiền?`),
         ...(unpriced ? [line(`${unpriced.service_name} giá sao?`)] : []),
+        ...(cfg.package_bundles.some((b) => b.bundle_name.trim()) ? [line('Có gói combo nào không?')] : []),
         line('Có trả góp không?'),
         line('Có ưu đãi gì không?'),
         line('Thanh toán bằng gì được?'),
@@ -47,7 +49,7 @@ export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
     case 'bao-hiem':
       return [line('Có nhận bảo hiểm y tế không?'), line('Khám lần đầu có mất phí không?'), line('Em cần mang theo gì?'), line('Có chụp phim tại chỗ không?')]
     case 'bac-si':
-      return [line(`Bác sĩ ${doctorName} hôm nay có làm không?`), line(`Bác sĩ nào làm ${(svc[3]?.service_name ?? 'implant').toLowerCase()}?`), line('Có bác sĩ nữ không?')]
+      return [line(`Bác sĩ ${doctorName} hôm nay có làm không?`), line(`Bác sĩ nào làm ${(implant?.service_name ?? 'implant').toLowerCase()}?`), line('Có bác sĩ nữ không?')]
     case 'cau-hoi':
       return [...faqs.slice(0, 3).map((f) => line(f.question.trim())), ...(faqs.length < 3 ? [line('Nhổ răng có đau không?'), line('Trẻ em mấy tuổi khám được?')] : [])].slice(0, 4)
     case 'tu-khoa':
