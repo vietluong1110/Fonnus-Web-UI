@@ -146,7 +146,7 @@ sub-tabs, all under `#/app/le-tan/`:
 | `ho-so`                    | Who she is: name, voice (4 voices = gender × accent), speed, style, English, greeting, steering text, turn-taking |
 | `kien-thuc`                | Hub: seven rows in two groups, each a one-line summary of what is set, beside the Fonnus assistant. Files and websites go to the assistant, which reads them into the sections |
 | `kien-thuc/dia-diem`       | Business identity + address (R1), directions / parking / links / VAT, branches               |
-| `kien-thuc/gio-mo-cua`     | Weekly hours and breaks (R1) painted on a drag calendar, live "open now", and holiday exceptions pre-seeded with Vietnamese holidays incl. Tết (R2) — one page, one confirmation |
+| `kien-thuc/gio-mo-cua`     | Weekly hours (R1) as shifts on a scrolling week calendar — drag to add, move or resize, click to type; the gap between shifts is the break — live "open now", and holiday exceptions pre-seeded with Vietnamese holidays incl. Tết (R2) — one page, one confirmation |
 | `kien-thuc/dich-vu`        | Service catalogue (12 dental template rows), pricing policy, not-offered, bundles, payments, promotions |
 | `kien-thuc/bao-hiem`       | Clinic pack: BHYT / insurance (R2), consultation fee, facilities, what to bring              |
 | `kien-thuc/bac-si`         | Practitioner roster                                                                          |
