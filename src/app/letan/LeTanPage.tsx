@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { messageFor } from '../../api'
-import { Badge } from '../../design-system'
 import { appHref } from '../../hooks/useRoute'
 import { ContentSkeleton, RetryCard } from '../Boot'
-import { BottomStackProvider, Tabs, ui } from '../ui'
+import { BottomStackProvider, Tabs } from '../ui'
 import { useConfig } from './store'
 import { LeTanHeader } from './LeTanHeader'
 import { SetupChatProvider } from './assistant/chatStore'
@@ -21,7 +19,10 @@ import { InsuranceSection } from './knowledge/InsuranceSection'
 import { PractitionersSection } from './knowledge/PractitionersSection'
 import { FaqSection } from './knowledge/FaqSection'
 import { KeytermsSection } from './knowledge/KeytermsSection'
-import { SkillsTab } from './skills/SkillsTab'
+import { SkillsHub } from './skills/SkillsHub'
+import { TransferSkill } from './skills/TransferSkill'
+import { EmailSkill } from './skills/EmailSkill'
+import { BookingSkill } from './skills/BookingSkill'
 import styles from './LeTanPage.module.css'
 
 /*
@@ -31,7 +32,8 @@ import styles from './LeTanPage.module.css'
  *   #/app/le-tan/ho-so/<section>       one persona section, full form
  *   #/app/le-tan/kien-thuc             what she knows: the hub, plus the assistant
  *   #/app/le-tan/kien-thuc/<section>   one knowledge section, full form
- *   #/app/le-tan/ky-nang/<skill>       what she may do: transfer, email, book
+ *   #/app/le-tan/ky-nang               what she may do: the hub, plus the assistant
+ *   #/app/le-tan/ky-nang/<skill>       one skill, full form
  *
  * Every page under the tab carries the same identity header: which
  * receptionist this is, which line she answers on, and one press to hear her.
@@ -77,6 +79,21 @@ export const KNOWLEDGE_SECTIONS = {
 } as const
 
 export type KnowledgeSectionKey = keyof typeof KNOWLEDGE_SECTIONS
+
+/*
+ * Kỹ năng is three skills, in the order a call runs into them: she picks up
+ * and may need a person, she books, and afterwards somebody has to be told.
+ * It used to be a 220px list down the left of its own pages rather than a hub
+ * — the only tab you could not stand back from, and the only one whose pages
+ * had no way back, no lede and no try-out rail.
+ */
+export const SKILL_SECTIONS = {
+  'chuyen-may': { title: 'Chuyển máy cho người thật', component: TransferSkill },
+  'dat-lich': { title: 'Giữ lịch hẹn', component: BookingSkill },
+  'gui-email': { title: 'Báo về hộp thư', component: EmailSkill },
+} as const
+
+export type SkillSectionKey = keyof typeof SKILL_SECTIONS
 
 export function LeTanPage({ path }: { path: string[] }) {
   const tab = (TABS.some((t) => t.value === path[0]) ? path[0] : 'ho-so') as LeTanTab
@@ -125,7 +142,9 @@ function LeTanRoutes({ path, tab }: { path: string[]; tab: LeTanTab }) {
       ? PROFILE_SECTIONS[path[1] as ProfileSectionKey].component
       : tab === 'kien-thuc' && path[1] && path[1] in KNOWLEDGE_SECTIONS
         ? KNOWLEDGE_SECTIONS[path[1] as KnowledgeSectionKey].component
-        : null
+        : tab === 'ky-nang' && path[1] && path[1] in SKILL_SECTIONS
+          ? SKILL_SECTIONS[path[1] as SkillSectionKey].component
+          : null
 
   if (Section) {
     return (
@@ -145,46 +164,12 @@ function LeTanRoutes({ path, tab }: { path: string[]; tab: LeTanTab }) {
         items={TABS.map((t) => ({ value: t.value, label: t.label, href: appHref('le-tan', t.value) }))}
         value={tab}
       />
-      {tab === 'ky-nang' ? (
-        <SkillsTab path={path.slice(1)} />
-      ) : (
-        <div className={styles.withRail}>
-          <div className={styles.withRailMain}>{tab === 'ho-so' ? <ProfileTab /> : <KnowledgeHub />}</div>
-          <div className={styles.withRailAside}>
-            <SetupChat variant="rail" />
-          </div>
+      <div className={styles.withRail}>
+        <div className={styles.withRailMain}>{tab === 'ho-so' ? <ProfileTab /> : tab === 'kien-thuc' ? <KnowledgeHub /> : <SkillsHub />}</div>
+        <div className={styles.withRailAside}>
+          <SetupChat variant="rail" />
         </div>
-      )}
+      </div>
     </>
-  )
-}
-
-/** Section head: back link and the section's own title, under the identity header. */
-export function SectionHead({
-  title,
-  badge,
-  actions,
-  backLabel = 'Kiến thức',
-  backHref = appHref('le-tan', 'kien-thuc'),
-}: {
-  title: ReactNode
-  badge?: { tone: 'success' | 'warning' | 'neutral' | 'terracotta'; label: ReactNode }
-  actions?: ReactNode
-  backLabel?: string
-  backHref?: string
-}) {
-  return (
-    <div className={ui.pageHead}>
-      <a className={ui.backLink} href={backHref}>
-        ‹ {backLabel}
-      </a>
-      <h2 className={styles.sectionTitle}>{title}</h2>
-      {badge ? (
-        <Badge tone={badge.tone} dot>
-          {badge.label}
-        </Badge>
-      ) : null}
-      {actions ? <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>{actions}</div> : null}
-    </div>
   )
 }

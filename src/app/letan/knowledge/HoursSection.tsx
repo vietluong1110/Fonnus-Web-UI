@@ -27,27 +27,6 @@ const HOLIDAY_STACKED = 560
 
 const KEYS = ['operating_hours_by_weekday', 'operating_hours_confirmed', 'break_periods', 'holiday_exceptions', 'holidays_confirmed'] as const
 
-export function WeekdayPicker({ value, onChange, ariaLabel }: { value: Weekday[]; onChange: (v: Weekday[]) => void; ariaLabel: string }) {
-  return (
-    <div className={styles.days} role="group" aria-label={ariaLabel}>
-      {WEEKDAYS.map((d) => {
-        const on = value.includes(d)
-        return (
-          <button
-            key={d}
-            type="button"
-            className={`${styles.day} ${on ? styles.dayOn : ''}`}
-            aria-pressed={on}
-            onClick={() => onChange(on ? value.filter((x) => x !== d) : [...value, d].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)))}
-          >
-            {WEEKDAY_SHORT[d]}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 /**
  * "Nghỉ cả ngày" or "Mở 08:00–12:00": one pill that says what the holiday
  * does to the day, and opens a small panel to change it. The two time
