@@ -24,7 +24,9 @@ export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
   const doctor = cfg.practitioner_roster.find((p) => p.practitioner_name.trim())
   const doctorName = doctor ? doctor.practitioner_name.trim().split(' ').pop() : 'Hùng'
   const faqs = cfg.faq_pairs.filter((f) => f.question.trim())
-  const term = cfg.keyterms.find((k) => k.source === 'tenant' && k.term.trim())
+  // Any word with a spelling, wherever it came from: the try-out line is worth
+  // most on a word the owner has just written a pronunciation for.
+  const term = cfg.keyterms.find((k) => k.source !== 'pack' && k.term.trim() && k.phonetic_hint.trim()) ?? cfg.keyterms.find((k) => k.source === 'tenant' && k.term.trim())
 
   switch (section) {
     case 'danh-tinh':

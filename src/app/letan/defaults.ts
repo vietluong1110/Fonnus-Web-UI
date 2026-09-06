@@ -364,6 +364,14 @@ export const LABELS = {
     take_message: 'Chỉ ghi lời nhắn',
     transfer: 'Thử chuyển máy, không được thì ghi lời nhắn',
   },
+  /** The four answers as a tile carries them: two or three words, on the card whose title already says "Bảo hiểm". */
+  insuranceShort: {
+    unset: 'Chưa trả lời',
+    none: 'Không nhận',
+    bhyt: 'BHYT',
+    private: 'Bảo hiểm tư nhân',
+    both: 'BHYT và tư nhân',
+  },
   insurance: {
     unset: 'Chưa trả lời',
     none: 'Không nhận BHYT, không nhận bảo hiểm tư nhân',
@@ -385,6 +393,8 @@ export const LABELS = {
   style: { professional_warm: 'Chuyên nghiệp và ấm áp', friendly: 'Thân thiện', formal: 'Trang trọng' },
   speed: { slow: 'Chậm', normal: 'Vừa', fast: 'Nhanh' },
   titles: ['BS', 'BS. CKI', 'BS. CKII', 'ThS. BS', 'TS. BS', 'PGS. TS', 'Y sĩ', 'Điều dưỡng'] as const,
+  /** [ext] So she can answer "có bác sĩ nữ không?" — a call Vietnamese clinics take weekly. */
+  gender: { nam: 'Nam', nu: 'Nữ' },
   emailIntent: {
     needs_review: 'Cần xem',
     new_booking: 'Lịch hẹn mới',

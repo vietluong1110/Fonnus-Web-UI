@@ -198,8 +198,11 @@ export function TryPanel({ section, config }: { section: string; config: Recepti
 
       <div className={styles.prompts}>
         <span className={styles.promptsLabel}>Thử hỏi</span>
-        {prompts.map((p) => (
-          <button key={p.label} type="button" className={styles.prompt} onClick={() => send(p.text ?? p.label)}>
+        {/* Keyed by position, not by label: on Câu hỏi the prompts *are* the
+            clinic's own questions, and nothing stops an owner from writing the
+            same one twice. */}
+        {prompts.map((p, i) => (
+          <button key={i} type="button" className={styles.prompt} onClick={() => send(p.text ?? p.label)}>
             <span className={styles.promptText}>{p.text ? p.label : `“${p.label}”`}</span>
             <span className={styles.promptGo} aria-hidden="true">
               <Icon name="arrow-up" size={14} />

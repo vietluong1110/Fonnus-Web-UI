@@ -112,6 +112,7 @@ proposals a designer may redraw, not as canon — each is marked `[ext]` in
 | `cash`         | `banknote`                 | a banknote, terracotta coin in the middle          |
 | `transfer`     | `arrow-left-right`         | two opposed arrows, the outbound one terracotta    |
 | `card`         | `credit-card`              | a card, terracotta stripe                          |
+| `insurance`    | `shield-plus`, `heart-pulse` | the same card, its stripe replaced by a terracotta cross and one ink name line — a BHYT card, not a shield |
 | `wallet`       | `wallet`                   | a wallet, terracotta clasp pocket                  |
 | `trash`        | `trash-2`                  | a bin, terracotta handle arc                       |
 | `edit`         | `pencil`                   | a pencil, terracotta tip                           |

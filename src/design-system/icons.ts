@@ -254,6 +254,8 @@ export const ICONS = {
   transfer: [{ d: 'M4 9.4h13.2' }, { d: 'M14.4 6.6 17.8 9.4 14.4 12.2', accent: true }, { d: 'M20 14.6H6.8' }, { d: 'M9.6 11.8 6.2 14.6 9.6 17.4' }],
   /** [ext] Thẻ — a card and its stripe. */
   card: [{ r: [3, 6, 18, 12, 2.5] }, { d: 'M3 10.4h18', accent: true }],
+  /** [ext] Bảo hiểm y tế — the card again, its stripe replaced by the terracotta cross, and one ink line for the name. */
+  insurance: [{ r: [3, 6, 18, 12, 2.5] }, { d: 'M6.6 12h3.6M8.4 10.2v3.6', accent: true }, { d: 'M13.4 10.6h4.6M13.4 13.8h3' }],
   /** [ext] Ví điện tử — a wallet, the clasp pocket on the right. */
   wallet: [{ r: [3.5, 6.5, 17, 11, 2.5] }, { d: 'M14.6 10.4h5.9v3.2h-5.9a1.6 1.6 0 0 1 0-3.2z', accent: true }],
   /** [ext] Xoá — a bin; the handle arc is the accent. */

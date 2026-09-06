@@ -589,723 +589,18 @@
   }
 }
 
-/* ------------------------------------------------------------ said line */
 
-/*
- * "Linh nói:" and the sentence, under the control that changes it. Plain
- * text, no bubble, no player: the try-out panel is where she is heard, this
- * is where the owner reads what a field will turn into before pressing it.
- */
-.said {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-}
+/* --------------------------------------------------------- picking */
 
-.saidWho {
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.hoursSaid {
-  composes: said;
-}
-
-.hoursSaidWho {
-  composes: saidWho;
-}
-
-/* ----------------------------------------------------------- the lists */
-
-/*
- * ONE GEOMETRY FOR EVERY LIST ON THIS PAGE. Services, combos and promotions
- * are the same expanding row, and the rule that keeps them aligned is:
- *
- *   a list block spans its card's content width EXACTLY — no bleed, no inset
- *   — and everything inside it is inset by the row's own 12px head padding.
- *
- * So the group card's border, a combo row's dashed edge and a promotion
- * row's dashed edge all land on the same vertical as the card's title, and
- * every row's text lands on the same vertical as every other row's. Nothing
- * here may take a negative margin: that is what pushed the combo rows 12px
- * further left than the group cards beside them.
- *
- * Rows answer to the list's own width, not the viewport's: the column beside
- * the rail is narrow on a 1200px desktop and wide on an 860px tablet.
- */
-.services {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  container: services / inline-size;
-}
-
-/* Group cards are separate objects and stand apart; bare rows are one list and do not. */
-.servicesGrouped {
-  gap: 12px;
-}
-
-.servicesDragging {
-  user-select: none;
-}
-
-/*
- * A group is a sub-card — the branch `.entry` vocabulary — whose head is a
- * band of the page's ground. The band is what says "these rows belong
- * together"; the fill does the work, so the name on it is set like any
- * other label rather than as an eyebrow.
- */
-.svcGroupCard {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  border: 1px solid var(--border-hairline);
-  border-radius: var(--radius-md);
-}
-
-.svcGroupHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 42px;
-  padding: 0 8px 0 12px;
-  background: var(--surface-page);
-  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
-  cursor: pointer;
-}
-
-.svcGroupFolded .svcGroupHead {
-  border-radius: calc(var(--radius-md) - 1px);
-}
-
-/*
- * The group's name is an input because the owner names their own headings;
- * the template's "Tổng quát" is a starting point, not a category. The band
- * already marks the group, so the name sits plainly on it — no hover tint,
- * a box only once you are in it. The −10px pull puts the *text* on the same
- * vertical as the row names below, since the box carries 10px of its own.
- */
-.svcGroupName {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 30px;
-  padding: 0 10px;
-  margin-left: -10px;
-  border: none;
-  border-radius: var(--radius-xs);
-  background: transparent;
-  font-family: var(--font-ui);
-  font-size: var(--size-ui);
-  font-weight: 600;
-  color: var(--ink);
-  text-overflow: ellipsis;
-  cursor: text;
-}
-
-.svcGroupName::placeholder {
-  color: var(--ink-soft);
-  font-weight: 500;
-}
-
-.svcGroupName:focus-visible {
-  outline: none;
-  background: var(--surface-card);
-  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
-}
-
-.svcGroupCount {
-  flex: 0 0 auto;
-  font-size: 12px;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-
-/* "+ Thêm nhóm" in a card head, "+ Thêm" on a band: the same quiet pill. */
-/* The fold's handle: the same chevron a row turns, on its own button. */
-.svcGroupChevron {
-  appearance: none;
-  border: none;
-  background: transparent;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 auto;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.svcGroupChevron:hover {
-  background: var(--action-ghost-hover);
-}
-
-/*
- * The rows fold shut with the group — the row editor's 0fr → 1fr fold, and
- * the same clipping rule: hold while moving, let go once settled, or a
- * dragged row could never ride over the cards below.
- */
-.svcGroupBody {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--duration-base) var(--ease-arc);
-}
-
-.svcGroupBodyOpen {
-  grid-template-rows: 1fr;
-}
-
-/* No padding: a row inside a group must start where the group's border is,
-   or the price list's rows would not line up with the combo card's. */
-.svcGroupBodyInner {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.svcGroupBodySettled .svcGroupBodyInner {
-  overflow: visible;
-}
-
-/* A heading the owner has emptied keeps its place and says what it is for.
-   It is also the target a dragged row aims at, so it is row-sized. */
-.svcGroupEmpty {
-  margin: 0;
-  padding: 14px 12px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
-/* ------------------------------------------------------------------ row */
-
-/*
- * A row spans its container exactly — inside a group card, or straight in a
- * combo or promotion card. Its 12px head padding is the only inset, and it
- * is the same one everywhere, so every name on the page starts on one
- * vertical and every dashed edge on another.
- */
-.svc {
-  position: relative;
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  transition: box-shadow var(--duration-fast) var(--ease-out);
-}
-
-.svc + .svc::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--border-hairline);
-  pointer-events: none;
-}
-
-/* An open row is ringed — the bordered sub-card a branch uses — not tinted:
-   the heading bands already own the page's ground on this list. */
-.svcOpen {
-  box-shadow: inset 0 0 0 1px var(--border-strong);
-}
-
-.svcOpen::before,
-.svcOpen + .svc::before,
-.svcUnfilled::before,
-.svcUnfilled + .svc::before,
-.svcDragging::before,
-.svcDragging + .svc::before {
-  display: none;
-}
-
-/* Missing the thing that makes it useful: the hub's dashed mark. Drawn as an
-   outline so it costs no layout and the row stays on the grid. */
-.svcUnfilled {
-  outline: 1px dashed var(--border-dashed);
-  outline-offset: -1px;
-}
-
-.svcUnfilled.svcOpen {
-  outline: none;
-}
-
-/* Lifted: it rides above its neighbours and casts the one shadow the app
-   allows, the overlay's. `transform` is set by the drag itself. */
-.svcDragging {
-  z-index: 3;
-  box-shadow: var(--shadow-overlay);
-}
-
-.svcHead {
-  position: relative;
-  appearance: none;
-  border: none;
-  background: transparent;
-  width: 100%;
-  min-height: 46px;
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  font-family: var(--font-ui);
-  color: var(--ink);
-  /* A vertical drag is ours with a mouse or pen; a finger's stays the page's scroll. */
-  touch-action: pan-y;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.svcHead:hover {
-  background: var(--action-ghost-hover);
-}
-
-.svcOpen .svcHead:hover {
-  background: transparent;
-}
-
-.svcDragging .svcHead {
-  cursor: grabbing;
-}
-
-.svcHead:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
-}
-
-/* The grip sits in the row's left padding and shows on hover: the row can be picked up. */
-.svcGrip {
-  position: absolute;
-  left: 1px;
-  top: 50%;
-  translate: 0 -50%;
-  display: inline-flex;
-  color: var(--ink-soft);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
-}
-
-.svcHead:hover .svcGrip,
-.svcDragging .svcGrip {
-  opacity: 1;
-}
-
-/* Name, then what else callers call it, quieter, on the same baseline. */
-.svcText {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.svcName {
-  flex: 0 0 auto;
-  max-width: 100%;
-  font-size: var(--size-body-sm);
-  font-weight: 500;
-  line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.svcAlias {
-  flex: 0 1 auto;
-  min-width: 0;
-  font-size: 12.5px;
-  line-height: 1.4;
-  color: var(--ink-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.svcPlaceholder {
-  color: var(--ink-soft);
-  font-weight: 400;
-}
-
-/* The price, as she says it, on one vertical down the list. */
-.svcPrice {
-  flex: 0 0 168px;
-  text-align: right;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-size: 13.5px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.svcUnit {
-  font-family: var(--font-ui);
-  font-size: 12.5px;
-  font-weight: 400;
-  color: var(--ink-soft);
-}
-
-.svcMissing {
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-accent);
-}
-
-/* How long, and the appointment mark when she may book it herself — or, on a
-   promotion, whether it is running. One column, one width, either way. */
-.svcMeta {
-  flex: 0 0 92px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-
-.svcDuration {
-  min-width: 48px;
-  text-align: right;
-}
-
-.svcBook {
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-  color: var(--text-accent);
-}
-
-.svcChevron {
-  flex: 0 0 auto;
-  display: inline-flex;
-  color: var(--ink-soft);
-  transition: transform var(--duration-base) var(--ease-arc);
-}
-
-.svcChevronOpen {
-  transform: rotate(180deg);
-}
-
-/*
- * The editor grows out from under the head on `grid-template-rows`
- * 0fr → 1fr — the one way to reach a natural height without measuring it —
- * on the house lift-and-settle. It clips only while folding; once settled
- * (`transitionend`, or a timer when that never comes) it lets go, or a focus
- * ring on the first pill inside would be cut off.
- */
-.svcBody {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--duration-base) var(--ease-arc);
-}
-
-.svcBodyOpen {
-  grid-template-rows: 1fr;
-}
-
-.svcBodyInner {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.svcBodySettled .svcBodyInner {
-  overflow: visible;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .svcBody,
-  .svcGroupBody {
-    transition: none;
-  }
-
-  /* No transition means no `transitionend`; nothing may stay clipped. */
-  .svcBodyOpen .svcBodyInner,
-  .svcGroupBodyOpen .svcGroupBodyInner {
-    overflow: visible;
-  }
-}
-
-/* The editor's fields line up with the row's text above them. */
-.svcEdit {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 4px 12px 12px;
-}
-
-.svcEditRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.svcEditGrow {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.svcEditFixed {
-  flex: 0 0 156px;
-}
-
-/* A compact field's label, for a control that does not draw its own. */
-.svcEditLabel {
-  font-size: var(--size-eyebrow);
-  line-height: var(--leading-eyebrow);
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-
-/* The booking switch: toggle first, then its words, so the two never drift
-   apart however long the hint runs. Padded to sit level with the select
-   beside it, which carries a label above. */
-.svcSwitch {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding-top: 22px;
-}
-
-.svcSwitchText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.svcSwitchLabel {
-  font-size: var(--size-ui);
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--ink);
-}
-
-.svcSwitchHint {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
-.svcEditFoot {
-  display: flex;
-  justify-content: flex-end;
-  margin: -6px -8px -4px 0;
-}
-
-/*
- * Under 560px of list: the other names, the meta and the unit go — the name
- * is what runs out first, and the unit is one press away in the editor. The
- * price takes only what it needs, so the name keeps the rest, the band
- * drops its count, and every editor row stacks.
- */
-@container services (max-width: 559.98px) {
-  .svcAlias,
-  .svcUnit,
-  .svcGroupCount,
-  .svcDuration {
-    display: none;
-  }
-
-  .svcMeta {
-    flex: 0 0 auto;
-  }
-
-  .svcPrice {
-    flex: 0 1 auto;
-    max-width: 55%;
-  }
-
-  .svcEditRow {
-    flex-wrap: wrap;
-  }
-
-  .svcEditGrow {
-    flex: 1 1 140px;
-  }
-
-  .svcEditFixed {
-    flex: 1 1 100%;
-  }
-
-  .svcSwitch {
-    padding-top: 0;
-  }
-}
-
-/* --------------------------------------------------------- suggestions */
-
-/* One-tap answers beside a field: short items, so pills. */
-.ideaChips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.ideaChipsLabel {
-  font-size: 12px;
-  color: var(--ink-soft);
-  margin-right: 2px;
-}
-
-.payChips {
+/* Choosing which services a combo or an offer covers: on/off values, so
+   `ChipButton`s in a wrapping row. Not suggestions — a suggestion is dashed
+   and is taken once; these toggle. */
+.pickChips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-/* ------------------------------------------------------------- payment */
-
-/*
- * How a patient can pay, as a grid of drawn tiles rather than a row of word
- * chips. A payment method is a *thing* — a note, a card, a wallet — and the
- * drawing is read before the label is. Selected is the terracotta fill the
- * voice tiles use in Hồ sơ, so "on" means the same thing in both places.
- *
- * The five the catalogue names come first; anything the clinic adds itself
- * follows in the same grid, and the dashed tile at the end is how one is
- * added — dashed means "not yet" everywhere on this page.
- */
-.pay {
-  display: grid;
-  /* 100px is what lets the five named methods and the "add" tile share one
-     row beside the rail, and folds them to three on a phone. */
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-}
-
-.payTile {
-  position: relative;
-  appearance: none;
-  border: none;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 78px;
-  padding: 13px 14px;
-  border-radius: var(--radius-md);
-  box-shadow: inset 0 0 0 1px var(--border-strong);
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.35;
-  color: var(--ink);
-  text-align: left;
-  cursor: pointer;
-  min-width: 0;
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
-}
-
-.payTile:hover {
-  background: var(--action-ghost-hover);
-  box-shadow: inset 0 0 0 1px var(--terracotta);
-}
-
-.payTile:focus-visible {
-  outline: none;
-  box-shadow:
-    inset 0 0 0 1.5px var(--focus-ring),
-    0 0 0 3px rgba(184, 92, 43, 0.13);
-}
-
-.payTileOn,
-.payTileOn:hover {
-  background: var(--terracotta);
-  /* A terracotta ground under cream text: the drawing's accent becomes the text colour. */
-  --icon-accent: currentColor;
-  color: var(--cream);
-  box-shadow: none;
-}
-
-.payName {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-/* A method the clinic wrote itself: on by definition, so removed rather than toggled. */
-.payTileOwn {
-  padding-right: 30px;
-}
-
-.payRemove {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  appearance: none;
-  border: none;
-  background: transparent;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: inline-grid;
-  place-items: center;
-  color: inherit;
-  opacity: 0.7;
-  cursor: pointer;
-  transition:
-    opacity var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out);
-}
-
-.payRemove:hover {
-  opacity: 1;
-  background: rgba(255, 246, 232, 0.18);
-}
-
-.payAdd {
-  box-shadow: none;
-  outline: 1px dashed var(--border-dashed);
-  outline-offset: -1px;
-  color: var(--text-accent);
-}
-
-.payAdd:hover {
-  box-shadow: none;
-  outline-color: var(--terracotta);
-}
-
-/* Typing a new one takes the whole row: a method is a phrase, not a word. */
-.payTileInput {
-  grid-column: 1 / -1;
-  justify-content: center;
-  padding: 0;
-  cursor: text;
-  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
-}
-
-.payInput {
-  width: 100%;
-  height: 100%;
-  min-height: 78px;
-  border: none;
-  outline: none;
-  background: transparent;
-  padding: 0 14px;
-  font-family: var(--font-ui);
-  font-size: var(--size-body-sm);
-  color: var(--ink);
-}
-
-.payInput::placeholder {
-  color: rgba(92, 82, 72, 0.6);
-}
 
 /* --------------------------------------------------------- suggestions */
 
@@ -1420,28 +715,281 @@
   opacity: 0.55;
 }
 
-/* ------------------------------------------------------------- phone */
+/* ---------------------------------------------------------------- bác sĩ */
 
-@media (max-width: 639.98px) {
-  .svcHead {
-    padding: 6px 10px;
+/*
+ * A doctor is a row, not a page of fields. The roster's job is scanning —
+ * "bác sĩ Hùng hôm nay có làm không?" is the question the page exists to
+ * answer — so the closed row carries who they are, what they do and when
+ * they are in, and only the one being edited opens.
+ */
+
+/*
+ * The monogram: the same two-letter disc the account wears in the sidebar,
+ * so a person is drawn the same way wherever one appears. A doctor with no
+ * name yet gets the `practitioner` icon instead — the same mark the hub row
+ * for this page carries.
+ */
+.drMark {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: var(--surface-page);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+
+/*
+ * The week, in the value column every list shares — where Dịch vụ puts the
+ * price, because it is the same thing: the one number a caller rings for.
+ *
+ * The cells are the day picker's cells one step down, so the closed row and
+ * the control that changes it say the same thing in the same shapes; a
+ * caller's "hôm nay" is underlined, and the roster read down that one column
+ * is "ai trực hôm nay" without a word being written.
+ *
+ * 7 × 20 + 6 × 3 = 158px, inside the value column's 168.
+ */
+.week {
+  display: inline-flex;
+  gap: 3px;
+  justify-content: flex-end;
+}
+
+.weekDay {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-hairline);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+
+.weekOn {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--cream);
+}
+
+/* Inside the cell, never outside it: the value column clips, and a mark
+   hanging below the strip was the first thing it cut off. */
+.weekToday::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 2px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+/*
+ * Under 560px of list the monogram goes and the days lose their letters: a
+ * phone has room for the name and seven dots, not for the name and seven
+ * labels. Today's underline goes with the letters — a chord across a dot
+ * reads as damage, and the strip still says how many days and which.
+ */
+@container rows (max-width: 559.98px) {
+  .drMark {
+    display: none;
   }
 
-  .svcEdit {
-    padding: 4px 10px 12px;
+  .week {
+    gap: 2px;
   }
 
-  .svcGroupHead {
-    padding: 0 6px 0 10px;
+  .weekDay {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    font-size: 0;
   }
 
-  .svcGroupEmpty {
-    padding: 12px 10px;
+  .weekToday::after {
+    display: none;
   }
 }
 
-/* With no groups the empty state speaks for the card; the list must not
-   still spend the card's 14px gap on nothing. */
-.services:empty {
-  display: none;
+/* --------------------------------------------------- bác sĩ · lịch tuần */
+
+/*
+ * A practitioner's week: one line per day they are in.
+ *
+ * A day the owner has ticked but not given hours to is not blank — the
+ * practitioner keeps the clinic's own hours, and the row says so in words.
+ * Only the exceptions carry time pills, so a doctor on the normal roster
+ * costs no typing at all, and no row goes stale when the clinic's own hours
+ * change. The alternative — seeding every ticked day with the clinic's times
+ * — puts five identical ranges in front of the owner to check and quietly
+ * lies the day the clinic opens an hour earlier.
+ *
+ * The pill is the holiday row's `ClosurePill` one size down: press it and an
+ * anchored panel opens with the two time fields and the delete, so a day
+ * stays one line however many blocks it holds. The weekday picker above is
+ * the same control the closed row's week strip draws, so ticking a day and
+ * reading it back are the same shapes.
+ */
+.sched {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.schedDay {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 44px;
+  padding: 5px 6px 5px 12px;
+  min-width: 0;
+}
+
+.schedDay + .schedDay {
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* Fixed, so every day's blocks start on one vertical down the week. */
+.schedName {
+  flex: 0 0 64px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.schedBlocks {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The inherited state, said plainly rather than drawn as a pill: it is what
+   the day *is*, not something the owner set. */
+.schedInherit {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.schedAdd {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* One block of time, as the holiday pill — one size down, since a day can
+   carry three of them beside a name and an add button. */
+.shiftPill {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 7px 0 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.shiftPill:hover,
+.shiftPillOpen,
+.shiftPillOpen:hover {
+  background: var(--action-ghost-hover);
+}
+
+.shiftPillOpen {
+  border-color: var(--terracotta);
+}
+
+.shiftPill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
+}
+
+.shiftChevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+}
+
+.shiftPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* "Từ" and "Đến" side by side, each under its own label — a range needs
+   saying which end is which more than it needs a dash between them. */
+.shiftTimes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.shiftFoot {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px -6px -2px 0;
+}
+
+/* Under a phone's width the day name takes its own line, so three blocks
+   still fit without the pills shrinking to nothing. */
+@container rows (max-width: 419.98px) {
+  .schedName {
+    flex: 1 0 100%;
+  }
+
+  .schedAdd {
+    margin-left: 0;
+  }
+}
+
+/*
+ * A word the table did not invent — the clinic's name, a service, a doctor.
+ * It reads rather than edits, because renaming it happens on the page that
+ * owns it; set on the input's own baseline so the column still lines up with
+ * the rows the owner typed.
+ */
+.termFixed {
+  min-width: 0;
+  /* The compact control's own 10px, so a word that reads and a word that
+     edits start on exactly one vertical down the column. */
+  padding: 0 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

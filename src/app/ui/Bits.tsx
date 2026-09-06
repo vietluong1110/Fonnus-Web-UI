@@ -407,13 +407,27 @@ export function DeleteButton({ label, icon = true, band = false, onClick }: { la
  * exactly when the box above was still blank.
  */
 
+/**
+ * A hairline with a word sitting on it. It names a band inside a card
+ * without spending a heading on one, and the rule carries on past the word
+ * so the band still reads as part of the card rather than as a second card.
+ * `Suggestions` is this plus its list; a card that groups two kinds of the
+ * same thing — the words Fonnus derives and the ones the industry pack
+ * brings — uses it directly.
+ */
+export function Rule({ label, hint }: { label: string; hint?: ReactNode }) {
+  return (
+    <div className={styles.suggestsRule}>
+      <span className={styles.suggestsLabel}>{label}</span>
+      {hint ? <span className={styles.suggestsHint}>{hint}</span> : null}
+    </div>
+  )
+}
+
 export function Suggestions({ label = 'Gợi ý', hint, children }: { label?: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <div className={styles.suggests}>
-      <div className={styles.suggestsRule}>
-        <span className={styles.suggestsLabel}>{label}</span>
-        {hint ? <span className={styles.suggestsHint}>{hint}</span> : null}
-      </div>
+      <Rule label={label} hint={hint} />
       <div className={styles.suggestsList}>{children}</div>
     </div>
   )
@@ -426,6 +440,23 @@ export function Suggestion({ children, onClick }: { children: ReactNode; onClick
         <Icon name="plus" size={14} />
       </span>
       <span>{children}</span>
+    </button>
+  )
+}
+
+/**
+ * The rest of a long suggestion list, behind one line. Show three or four —
+ * enough to say what a good one looks like — and let the reader ask for the
+ * remainder. Past that the examples are taller than the list they write
+ * into, and the card reads as a page of suggestions with a list attached.
+ */
+export function SuggestionMore({ count, open, onToggle }: { count: number; open: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className={styles.suggestMore} onClick={onToggle} aria-expanded={open}>
+      {open ? 'Bớt gợi ý' : `Thêm ${count} gợi ý`}
+      <span className={`${styles.suggestMoreChevron} ${open ? styles.suggestMoreOpen : ''}`}>
+        <Icon name="chevron-down" size={14} />
+      </span>
     </button>
   )
 }
