@@ -1,4 +1,3 @@
-import { Icon } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
 import { messageFor } from '../../../api'
@@ -8,6 +7,7 @@ import { useConfig } from '../store'
 import { formatVnd, useToast } from '../../ui'
 import { fmtDate } from './answers'
 import { derivedKeyterms } from './KeytermsSection'
+import { HubFoot, HubRow, sectionStyles } from '../SectionFrame'
 import styles from './Knowledge.module.css'
 
 /*
@@ -129,41 +129,23 @@ export function KnowledgeHub() {
     },
   ]
 
-  const row = (r: Row) => (
-    <a key={r.segment} className={`${styles.rowLink} ${r.empty ? styles.rowEmpty : ''}`} href={appHref('le-tan', 'kien-thuc', r.segment)}>
-      <span className={styles.rowIcon}>
-        <Icon name={r.icon} size={20} />
-      </span>
-      <span className={styles.rowText}>
-        <span className={styles.rowTitle}>{r.title}</span>
-        <span className={`${styles.rowSub} ${r.empty ? styles.rowSubEmpty : ''}`}>{r.sub}</span>
-      </span>
-      <span className={styles.rowChev}>
-        <Icon name="chevron-right" size={18} />
-      </span>
-    </a>
-  )
+  const row = (r: Row) => <HubRow key={r.segment} href={appHref('le-tan', 'kien-thuc', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
 
   return (
-    <div className={styles.hub}>
-      <div className={styles.group}>
-        <span className={styles.groupLabel}>Khách hay hỏi</span>
+    <div className={sectionStyles.hub}>
+      <div className={sectionStyles.group}>
+        <span className={sectionStyles.groupLabel}>Khách hay hỏi</span>
         {asked.map(row)}
       </div>
 
-      <div className={styles.group}>
-        <span className={styles.groupLabel}>Để {agent} trả lời hay hơn</span>
+      <div className={sectionStyles.group}>
+        <span className={sectionStyles.groupLabel}>Để {agent} trả lời hay hơn</span>
         {better.map(row)}
       </div>
 
-      <div className={styles.hubFoot}>
-        <span className={styles.hubFootIcon}>
-          <Icon name="guide" size={16} />
-        </span>
-        <span>
-          Cách {agent} <em>xưng hô</em> và chào khách — tên, giọng, lời chào — nằm ở tab <a href={appHref('le-tan', 'ho-so')}>Hồ sơ</a>.
-        </span>
-      </div>
+      <HubFoot>
+        Cách {agent} <em>xưng hô</em> và chào khách — tên, giọng, lời chào — nằm ở tab <a href={appHref('le-tan', 'ho-so')}>Hồ sơ</a>.
+      </HubFoot>
 
       <button
         type="button"

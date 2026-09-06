@@ -1,0 +1,208 @@
+/*
+ * The week, and the blocks of time inside a day.
+ *
+ * `Bác sĩ` wrote this to answer "bác sĩ Hùng thứ Hai làm từ mấy giờ", and
+ * `Đặt lịch hẹn` needs exactly the same answer for "sáng thứ Bảy có nhận hẹn
+ * không". One control, so the two pages say the same thing the same way.
+ *
+ * The idea it carries: **a ticked day with no block keeps the clinic's own
+ * hours**, and says so in quiet text. Only the exceptions are written down —
+ * so a normal week costs no typing at all, and nothing goes stale when the
+ * clinic's opening hours change.
+ */
+
+.days {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.day {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  width: 36px;
+  height: 30px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.day:hover {
+  background: var(--action-ghost-hover);
+}
+
+.dayOn,
+.dayOn:hover {
+  background: var(--terracotta);
+  --icon-accent: currentColor;
+  border-color: var(--terracotta);
+  color: var(--cream);
+}
+
+/*
+ * A day the clinic itself is shut. Not a pill that can be pressed and not a
+ * sentence explaining why — the day is simply drawn as unavailable, and the
+ * card's own line says where to change it.
+ */
+.dayOff,
+.dayOff:hover {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border-dashed);
+  color: var(--ink-soft);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/*
+ * The day list. It carries its own container so the row below can stack on a
+ * phone whether it is standing in a card or nested inside an open row's
+ * editor — asking the viewport would get the second case wrong every time.
+ */
+.sched {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  container: week / inline-size;
+}
+
+.schedDay {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 44px;
+  padding: 5px 6px 5px 12px;
+  min-width: 0;
+}
+
+.schedDay + .schedDay {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.schedName {
+  flex: 0 0 64px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.schedBlocks {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* "Theo giờ phòng khám" — the default, said rather than drawn. A pill here
+   would claim the owner had chosen something, and seven identical pills is
+   seven things to check that nobody set. */
+.schedInherit {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.schedAdd {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.shiftPill {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 7px 0 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.shiftPill:hover,
+.shiftPillOpen,
+.shiftPillOpen:hover {
+  background: var(--action-ghost-hover);
+}
+
+.shiftPillOpen {
+  border-color: var(--terracotta);
+}
+
+/* A block that falls outside the clinic's own hours. The edge carries it and
+   the pill keeps its title — a whole notice for one bad pill would say the
+   page was broken rather than that one number needs a look. */
+.shiftPillBad,
+.shiftPillBad:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.shiftPill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 0 5px var(--focus-ring);
+}
+
+.shiftChevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+}
+
+.shiftPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shiftTimes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.shiftNote {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--error);
+}
+
+.shiftFoot {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px -6px -2px 0;
+}
+
+/* Under a phone's width the day name takes its own line, so three blocks
+   still fit without the pills shrinking to nothing. */
+@container week (max-width: 399.98px) {
+  .schedName {
+    flex: 1 0 100%;
+  }
+
+  .schedAdd {
+    margin-left: 0;
+  }
+}

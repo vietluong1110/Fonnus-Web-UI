@@ -1,127 +1,270 @@
-import { useRef, useState } from 'react'
-import { Badge, Button } from '../../../design-system'
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '../../../design-system'
+import type { IconName } from '../../../design-system'
 import { isValidEmail } from '../../../auth/phone'
 import { LABELS } from '../defaults'
 import type { EmailIntent, EmailRule } from '../model'
 import { useConfig, useDraft } from '../store'
-import { Card, ChipButton, ChipInput, Notice, SaveBar, Switch, TextArea, TextField, ui, useToast } from '../../ui'
+import {
+  Card,
+  ChipInput,
+  Disclosure,
+  ExpandRow,
+  FOLD_MS,
+  RowEdit,
+  RowEditFoot,
+  RowEditLabel,
+  RowList,
+  RowMark,
+  RowMeta,
+  RowMissing,
+  RowSwitch,
+  RowText,
+  RowValue,
+  SaveBar,
+  TextArea,
+  TextField,
+  ui,
+  useToast,
+} from '../../ui'
+import { TryPanel } from '../tryout/TryPanel'
+import { SkillsSection } from './SkillsSection'
+import { INTENT_ASKS, SAMPLE, emailSummary, fill, filled } from './lines'
 import styles from './Skills.module.css'
 
 /*
  * [ext] Gửi email — not in catalogue v1. One rule per call intent: when it
- * fires, who receives it, and the template. Variables are «guillemet» tokens
- * the mailer fills in; the chips insert them at the caret.
+ * fires, who receives it, and the wording. Variables are «guillemet» tokens
+ * the mailer fills in.
  */
 
 const KEYS = ['email_rules'] as const
 
-const INTENT_META: Record<EmailIntent, { tone: 'terracotta' | 'lemongrass' | 'neutral'; desc: (agent: string) => string; vars: string[] }> = {
-  needs_review: { tone: 'terracotta', desc: (a) => `Cuộc gọi ${a} chưa trả lời được`, vars: ['tên_khách', 'số_gọi', 'giờ_gọi', 'tóm_tắt', 'liên_kết'] },
-  new_booking: { tone: 'lemongrass', desc: (a) => `${a} vừa đặt hẹn cho khách`, vars: ['tên_khách', 'số_gọi', 'dịch_vụ', 'giờ_hẹn', 'tóm_tắt', 'liên_kết'] },
-  missed_after_hours: { tone: 'neutral', desc: () => 'Khách gọi ngoài giờ, cần gọi lại', vars: ['tên_khách', 'số_gọi', 'giờ_gọi', 'hẹn_gọi_lại', 'tóm_tắt', 'liên_kết'] },
+const INTENT_ICON: Record<EmailIntent, IconName> = {
+  needs_review: 'alert',
+  new_booking: 'appointment',
+  missed_after_hours: 'caller-lost',
 }
 
-const INTENTS: EmailIntent[] = ['needs_review', 'new_booking', 'missed_after_hours']
+const INTENT_VARS: Record<EmailIntent, string[]> = {
+  needs_review: ['tên_khách', 'số_gọi', 'giờ_gọi', 'tóm_tắt', 'liên_kết'],
+  new_booking: ['tên_khách', 'số_gọi', 'dịch_vụ', 'giờ_hẹn', 'tóm_tắt', 'liên_kết'],
+  missed_after_hours: ['tên_khách', 'số_gọi', 'giờ_gọi', 'hẹn_gọi_lại', 'tóm_tắt', 'liên_kết'],
+}
 
+/**
+ * The email as it lands, not the template that makes it.
+ *
+ * This is the `Said` line of a page whose output is not a sentence. Every
+ * other screen ends in the words a caller would hear; here the thing produced
+ * is a message in somebody's inbox, so that is what is shown — addressed,
+ * with a subject, filled in with one worked call. The parts that change from
+ * call to call are tinted, which is the entire explanation of what a variable
+ * is; the row of «tên_khách» chips underneath used to be that explanation,
+ * and it asked an owner to hold a token vocabulary in their head to read
+ * their own email.
+ */
+function Envelope({ rule, to }: { rule: EmailRule; to: string[] }) {
+  const runs = fill(rule.body)
+  return (
+    <div className={styles.mail}>
+      <div className={styles.mailTo}>
+        <span className={styles.mailToLabel}>Tới</span>
+        {to.length ? to.join(', ') : <span className={styles.mailNobody}>chưa có người nhận</span>}
+      </div>
+      <div className={styles.mailSubject}>
+        {fill(rule.subject).map((r, i) => (
+          <span key={i} className={r.variable ? styles.mailVar : undefined} title={r.variable ? `«${r.variable}»` : undefined}>
+            {r.text}
+          </span>
+        ))}
+      </div>
+      <div className={styles.mailBody}>
+        {runs.map((r, i) => (
+          <span key={i} className={r.variable ? styles.mailVar : undefined} title={r.variable ? `«${r.variable}»` : undefined}>
+            {r.text}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * `#/app/le-tan/ky-nang/gui-email` — how the clinic finds out what happened
+ * on the phone while nobody was watching.
+ *
+ * Three things worth an email, one row each: she could not answer, she held a
+ * slot, somebody rang after hours. Closed, a row says who it reaches; open, it
+ * is who and *what arrives* — the message drawn as it lands in the inbox,
+ * filled in with one worked call, the changing parts tinted.
+ *
+ * The wording is Fonnus's, and that is the point. The page used to be two
+ * cards — a list of switches, then a second card with a chip picker choosing
+ * which of the same three to edit — asking a clinic owner to author three
+ * email templates with «guillemet» tokens inserted at the caret. That is a
+ * copywriting job handed to somebody who wanted a notification. So the mail is
+ * written, the owner picks who gets it, and "Sửa lời" is one press away for
+ * the clinics that want their own subject line.
+ */
 export function EmailSkill() {
   const { config } = useConfig()
   const { toast } = useToast()
-  const d = useDraft(KEYS, 'Kỹ năng gửi email')
+  const d = useDraft(KEYS, 'Báo về hộp thư')
   const { draft, set } = d
   const agent = config.agent_name || 'Linh'
-  const [intent, setIntent] = useState<EmailIntent>('needs_review')
+  const live = { ...config, ...draft }
+  const rules = draft.email_rules
+
+  /*
+   * One open row, the same way the price list and the roster hold one:
+   * `closingId` keeps the row that just closed mounted for a fold so it can
+   * animate shut.
+   */
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [closingId, setClosingId] = useState<string | null>(null)
+  useEffect(() => {
+    if (!closingId) return
+    const t = window.setTimeout(() => setClosingId(null), FOLD_MS)
+    return () => window.clearTimeout(t)
+  }, [closingId])
+  const close = (id: string) => {
+    if (openId === id) {
+      setClosingId(id)
+      setOpenId(null)
+    }
+  }
+  const toggle = (id: string) => {
+    if (openId === id) return close(id)
+    if (openId) setClosingId(openId)
+    setOpenId(id)
+  }
+
+  // A press outside the open row shuts it; the save bar is the only "done".
+  useEffect(() => {
+    if (!openId) return
+    const onPress = (e: PointerEvent) => {
+      const t = e.target
+      if (!(t instanceof Element) || t.closest('[data-popup]')) return
+      if (document.querySelector(`[data-row-id="${CSS.escape(openId)}"]`)?.contains(t)) return
+      close(openId)
+    }
+    document.addEventListener('pointerdown', onPress, true)
+    return () => document.removeEventListener('pointerdown', onPress, true)
+    // `close` is rebuilt every render; the effect only needs the one for this `openId`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId])
+
+  const setRule = (i: EmailIntent, patch: Partial<EmailRule>) => set('email_rules', rules.map((r) => (r.intent === i ? { ...r, ...patch } : r)))
   const bodyRef = useRef<HTMLTextAreaElement>(null)
 
-  const rule = draft.email_rules.find((r) => r.intent === intent) ?? draft.email_rules[0]
-  const setRule = (i: EmailIntent, patch: Partial<EmailRule>) => set('email_rules', draft.email_rules.map((r) => (r.intent === i ? { ...r, ...patch } : r)))
-
-  const insertVar = (v: string) => {
+  /** A token goes in at the caret, so an owner rewriting a line keeps their place. */
+  const insertVar = (rule: EmailRule, v: string) => {
     const token = `«${v}»`
     const el = bodyRef.current
-    if (!el) return setRule(intent, { body: rule.body + token })
+    if (!el) return setRule(rule.intent, { body: rule.body + token })
     const start = el.selectionStart ?? rule.body.length
     const end = el.selectionEnd ?? start
-    const body = rule.body.slice(0, start) + token + rule.body.slice(end)
-    setRule(intent, { body })
+    setRule(rule.intent, { body: rule.body.slice(0, start) + token + rule.body.slice(end) })
     requestAnimationFrame(() => {
       el.focus()
       el.setSelectionRange(start + token.length, start + token.length)
     })
   }
 
-  const anyOn = draft.email_rules.some((r) => r.enabled && r.recipients.length)
+  const on = rules.filter((r) => r.enabled && r.recipients.length).length
 
   return (
-    <>
-      <Card title="Khi nào gửi email?" gate="O">
-        {draft.email_rules.map((r) => {
-          const m = INTENT_META[r.intent]
-          return (
-            <div key={r.intent} className={styles.intentRow}>
-              <Badge tone={m.tone} style={{ minWidth: 110, justifyContent: 'center' }}>
-                {LABELS.emailIntent[r.intent]}
-              </Badge>
-              <div className={styles.intentDesc}>
-                <span>{m.desc(agent)}</span>
-                <span className={styles.intentMeta}>
-                  {r.recipients.length ? `→ ${r.recipients.join(', ')}` : 'chưa có người nhận'} · mẫu: {LABELS.emailIntent[r.intent]}
-                </span>
-              </div>
-              <button type="button" className={ui.linkButton} onClick={() => setIntent(r.intent)}>
-                Sửa mẫu
-              </button>
-              <Switch checked={r.enabled} onChange={(v) => setRule(r.intent, { enabled: v })} ariaLabel={`Gửi email ${LABELS.emailIntent[r.intent]}`} />
-            </div>
-          )
-        })}
-        {!anyOn ? (
-          <Notice tone="warm" icon="mail">
-            Chưa có email nào được gửi: bật ít nhất một loại và thêm người nhận ở mẫu bên dưới. Email là cách duy nhất bạn biết một cuộc gọi cần xem lại mà không mở ứng dụng.
-          </Notice>
-        ) : null}
+    <SkillsSection
+      title="Báo về hộp thư"
+      lede={`${agent} nghe máy cả lúc không ai ở phòng khám. Ba việc đáng để bạn biết ngay — mỗi việc một email, gửi tới đúng người, viết sẵn.`}
+      rail={<TryPanel section="gui-email" config={live} />}
+      bar={<SaveBar {...d.bar} sub={on ? `${on}/${rules.length} loại đang gửi · áp dụng cho cuộc gọi tiếp theo` : `Chưa loại nào được gửi — ${agent} vẫn nghe máy, chỉ là không ai được báo`} />}
+    >
+      <Card title="Việc đáng báo" subtitle={emailSummary(rules, agent)}>
+        <RowList>
+          {rules.map((r) => {
+            const to = r.recipients
+            const live_ = r.enabled && to.length > 0
+            return (
+              <ExpandRow
+                key={r.intent}
+                rowId={r.intent}
+                open={openId === r.intent}
+                mounted={openId === r.intent || closingId === r.intent}
+                unfilled={r.enabled && !to.length}
+                onToggle={() => toggle(r.intent)}
+                summary={
+                  <>
+                    <RowText name={LABELS.emailIntent[r.intent]} sub={INTENT_ASKS[r.intent](agent)} />
+                    <RowValue>
+                      {live_ ? to.join(', ') : r.enabled ? <RowMissing>chưa có người nhận</RowMissing> : <RowMissing>đang tắt</RowMissing>}
+                    </RowValue>
+                    <RowMeta tight>
+                      <RowMark name={live_ ? INTENT_ICON[r.intent] : null} title={live_ ? `Đang gửi tới ${to.join(', ')}` : 'Chưa gửi'} />
+                    </RowMeta>
+                  </>
+                }
+              >
+                <RowEdit>
+                  <RowSwitch
+                    checked={r.enabled}
+                    onChange={(v) => setRule(r.intent, { enabled: v })}
+                    ariaLabel={`Gửi email ${LABELS.emailIntent[r.intent]}`}
+                    label={`Gửi email khi ${INTENT_ASKS[r.intent](agent)}`}
+                    hint={r.enabled ? 'Gửi ngay khi cuộc gọi kết thúc.' : 'Việc này vẫn được ghi lại trong Cuộc gọi, chỉ là không ai được báo.'}
+                  />
+
+                  <div className={ui.stackTight}>
+                    <RowEditLabel>Người nhận</RowEditLabel>
+                    <ChipInput
+                      boxed
+                      value={to}
+                      onChange={(v) => setRule(r.intent, { recipients: v })}
+                      placeholder={to.length ? 'Thêm email…' : 'VD: chi.lan@nhakhoa.vn'}
+                      validate={(raw) => (isValidEmail(raw) ? null : 'Email chưa đúng dạng.')}
+                    />
+                  </div>
+
+                  <div className={ui.stackTight}>
+                    <RowEditLabel>Email sẽ trông như thế này</RowEditLabel>
+                    <Envelope rule={r} to={to} />
+                  </div>
+
+                  {/* The wording is Fonnus's by default. It opens for the
+                      clinics that want their own, and stays shut for the ones
+                      that never think about it — which is most of them. */}
+                  <Disclosure title="Sửa lời" subtitle="phần tô màu là thông tin của từng cuộc gọi">
+                    <div className={ui.stack}>
+                      <TextField compact label="Tiêu đề" value={r.subject} onChange={(e) => setRule(r.intent, { subject: e.target.value })} maxLength={120} />
+                      <TextArea ref={bodyRef} label="Nội dung" value={r.body} onChange={(e) => setRule(r.intent, { body: e.target.value })} rows={5} maxLength={1200} />
+                      <div className={ui.row}>
+                        <span className={ui.hint}>Bấm để chèn:</span>
+                        {INTENT_VARS[r.intent].map((v) => (
+                          <button key={v} type="button" className={styles.varChip} title={`Thành "${SAMPLE[v] ?? v}"`} onClick={() => insertVar(r, v)}>
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </Disclosure>
+
+                  <RowEditFoot>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={!to.length}
+                      onClick={() => toast(`Đã gửi thử "${filled(r.subject)}" tới ${to[0]}.`, 'neutral')}
+                    >
+                      Gửi thử cho tôi
+                    </Button>
+                  </RowEditFoot>
+                </RowEdit>
+              </ExpandRow>
+            )
+          })}
+        </RowList>
       </Card>
-
-      <Card title="Mẫu email theo ý định">
-        <div className={ui.row}>
-          {INTENTS.map((i) => (
-            <ChipButton key={i} selected={i === intent} onClick={() => setIntent(i)}>
-              {LABELS.emailIntent[i]}
-            </ChipButton>
-          ))}
-        </div>
-        <span className={ui.hint}>Mỗi ý định gửi một mẫu riêng — chọn ý định phía trên để sửa mẫu tương ứng. Bật/tắt ở thẻ trên.</span>
-
-        <div className={ui.stackTight}>
-          <span className={ui.labelMuted}>Người nhận</span>
-          <ChipInput
-            value={rule.recipients}
-            onChange={(v) => setRule(intent, { recipients: v })}
-            placeholder="email@phongkham.vn"
-            addLabel="+ Thêm email"
-            validate={(raw) => (isValidEmail(raw) ? null : 'Email chưa đúng dạng.')}
-            emptyText="Chưa có người nhận."
-          />
-        </div>
-
-        <TextField label="Tiêu đề" value={rule.subject} onChange={(e) => setRule(intent, { subject: e.target.value })} maxLength={120} />
-        <TextArea ref={bodyRef} label="Nội dung" value={rule.body} onChange={(e) => setRule(intent, { body: e.target.value })} rows={5} maxLength={1200} />
-        <div className={ui.row}>
-          <span className={ui.hint}>Bấm để chèn biến:</span>
-          {INTENT_META[intent].vars.map((v) => (
-            <button key={v} type="button" className={styles.varChip} onClick={() => insertVar(v)}>
-              «{v}»
-            </button>
-          ))}
-        </div>
-        <div className={ui.row}>
-          <Button variant="ghost" size="sm" onClick={() => toast(`Đã gửi email thử "${rule.subject}" tới ${rule.recipients[0] ?? 'bạn'}.`, 'neutral')} disabled={!rule.recipients.length}>
-            Gửi email thử cho tôi
-          </Button>
-          <span className={ui.hint}>Email thử dùng dữ liệu mẫu — không có cuộc gọi thật nào được gửi đi.</span>
-        </div>
-      </Card>
-
-      <SaveBar {...d.bar} sub={`${draft.email_rules.filter((r) => r.enabled).length}/3 loại đang bật`} />
-    </>
+    </SkillsSection>
   )
 }

@@ -1,9 +1,34 @@
-import { Badge } from '../../../design-system'
+import { useEffect, useState } from 'react'
 import { appHref } from '../../../hooks/useRoute'
-import { BUFFER_OPTIONS, LABELS, SLOT_DURATION_OPTIONS, WEEKDAYS, WEEKDAY_LONG } from '../defaults'
+import { BUFFER_OPTIONS, LABELS, SLOT_DURATION_OPTIONS } from '../defaults'
 import type { BookingConfirmationChannel, IdentityVerificationRule, SlotRule, Weekday } from '../model'
 import { useConfig, useDraft } from '../store'
-import { Card, GateTag, Notice, NumberField, SaveBar, SelectField, SpeechBubble, Switch, TextField, ui } from '../../ui'
+import {
+  Card,
+  Disclosure,
+  ExpandRow,
+  FOLD_MS,
+  NumberField,
+  RowEdit,
+  RowList,
+  RowMissing,
+  RowText,
+  RowValue,
+  Said,
+  SaveBar,
+  Segmented,
+  SelectField,
+  Suggestion,
+  Suggestions,
+  TextField,
+  ui,
+} from '../../ui'
+import { DayBlocks, WeekdayPicker, blocksOn, nextBlock } from '../Week'
+import type { TimeBlock } from '../Week'
+import { fmtDate } from '../knowledge/answers'
+import { TryPanel } from '../tryout/TryPanel'
+import { SkillsSection } from './SkillsSection'
+import { POLICIES, bookableDays, clinicHours, closedDays, confirmLine, identityLine, limitLine, policyLine, slotLine } from './lines'
 import styles from './Skills.module.css'
 
 const KEYS = [
@@ -20,156 +45,302 @@ const KEYS = [
   'identity_verification_rule',
 ] as const
 
-const fmt = (iso: string) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}` : '')
+/**
+ * `slot_rules` keeps a list of windows per day; the week control keeps one
+ * flat list of blocks. The id is the day and the window's place in it, which
+ * is stable for as long as a block exists — a window is only ever added at the
+ * end or removed, never reordered.
+ */
+function toBlocks(rules: SlotRule[]): TimeBlock[] {
+  return rules.flatMap((r) => r.windows.map((w, i) => ({ id: `${r.day}:${i}`, day: r.day, from: w.from, to: w.to })))
+}
 
+const CHANNELS: BookingConfirmationChannel[] = ['sms', 'zalo', 'none']
+
+/**
+ * `#/app/le-tan/ky-nang/dat-lich` — the diary she is allowed to write in.
+ *
+ * Four questions, in the order a booking runs into them: when may she give a
+ * slot away, how many may she give, what does she promise afterwards, and how
+ * does she check the person ringing back is the person who booked.
+ *
+ * The week is the control `Bác sĩ` wrote (`../Week`), and it carries the same
+ * decision: **a day that is on but carries no block of its own keeps the
+ * clinic's opening hours**, and says so. Most clinics take bookings whenever
+ * they are open, so most of this page needs no touching — and the day a
+ * clinic changes its opening time, nothing here goes stale. Windows are only
+ * for the exceptions: "sáng thứ Bảy thôi". The old version made every day
+ * carry its hours written out, in a pair of native time inputs that were
+ * system-blue and in English on a Vietnamese page.
+ *
+ * The four things a caller asks *after* the slot is held — cọc, huỷ, quên
+ * hẹn, chờ lâu — are rows rather than a block of text fields, because closed
+ * they read as the cheat-sheet they are: the question on the left, her answer
+ * under it, and a dashed edge on the ones she still has no answer for.
+ */
 export function BookingSkill() {
   const { config } = useConfig()
-  const d = useDraft(KEYS, 'Kỹ năng đặt lịch hẹn')
+  const d = useDraft(KEYS, 'Giữ lịch hẹn')
   const { draft, set } = d
   const agent = config.agent_name || 'Linh'
+  const live = { ...config, ...draft }
   const today = new Date().toISOString().slice(0, 10)
 
-  const hoursFor = (day: Weekday) => config.operating_hours_by_weekday.find((h) => h.day === day)
+  const shut = closedDays(config)
+  const days = bookableDays(draft.slot_rules)
+  const blocks = toBlocks(draft.slot_rules)
+
   const setRule = (day: Weekday, patch: Partial<SlotRule>) => set('slot_rules', draft.slot_rules.map((r) => (r.day === day ? { ...r, ...patch } : r)))
-  const setWindow = (day: Weekday, i: number, patch: Partial<{ from: string; to: string }>) => {
-    const rule = draft.slot_rules.find((r) => r.day === day)!
-    setRule(day, { windows: rule.windows.map((w, j) => (j === i ? { ...w, ...patch } : w)) })
+  const setDays = (next: Weekday[]) =>
+    set(
+      'slot_rules',
+      draft.slot_rules.map((r) => (next.includes(r.day) ? { ...r, enabled: true } : { ...r, enabled: false, windows: [] })),
+    )
+  const editBlock = (id: string, patch: Partial<TimeBlock>) => {
+    const [day, i] = id.split(':').map(Number)
+    const rule = draft.slot_rules.find((r) => r.day === day)
+    if (!rule) return
+    setRule(day as Weekday, { windows: rule.windows.map((w, j) => (j === i ? { ...w, ...patch } : w)) })
   }
-  const windowBad = (day: Weekday, w: { from: string; to: string }) => {
-    const h = hoursFor(day)
-    if (w.from >= w.to) return 'Giờ kết thúc phải sau giờ bắt đầu.'
-    if (h && h.open && (w.from < h.from || w.to > h.to)) return `Ngoài giờ làm việc (${h.from}–${h.to}).`
-    if (h && !h.open) return 'Phòng khám nghỉ ngày này.'
+  const removeBlock = (id: string) => {
+    const [day, i] = id.split(':').map(Number)
+    const rule = draft.slot_rules.find((r) => r.day === day)
+    if (!rule) return
+    setRule(day as Weekday, { windows: rule.windows.filter((_, j) => j !== i) })
+  }
+  const addBlock = (day: Weekday) => {
+    const rule = draft.slot_rules.find((r) => r.day === day)
+    if (!rule) return
+    const h = clinicHours(config, day) ?? { from: '09:00', to: '17:00' }
+    setRule(day, { windows: [...rule.windows, nextBlock(blocksOn(blocks, day).at(-1), h)] })
+  }
+
+  /** A window that promises a time the clinic is not open is the one real error on this page. */
+  const problem = (b: TimeBlock): string | null => {
+    if (b.from >= b.to) return 'Giờ kết thúc phải sau giờ bắt đầu.'
+    const h = clinicHours(config, b.day)
+    if (!h) return 'Phòng khám nghỉ ngày này.'
+    if (b.from < h.from || b.to > h.to) return `Ngoài giờ mở cửa (${h.from}–${h.to}).`
     return null
   }
-  const anyBad = draft.slot_rules.some((r) => r.enabled && r.windows.some((w) => windowBad(r.day, w)))
+  const anyBad = blocks.some((b) => problem(b))
 
-  const upcoming = config.holiday_exceptions.filter((h) => h.date_to >= today).sort((a, b) => a.date_from.localeCompare(b.date_from)).slice(0, 4)
-  const example = config.service_catalog.find((s) => s.is_bookable && s.price_from) ?? config.service_catalog[0]
-  const line = example
-    ? `${example.service_name} tại phòng khám ${example.price_from ? `từ ${(example.price_from / 1000).toLocaleString('vi-VN')} nghìn` : 'bác sĩ báo giá sau khám'}. Anh chị muốn em giữ lịch 9 giờ sáng thứ Bảy không ạ?${draft.deposit_policy.trim() ? ` ${draft.deposit_policy.trim()}.` : ''}`
-    : ''
+  const upcoming = config.holiday_exceptions
+    .filter((h) => h.date_to >= today)
+    .sort((a, b) => a.date_from.localeCompare(b.date_from))
+    .slice(0, 3)
+
+  /* One open policy row at a time — the same fold as every other list. */
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [closingId, setClosingId] = useState<string | null>(null)
+  useEffect(() => {
+    if (!closingId) return
+    const t = window.setTimeout(() => setClosingId(null), FOLD_MS)
+    return () => window.clearTimeout(t)
+  }, [closingId])
+  const closeRow = (id: string) => {
+    if (openId === id) {
+      setClosingId(id)
+      setOpenId(null)
+    }
+  }
+  const toggle = (id: string) => {
+    if (openId === id) return closeRow(id)
+    if (openId) setClosingId(openId)
+    setOpenId(id)
+  }
+  useEffect(() => {
+    if (!openId) return
+    const onPress = (e: PointerEvent) => {
+      const t = e.target
+      if (!(t instanceof Element) || t.closest('[data-popup]')) return
+      if (document.querySelector(`[data-row-id="${CSS.escape(openId)}"]`)?.contains(t)) return
+      closeRow(openId)
+    }
+    document.addEventListener('pointerdown', onPress, true)
+    return () => document.removeEventListener('pointerdown', onPress, true)
+    // `closeRow` is rebuilt every render; the effect only needs the one for this `openId`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId])
+
+  const answered = POLICIES.filter((p) => draft[p.key].trim()).length
 
   return (
-    <>
-      <Card gate="O" title="Khung giờ nhận hẹn trong tuần" subtitle={`${agent} chỉ tự giữ lịch trong các khung này`}>
-        <div>
-          {WEEKDAYS.map((day) => {
-            const rule = draft.slot_rules.find((r) => r.day === day)!
-            const h = hoursFor(day)
-            return (
-              <div key={day} className={styles.slotRow}>
-                <span style={{ fontSize: 13.5, fontWeight: 600 }}>{WEEKDAY_LONG[day]}</span>
-                <Switch checked={rule.enabled} onChange={(v) => setRule(day, { enabled: v, windows: v && !rule.windows.length && h?.open ? [{ from: h.from, to: h.to }] : rule.windows })} ariaLabel={`Nhận hẹn ${WEEKDAY_LONG[day]}`} disabled={!h?.open} />
-                {!h?.open ? (
-                  <span className={ui.hint}>Phòng khám nghỉ — sửa ở Kiến thức · Giờ làm việc</span>
-                ) : rule.enabled ? (
-                  <div className={styles.windows}>
-                    {rule.windows.map((w, i) => {
-                      const bad = windowBad(day, w)
-                      return (
-                        <span key={i} className={`${styles.window} ${bad ? styles.windowBad : ''}`} title={bad ?? undefined}>
-                          <input type="time" step={300} className={styles.windowInput} value={w.from} onChange={(e) => setWindow(day, i, { from: e.target.value })} aria-label="Từ" />
-                          <span className={ui.muted}>–</span>
-                          <input type="time" step={300} className={styles.windowInput} value={w.to} onChange={(e) => setWindow(day, i, { to: e.target.value })} aria-label="Đến" />
-                          <button type="button" className={styles.windowRemove} aria-label="Bỏ khung giờ" onClick={() => setRule(day, { windows: rule.windows.filter((_, j) => j !== i) })}>
-                            ✕
-                          </button>
-                        </span>
-                      )
-                    })}
-                    <button type="button" className={styles.addWindow} onClick={() => setRule(day, { windows: [...rule.windows, { from: rule.windows.length ? rule.windows[rule.windows.length - 1].to : (h?.from ?? '09:00'), to: h?.to ?? '17:00' }] })}>
-                      + Thêm
-                    </button>
-                  </div>
-                ) : (
-                  <span className={ui.hint}>Không nhận hẹn — {agent} ghi lời nhắn và hẹn gọi lại</span>
-                )}
-              </div>
-            )
-          })}
-        </div>
-        <span className={ui.hint}>Bật/tắt từng ngày và thêm khung giờ riêng cho ngày đó. Giờ nhận hẹn phải nằm trong giờ làm việc của phòng khám.</span>
-
-        <div className={ui.grid2} style={{ paddingTop: 4 }}>
-          <NumberField label="Số chỗ mỗi ngày" gate="R2" value={draft.ai_bookable_slots_per_day} onChange={(v) => set('ai_bookable_slots_per_day', v ?? 0)} min={0} max={50} hint={`${agent} chỉ tự xác nhận trong số chỗ này.`} />
-          <SelectField label="Thời lượng một hẹn" gate="R2" value={String(draft.slot_duration)} onChange={(v) => set('slot_duration', Number(v))} options={SLOT_DURATION_OPTIONS.map((m) => ({ value: String(m), label: `${m} phút` }))} hint="Dịch vụ có thời lượng riêng ở bảng giá." />
-          <SelectField label="Nghỉ giữa hai hẹn" value={String(draft.buffer_time)} onChange={(v) => set('buffer_time', Number(v))} options={BUFFER_OPTIONS.map((m) => ({ value: String(m), label: m === 0 ? 'Không' : `${m} phút` }))} />
-          <NumberField label="Tối đa mỗi ngày" value={draft.max_bookings_per_day} onChange={(v) => set('max_bookings_per_day', v)} min={1} max={99} placeholder="không giới hạn" hint="Trần cứng, tính cả hẹn nhân viên tự ghi." />
-        </div>
+    <SkillsSection
+      title="Giữ lịch hẹn"
+      lede={`Khách gọi để đặt lịch nhiều hơn mọi lý do khác. Trang này nói cho ${agent} biết được giữ chỗ vào lúc nào, bao nhiêu chỗ, và hứa gì với khách sau đó.`}
+      rail={<TryPanel section="dat-lich" config={live} />}
+      bar={
+        <SaveBar
+          {...d.bar}
+          sub={anyBad ? 'Có khung giờ nằm ngoài giờ mở cửa — xem lại trước khi lưu.' : `${days.length} ngày nhận hẹn · ${draft.ai_bookable_slots_per_day} chỗ mỗi ngày · hẹn ${draft.slot_duration} phút`}
+        />
+      }
+    >
+      <Card title="Ngày và giờ nhận hẹn" subtitle={`khách hỏi "sáng thứ Bảy còn chỗ không"`}>
+        <WeekdayPicker
+          ariaLabel="Ngày nhận hẹn"
+          value={days}
+          onChange={setDays}
+          off={shut}
+          offTitle="Phòng khám nghỉ ngày này — sửa ở Kiến thức · Giờ mở cửa"
+        />
+        {days.length ? (
+          <DayBlocks
+            days={days}
+            blocks={blocks}
+            inherit={() => 'Theo giờ phòng khám'}
+            problem={problem}
+            onEdit={editBlock}
+            onRemove={removeBlock}
+            onAdd={addBlock}
+          />
+        ) : (
+          <span className={ui.hint}>Chưa nhận hẹn ngày nào — {agent} ghi lời nhắn và hẹn nhân viên gọi lại.</span>
+        )}
+        <span className={ui.hint}>
+          Ngày bật mà không thêm khung giờ thì {agent} nhận hẹn đúng giờ mở cửa. Chỉ thêm khung giờ cho ngày khác thường — sửa giờ mở cửa ở{' '}
+          <a href={appHref('le-tan', 'kien-thuc', 'gio-mo-cua')}>Giờ mở cửa và ngày nghỉ</a>.
+        </span>
+        <Said who={agent}>{slotLine(live, agent)}</Said>
       </Card>
 
-      <Card title="Ngày nghỉ và ngoại lệ" subtitle="lấy từ Kiến thức · Giờ mở cửa và ngày nghỉ — sửa ở đó" actions={<a className={ui.linkButton} href={appHref('le-tan', 'kien-thuc', 'gio-mo-cua')}>Mở Giờ mở cửa và ngày nghỉ</a>}>
+      <Card title="Bao nhiêu chỗ mỗi ngày" subtitle={`quá số này ${agent} ghi nhận để nhân viên xác nhận lại`}>
+        <div className={ui.grid2}>
+          <NumberField
+            label={`Chỗ ${agent} tự giữ`}
+            value={draft.ai_bookable_slots_per_day}
+            onChange={(v) => set('ai_bookable_slots_per_day', v ?? 0)}
+            min={0}
+            max={50}
+          />
+          <SelectField
+            label="Một hẹn kéo dài"
+            value={String(draft.slot_duration)}
+            onChange={(v) => set('slot_duration', Number(v))}
+            options={SLOT_DURATION_OPTIONS.map((m) => ({ value: String(m), label: `${m} phút` }))}
+            hint="Dịch vụ có thời lượng riêng ở bảng giá."
+          />
+          <SelectField
+            label="Nghỉ giữa hai hẹn"
+            value={String(draft.buffer_time)}
+            onChange={(v) => set('buffer_time', Number(v))}
+            options={BUFFER_OPTIONS.map((m) => ({ value: String(m), label: m === 0 ? 'Không' : `${m} phút` }))}
+          />
+          <NumberField
+            label="Trần cả phòng khám"
+            value={draft.max_bookings_per_day}
+            onChange={(v) => set('max_bookings_per_day', v)}
+            min={1}
+            max={99}
+            placeholder="không giới hạn"
+            hint="Tính cả hẹn nhân viên tự ghi."
+          />
+        </div>
+        <Said who={agent}>{limitLine(live)}</Said>
+      </Card>
+
+      <Card
+        title="Ngày nghỉ sắp tới"
+        subtitle={`${agent} không giữ lịch vào những ngày này`}
+        actions={
+          <a className={ui.linkButton} href={appHref('le-tan', 'kien-thuc', 'gio-mo-cua')}>
+            Sửa ở Giờ mở cửa
+          </a>
+        }
+      >
         {upcoming.length ? (
-          <div>
+          <div className={styles.offdays}>
             {upcoming.map((h) => (
-              <div key={h.id} className={ui.kv}>
-                <span className={ui.kvKey} style={{ color: 'var(--ink)', fontWeight: 500 }}>
-                  {h.holiday_label || 'Ngày nghỉ'}
-                </span>
-                <span className={`${ui.kvVal} ${ui.num}`}>
-                  {h.date_from === h.date_to ? fmt(h.date_from) : `${fmt(h.date_from)} – ${fmt(h.date_to)}`}
-                  {'  '}
-                  <Badge tone={h.closure_type === 'closed' ? 'terracotta' : 'neutral'} style={{ marginLeft: 10 }}>
-                    {h.closure_type === 'closed' ? 'Cả ngày' : `${h.modified_hours?.from} – ${h.modified_hours?.to}`}
-                  </Badge>
-                </span>
+              <div key={h.id} className={styles.offday}>
+                <span className={styles.offdayName}>{h.holiday_label || 'Ngày nghỉ'}</span>
+                <span className={`${styles.offdayWhen} ${ui.num}`}>{h.date_from === h.date_to ? fmtDate(h.date_from) : `${fmtDate(h.date_from)} – ${fmtDate(h.date_to)}`}</span>
+                <span className={styles.offdayWhat}>{h.closure_type === 'closed' ? 'Nghỉ cả ngày' : `Mở ${h.modified_hours?.from}–${h.modified_hours?.to}`}</span>
               </div>
             ))}
           </div>
         ) : (
-          <span className={ui.hint}>Không có ngày nghỉ sắp tới.</span>
+          <span className={ui.hint}>Không có ngày nghỉ nào sắp tới.</span>
         )}
         {upcoming[0] ? (
-          <SpeechBubble who={`${agent} nói`}>
-            Phòng khám nghỉ {upcoming[0].holiday_label.toLowerCase()} đến hết {fmt(upcoming[0].date_to)}. Em đặt lịch cho anh chị vào ngày mở cửa lại nhé?
-          </SpeechBubble>
+          <Said who={agent}>
+            Dạ, phòng khám nghỉ {(upcoming[0].holiday_label || 'ngày này').toLowerCase()} đến hết {fmtDate(upcoming[0].date_to)}. Em giữ lịch cho anh chị vào ngày mở cửa lại nhé?
+          </Said>
         ) : null}
       </Card>
 
-      <Card title="Xác nhận với khách">
-        <div className={ui.grid2}>
-          <SelectField<BookingConfirmationChannel>
-            label="Kênh xác nhận"
-            gate="R2"
+      <Card title="Khách hỏi thêm về lịch hẹn" subtitle={answered ? `${answered}/${POLICIES.length} câu có câu trả lời riêng` : `chưa câu nào có câu trả lời riêng — ${agent} đang trả lời chung`}>
+        <RowList>
+          {POLICIES.map((p) => {
+            const value = draft[p.key]
+            const ideas = p.ideas.filter((i) => i !== value.trim())
+            return (
+              <ExpandRow
+                key={p.key}
+                rowId={p.key}
+                open={openId === p.key}
+                mounted={openId === p.key || closingId === p.key}
+                unfilled={!value.trim()}
+                onToggle={() => toggle(p.key)}
+                summary={
+                  <>
+                    <RowText name={p.q} sub={policyLine(p, value)} />
+                    {value.trim() ? null : (
+                      <RowValue>
+                        <RowMissing>trả lời chung</RowMissing>
+                      </RowValue>
+                    )}
+                  </>
+                }
+              >
+                <RowEdit>
+                  <TextField compact aria-label={p.q} value={value} onChange={(e) => set(p.key, e.target.value)} placeholder={p.placeholder} maxLength={140} />
+                  {ideas.length ? (
+                    <Suggestions hint="bấm để dùng">
+                      {ideas.map((i) => (
+                        <Suggestion key={i} onClick={() => set(p.key, i)}>
+                          {i}
+                        </Suggestion>
+                      ))}
+                    </Suggestions>
+                  ) : null}
+                  <Said who={agent}>{policyLine(p, value)}</Said>
+                </RowEdit>
+              </ExpandRow>
+            )
+          })}
+        </RowList>
+      </Card>
+
+      <Card title="Sau khi giữ chỗ" subtitle={`khách hỏi "có nhắn lại cho em không"`}>
+        <div className={ui.stackTight}>
+          <span className={ui.label}>Xác nhận qua</span>
+          <Segmented<BookingConfirmationChannel>
+            ariaLabel="Kênh xác nhận hẹn"
             value={draft.booking_confirmation_channel}
             onChange={(v) => set('booking_confirmation_channel', v)}
-            options={(['sms', 'zalo', 'none'] as BookingConfirmationChannel[]).map((k) => ({ value: k, label: LABELS.confirmation[k] }))}
-            hint={draft.booking_confirmation_channel === 'zalo' ? 'Zalo cần tài khoản OA — Fonnus sẽ hướng dẫn khi kết nối.' : undefined}
+            options={CHANNELS.map((k) => ({ value: k, label: LABELS.confirmation[k] }))}
           />
-          <TextField label="Đặt cọc" value={draft.deposit_policy} onChange={(e) => set('deposit_policy', e.target.value)} placeholder="VD: Không cần đặt cọc" />
-          <TextField label="Chính sách huỷ" value={draft.cancellation_policy} onChange={(e) => set('cancellation_policy', e.target.value)} placeholder="VD: Huỷ trước 2 tiếng, không mất phí" />
-          <TextField label="Khách không đến" value={draft.no_show_policy} onChange={(e) => set('no_show_policy', e.target.value)} placeholder={`VD: Không phạt — ${agent} gọi nhắc lại hôm sau`} />
-          <TextField className={ui.span2} label="Thời gian chờ tại phòng khám" value={draft.waiting_time_expectation} onChange={(e) => set('waiting_time_expectation', e.target.value)} placeholder="VD: Thường chờ 10 – 15 phút" hint={`${agent} nói trước để khách khỏi bất ngờ.`} />
+          {draft.booking_confirmation_channel === 'zalo' ? <span className={ui.hint}>Zalo cần tài khoản OA — Fonnus sẽ hướng dẫn khi kết nối.</span> : null}
         </div>
+        <Said who={agent}>{confirmLine(live)}</Said>
 
-        <div className={ui.stackTight}>
-          <SelectField<IdentityVerificationRule>
-            label={
-              <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-                Khách hỏi lại lịch đã đặt <GateTag gate="SW" />
-              </span>
-            }
-            value={draft.identity_verification_rule}
-            onChange={(v) => set('identity_verification_rule', v)}
-            options={[
-              { value: 'caller_id_date', label: 'Gọi từ đúng số đã đặt + nói đúng ngày hẹn (mặc định)' },
-              { value: 'caller_id_date_name', label: 'Thêm: nói đúng tên người đặt (chặt hơn)' },
-            ]}
-          />
-          <Notice tone="neutral" icon="privacy">
-            Quy tắc bảo vệ dữ liệu cá nhân — chỉ siết chặt thêm được, không nới lỏng. {agent} không đọc lịch hẹn cho người gọi từ số lạ.
-          </Notice>
-        </div>
-
-        {line ? (
-          <SpeechBubble who={`${agent} nói`} speak text={line}>
-            {line}
-          </SpeechBubble>
-        ) : null}
+        <Disclosure title="Khách gọi lại hỏi lịch đã đặt" subtitle="quy tắc bảo vệ dữ liệu — chỉ siết thêm được, không nới ra">
+          <div className={ui.stack}>
+            <SelectField<IdentityVerificationRule>
+              label={`${agent} kiểm tra bằng`}
+              value={draft.identity_verification_rule}
+              onChange={(v) => set('identity_verification_rule', v)}
+              options={[
+                { value: 'caller_id_date', label: 'Đúng số đã đặt + đúng ngày hẹn' },
+                { value: 'caller_id_date_name', label: 'Thêm: đúng tên người đặt (chặt hơn)' },
+              ]}
+              hint={`${agent} không đọc lịch hẹn cho người gọi từ số lạ, dù trả lời đúng ngày.`}
+            />
+            <Said who={agent}>{identityLine(live)}</Said>
+          </div>
+        </Disclosure>
       </Card>
-
-      <SaveBar {...d.bar} sub={anyBad ? 'Có khung giờ nằm ngoài giờ làm việc — kiểm tra lại trước khi lưu.' : `${draft.ai_bookable_slots_per_day} chỗ mỗi ngày · hẹn ${draft.slot_duration} phút · xác nhận qua ${LABELS.confirmation[draft.booking_confirmation_channel]}`} />
-    </>
+    </SkillsSection>
   )
 }

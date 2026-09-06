@@ -1,0 +1,273 @@
+/*
+ * The frame every Lễ tân page is built in — the one copy.
+ *
+ * Hồ sơ wrote this geometry, Kiến thức restated it, and when Kỹ năng needed
+ * it too the third copy is what forced it here. The two stylesheets that
+ * carried it were byte-identical for 180 lines; what is left in them is what
+ * is genuinely theirs (a holiday pill, a voice picker, a doctor's monogram).
+ *
+ * The rules, which are the reason for every number below:
+ *
+ *   1. One work column and one sticky rail. What separates them is the
+ *      **gutter** — a 380px column, a 40px gap, a hairline down the middle of
+ *      it — not a fill. The same geometry as `.withRail` in
+ *      LeTanPage.module.css, which is the hub's version of the same idea.
+ *   2. Every screen ends in something you can hear: the rail is a call you
+ *      can hold, answering from the fields as they stand.
+ *   3. Status is a summary of what is set, never a "required" badge. A hub
+ *      row with nothing in it wears a dashed edge and says so in her words.
+ *   4. Under 1180px the columns stack, and the stacked container **restates
+ *      `align-items: stretch`** — a grid instruction left on a flex column
+ *      sizes every child to its own max-content, which once blew a 375px
+ *      page 620px wide.
+ *   5. Under 640px it is a phone: the row summary wraps rather than
+ *      ellipsing, because four words and a "…" say nothing.
+ */
+
+/* --------------------------------------------------------- section page */
+
+/* The section's own title, under the identity header and the way back. */
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+}
+
+@media (max-width: 639.98px) {
+  .sectionTitle {
+    font-size: 21px;
+  }
+}
+
+.work {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 40px;
+  /* Both columns run the full height of the row: the preview sticks to the
+     top of the rail and the assistant to its foot, the save bar to the foot
+     of the form column — and a sticky child needs the tall box to move in. */
+  align-items: stretch;
+}
+
+/* Full height of the taller column, not of the panel: the panel is sticky and
+   short, and a rule that stopped where it stops would look like an accident. */
+.work::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Centre of the gutter: 380px column + half of the 40px gap. */
+  right: 400px;
+  width: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* The preview, pinned to the top of the rail. The assistant window, when the
+   page mounts one, pins itself to the rail's foot (`.dockAside` in SetupChat). */
+.railTop {
+  position: sticky;
+  top: 24px;
+}
+
+/*
+ * The line under the title says what the page is for. It wraps at the width
+ * of the work column it introduces — the same 380px + 40px the grid below
+ * reserves for the panel — not at a reading measure of its own, which broke
+ * it into a narrow block that stopped well short of the fields underneath.
+ */
+.lede {
+  margin: -6px 0 0;
+  max-width: calc(100% - 420px);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/*
+ * Below this the panel would squeeze the work column under ~530px, so it goes
+ * back to being one column — and moves *above* the fields rather than below
+ * them, because hearing what the caller hears is the point of the page.
+ */
+@media (max-width: 1180.98px) {
+  .work {
+    display: flex;
+    flex-direction: column;
+    /* The 40px above is the width of a gutter with a rule down it; stacked
+       there is no gutter. And the reset stays even though the grid above is
+       `stretch` now: a grid `align-items` left on a flex column once stopped
+       the stacked cards filling the width. */
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  .work::before {
+    display: none;
+  }
+
+  .col {
+    order: 2;
+  }
+
+  .rail {
+    order: 1;
+  }
+
+  .railTop {
+    position: static;
+  }
+
+  .lede {
+    max-width: none;
+  }
+}
+
+/* ------------------------------------------------------------------- hub */
+
+.hub {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* One list of ways in (Hồ sơ, Kỹ năng), or several under labels (Kiến thức). */
+.rows,
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding: 4px 2px 0;
+}
+
+.rowLink {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.rowLink:hover {
+  background: var(--action-secondary-hover);
+  transform: translateY(var(--lift-hover));
+  text-decoration: none;
+  color: var(--ink);
+}
+
+/* Nothing filled in yet — a dashed edge, not a warning colour. */
+.rowEmpty {
+  border: 1px dashed var(--border-dashed);
+}
+
+.rowIcon {
+  color: var(--text-accent);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.rowTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.rowSub {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowSubEmpty {
+  color: var(--text-accent);
+}
+
+.rowChev {
+  color: var(--ink-soft);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.hubFoot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding: 2px 2px 0;
+}
+
+.hubFootIcon {
+  color: var(--ink-soft);
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+/*
+ * Phone. The one-line summary is the whole point of a row — "Chưa dặn gì thêm
+ * — Linh đang trả lời…" ellipsised after four words says nothing — so it wraps
+ * here instead of truncating, and the row grows to fit rather than the text
+ * disappearing.
+ */
+@media (max-width: 639.98px) {
+  .rowLink {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 15px;
+  }
+
+  .rowIcon,
+  .rowChev {
+    margin-top: 1px;
+  }
+
+  .rowSub {
+    white-space: normal;
+    overflow: visible;
+  }
+}

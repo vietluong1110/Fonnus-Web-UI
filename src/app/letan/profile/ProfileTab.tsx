@@ -1,10 +1,9 @@
-import { Icon } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
 import { LABELS } from '../defaults'
 import { useConfig } from '../store'
 import { ui } from '../../ui'
-import styles from './Profile.module.css'
+import { HubFoot, HubRow, sectionStyles as styles } from '../SectionFrame'
 
 /**
  * `#/app/le-tan/ho-so` — the hub.
@@ -16,7 +15,8 @@ import styles from './Profile.module.css'
  * There are no "bắt buộc" / "không bắt buộc" chips. What a row shows instead
  * is what is currently set — the same information, phrased as a fact about
  * the clinic rather than as an obligation. A row with nothing in it says so
- * plainly and wears a dashed edge; that is the whole nudge.
+ * plainly and wears a dashed edge; that is the whole nudge. The row itself is
+ * `HubRow`, shared with the other two hubs.
  */
 
 interface Row {
@@ -71,30 +71,14 @@ export function ProfileTab() {
     <div className={styles.hub}>
       <div className={styles.rows}>
         {rows.map((r) => (
-          <a key={r.segment} className={`${styles.rowLink} ${r.empty ? styles.rowEmpty : ''}`} href={appHref('le-tan', 'ho-so', r.segment)}>
-            <span className={styles.rowIcon}>
-              <Icon name={r.icon} size={20} />
-            </span>
-            <span className={styles.rowText}>
-              <span className={styles.rowTitle}>{r.title}</span>
-              <span className={`${styles.rowSub} ${r.empty ? styles.rowSubEmpty : ''}`}>{r.sub}</span>
-            </span>
-            <span className={styles.rowChev}>
-              <Icon name="chevron-right" size={18} />
-            </span>
-          </a>
+          <HubRow key={r.segment} href={appHref('le-tan', 'ho-so', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
         ))}
       </div>
 
-      <div className={styles.hubFoot}>
-        <span className={styles.hubFootIcon}>
-          <Icon name="guide" size={16} />
-        </span>
-        <span>
-          Những gì {agent} <em>biết</em> về phòng khám — giá, giờ mở cửa, bác sĩ — nằm ở tab{' '}
-          <a href={appHref('le-tan', 'kien-thuc')}>Kiến thức</a>.
-        </span>
-      </div>
+      <HubFoot>
+        Những gì {agent} <em>biết</em> về phòng khám — giá, giờ mở cửa, bác sĩ — nằm ở tab{' '}
+        <a href={appHref('le-tan', 'kien-thuc')}>Kiến thức</a>.
+      </HubFoot>
 
       <span className={ui.hint}>
         Chưa biết bắt đầu từ đâu? Trả lời Fonnus ở khung trợ lý — mỗi câu trả lời điền thẳng vào một mục.

@@ -1,165 +1,206 @@
-.layout {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-}
+/*
+ * Kỹ năng — what is specific to its three sub-pages.
+ *
+ * The page frame (work column, rail, gutter rule, lede) and the hub row are
+ * ../Section.module.css, shared with Hồ sơ and Kiến thức. The week and its
+ * blocks of time are ../Week.module.css, shared with Bác sĩ. What is left
+ * here is three drawings that exist nowhere else:
+ *
+ *   - the ladder of numbers down the escalation list, which says "she tries
+ *     them in this order" without a sentence saying it;
+ *   - the envelope, which is what a `Said` line is for a page whose output is
+ *     an email rather than a spoken sentence;
+ *   - the borrowed holiday lines, which read rather than edit because they
+ *     belong to Giờ mở cửa.
+ *
+ * This file used to hold a subnav, a table of native time inputs and a rose
+ * panel of red flags. All three are gone — the first because Kỹ năng now has
+ * a hub like the other two tabs, the second because the week control replaced
+ * it, and the third because a tinted callout inside a form is exactly what
+ * drained blush of its meaning.
+ */
 
-@media (max-width: 900px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.subnav {
-  background: var(--surface-card);
-  border: 1px solid var(--border-hairline);
-  border-radius: 14px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  position: sticky;
-  top: 20px;
-}
-
-@media (max-width: 900px) {
-  .subnav {
-    flex-direction: row;
-    position: static;
-    overflow-x: auto;
-  }
-}
-
-.subItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--ink-soft);
-  text-decoration: none;
-  white-space: nowrap;
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
-}
-
-.subItem:hover {
-  background: var(--action-ghost-hover);
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.subItemOn,
-.subItemOn:hover {
-  background: var(--terracotta);
-  --icon-accent: currentColor;
-  color: var(--cream);
-  font-weight: 600;
-}
-
-.subDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--warning);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 820px;
-  min-width: 0;
-}
+/* ------------------------------------------------- chuyển máy · the ladder */
 
 .targets {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  container: targets / inline-size;
 }
 
-.targetRow {
+/*
+ * A row is the rung number, the phone, the name, the delete. There is no
+ * hairline between rows: the ladder line below *is* the separator, and it
+ * carries the order as well, which a hairline cannot.
+ */
+.target {
+  position: relative;
   display: grid;
-  grid-template-columns: 32px 180px minmax(0, 1fr) 32px;
+  grid-template-columns: 30px 180px minmax(0, 1fr) 32px;
   gap: 10px;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-hairline);
+  min-width: 0;
 }
 
-.targetOrder {
+/*
+ * The rung-to-rung line. It starts 3px under the circle — which sits at
+ * 5–29px inside its grid row at both widths, because the row's height is the
+ * compact field's either way — and runs past the row's bottom edge into the
+ * gap, so the ladder reads as continuous however tall a row becomes.
+ */
+.target:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  /* Centre of the 30px rank column. */
+  left: 15px;
+  top: 32px;
+  bottom: -10px;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+.rank {
+  /* Centred in its 30px column, so the line below meets the circle's middle. */
+  justify-self: center;
   width: 24px;
   height: 24px;
   border-radius: 50%;
   border: 1px solid var(--border-strong);
   display: inline-grid;
   place-items: center;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1;
   color: var(--ink-soft);
 }
 
-.targetOrderFirst {
+/* The one she rings first. Filled, so the eye finds it before it reads a digit. */
+.rankFirst {
   background: var(--terracotta);
   --icon-accent: currentColor;
   border-color: var(--terracotta);
   color: var(--cream);
 }
 
-.redFlags {
-  background: var(--surface-rose);
-  border-radius: 12px;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.targetName {
+  grid-column: 3;
+  grid-row: 1;
 }
 
-.redEyebrow {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--error);
+.targetDel {
+  grid-column: 4;
+  grid-row: 1;
 }
 
-.intentRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border-hairline);
-  font-size: 13.5px;
+/*
+ * Beside the rail, and on a phone, a number and a name no longer fit on one
+ * line. The name drops under them and keeps the ladder aligned, because the
+ * rung is the one thing that must stay on its vertical.
+ */
+@container targets (max-width: 439.98px) {
+  .target {
+    grid-template-columns: 30px minmax(0, 1fr) 32px;
+    row-gap: 8px;
+  }
+
+  .targetName {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .targetDel {
+    grid-column: 3;
+    grid-row: 1;
+  }
 }
 
-.intentRow:last-child {
-  border-bottom: none;
-}
+/* --------------------------------------------- gửi email · the envelope */
 
-.intentDesc {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.intentMeta {
-  font-size: 12.5px;
-  color: var(--ink-soft);
+/*
+ * The email as it lands. Milk on the card's own ground with a firm edge — not
+ * blush, which is speech, and not a tint of its own, which would make it read
+ * as a notice about the email rather than as the email.
+ */
+.mail {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  background: var(--surface-card);
+  min-width: 0;
 }
 
+.mailTo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-hairline);
+  background: var(--paper);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.mailToLabel {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.mailNobody {
+  color: var(--text-accent);
+}
+
+.mailSubject {
+  padding: 12px 14px 0;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.mailBody {
+  padding: 6px 14px 13px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The half of the sentence that changes on every call. Tinting it is the
+ * whole explanation of what a variable is — the row of «tên_khách» chips this
+ * replaced asked the reader to learn a token vocabulary to read their own
+ * email.
+ */
+.mailVar {
+  border-radius: 5px;
+  padding: 0 3px;
+  margin: 0 -1px;
+  background: var(--surface-warm);
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+/* The tokens themselves, only inside "Sửa lời" where they are being typed. */
 .varChip {
   appearance: none;
   border: none;
   background: var(--surface-warm);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 3px 11px;
   font-family: var(--font-ui);
   font-size: 12px;
@@ -173,84 +214,60 @@
   filter: brightness(0.97);
 }
 
-.slotRow {
-  display: grid;
-  grid-template-columns: 96px 48px minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-hairline);
-}
+/* ------------------------------------------ đặt lịch · the borrowed days */
 
-.windows {
+/*
+ * Holidays live on Giờ mở cửa. Here they read and never edit — three lines,
+ * no controls, and the card's own action is the way over to change them.
+ */
+.offdays {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+  flex-direction: column;
+  min-width: 0;
+  container: offdays / inline-size;
 }
 
-.window {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--paper);
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  padding: 2px 4px 2px 10px;
+.offday {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding: 9px 0;
+  font-size: 13px;
+  line-height: 1.45;
+  min-width: 0;
 }
 
-.windowInput {
-  border: none;
-  background: transparent;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-size: 12.5px;
-  font-weight: 500;
+.offday + .offday {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.offdayName {
   color: var(--ink);
-  width: 92px;
-  outline: none;
-}
-
-.windowInput:focus {
-  box-shadow: inset 0 -2px 0 var(--focus-ring);
-}
-
-.windowBad {
-  border-color: var(--error);
-}
-
-.windowRemove {
-  appearance: none;
-  border: none;
-  background: none;
-  color: var(--ink-soft);
-  cursor: pointer;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: inline-grid;
-  place-items: center;
-  font-size: 12px;
-}
-
-.windowRemove:hover {
-  background: var(--surface-rose);
-  color: var(--error);
-}
-
-.addWindow {
-  appearance: none;
-  border: none;
-  background: none;
-  color: var(--text-accent);
-  font-family: var(--font-ui);
-  font-size: 12.5px;
   font-weight: 500;
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.addWindow:hover {
-  background: var(--action-ghost-hover);
+.offdayWhen {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.offdayWhat {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+@container offdays (max-width: 359.98px) {
+  .offday {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .offdayName {
+    grid-column: 1 / -1;
+    white-space: normal;
+  }
 }

@@ -56,6 +56,19 @@ export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
       return [...faqs.slice(0, 3).map((f) => line(f.question.trim())), ...(faqs.length < 3 ? [line('Nhổ răng có đau không?'), line('Trẻ em mấy tuổi khám được?')] : [])].slice(0, 4)
     case 'tu-khoa':
       return [line(`Em muốn hỏi về ${term?.phonetic_hint.trim() || term?.term.trim() || 'in-vi-za-lai'}`), line(`Bên mình có làm ${term?.term.trim() || 'Invisalign'} không?`), line('Cho em hỏi giá implant')]
+    /*
+     * The three Kỹ năng pages. Each prompt is a caller's line that reaches the
+     * skill rather than the knowledge behind it: asking for a person, naming a
+     * red flag, holding a slot. The emergency line is a real red flag from the
+     * pack, because "what happens if somebody says that" is the question an
+     * owner has about the emergency card and cannot answer by reading it.
+     */
+    case 'chuyen-may':
+      return [line('Cho em gặp nhân viên với'), line('Em muốn nói chuyện với người thật'), line('Em bị chảy máu không cầm, đau lắm'), line('Bên mình mấy giờ đóng cửa vậy?')]
+    case 'dat-lich':
+      return [line('Em muốn đặt lịch khám'), line(`Cho em hẹn ${priced?.service_name.toLowerCase() ?? 'cạo vôi răng'} sáng thứ Bảy`), line('Bận đột xuất thì huỷ hẹn sao ạ?'), line('Đến rồi có phải chờ lâu không?')]
+    case 'gui-email':
+      return [line('Em muốn đặt lịch khám'), line('Bên mình có làm răng sứ thẩm mỹ Nhật không?'), line('Giờ này còn ai ở phòng khám không?')]
     default:
       return [line('Phòng khám ở đâu?'), line('Mai mấy giờ mở cửa?'), line('Có nhận bảo hiểm y tế không?')]
   }

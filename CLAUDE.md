@@ -90,9 +90,9 @@ npm run typecheck
   `useAnchoredPopup` / `AnchoredPopup` from `ui/Pickers.tsx` rather than
   writing the listeners again: pop-ups nest, and both the outside-press rule
   and the "scroll by `scrollTop`, never `scrollIntoView`" rule live there.
-  One pair of native `type="time"` inputs is left, in `skills/BookingSkill.tsx`
-  — they sit *inside* a bordered pill, so they need that row reworked rather
-  than a drop-in swap. Convert them when that page is next touched.
+  There are no native `type="date"` or `type="time"` inputs left in the app;
+  the last pair went when `Đặt lịch hẹn` took the shared week control
+  (`app/letan/Week.tsx`). Keep it that way.
 - The shape of a list is fixed: one `Card` per list, its `AddButton` in the head's
   `actions` slot, repeated records as `entries`/`entry` blocks inside it, an `EmptyState`
   when it is empty, and `Suggestions` inside the same card when there are ready-made
@@ -133,9 +133,11 @@ npm run typecheck
   other and the centred content column shifts 7–8px between them. It looked like the
   two pages had different margins; they had different scrollbars.
 - The rail beside a form is separated by the **gutter**, not by a fill: 380px column,
-  40px gap, a hairline down the middle of it (`.withRail` in `LeTanPage.module.css`,
-  `.work` in `Profile.module.css` — restated in both, change them together). A milk
-  panel beside milk cards is correct; the rule is what does the work.
+  40px gap, a hairline down the middle of it. The section frame lives once, in
+  `app/letan/SectionFrame.tsx` / `Section.module.css`, and all three tabs' sub-pages
+  are three-line wrappers over it; the hub's own version of the same geometry is
+  `.withRail` in `LeTanPage.module.css` — change the two together. A milk panel beside
+  milk cards is correct; the rule is what does the work.
 - Blush (`--surface-warm`) means **speech**: the Fonnus assistant panel, and the
   receptionist's own line inside a call preview. Never a callout or a badge inside a
   form — that is what drained the tint of meaning last time.

@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Icon } from '../../../design-system'
 import { LABELS, WEEKDAYS, WEEKDAY_LONG, WEEKDAY_SHORT } from '../defaults'
-import type { Practitioner, PractitionerGender, PractitionerShift, PractitionerTitle, Weekday } from '../model'
+import type { Practitioner, PractitionerGender, PractitionerTitle, Weekday } from '../model'
 import { newId } from '../model'
 import { useConfig, useDraft } from '../store'
 import {
   AddButton,
-  AnchoredPopup,
   Card,
   ChipInput,
   DeleteButton,
@@ -31,13 +30,11 @@ import {
   Segmented,
   SelectField,
   TextField,
-  TimeField,
   rowStyles,
   ui,
-  useAnchoredPopup,
   useAppear,
 } from '../../ui'
-import { WeekdayPicker } from './HoursSection'
+import { DayBlocks, WeekdayPicker, nextBlock } from '../Week'
 import { practitionerSentence, shiftsOn, workingDaysSaid, workingHoursNote } from './answers'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
@@ -95,68 +92,6 @@ function WeekStrip({ days, today }: { days: Weekday[]; today: Weekday }) {
   )
 }
 
-/** "13:30" → 810, so a block can be placed relative to the one before it. */
-const minutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5))
-
-/** Back to "13:30", never past the end of the day — `TimeField` only offers real times. */
-const clock = (mins: number) => {
-  const m = Math.max(0, Math.min(23 * 60 + 45, mins))
-  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
-}
-
-/**
- * One block of time, as a pill that opens its two ends.
- *
- * The same idiom as a holiday's `ClosurePill` on Giờ mở cửa: the two time
- * fields live inside an anchored panel, so a day stays one line however many
- * blocks it carries, and a time list opening inside the panel does not take
- * the panel down with it. The delete lives in the panel too — a row of
- * pills each wearing its own ✕ reads as chrome, not as a schedule.
- */
-function ShiftPill({ shift, onChange, onRemove }: { shift: PractitionerShift; onChange: (patch: Partial<PractitionerShift>) => void; onRemove: () => void }) {
-  const [open, setOpen] = useState(false)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const close = useCallback(() => setOpen(false), [])
-  const { place, panelRef } = useAnchoredPopup(triggerRef, open, close, { width: 268, height: 168, minWidth: 244 })
-
-  return (
-    <>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={`${styles.shiftPill} ${open ? styles.shiftPillOpen : ''}`}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        {shift.from}–{shift.to}
-        <span className={styles.shiftChevron}>
-          <Icon name="chevron-down" size={13} />
-        </span>
-      </button>
-      {open && place ? (
-        <AnchoredPopup place={place} panelRef={panelRef} label="Khung giờ">
-          <div className={styles.shiftPanel}>
-            <div className={styles.shiftTimes}>
-              <TimeField compact label="Từ" max={shift.to} value={shift.from} onChange={(v) => onChange({ from: v })} />
-              <TimeField compact label="Đến" min={shift.from} value={shift.to} onChange={(v) => onChange({ to: v })} />
-            </div>
-            <div className={styles.shiftFoot}>
-              <DeleteButton
-                label="Xoá khung giờ"
-                onClick={() => {
-                  setOpen(false)
-                  onRemove()
-                }}
-              />
-            </div>
-          </div>
-        </AnchoredPopup>
-      ) : null}
-    </>
-  )
-}
-
 /**
  * The practitioner's week: the day picker, then a line per day they are in.
  *
@@ -172,47 +107,20 @@ function Schedule({ p, onChange, agent }: { p: Practitioner; onChange: (patch: P
   // Turning a day off takes its blocks with it: a block on a day she is not
   // in is a contradiction the sentence below would have to explain away.
   const setDays = (v: Weekday[]) => onChange({ working_days: v, working_shifts: shifts.filter((s) => v.includes(s.day)) })
-  const setShift = (id: string, patch: Partial<PractitionerShift>) => onChange({ working_shifts: shifts.map((s) => (s.id === id ? { ...s, ...patch } : s)) })
-  const removeShift = (id: string) => onChange({ working_shifts: shifts.filter((s) => s.id !== id) })
-  /*
-   * A second block on a day is an afternoon, not a continuation: it starts a
-   * lunch break after the last one ends and runs four hours, clamped to the
-   * end of the day. Starting it exactly where the previous block finished
-   * produced "08:00 đến 12:00 và 12:00 đến 18:00", which is one block written
-   * twice and reads as a mistake in her own sentence.
-   */
-  const addShift = (day: Weekday) => {
-    const last = shiftsOn(p, day).at(-1)
-    const from = last ? clock(minutes(last.to) + 90) : '08:00'
-    const to = last ? clock(minutes(from) + 240) : '12:00'
-    onChange({ working_shifts: [...shifts, { id: newId('sh'), day, from, to }] })
-  }
 
   return (
     <div className={ui.stackTight}>
       <RowEditLabel>Ngày có mặt</RowEditLabel>
       <WeekdayPicker ariaLabel="Ngày làm việc" value={p.working_days} onChange={setDays} />
       {days.length ? (
-        <div className={styles.sched}>
-          {days.map((d) => {
-            const blocks = shiftsOn(p, d)
-            return (
-              <div key={d} className={styles.schedDay}>
-                <span className={styles.schedName}>{WEEKDAY_LONG[d]}</span>
-                <span className={styles.schedBlocks}>
-                  {blocks.length ? (
-                    blocks.map((s) => <ShiftPill key={s.id} shift={s} onChange={(patch) => setShift(s.id, patch)} onRemove={() => removeShift(s.id)} />)
-                  ) : (
-                    <span className={styles.schedInherit}>Theo giờ phòng khám</span>
-                  )}
-                </span>
-                <span className={styles.schedAdd}>
-                  <AddButton band label="khung giờ" onClick={() => addShift(d)} />
-                </span>
-              </div>
-            )
-          })}
-        </div>
+        <DayBlocks
+          days={days}
+          blocks={shifts}
+          inherit={() => 'Theo giờ phòng khám'}
+          onEdit={(id, patch) => onChange({ working_shifts: shifts.map((s) => (s.id === id ? { ...s, ...patch } : s)) })}
+          onRemove={(id) => onChange({ working_shifts: shifts.filter((s) => s.id !== id) })}
+          onAdd={(day) => onChange({ working_shifts: [...shifts, { id: newId('sh'), day, ...nextBlock(shiftsOn(p, day).at(-1), { from: '08:00', to: '12:00' }) }] })}
+        />
       ) : (
         <span className={ui.hint}>Chưa chọn ngày nào — {agent} sẽ nói bác sĩ chưa có lịch cố định.</span>
       )}

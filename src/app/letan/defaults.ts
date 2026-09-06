@@ -364,6 +364,23 @@ export const LABELS = {
     take_message: 'Chỉ ghi lời nhắn',
     transfer: 'Thử chuyển máy, không được thì ghi lời nhắn',
   },
+  /* A tile carries a name, not a sentence. The nuance the long labels hold is
+     said by the `Said` line under the grid instead, in her own words. */
+  afterHoursShort: {
+    log_callback: 'Hẹn gọi lại',
+    take_message: 'Ghi lời nhắn',
+    transfer: 'Thử nối máy',
+  },
+  escalationWindow: {
+    always: 'Chuyển cả ngoài giờ',
+    business_hours: 'Chỉ trong giờ làm việc',
+    after_hours: 'Chỉ ngoài giờ làm việc',
+  },
+  escalationWindowShort: {
+    always: 'Lúc nào cũng chuyển',
+    business_hours: 'Trong giờ làm việc',
+    after_hours: 'Ngoài giờ',
+  },
   /** The four answers as a tile carries them: two or three words, on the card whose title already says "Bảo hiểm". */
   insuranceShort: {
     unset: 'Chưa trả lời',
