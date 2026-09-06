@@ -1,0 +1,617 @@
+/* ------------------------------------------------------------ said line */
+
+/*
+ * "Linh nói:" and the sentence, under the control that changes it. Plain
+ * text, no bubble, no player: the try-out panel is where she is heard, this
+ * is where the owner reads what a field will turn into before pressing it.
+ */
+.said {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.saidWho {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ----------------------------------------------------------- the lists */
+
+/*
+ * ONE GEOMETRY FOR EVERY LIST THAT READS BEFORE IT EDITS.
+ *
+ * A price row, a doctor, a question, a combo, a promotion: closed, the row
+ * *reads* — a name, what else it is called, one value on a shared vertical,
+ * a mark or two — and pressing it grows the editor out from underneath.
+ * The geometry was written for `Dịch vụ` first; it lives here because
+ * `Bác sĩ` and `Câu hỏi` are the same shape, and three copies of it would
+ * have drifted apart within a release.
+ *
+ * The rule that keeps every list aligned:
+ *
+ *   a list block spans its card's content width EXACTLY — no bleed, no inset
+ *   — and everything inside it is inset by the row's own 12px head padding.
+ *
+ * So a group card's border, a combo row's dashed edge and a promotion row's
+ * dashed edge all land on the same vertical as the card's title, and every
+ * row's text lands on the same vertical as every other row's. Nothing here
+ * may take a negative margin: that is what pushed the combo rows 12px
+ * further left than the group cards beside them.
+ *
+ * Rows answer to the *list's* own width, not the viewport's: the column
+ * beside the try-out rail is narrow on a 1200px desktop and wide on an 860px
+ * tablet. That is what the `rows` container is for — and it is declared and
+ * queried in this one file, so its name is scoped the same way in both.
+ */
+.rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  container: rows / inline-size;
+}
+
+/* Group cards are separate objects and stand apart; bare rows are one list and do not. */
+.rowsGrouped {
+  gap: 12px;
+}
+
+.rowsDragging {
+  user-select: none;
+}
+
+/*
+ * A group is a sub-card — the branch `.entry` vocabulary — whose head is a
+ * band of the page's ground. The band is what says "these rows belong
+ * together"; the fill does the work, so the name on it is set like any
+ * other label rather than as an eyebrow.
+ */
+.group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 8px 0 12px;
+  background: var(--surface-page);
+  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
+  cursor: pointer;
+}
+
+.groupFolded .groupHead {
+  border-radius: calc(var(--radius-md) - 1px);
+}
+
+/*
+ * The group's name is an input because the owner names their own headings;
+ * the template's "Tổng quát" is a starting point, not a category. The band
+ * already marks the group, so the name sits plainly on it — no hover tint,
+ * a box only once you are in it. The −10px pull puts the *text* on the same
+ * vertical as the row names below, since the box carries 10px of its own.
+ */
+.groupName {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  padding: 0 10px;
+  margin-left: -10px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: 600;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  cursor: text;
+}
+
+.groupName::placeholder {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.groupName:focus-visible {
+  outline: none;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+.groupCount {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* "+ Thêm nhóm" in a card head, "+ Thêm" on a band: the same quiet pill. */
+/* The fold's handle: the same chevron a row turns, on its own button. */
+.groupChevron {
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.groupChevron:hover {
+  background: var(--action-ghost-hover);
+}
+
+/*
+ * The rows fold shut with the group — the row editor's 0fr → 1fr fold, and
+ * the same clipping rule: hold while moving, let go once settled, or a
+ * dragged row could never ride over the cards below.
+ */
+.groupBody {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-arc);
+}
+
+.groupBodyOpen {
+  grid-template-rows: 1fr;
+}
+
+/* No padding: a row inside a group must start where the group's border is,
+   or the price list's rows would not line up with the combo card's. */
+.groupBodyInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.groupBodySettled .groupBodyInner {
+  overflow: visible;
+}
+
+/* A heading the owner has emptied keeps its place and says what it is for.
+   It is also the target a dragged row aims at, so it is row-sized. */
+.groupEmpty {
+  margin: 0;
+  padding: 14px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------------ row */
+
+/*
+ * A row spans its container exactly — inside a group card, or straight in a
+ * combo or promotion card. Its 12px head padding is the only inset, and it
+ * is the same one everywhere, so every name on the page starts on one
+ * vertical and every dashed edge on another.
+ */
+.row {
+  position: relative;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+/* An open row is ringed — the bordered sub-card a branch uses — not tinted:
+   the heading bands already own the page's ground on this list. */
+.rowOpen {
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.rowOpen::before,
+.rowOpen + .row::before,
+.rowUnfilled::before,
+.rowUnfilled + .row::before,
+.rowDragging::before,
+.rowDragging + .row::before {
+  display: none;
+}
+
+/* Missing the thing that makes it useful: the hub's dashed mark. Drawn as an
+   outline so it costs no layout and the row stays on the grid. */
+.rowUnfilled {
+  outline: 1px dashed var(--border-dashed);
+  outline-offset: -1px;
+}
+
+.rowUnfilled.rowOpen {
+  outline: none;
+}
+
+/* Lifted: it rides above its neighbours and casts the one shadow the app
+   allows, the overlay's. `transform` is set by the drag itself. */
+.rowDragging {
+  z-index: 3;
+  box-shadow: var(--shadow-overlay);
+}
+
+.rowHead {
+  position: relative;
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  min-height: 46px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  /* A vertical drag is ours with a mouse or pen; a finger's stays the page's scroll. */
+  touch-action: pan-y;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.rowHead:hover {
+  background: var(--action-ghost-hover);
+}
+
+.rowOpen .rowHead:hover {
+  background: transparent;
+}
+
+.rowDragging .rowHead {
+  cursor: grabbing;
+}
+
+.rowHead:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+/* The grip sits in the row's left padding and shows on hover: the row can be picked up. */
+.grip {
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  color: var(--ink-soft);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.rowHead:hover .grip,
+.rowDragging .grip {
+  opacity: 1;
+}
+
+/* Name, then what else callers call it, quieter, on the same baseline. */
+.text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.name {
+  flex: 0 0 auto;
+  max-width: 100%;
+  font-size: var(--size-body-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.placeholder {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+/* The price, as she says it, on one vertical down the list. */
+.value {
+  flex: 0 0 168px;
+  text-align: right;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unit {
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.missing {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-accent);
+}
+
+/* How long, and the appointment mark when she may book it herself — or, on a
+   promotion, whether it is running. One column, one width, either way. */
+.meta {
+  flex: 0 0 92px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.metaNum {
+  min-width: 48px;
+  text-align: right;
+}
+
+/* A list whose meta column holds one mark and nothing else — a roster, not a
+   price list. Declared after `.meta` so the shorthand it overrides loses. */
+.metaTight {
+  flex: 0 0 auto;
+}
+
+.metaMark {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  color: var(--text-accent);
+}
+
+.chevron {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--ink-soft);
+  transition: transform var(--duration-base) var(--ease-arc);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/*
+ * The editor grows out from under the head on `grid-template-rows`
+ * 0fr → 1fr — the one way to reach a natural height without measuring it —
+ * on the house lift-and-settle. It clips only while folding; once settled
+ * (`transitionend`, or a timer when that never comes) it lets go, or a focus
+ * ring on the first pill inside would be cut off.
+ */
+.body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-arc);
+}
+
+.bodyOpen {
+  grid-template-rows: 1fr;
+}
+
+.bodyInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bodySettled .bodyInner {
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .body,
+  .groupBody {
+    transition: none;
+  }
+
+  /* No transition means no `transitionend`; nothing may stay clipped. */
+  .bodyOpen .bodyInner,
+  .groupBodyOpen .groupBodyInner {
+    overflow: visible;
+  }
+}
+
+/* The editor's fields line up with the row's text above them. */
+.edit {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 12px 12px;
+}
+
+.editRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.editGrow {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.editFixed {
+  flex: 0 0 156px;
+}
+
+/* Three-quarters of it, for a control whose content is short and known — a
+   title ("ThS. BS"), a two-option segmented — on a line that has to hold
+   three things and still leave the name room to be read. */
+.editSmall {
+  flex: 0 0 118px;
+}
+
+/* A compact field's label, for a control that does not draw its own. */
+.editLabel {
+  font-size: var(--size-eyebrow);
+  line-height: var(--leading-eyebrow);
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* The booking switch: toggle first, then its words, so the two never drift
+   apart however long the hint runs. */
+.editSwitch {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Beside a field that draws its own label, the switch takes the label's
+   height so the two sit level. On its own line it must not, or the row
+   opens with 22px of nothing above it. */
+.editSwitchAligned {
+  padding-top: 22px;
+}
+
+.editSwitchText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.editSwitchLabel {
+  font-size: var(--size-ui);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.editSwitchHint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.editFoot {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px -8px -4px 0;
+}
+
+/*
+ * Under 560px of list: the other names, the meta and the unit go — the name
+ * is what runs out first, and the unit is one press away in the editor. The
+ * price takes only what it needs, so the name keeps the rest, the band
+ * drops its count, and every editor row stacks.
+ */
+@container rows (max-width: 559.98px) {
+  .sub,
+  .unit,
+  .groupCount,
+  .metaNum {
+    display: none;
+  }
+
+  /* Four gaps of 12px is a third of what is left for the name at 375px.
+     The columns are already distinct without the air. */
+  .rowHead {
+    gap: 8px;
+  }
+
+  .meta {
+    flex: 0 0 auto;
+  }
+
+  .value {
+    flex: 0 1 auto;
+    max-width: 55%;
+  }
+
+  .editRow {
+    flex-wrap: wrap;
+  }
+
+  .editGrow {
+    flex: 1 1 140px;
+  }
+
+  .editFixed,
+  .editSmall {
+    flex: 1 1 100%;
+  }
+
+  .editSwitchAligned {
+    padding-top: 0;
+  }
+}
+
+/* ------------------------------------------------------------- phone */
+
+@media (max-width: 639.98px) {
+  .rowHead {
+    padding: 6px 10px;
+  }
+
+  .edit {
+    padding: 4px 10px 12px;
+  }
+
+  .groupHead {
+    padding: 0 6px 0 10px;
+  }
+
+  .groupEmpty {
+    padding: 12px 10px;
+  }
+}
+
+/* With no groups the empty state speaks for the card; the list must not
+   still spend the card's 14px gap on nothing. */
+.rows:empty {
+  display: none;
+}
+
+/*
+ * A value made of marks rather than text — a doctor's week — may not be
+ * shrunk to fit. Text ends in an ellipsis and loses a letter; a set of marks
+ * loses its last day, silently, and the row then says the wrong thing. So
+ * this one holds its width and the name truncates instead, which is what an
+ * ellipsis is for. Declared after the container query the rule it overrides
+ * lives in, so equal specificity resolves the right way.
+ */
+.valueFixed {
+  flex: 0 0 auto;
+  max-width: none;
+}

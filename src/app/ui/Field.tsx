@@ -187,8 +187,16 @@ interface Placement {
 }
 
 const POPUP_GAP = 6
-const POPUP_MAX = 288
-const OPTION_HEIGHT = 36
+/*
+ * Tall enough that a list of eight — every practitioner title, say — opens
+ * without a scrollbar at all. It used to cap at 288 while eight options need
+ * 302, so the shortest lists in the app scrolled by fourteen pixels and paid
+ * a whole scrollbar for it. Longer lists (the cities) still cap and scroll,
+ * which is what a cap is for.
+ */
+const POPUP_MAX = 320
+/** 35.6 of option and 1 of gap, rounded up: under-counting makes the panel scroll for nothing. */
+const OPTION_HEIGHT = 37
 
 /**
  * A listbox we draw ourselves rather than a native <select>.

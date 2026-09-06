@@ -97,11 +97,36 @@ up loose at the bottom of the page belonging to nothing.
 
 The price list is the same idea one level deeper — rows that expand to edit, under
 renamable group bands — because it is long enough to need scanning rather than reading.
-Use rows when a record has a one-line summary worth scanning; use entries when every
-field matters.
+
+**The choice between the two is about what a closed record can say.** If a record has a
+one-line summary worth scanning, it is a row (`ExpandRow`); if every field matters and
+there is nothing to scan, it is an entry. A doctor is a row, because "bác sĩ Hùng hôm nay
+có làm không" is answered by the closed line; a question is a row, because the question
+and the first words of its answer are the whole record; a branch and a holiday are
+entries, because an address has nothing to summarise.
+
+**And there is a third answer: neither.** A record of two short fields, in a list the
+owner fills in one sitting, is a **table row that edits in place** — no press to open, no
+summary, because there is nothing a summary could hide. `Từ hay nghe nhầm` was built as
+an expanding row and it was wrong: a price row has eight fields worth folding away, a
+keyterm has two, and thirty of them meant thirty extra presses to do one job. The test is
+not "how many fields" but **how many of these will they fill in a row**. One record at a
+time → expand. Thirty in a sitting → a table.
+
+The row's geometry lives in `app/ui/Rows.tsx` — `RowList`, `ExpandRow`, `RowText`,
+`RowValue`, `RowMeta`, `RowEdit` — not on the page that wrote it first. Four pages
+hand-assembling the same spans is four pages that drift; and the container query the
+row answers to (`rows`) has to be declared and queried in one stylesheet, because a
+CSS-module container name is global while its classes are not.
+
+A row's columns are fixed so every value in a list lands on one vertical, which means a
+value that is a **set of marks rather than text** — a doctor's week — must be
+`RowValue fixed`. Text that runs out ends in an ellipsis and loses a letter; a set of
+marks loses its last day, silently, and the row then says something untrue.
 
 > **Check:** does the page have more than one card with the same title shape
-> (`Câu hỏi 1`, `Câu hỏi 2`)? Then it wants to be one card of entries.
+> (`Câu hỏi 1`, `Câu hỏi 2`)? Then it wants to be one card of entries — or, if the first
+> line of each would be worth scanning, one card of rows.
 
 ---
 
@@ -141,7 +166,14 @@ most: when the box above is still blank. `Chỉ dẫn riêng` and `Câu hỏi th
 had this, and both now read as one thing.
 
 Use `Suggestions` + `Suggestion` from `app/ui`. Whole sentences are rows; short values
-are `ChipButton`s (a pill cannot wrap, so a sentence in a pill runs off the card).
+are dashed pills (`styles.suggest` — the shape `Dịch vụ không làm` uses), never
+`ChipButton`s, which mean *a value that is on or off* rather than *a value you can take*.
+
+**Three at a time, and the rest behind `SuggestionMore`.** Seven dashed rows on
+`Câu hỏi` were taller than the list they wrote into, so the card read as a page of
+examples with a list attached; three say what a good one looks like, which is all the
+examples were ever for. The reveal is a ghost pill, not a dashed row — dashed is content
+(§1), and this is a control.
 
 ---
 
@@ -198,6 +230,29 @@ to say anything on these screens, so it is the last thing to reach for.
 - **Every card ends in the sentence the receptionist would actually say**, built from
   the current draft (`Said`, `Linh đọc:`). One rendered sentence answers "what does this
   field do" better than a paragraph of hint text, and it updates as they type.
+- **When the field is empty, `Said` shows the line she falls back to** — not nothing.
+  "Dạ, câu này em xin ghi nhận và nhờ nhân viên gọi lại anh chị ạ." is the entire
+  argument for filling the field in, and it makes the argument in her voice instead of
+  in a warning. The fallbacks live on the `Exchange` in `answers.ts` beside the answers,
+  so the form and the receptionist say the same words; `BHYT` reads as four answers
+  being written rather than as four fields being filled because of it.
+- **A closed set of options that are each a *thing* is a grid of drawn tiles**, not a
+  list of radios: a payment method, a kind of insurance. The drawing is read before the
+  label is, and the grid answers in one glance instead of one line at a time
+  (`TileGrid` / `Tile`, `single` for a one-of choice). It is the wrong reach when the
+  set is open-ended — that is a `ChipInput` — or when the labels are sentences.
+- **Let the owner hear it when hearing is the point.** `Từ hay nghe nhầm` is the page
+  an owner understands least, because "phonetic hint" is an abstraction. A play button
+  beside the spelling, reading the word back *inside a sentence*, is the whole
+  explanation: type, listen, fix, listen. The same button does the same job for
+  `Cách đọc tên` on `Địa điểm`.
+- **One worked example, not one per row.** Thirty identical placeholders down a column
+  teach nothing the first one did not and turn the empty half of a table into noise. Put
+  the example on the first row still missing a value; the column heading does the rest.
+- **A default state is said, not drawn.** A weekday a doctor keeps the clinic's own hours
+  on reads "Theo giờ phòng khám" in quiet text; only the exceptions wear pills. A pill
+  for the default would claim the owner had set something, and five identical pills is
+  five things to check that nobody chose.
 - Every screen ends in something you can hear — the try-out rail. Nothing on these pages
   is theoretical.
 - A hint under a field earns its place only if it says something the field cannot show.
@@ -286,6 +341,33 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-06 (second round, on the owner's feedback)** — Three things the first pass
+  got wrong. A doctor's hours were one free-text line, which cannot say "15:00–17:00 and
+  20:00–22:00 on Monday, 09:00–10:00 on Tuesday": now a block list per weekday
+  (`[ext] working_shifts`), where a ticked day with no block *inherits the clinic's
+  hours* and says so — so a normal roster still costs no typing, and the catalogue's
+  `working_hours_note` is written from the blocks the way `promo_description` is written
+  from a promotion's services. `Từ hay nghe nhầm` went back from expanding rows to a
+  table that edits in place, and the words derived from the other pages joined it instead
+  of sitting in a read-only panel nobody could act on — with the rule that **nothing the
+  owner cannot reach from somewhere in the product belongs on their screen**, which took
+  the industry pack off the page entirely. And a select's list scrolled by fourteen
+  pixels because `OPTION_HEIGHT` under-counted by half a pixel per row: the fix was to
+  measure, not to restyle the scrollbar. → §3, §7.
+- **2026-09-06** — Redesigned `BHYT`, `Bác sĩ`, `Câu hỏi` and `Từ khoá` together, which
+  is why so much of what they needed turned out to be shared. `Dịch vụ` had privately
+  owned three ideas the other pages wanted: the `Said` line, the row that reads closed
+  and opens to edit, and the drawn tile grid. All three moved to `app/ui`
+  (`Rows.tsx`/`Rows.module.css`, `Tiles.tsx`), and `Dịch vụ` and `Giờ mở cửa` now import
+  what they wrote. Two things fell out of the move: a CSS-module `container-name` is
+  **not** scoped (classes are), so the container and its queries must share a file or
+  they silently detach; and a `RowValue` holding marks rather than text has to refuse to
+  shrink, or the phone quietly clipped a doctor's Sunday. The rules that were genuinely
+  new: a `Said` on an empty field shows the **fallback she actually says**, which argues
+  for filling the field better than any warning; a closed set of options that are each a
+  thing is a tile grid; and the page whose subject is *sound* (`Từ khoá`) is explained
+  by a play button, not by a sentence about phonetics. → §3, §5, §7.
 
 - **2026-09-05** — The holiday list was the only one whose new rows grew into place;
   every other list popped. Generalised it as `useAppear` and put it on all nine lists,

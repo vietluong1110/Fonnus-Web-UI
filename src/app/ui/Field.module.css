@@ -198,6 +198,28 @@
   flex-direction: column;
   gap: 1px;
   animation: popIn var(--duration-base) var(--ease-arc);
+  /* The house hairline bar, as on the time list, the assistant's log and the
+     week planner. The platform default is a grey slab from another operating
+     system, and inside a 190px panel it is most of the right-hand margin. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(38, 31, 24, 0.22) transparent;
+}
+
+.popup::-webkit-scrollbar {
+  width: 6px;
+}
+
+.popup::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.popup::-webkit-scrollbar-thumb {
+  background: rgba(38, 31, 24, 0.16);
+  border-radius: var(--radius-pill);
+}
+
+.popup:hover::-webkit-scrollbar-thumb {
+  background: rgba(38, 31, 24, 0.28);
 }
 
 @keyframes popIn {

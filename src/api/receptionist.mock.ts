@@ -27,6 +27,7 @@ import {
   closingToday,
   localIso,
   parkingExchange,
+  practitionerSentence,
   prepExchange,
   priceSentence,
   promoOffer,
@@ -37,6 +38,7 @@ import {
   paymentSentence,
   shortVnd,
   summarizeWeek,
+  spoken,
   tetExchange,
 } from '../app/letan/knowledge/answers'
 import type { ReceptionistConfig, ServiceRow, Weekday } from '../app/letan/model'
@@ -61,6 +63,7 @@ export function fold(s: string): string {
 }
 
 const any = (t: string, res: RegExp[]) => res.some((r) => r.test(t))
+
 
 const STOP = new Set(['co', 'khong', 'la', 'gi', 'a', 'ben', 'minh', 'em', 'anh', 'chi', 'cho', 'hoi', 'duoc', 'nao', 'thi', 'va', 'o', 'cua', 'phong', 'kham', 'toi', 'nhe', 'voi'])
 const words = (t: string) => fold(t).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 1 && !STOP.has(w))
@@ -163,16 +166,24 @@ function reply(turn: ReceptionistTurn, now: Date): string {
     const roster = cfg.practitioner_roster.filter((p) => p.practitioner_name.trim())
     if (/gioi nhat|tot nhat|uy tin nhat/.test(t) && /khong so sanh/.test(instructions)) return INSTRUCTION_IDEAS[3].answer
     const named = roster.find((p) => fold(p.practitioner_name).split(' ').some((w) => w.length > 2 && new RegExp(`\\b${w}\\b`).test(t)))
-    if (named) {
-      const days = named.working_days.length ? named.working_days.map((w) => WEEKDAY_LONG[w].replace('Thứ ', 'thứ ')).join(', ') : 'theo lịch'
-      const note = named.working_hours_note.trim() ? `, ${named.working_hours_note.trim().toLowerCase()}` : ''
-      const spec = named.specialties.length ? ` Bác sĩ phụ trách ${named.specialties.join(', ').toLowerCase()}.` : ''
-      return `${named.title_credential} ${named.practitioner_name.trim()} làm việc ${days}${note} ạ.${spec}${named.bookable_by_name ? ' Anh chị muốn hẹn đích danh, em ghi nhận rồi phòng khám xác nhận lại ạ.' : ''}`
-    }
+    // The roster page prints this same line under the doctor being edited, so
+    // the owner reads on the form exactly what the caller will hear — hours
+    // per weekday included.
+    if (named) return practitionerSentence(named) ?? UNRESOLVABLE_FALLBACK_SCRIPT
     const svc = serviceIn(cfg, t)
     const bySpec = svc ? roster.filter((p) => p.specialties.some((sp) => fold(sp) === fold(svc.service_name))) : []
     if (bySpec.length) return `Dạ, ${svc!.service_name.toLowerCase()} bên em do ${bySpec.map((p) => `${p.title_credential} ${p.practitioner_name.trim()}`).join(' và ')} phụ trách ạ.`
-    if (/bac si nu/.test(t)) return roster.length ? `Dạ, phòng khám có ${roster.length} bác sĩ ạ: ${roster.map((p) => `${p.title_credential} ${p.practitioner_name.trim()}`).join(', ')}. Anh chị muốn hẹn bác sĩ nào ạ?` : UNRESOLVABLE_FALLBACK_SCRIPT
+    // "Có bác sĩ nữ không?" is a real, weekly call, and it is answerable now
+    // that the roster records a gender. Unanswered genders are not counted as
+    // "no" — she says who she is sure of, or admits she does not know.
+    if (any(t, [/bac si nu/, /bac si nam/])) {
+      const wants = /bac si nu/.test(t) ? 'nu' : 'nam'
+      const matching = roster.filter((p) => p.practitioner_gender === wants)
+      const label = wants === 'nu' ? 'nữ' : 'nam'
+      if (matching.length) return `Dạ có ạ, phòng khám có ${matching.length} bác sĩ ${label}: ${matching.map((p) => `${p.title_credential} ${p.practitioner_name.trim()}`).join(', ')}. Anh chị muốn hẹn bác sĩ nào ạ?`
+      if (roster.some((p) => p.practitioner_gender)) return `Dạ, hiện phòng khám chưa có bác sĩ ${label} ạ. Em xin ghi nhận rồi nhân viên gọi lại anh chị nhé.`
+      return roster.length ? `Dạ, phòng khám có ${roster.map((p) => `${p.title_credential} ${p.practitioner_name.trim()}`).join(', ')} ạ. Anh chị muốn hẹn bác sĩ nào ạ?` : UNRESOLVABLE_FALLBACK_SCRIPT
+    }
     if (roster.length) return `Dạ, phòng khám có ${roster.map((p) => `${p.title_credential} ${p.practitioner_name.trim()}`).join(', ')} ạ. Anh chị muốn hỏi bác sĩ nào ạ?`
     return `Dạ, em chưa có lịch của từng bác sĩ ạ. ${UNRESOLVABLE_FALLBACK_SCRIPT}`
   }
@@ -188,7 +199,7 @@ function reply(turn: ReceptionistTurn, now: Date): string {
     if (live.length === 1) return promoSentence(live[0], cfg.service_catalog)
     return `Dạ có ạ, phòng khám đang ${live.map((p) => promoOffer(p, cfg.service_catalog) || p.promo_name.trim()).join('; ')} ạ. Anh chị quan tâm chương trình nào để em nói rõ hơn ạ?`
   }
-  if (any(t, [/bhyt/, /bao hiem/])) return insuranceExchange(cfg).a ?? `Dạ, câu này em xin ghi nhận và nhờ nhân viên gọi lại anh chị ạ.`
+  if (any(t, [/bhyt/, /bao hiem/])) return spoken(insuranceExchange(cfg))
 
   // A service, named.
   const notOffered = cfg.services_not_offered.find((n) => n.trim() && t.includes(fold(n)))
@@ -214,9 +225,9 @@ function reply(turn: ReceptionistTurn, now: Date): string {
     if (svc.service_note.trim() && /(?:^|\s)(luu y|dieu kien|ap dung)/.test(t)) line += ` ${svc.service_note.trim()}.`
     return line
   }
-  if (any(t, [/kham (lan )?dau/, /phi kham/, /tu van .*(phi|tien)/, /lan dau/])) return feeExchange(cfg).a ?? `Dạ, phí khám ban đầu em xin ghi nhận và nhờ nhân viên báo lại anh chị ạ.`
-  if (any(t, [/mang theo/, /chuan bi/, /can (mang|dem) gi/])) return prepExchange(cfg).a ?? `Dạ, anh chị chỉ cần đến đúng giờ hẹn ạ, không cần chuẩn bị gì thêm.`
-  if (any(t, [/chup phim/, /x-?quang/, /thiet bi/, /may moc/, /cone beam/, /scan/])) return facilityExchange(cfg).a ?? `Dạ, thiết bị tại phòng khám em xin ghi nhận và nhờ nhân viên trả lời anh chị ạ.`
+  if (any(t, [/kham (lan )?dau/, /phi kham/, /tu van .*(phi|tien)/, /lan dau/])) return spoken(feeExchange(cfg))
+  if (any(t, [/mang theo/, /chuan bi/, /can (mang|dem) gi/])) return spoken(prepExchange(cfg))
+  if (any(t, [/chup phim/, /x-?quang/, /thiet bi/, /may moc/, /cone beam/, /scan/])) return spoken(facilityExchange(cfg))
 
   // When.
   if (any(t, [/tet/, /nghi le/, /ngay le/, /le (nay|nao)/, /30\/4/, /2\/9/, /ngay nghi/, /nghi (ngay|hom) nao/])) return tetExchange(cfg).a ?? `Dạ, phòng khám chưa có lịch nghỉ lễ ạ. ${UNRESOLVABLE_FALLBACK_SCRIPT}`

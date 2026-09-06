@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { PointerEvent as ReactPointerEvent, ReactNode, Ref, RefObject, TransitionEvent } from 'react'
+import type { PointerEvent as ReactPointerEvent, ReactNode, RefObject } from 'react'
 import { Icon } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { useElementWidth } from '../../../hooks/useElementWidth'
@@ -9,7 +9,43 @@ import { newId } from '../model'
 import { pricedCount } from '../readiness'
 import { useConfig, useDraft } from '../store'
 import { PRICE_QUALIFIER } from '../system'
-import { AddButton, Card, ChipButton, ChipInput, DateRangeField, DeleteButton, EmptyState, MoneyField, NumberField, RadioGroup, SaveBar, Segmented, SelectField, Switch, TextField, ui, useAppear } from '../../ui'
+import {
+  AddButton,
+  Card,
+  ChipButton,
+  ChipInput,
+  DateRangeField,
+  DeleteButton,
+  EmptyState,
+  ExpandRow,
+  FOLD_MS,
+  MoneyField,
+  NumberField,
+  RadioGroup,
+  RowEdit,
+  RowEditFoot,
+  RowEditLabel,
+  RowEditRow,
+  RowList,
+  RowMark,
+  RowMeta,
+  RowMissing,
+  RowSwitch,
+  RowText,
+  RowUnit,
+  RowValue,
+  Said,
+  SaveBar,
+  Segmented,
+  SelectField,
+  TextField,
+  Tile,
+  TileAdd,
+  TileGrid,
+  rowStyles,
+  ui,
+  useAppear,
+} from '../../ui'
 import { bundleSentence, localIso, priceSentence, priceShort, promoOffer, promoSentence } from './answers'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
@@ -20,9 +56,6 @@ export { priceSentence } from './answers'
 const KEYS = ['service_groups', 'service_catalog', 'pricing_disclosure_policy', 'services_not_offered', 'package_bundles', 'instalment_options', 'payment_methods', 'payment_methods_other', 'active_promotions'] as const
 
 const POLICIES: PricingDisclosurePolicy[] = ['range', 'exact', 'defer']
-
-/** How long a closed row keeps its editor in the tree so the fold can play out — comfortably past the 200ms it takes. */
-const FOLD_MS = 400
 
 /** Under this much card, the three policy labels no longer fit one segmented row and become a list. */
 const POLICY_STACKED = 340
@@ -63,15 +96,6 @@ type InstalmentChoice = '' | 'yes' | 'no'
  */
 const NO_INSTALMENT = 'Không hỗ trợ trả góp'
 const isNoInstalment = (v: string) => /^không/i.test(v.trim())
-
-/** "Linh nói:" and the line — under the control that changes it, the way the hours page reads its week back. */
-function Said({ who, children }: { who: string; children: ReactNode }) {
-  return (
-    <p className={styles.said}>
-      <span className={styles.saidWho}>{who} nói:</span> {children}
-    </p>
-  )
-}
 
 /* ------------------------------------------------------------------ drag */
 
@@ -270,93 +294,6 @@ function useFlip(listRef: RefObject<HTMLDivElement | null>, active: boolean) {
 /* ------------------------------------------------------------------ rows */
 
 /**
- * One line of a list that opens into its editor.
- *
- * Closed, it *reads*: the summary is the whole row, in fixed columns so every
- * price in the list sits on one vertical. Open, the same line stays as the
- * row's head — it keeps updating as the fields under it are typed into, so
- * the owner watches the list they are making — and the editor grows out
- * beneath it on the house lift-and-settle. Only one row on the page is open
- * at a time (`openId` in the section), and a press anywhere else closes it:
- * twelve rows in edit mode at once was a hundred controls and nothing to read.
- *
- * Every list on this page is built from this row — services, combos,
- * promotions — so all three sections share one geometry: the row spans its
- * card's content width exactly, and its text sits 12px inside that.
- *
- * `mounted` outlives `open` by one fold so the close can animate; the parent
- * owns both because it is the parent that swaps one open row for another.
- */
-function ExpandRow({
-  rowId,
-  rowRef,
-  group,
-  open,
-  mounted,
-  unfilled,
-  dragging,
-  drag,
-  onToggle,
-  summary,
-  children,
-}: {
-  rowId: string
-  /** From `useAppear`: the row grows into place and collapses out of it. */
-  rowRef?: Ref<HTMLDivElement>
-  group?: string
-  open: boolean
-  mounted: boolean
-  unfilled?: boolean
-  dragging?: boolean
-  /** Pointer handlers for the head when the row can be dragged; none for a list that cannot be reordered. */
-  drag?: ReturnType<ReturnType<typeof useRowDrag>['handlersFor']>
-  onToggle: () => void
-  summary: ReactNode
-  children: ReactNode
-}) {
-  // Clipping is only for the fold itself. Once the editor has settled it lets
-  // go, or a focus ring on the first pill inside would be cut off. Reduced
-  // motion never fires `transitionend`, so the stylesheet lifts the clip there.
-  const [settled, setSettled] = useState(false)
-  useEffect(() => {
-    if (!open) {
-      setSettled(false)
-      return
-    }
-    const t = window.setTimeout(() => setSettled(true), FOLD_MS)
-    return () => window.clearTimeout(t)
-  }, [open])
-  const onEnd = (e: TransitionEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && open) setSettled(true)
-  }
-  return (
-    <div
-      ref={rowRef}
-      className={`${styles.svc} ${open ? styles.svcOpen : ''} ${unfilled ? styles.svcUnfilled : ''} ${dragging ? styles.svcDragging : ''}`}
-      data-row-id={rowId}
-      data-group={group}
-      data-flip={rowId}
-      data-dragging={dragging ? 'true' : undefined}
-    >
-      <button type="button" className={styles.svcHead} aria-expanded={open} onClick={onToggle} {...drag}>
-        {drag ? (
-          <span className={styles.svcGrip} aria-hidden="true">
-            <Icon name="grip" size={12} />
-          </span>
-        ) : null}
-        {summary}
-        <span className={`${styles.svcChevron} ${open ? styles.svcChevronOpen : ''}`}>
-          <Icon name="chevron-down" size={16} />
-        </span>
-      </button>
-      <div className={`${styles.svcBody} ${open ? styles.svcBodyOpen : ''} ${open && settled ? styles.svcBodySettled : ''}`} onTransitionEnd={onEnd}>
-        <div className={styles.svcBodyInner}>{mounted ? children : null}</div>
-      </div>
-    </div>
-  )
-}
-
-/**
  * The rows of one group, folding shut when the group is collapsed — the same
  * 0fr → 1fr grid fold as a row's editor, and the same clipping rule: only
  * while moving, or a dragged row could never ride over the cards below.
@@ -373,12 +310,12 @@ function GroupBody({ open, children }: { open: boolean; children: ReactNode }) {
   }, [open])
   return (
     <div
-      className={`${styles.svcGroupBody} ${open ? styles.svcGroupBodyOpen : ''} ${open && settled ? styles.svcGroupBodySettled : ''}`}
+      className={`${rowStyles.groupBody} ${open ? rowStyles.groupBodyOpen : ''} ${open && settled ? rowStyles.groupBodySettled : ''}`}
       onTransitionEnd={(e) => {
         if (e.target === e.currentTarget && open) setSettled(true)
       }}
     >
-      <div className={styles.svcGroupBodyInner}>{children}</div>
+      <div className={rowStyles.groupBodyInner}>{children}</div>
     </div>
   )
 }
@@ -386,11 +323,11 @@ function GroupBody({ open, children }: { open: boolean; children: ReactNode }) {
 /** The price column of a row: "300–500 nghìn / lần", "miễn phí", or the one thing the row still needs. */
 function PriceCell({ from, to, unit }: { from: number | null; to: number | null; unit?: PriceUnit }) {
   const price = priceShort(from, to)
-  if (price == null) return <span className={styles.svcMissing}>chưa có giá</span>
+  if (price == null) return <RowMissing>chưa có giá</RowMissing>
   return (
     <>
       {price}
-      {unit && price !== 'miễn phí' ? <span className={styles.svcUnit}> {LABELS.priceUnit[unit]}</span> : null}
+      {unit && price !== 'miễn phí' ? <RowUnit>{LABELS.priceUnit[unit]}</RowUnit> : null}
     </>
   )
 }
@@ -640,13 +577,6 @@ export function ServicesSection() {
 
   const togglePay = (m: PaymentMethod) => set('payment_methods', draft.payment_methods.includes(m) ? draft.payment_methods.filter((x) => x !== m) : [...draft.payment_methods, m])
   const otherPay = draft.payment_methods_other ?? []
-  const [addingPay, setAddingPay] = useState(false)
-  const [payDraft, setPayDraft] = useState('')
-  const commitPay = () => {
-    const v = payDraft.trim()
-    if (v && !otherPay.includes(v)) set('payment_methods_other', [...otherPay, v])
-    setPayDraft('')
-  }
 
   /*
    * Trả góp has three states, and the empty one is not "no": a clinic that has
@@ -665,7 +595,7 @@ export function ServicesSection() {
   /** "−20%" when one number covers the offer, "2 dịch vụ" when they differ, "chưa chọn dịch vụ" when it is empty. */
   const promoHeadline = (p: Promotion): ReactNode => {
     const list = (p.promo_services ?? []).filter((x) => nameOf(x.service_id))
-    if (!list.length) return <span className={styles.svcMissing}>chưa chọn dịch vụ</span>
+    if (!list.length) return <span className={rowStyles.missing}>chưa chọn dịch vụ</span>
     const percents = [...new Set(list.map((x) => x.discount_percent))]
     if (percents.length === 1 && percents[0] != null) return `−${percents[0]}%`
     return `${list.length} dịch vụ`
@@ -696,7 +626,7 @@ export function ServicesSection() {
             Thêm một nhóm — VD: "Điều trị" — rồi liệt kê dịch vụ và giá bên dưới. Khách hỏi "cạo vôi bao nhiêu", {agent} đọc đúng con số thay vì hẹn gọi lại.
           </EmptyState>
         ) : null}
-        <div className={`${styles.services} ${styles.servicesGrouped} ${drag.dragId ? styles.servicesDragging : ''}`} ref={listRef}>
+        <RowList grouped dragging={drag.dragId != null} ref={listRef}>
           {groups.map((g) => {
             const key = groupKey(g.name)
             const isOpen = !folded.includes(key)
@@ -705,10 +635,10 @@ export function ServicesSection() {
               setFolded((f) => (f.includes(key) ? f.filter((k) => k !== key) : [...f, key]))
             }
             return (
-              <section key={key} ref={groupRows.ref(key)} className={`${styles.svcGroupCard} ${isOpen ? '' : styles.svcGroupFolded}`} data-flip={key}>
+              <section key={key} ref={groupRows.ref(key)} className={`${rowStyles.group} ${isOpen ? '' : rowStyles.groupFolded}`} data-flip={key}>
                 {/* The band is the fold's handle; presses on what it carries — the name, the buttons — stay theirs. */}
                 <div
-                  className={styles.svcGroupHead}
+                  className={rowStyles.groupHead}
                   data-group-head={g.name}
                   onClick={(e) => {
                     if ((e.target as Element).closest('input,button')) return
@@ -716,7 +646,7 @@ export function ServicesSection() {
                   }}
                 >
                   <input
-                    className={styles.svcGroupName}
+                    className={rowStyles.groupName}
                     value={g.name}
                     onChange={(e) => renameGroup(g.name, e.target.value)}
                     placeholder="Tên nhóm"
@@ -724,18 +654,18 @@ export function ServicesSection() {
                     ref={freshGroup === g.name ? freshGroupRef : undefined}
                     onBlur={() => setFreshGroup(null)}
                   />
-                  <span className={styles.svcGroupCount}>{g.rows.length} dịch vụ</span>
+                  <span className={rowStyles.groupCount}>{g.rows.length} dịch vụ</span>
                   <AddButton band label="Thêm" onClick={() => addRow(g.name)} />
                   <DeleteButton band label="Xoá" icon={false} onClick={() => removeGroup(g.name)} />
-                  <button type="button" className={styles.svcGroupChevron} aria-expanded={isOpen} aria-label={`${isOpen ? 'Thu gọn' : 'Mở'} nhóm ${g.name || 'chưa đặt tên'}`} onClick={toggleFold}>
-                    <span className={`${styles.svcChevron} ${isOpen ? styles.svcChevronOpen : ''}`}>
+                  <button type="button" className={rowStyles.groupChevron} aria-expanded={isOpen} aria-label={`${isOpen ? 'Thu gọn' : 'Mở'} nhóm ${g.name || 'chưa đặt tên'}`} onClick={toggleFold}>
+                    <span className={`${rowStyles.chevron} ${isOpen ? rowStyles.chevronOpen : ''}`}>
                       <Icon name="chevron-down" size={16} />
                     </span>
                   </button>
                 </div>
                 <GroupBody open={isOpen}>
                   {/* An empty heading keeps its place, and says what to do with it — it is also the target a dragged row needs. */}
-                  {g.rows.length === 0 ? <p className={styles.svcGroupEmpty}>Chưa có dịch vụ — kéo một dòng vào đây, hoặc bấm Thêm.</p> : null}
+                  {g.rows.length === 0 ? <p className={rowStyles.groupEmpty}>Chưa có dịch vụ — kéo một dòng vào đây, hoặc bấm Thêm.</p> : null}
                   {g.rows.map((s) => {
                     const unpriced = s.price_from == null
                     return (
@@ -754,57 +684,54 @@ export function ServicesSection() {
                         }}
                         summary={
                           <>
-                            <span className={styles.svcText}>
-                              <span className={styles.svcName}>{s.service_name.trim() || <span className={styles.svcPlaceholder}>Dịch vụ chưa có tên</span>}</span>
-                              {s.service_aliases.length ? <span className={styles.svcAlias}>{s.service_aliases.join(' · ')}</span> : null}
-                            </span>
-                            <span className={styles.svcPrice}>
+                            <RowText name={s.service_name} placeholder="Dịch vụ chưa có tên" sub={s.service_aliases.length ? s.service_aliases.join(' · ') : null} />
+                            <RowValue>
                               <PriceCell from={s.price_from} to={s.price_to} unit={s.price_unit} />
-                            </span>
-                            <span className={styles.svcMeta}>
-                              <span className={styles.svcDuration}>{s.duration != null ? `${s.duration} phút` : ''}</span>
-                              <span className={styles.svcBook} title={s.is_bookable ? `${agent} được tự đặt hẹn` : `${agent} không tự đặt hẹn`}>
-                                {s.is_bookable ? <Icon name="appointment" size={16} /> : null}
-                              </span>
-                            </span>
+                            </RowValue>
+                            <RowMeta>
+                              <span className={rowStyles.metaNum}>{s.duration != null ? `${s.duration} phút` : ''}</span>
+                              <RowMark name={s.is_bookable ? 'appointment' : null} title={s.is_bookable ? `${agent} được tự đặt hẹn` : `${agent} không tự đặt hẹn`} />
+                            </RowMeta>
                           </>
                         }
                       >
-                        <div className={styles.svcEdit}>
+                        <RowEdit>
                           <TextField compact label="Tên dịch vụ" value={s.service_name} onChange={(e) => setRow(s.id, { service_name: e.target.value })} placeholder="VD: Cạo vôi răng" autoFocus={fresh.includes(s.id)} />
                           <div className={ui.stackTight}>
-                            <span className={styles.svcEditLabel}>Khách còn gọi là</span>
+                            <RowEditLabel>Khách còn gọi là</RowEditLabel>
                             <ChipInput value={s.service_aliases} onChange={(v) => setRow(s.id, { service_aliases: v })} addLabel="+ tên khác" placeholder="VD: lấy cao răng" emptyText={`${agent} nhận ra dịch vụ khi khách gọi bằng tên khác.`} />
                           </div>
-                          <div className={styles.svcEditRow}>
+                          <RowEditRow>
                             <MoneyField
-                              className={styles.svcEditGrow}
+                              className={rowStyles.editGrow}
                               compact
                               label="Giá từ"
                               value={s.price_from}
                               onChange={(v) => setRow(s.id, { price_from: v, price_to: v != null && s.price_to != null && s.price_to < v ? v : s.price_to })}
                               placeholder="chưa có giá"
                             />
-                            <MoneyField className={styles.svcEditGrow} compact label="Giá đến" value={s.price_to} onChange={(v) => setRow(s.id, { price_to: v })} disabled={unpriced} placeholder={unpriced ? '' : 'để trống = một giá'} />
+                            <MoneyField className={rowStyles.editGrow} compact label="Giá đến" value={s.price_to} onChange={(v) => setRow(s.id, { price_to: v })} disabled={unpriced} placeholder={unpriced ? '' : 'để trống = một giá'} />
                             <SelectField<PriceUnit>
-                              className={styles.svcEditFixed}
+                              className={rowStyles.editFixed}
                               compact
                               label="Tính theo"
                               value={s.price_unit}
                               onChange={(v) => setRow(s.id, { price_unit: v })}
                               options={(Object.keys(LABELS.priceUnit) as PriceUnit[]).map((k) => ({ value: k, label: LABELS.priceUnit[k] }))}
                             />
-                          </div>
-                          <div className={styles.svcEditRow}>
-                            <div className={`${styles.svcEditGrow} ${styles.svcSwitch}`}>
-                              <Switch checked={s.is_bookable} onChange={(v) => setRow(s.id, { is_bookable: v })} ariaLabel={`${agent} được tự đặt hẹn`} />
-                              <span className={styles.svcSwitchText}>
-                                <span className={styles.svcSwitchLabel}>{agent} được tự đặt hẹn</span>
-                                <span className={styles.svcSwitchHint}>{s.is_bookable ? 'Khách gọi là có lịch ngay.' : `${agent} ghi nhận, phòng khám gọi lại xếp lịch — cho việc cần bác sĩ xem trước.`}</span>
-                              </span>
-                            </div>
+                          </RowEditRow>
+                          <RowEditRow>
+                            <RowSwitch
+                              aligned
+                              className={rowStyles.editGrow}
+                              checked={s.is_bookable}
+                              onChange={(v) => setRow(s.id, { is_bookable: v })}
+                              ariaLabel={`${agent} được tự đặt hẹn`}
+                              label={`${agent} được tự đặt hẹn`}
+                              hint={s.is_bookable ? 'Khách gọi là có lịch ngay.' : `${agent} ghi nhận, phòng khám gọi lại xếp lịch — cho việc cần bác sĩ xem trước.`}
+                            />
                             <SelectField
-                              className={styles.svcEditFixed}
+                              className={rowStyles.editFixed}
                               compact
                               label="Mỗi hẹn"
                               value={s.duration == null ? '' : String(s.duration)}
@@ -812,13 +739,13 @@ export function ServicesSection() {
                               options={[{ value: '', label: '—' }, ...DURATION_OPTIONS.map((m) => ({ value: String(m), label: `${m} phút` }))]}
                               disabled={!s.is_bookable}
                             />
-                          </div>
+                          </RowEditRow>
                           <TextField compact label={`${agent} được nói thêm`} value={s.service_note} onChange={(e) => setRow(s.id, { service_note: e.target.value })} placeholder="VD: Không áp dụng răng nhiễm tetracycline" maxLength={140} />
                           <Said who={agent}>{priceSentence(s, policy)}</Said>
-                          <div className={styles.svcEditFoot}>
+                          <RowEditFoot>
                             <DeleteButton label="Xoá dịch vụ" onClick={() => removeRow(s.id)} />
-                          </div>
-                        </div>
+                          </RowEditFoot>
+                        </RowEdit>
                       </ExpandRow>
                     )
                   })}
@@ -826,12 +753,12 @@ export function ServicesSection() {
               </section>
             )
           })}
-        </div>
+        </RowList>
       </Card>
 
       <Card title="Gói combo" subtitle={`nhiều dịch vụ một giá — ${agent} báo khi khách hỏi "có gói nào không"`} actions={<AddButton label="Thêm combo" onClick={addBundle} />}>
         {draft.package_bundles.length ? (
-          <div className={styles.services}>
+          <RowList>
             {draft.package_bundles.map((b) => {
               const ids = b.service_ids ?? []
               const included = ids.map(nameOf).filter(Boolean)
@@ -846,25 +773,22 @@ export function ServicesSection() {
                   onToggle={() => toggle(b.id)}
                   summary={
                     <>
-                      <span className={styles.svcText}>
-                        <span className={styles.svcName}>{b.bundle_name.trim() || <span className={styles.svcPlaceholder}>Combo chưa có tên</span>}</span>
-                        {included.length ? <span className={styles.svcAlias}>{included.join(' + ')}</span> : null}
-                      </span>
-                      <span className={styles.svcPrice}>
+                      <RowText name={b.bundle_name} placeholder="Combo chưa có tên" sub={included.length ? included.join(' + ') : null} />
+                      <RowValue>
                         <PriceCell from={b.price} to={b.price} />
-                      </span>
+                      </RowValue>
                     </>
                   }
                 >
-                  <div className={styles.svcEdit}>
-                    <div className={styles.svcEditRow}>
-                      <TextField className={styles.svcEditGrow} compact label="Tên combo" value={b.bundle_name} onChange={(e) => setBundle(b.id, { bundle_name: e.target.value })} placeholder="VD: Cạo vôi và tẩy trắng" autoFocus={fresh.includes(b.id)} />
-                      <MoneyField className={styles.svcEditFixed} compact label="Giá gói" value={b.price} onChange={(v) => setBundle(b.id, { price: v })} placeholder="2.000.000" />
-                    </div>
+                  <RowEdit>
+                    <RowEditRow>
+                      <TextField className={rowStyles.editGrow} compact label="Tên combo" value={b.bundle_name} onChange={(e) => setBundle(b.id, { bundle_name: e.target.value })} placeholder="VD: Cạo vôi và tẩy trắng" autoFocus={fresh.includes(b.id)} />
+                      <MoneyField className={rowStyles.editFixed} compact label="Giá gói" value={b.price} onChange={(v) => setBundle(b.id, { price: v })} placeholder="2.000.000" />
+                    </RowEditRow>
                     <div className={ui.stackTight}>
-                      <span className={styles.svcEditLabel}>Dịch vụ trong gói</span>
+                      <RowEditLabel>Dịch vụ trong gói</RowEditLabel>
                       {named.length ? (
-                        <div className={styles.payChips}>
+                        <div className={styles.pickChips}>
                           {named.map((s) => (
                             <ChipButton key={s.id} selected={ids.includes(s.id)} onClick={() => setBundle(b.id, { service_ids: ids.includes(s.id) ? ids.filter((x) => x !== s.id) : [...ids, s.id] })}>
                               {s.service_name.trim()}
@@ -877,14 +801,14 @@ export function ServicesSection() {
                     </div>
                     <TextField compact label="Điều kiện" value={b.note} onChange={(e) => setBundle(b.id, { note: e.target.value })} placeholder="VD: Áp dụng khách mới, làm trong một buổi" />
                     <Said who={agent}>{bundleSentence(b, rows)}</Said>
-                    <div className={styles.svcEditFoot}>
+                    <RowEditFoot>
                       <DeleteButton label="Xoá combo" onClick={() => removeBundle(b.id)} />
-                    </div>
-                  </div>
+                    </RowEditFoot>
+                  </RowEdit>
                 </ExpandRow>
               )
             })}
-          </div>
+          </RowList>
         ) : (
           <EmptyState title="Chưa có gói combo">Gộp vài dịch vụ thành một giá — VD: cạo vôi và tẩy trắng 2 triệu. Khách hỏi "có combo không", {agent} có gói để đọc.</EmptyState>
         )}
@@ -892,7 +816,7 @@ export function ServicesSection() {
 
       <Card title="Ưu đãi" subtitle={`hết hạn, ${agent} tự ngừng báo — không cần nhớ gỡ`} actions={<AddButton label="Thêm ưu đãi" onClick={addPromo} />}>
         {draft.active_promotions.length ? (
-          <div className={styles.services}>
+          <RowList>
             {draft.active_promotions.map((p) => {
               const st = promoState(p, today)
               const picked = (p.promo_services ?? []).filter((x) => nameOf(x.service_id))
@@ -907,26 +831,28 @@ export function ServicesSection() {
                   onToggle={() => toggle(p.id)}
                   summary={
                     <>
-                      <span className={`${styles.svcText} ${st === 'past' ? styles.promoPast : ''}`}>
-                        <span className={styles.svcName}>{p.promo_name.trim() || <span className={styles.svcPlaceholder}>Ưu đãi chưa có tên</span>}</span>
-                        {picked.length ? <span className={styles.svcAlias}>{picked.map((x) => nameOf(x.service_id)).join(' · ')}</span> : null}
-                      </span>
-                      <span className={styles.svcPrice}>{promoHeadline(p)}</span>
-                      <span className={styles.svcMeta}>
+                      <RowText
+                        className={st === 'past' ? styles.promoPast : undefined}
+                        name={p.promo_name}
+                        placeholder="Ưu đãi chưa có tên"
+                        sub={picked.length ? picked.map((x) => nameOf(x.service_id)).join(' · ') : null}
+                      />
+                      <RowValue>{promoHeadline(p)}</RowValue>
+                      <RowMeta>
                         <span className={`${styles.promoState} ${promoClass[st]}`}>
                           <span className={styles.promoDot} aria-hidden="true" />
                           {PROMO_LABEL[st]}
                         </span>
-                      </span>
+                      </RowMeta>
                     </>
                   }
                 >
-                  <div className={styles.svcEdit}>
+                  <RowEdit>
                     <TextField compact label="Tên ưu đãi" value={p.promo_name} onChange={(e) => setPromo(p.id, { promo_name: e.target.value })} placeholder="VD: Ưu đãi tháng 9" autoFocus={fresh.includes(p.id)} />
                     <div className={ui.stackTight}>
-                      <span className={styles.svcEditLabel}>Dịch vụ được giảm</span>
+                      <RowEditLabel>Dịch vụ được giảm</RowEditLabel>
                       {named.length ? (
-                        <div className={styles.payChips}>
+                        <div className={styles.pickChips}>
                           {named.map((s) => (
                             <ChipButton key={s.id} selected={picked.some((x) => x.service_id === s.id)} onClick={() => togglePromoService(p, s.id)}>
                               {s.service_name.trim()}
@@ -957,26 +883,26 @@ export function ServicesSection() {
                         ))}
                       </div>
                     ) : null}
-                    <div className={styles.svcEditRow}>
+                    <RowEditRow>
                       <DateRangeField
-                        className={styles.svcEditGrow}
+                        className={rowStyles.editGrow}
                         compact
                         label="Thời gian áp dụng"
                         from={p.valid_from}
                         to={p.valid_to}
                         onChange={(r) => setPromo(p.id, { valid_from: r.from, valid_to: r.to })}
                       />
-                    </div>
+                    </RowEditRow>
                     <TextField compact label="Điều kiện" value={p.promo_condition ?? ''} onChange={(e) => setPromo(p.id, { promo_condition: e.target.value })} placeholder="VD: Áp dụng khách mới, đặt lịch trước" />
                     <Said who={agent}>{promoSentence(p, rows)}</Said>
-                    <div className={styles.svcEditFoot}>
+                    <RowEditFoot>
                       <DeleteButton label="Xoá ưu đãi" onClick={() => removePromo(p.id)} />
-                    </div>
-                  </div>
+                    </RowEditFoot>
+                  </RowEdit>
                 </ExpandRow>
               )
             })}
-          </div>
+          </RowList>
         ) : (
           <EmptyState title="Chưa có ưu đãi">
             Thêm chương trình đang chạy để {agent} nhắc khi khách hỏi "có ưu đãi gì không". Hết ngày, {agent} tự ngừng nói.
@@ -985,61 +911,34 @@ export function ServicesSection() {
       </Card>
 
       <Card title="Thanh toán" subtitle={`${agent} chỉ nói khi khách hỏi`}>
-        <div className={styles.pay}>
-          {(Object.keys(LABELS.payment) as PaymentMethod[]).map((m) => {
-            const on = draft.payment_methods.includes(m)
-            return (
-              <button key={m} type="button" className={`${styles.payTile} ${on ? styles.payTileOn : ''}`} aria-pressed={on} onClick={() => togglePay(m)}>
-                <Icon name={PAY_ICON[m]} size={20} />
-                <span className={styles.payName}>{LABELS.payment[m]}</span>
-              </button>
-            )
-          })}
-          {otherPay.map((label: string) => (
-            <span key={label} className={`${styles.payTile} ${styles.payTileOn} ${styles.payTileOwn}`}>
-              <Icon name="wallet" size={20} />
-              <span className={styles.payName}>{label}</span>
-              <button type="button" className={styles.payRemove} aria-label={`Bỏ ${label}`} onClick={() => set('payment_methods_other', otherPay.filter((x: string) => x !== label))}>
-                <Icon name="x" size={12} />
-              </button>
-            </span>
+        <TileGrid ariaLabel="Cách khách thanh toán">
+          {(Object.keys(LABELS.payment) as PaymentMethod[]).map((m) => (
+            <Tile key={m} icon={PAY_ICON[m]} label={LABELS.payment[m]} selected={draft.payment_methods.includes(m)} onClick={() => togglePay(m)} />
           ))}
-          {addingPay ? (
-            <span className={`${styles.payTile} ${styles.payTileInput}`}>
-              <input
-                className={styles.payInput}
-                autoFocus
-                value={payDraft}
-                placeholder="Cách thanh toán khác — VD: Quẹt thẻ Visa tại quầy"
-                aria-label="Cách thanh toán khác"
-                onChange={(e) => setPayDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    commitPay()
-                  } else if (e.key === 'Escape') {
-                    setPayDraft('')
-                    setAddingPay(false)
-                  }
-                }}
-                onBlur={() => {
-                  commitPay()
-                  setAddingPay(false)
-                }}
-              />
-            </span>
-          ) : (
-            <button type="button" className={`${styles.payTile} ${styles.payAdd}`} onClick={() => setAddingPay(true)}>
-              <Icon name="plus" size={18} />
-              <span className={styles.payName}>Cách khác</span>
-            </button>
-          )}
-        </div>
+          {otherPay.map((label: string) => (
+            <Tile
+              key={label}
+              icon="wallet"
+              label={label}
+              selected
+              removeLabel={`Bỏ ${label}`}
+              onRemove={() => set('payment_methods_other', otherPay.filter((x: string) => x !== label))}
+            />
+          ))}
+          <TileAdd
+            label="Cách khác"
+            placeholder="Cách thanh toán khác — VD: Quẹt thẻ Visa tại quầy"
+            ariaLabel="Cách thanh toán khác"
+            onAdd={(v) => {
+              if (!otherPay.includes(v)) set('payment_methods_other', [...otherPay, v])
+            }}
+          />
+        </TileGrid>
 
         <div className={ui.divider} />
 
         <div className={ui.stackTight}>
-          <span className={styles.svcEditLabel}>Trả góp</span>
+          <RowEditLabel>Trả góp</RowEditLabel>
           <Segmented<InstalmentChoice>
             ariaLabel="Phòng khám có hỗ trợ trả góp không"
             value={instalmentChoice}

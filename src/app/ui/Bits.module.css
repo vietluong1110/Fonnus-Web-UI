@@ -709,3 +709,48 @@
   margin-top: 2px;
   color: var(--text-accent);
 }
+
+/*
+ * The rest of a suggestion list, behind one quiet line.
+ *
+ * Three ready-made sentences read as help; seven read as the page — on Câu
+ * hỏi the dashed block was taller than the list it writes into, so the list
+ * looked like the smaller half of its own card. The line is a ghost pill
+ * rather than a dashed row: dashed means content you can take, and this is
+ * a control.
+ */
+.suggestMore {
+  appearance: none;
+  border: none;
+  background: transparent;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  margin-left: -10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.suggestMore:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+}
+
+.suggestMoreChevron {
+  display: inline-flex;
+  transition: transform var(--duration-base) var(--ease-arc);
+}
+
+.suggestMoreOpen {
+  transform: rotate(180deg);
+}

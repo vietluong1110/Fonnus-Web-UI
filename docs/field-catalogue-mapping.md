@@ -173,7 +173,7 @@ catalogue-ising properly.
 | `consultation_fee` | `consultation_fee` | ✅ nullable; `0` means free |
 | `facility_capabilities` | `facility_capabilities` | ✅ |
 | `pre_appointment_instructions` | `pre_appointment_instructions` | ✅ |
-| `practitioner_roster` | `practitioner_roster: Practitioner[]` | ✅ all nine columns |
+| `practitioner_roster` | `practitioner_roster: Practitioner[]` | ⚠️ all nine columns ✅; model adds `id`, `practitioner_gender` and `working_shifts` `[ext]`. `working_hours_note` is now **derived** from `working_shifts` by the UI, never typed |
 | `after_hours_emergency_target` | `after_hours_emergency_target` | ⚠️ `{ phone, name }`; the catalogue types it as a phone |
 | `emergency_red_flags` | `system.ts → EMERGENCY_RED_FLAGS_PACK` **+** `emergency_red_flags_custom` | ⚠️ **split** |
 | `emergency_instruction_script` | `system.ts → EMERGENCY_INSTRUCTION_SCRIPT` | ✅ SW |
@@ -215,7 +215,7 @@ forever.
 | Catalogue | Computed by | Note |
 |---|---|---|
 | `is_open_now` | `readiness.ts → isOpenNow()` | From hours, breaks and holidays, for the live "đang mở cửa" indicator |
-| `keyterms` (derived rows) | `KeytermsSection.tsx → derivedKeyterms()` | From `business_name` + service names + aliases, per the catalogue's A7 note |
+| `keyterms` (derived rows) | `KeytermsSection.tsx → derivedKeyterms()` | From `business_name` + service names + aliases + practitioner names, per the catalogue's A7 note. The **word** is derived; its `phonetic_hint` is not — writing one materialises a stored row with `source: 'derived'`, so a re-derivation must merge on `term` rather than replace the list |
 | R1 / R2 readiness gates | `readiness.ts → computeReadiness()` | Not a catalogue field, but it applies the catalogue's gates — and the pipeline needs the same verdict to decide whether an agent may go live |
 
 > **Backend question.** Should these come down in `GET /tenant/config` instead? The frontend
@@ -246,13 +246,18 @@ because six of the fifteen built sections write at least one of them.
 | `Promotion.promo_services` | `{ service_id, discount_percent }[]` — which services an offer discounts, and by how much | "Giảm 20% tẩy trắng" is structured data the agent has to apply per service; as prose it could not be checked against the price list or expired per row | Store as a join table keyed on the service id (depends on Q5, stable ids) |
 | `payment_methods_other` | Ways to pay the five-value enum does not name | Vietnamese clinics take wallets and bank apps the enum was fixed before; an owner who cannot enter theirs simply leaves the field wrong | Store as a string array beside the enum, or widen the enum and keep this for the tail |
 | `Promotion.promo_condition` | "Áp dụng khách mới" — what a caller must satisfy | The catalogue has only `promo_description`, which is now the *derived* sentence | Store as a column |
+| `Practitioner.practitioner_gender` | `nam` / `nu`, empty until answered | "Có bác sĩ nữ không?" is a weekly call at a Vietnamese clinic and the roster had no way to answer it. Empty is a third state on purpose — an unanswered gender must not be read as "nam" | Store as a column, nullable |
+| `Practitioner.working_shifts` | `{ day, from, to }[]` — the blocks of time a practitioner is at the clinic, per weekday | A doctor is in 15:00–17:00 and 20:00–22:00 on Monday and 09:00–10:00 on Tuesday. One free-text line could not carry that, and the agent has to answer "hôm nay bác sĩ Hùng có làm không" with a time. A weekday with **no** block is not a day off — it is a day the practitioner keeps the clinic's own hours, so a normal roster stores nothing and never goes stale when the clinic's hours change | Store as a join table keyed on the practitioner id, or as JSONB on the row |
 | `HolidayException.seeded` | Was this row pre-seeded by Fonnus? | Same purpose, for holidays | Same |
 | `id` on every entity row | Client-generated row key | React list keys and edit targeting. `model.ts:343` says "the server replaces them on save" | **Decide explicitly** — see open questions Q5 |
 | `escalation_triggers_custom`, `emergency_red_flags_custom` | The tenant half of a split field | See *Split fields* above | Two columns recommended |
 
 `Keyterm.source` is **not** an `[ext]` field despite looking like one — the catalogue defines
-it as A7 `source [row]`. It is listed here only because the UI depends on it to render pack
-and derived rows read-only.
+it as A7 `source [row]`. It is listed here because the UI reads it to decide what a row can
+do: a `tenant` row is renamed and deleted in place, a `derived` row shows the word from the
+page that owns it and takes only a spelling, and a `pack` row is **not rendered at all** —
+Fonnus maintains those words and an owner who cannot reach them from anywhere in the product
+should not be shown them. All three are still sent.
 
 ---
 

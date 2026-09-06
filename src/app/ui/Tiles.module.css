@@ -1,0 +1,149 @@
+/* ------------------------------------------------------------------ tiles */
+
+/*
+ * A choice made of drawn things, not of word chips.
+ *
+ * A payment method is a *thing* — a note, a card, a wallet. So is a kind of
+ * insurance. When the options are a small closed set and each one has a
+ * drawing, the drawing is read before the label is, and the grid reads in
+ * one glance instead of a line at a time. Selected is the terracotta fill
+ * the voice tiles use in Hồ sơ, so "on" means the same thing in all three
+ * places.
+ *
+ * Multi-select (payment methods) and single-select (which insurance the
+ * clinic takes) wear the same tile; only the ARIA differs, so the owner
+ * never has to learn two controls. Anything the clinic adds itself follows
+ * in the same grid, and the dashed tile at the end is how one is added —
+ * dashed means "not yet" everywhere in the app.
+ *
+ * `--tile-min` is the column floor: 100px fits five methods and the add tile
+ * beside the rail; a set with sentence-length labels passes a bigger one.
+ */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min, 100px), 1fr));
+  gap: 10px;
+}
+.tile {
+  position: relative;
+  appearance: none;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 78px;
+  padding: 13px 14px;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.tile:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+.tile:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1.5px var(--focus-ring),
+    0 0 0 3px rgba(184, 92, 43, 0.13);
+}
+
+.tileOn,
+.tileOn:hover {
+  background: var(--terracotta);
+  /* A terracotta ground under cream text: the drawing's accent becomes the text colour. */
+  --icon-accent: currentColor;
+  color: var(--cream);
+  box-shadow: none;
+}
+
+.tileName {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A method the clinic wrote itself: on by definition, so removed rather than toggled. */
+.tileOwn {
+  padding-right: 30px;
+}
+
+.tileRemove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.tileRemove:hover {
+  opacity: 1;
+  background: rgba(255, 246, 232, 0.18);
+}
+
+.tileAdd {
+  box-shadow: none;
+  outline: 1px dashed var(--border-dashed);
+  outline-offset: -1px;
+  color: var(--text-accent);
+}
+
+.tileAdd:hover {
+  box-shadow: none;
+  outline-color: var(--terracotta);
+}
+
+/* Typing a new one takes the whole row: a method is a phrase, not a word. */
+.tileInput {
+  grid-column: 1 / -1;
+  justify-content: center;
+  padding: 0;
+  cursor: text;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+.input {
+  width: 100%;
+  height: 100%;
+  min-height: 78px;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 14px;
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  color: var(--ink);
+}
+
+.input::placeholder {
+  color: rgba(92, 82, 72, 0.6);
+}

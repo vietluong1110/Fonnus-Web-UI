@@ -1,6 +1,6 @@
-import { LABELS, WEEKDAY_LONG } from '../defaults'
+import { LABELS, WEEKDAYS, WEEKDAY_LONG } from '../defaults'
 import { summarizeHours } from '../readiness'
-import type { Bundle, InsuranceOption, PaymentMethod, PricingDisclosurePolicy, Promotion, ReceptionistConfig, ServiceRow, Weekday } from '../model'
+import type { Bundle, InsuranceOption, PaymentMethod, Practitioner, PractitionerShift, PricingDisclosurePolicy, Promotion, ReceptionistConfig, ServiceRow, Weekday } from '../model'
 import { PRICE_QUALIFIER } from '../system'
 import { formatVnd } from '../../ui'
 
@@ -27,8 +27,20 @@ export interface Exchange {
   a: string | null
   /** What is missing, when `a` is null. */
   missing?: string
+  /**
+   * What she says when the record cannot answer at all. Written here rather
+   * than at the two places that need it — the sub-page's `Said` line and the
+   * mock receptionist — so the owner reads on the form the same sentence a
+   * caller would hear.
+   */
+  fallback?: string
   /** One line the answer says about itself — "giờ mẫu, bạn chưa xác nhận". */
   note?: string
+}
+
+/** The line she says for an exchange — her answer if the record has one, and otherwise the fallback. Never null. */
+export function spoken(x: Exchange): string {
+  return x.a ?? x.fallback ?? ''
 }
 
 export const fmtDate = (iso: string): string => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}` : '…')
@@ -40,6 +52,12 @@ export function localIso(d: Date): string {
 
 /** Lower-cases the first letter so a field value can sit mid-sentence. */
 const mid = (s: string) => s.charAt(0).toLowerCase() + s.slice(1)
+
+/**
+ * A weekday mid-sentence: "thứ Hai", "chủ nhật". `mid` alone gives "chủ Nhật",
+ * because the name is two words and only the first one is the label.
+ */
+const midDay = (d: Weekday) => (d === 0 ? 'chủ nhật' : mid(WEEKDAY_LONG[d]))
 
 /** "1.500.000" → "1,5 triệu", "300.000" → "300 nghìn". The way a price is said. */
 export function shortVnd(n: number): string {
@@ -156,6 +174,113 @@ export function feeSentence(fee: number | null): string | null {
   if (fee == null) return null
   if (fee === 0) return 'Khám và tư vấn lần đầu miễn phí ạ.'
   return `Phí khám và tư vấn lần đầu là ${shortVnd(fee)} ạ.`
+}
+
+/** "A, B và C" — a list said out loud, not a list printed with commas to the end. */
+export function saidList(parts: string[]): string {
+  const clean = parts.map((p) => p.trim()).filter(Boolean)
+  if (clean.length <= 1) return clean[0] ?? ''
+  return `${clean.slice(0, -1).join(', ')} và ${clean[clean.length - 1]}`
+}
+
+export function facilitySentence(list: string[]): string | null {
+  const clean = list.map((s) => s.trim()).filter(Boolean)
+  if (!clean.length) return null
+  return `Dạ có, phòng khám có ${saidList(clean.map(mid))} tại chỗ ạ.`
+}
+
+export function prepSentence(v: string): string | null {
+  const clean = v.trim()
+  if (!clean) return null
+  return `${clean.replace(/[.\s]+$/, '')} ạ.`
+}
+
+/**
+ * The days a doctor is in, the way she reads them: "thứ Hai, thứ Tư và thứ
+ * Sáu", or "tất cả các ngày". Empty when the doctor has no days at all —
+ * the caller then hears that the schedule is not fixed rather than a list
+ * of nothing.
+ */
+export function workingDaysSaid(days: Weekday[]): string {
+  if (!days.length) return ''
+  if (days.length === 7) return 'tất cả các ngày trong tuần'
+  return saidList(WEEKDAYS.filter((d) => days.includes(d)).map(midDay))
+}
+
+/** The shifts a practitioner keeps on one weekday, in clock order. */
+export function shiftsOn(p: Practitioner, day: Weekday): PractitionerShift[] {
+  return (p.working_shifts ?? []).filter((s) => s.day === day).sort((a, b) => a.from.localeCompare(b.from))
+}
+
+/**
+ * The practitioner's week as one line: "Thứ Hai 08:00–12:00, 14:00–18:00 ·
+ * Thứ Ba 09:00–10:00 · Thứ Tư, Thứ Năm theo giờ phòng khám".
+ *
+ * This is what goes into the catalogue's `working_hours_note`, which the
+ * tenant no longer types — the UI derives it from the shifts on every edit,
+ * the way a promotion's `promo_description` is derived from its services. A
+ * day with no shift keeps the clinic's own hours and says so, because
+ * "nothing written" and "not here" must not reach the backend looking alike.
+ */
+export function workingHoursNote(p: Practitioner): string {
+  const days = WEEKDAYS.filter((d) => p.working_days.includes(d))
+  if (!days.length) return ''
+  const parts: string[] = []
+  const plain: Weekday[] = []
+  for (const d of days) {
+    const shifts = shiftsOn(p, d)
+    if (shifts.length) parts.push(`${WEEKDAY_LONG[d]} ${shifts.map((s) => `${s.from}–${s.to}`).join(', ')}`)
+    else plain.push(d)
+  }
+  if (plain.length) parts.push(`${plain.map((d) => WEEKDAY_LONG[d]).join(', ')} theo giờ phòng khám`)
+  return parts.join(' · ')
+}
+
+/**
+ * What she says to "bác sĩ Hùng hôm nay có làm không?" — the one question
+ * this roster exists to answer, so the row that holds a doctor ends in it.
+ *
+ * Days that keep the clinic's hours are named without a time and gathered at
+ * the end; only the exceptions carry a clock. That is how a receptionist
+ * reads a rota out loud — she does not recite the same two numbers five
+ * times.
+ */
+export function practitionerSentence(p: Practitioner): string | null {
+  const name = p.practitioner_name.trim()
+  if (!name) return null
+  const days = WEEKDAYS.filter((d) => p.working_days.includes(d))
+  if (!days.length) return `Dạ, ${p.title_credential} ${name} chưa có lịch cố định trong tuần ạ. Em xin ghi nhận rồi phòng khám xác nhận lại giúp anh chị.`
+
+  const parts: string[] = []
+  const plain: Weekday[] = []
+  for (const d of days) {
+    const shifts = shiftsOn(p, d)
+    if (shifts.length) parts.push(`${midDay(d)} ${saidList(shifts.map((s) => `${s.from} đến ${s.to}`))}`)
+    else plain.push(d)
+  }
+  // With no custom hours anywhere, the plain day list reads better than the
+  // same list with "theo giờ phòng khám" bolted onto the end of it.
+  if (!parts.length) parts.push(workingDaysSaid(days))
+  else if (plain.length) parts.push(`${saidList(plain.map(midDay))} theo giờ phòng khám`)
+
+  // A part that already joins its own blocks with "và" cannot then be joined
+  // to the next part with another one — "thứ Hai 08:00 đến 12:00 và 13:30 đến
+  // 17:30 và thứ Ba … theo giờ phòng khám" reads as one run-on day. The
+  // semicolon is the pause she would actually leave there.
+  const when = parts.some((x) => x.includes(' và ')) ? parts.join('; ') : saidList(parts)
+  const spec = p.specialties.length ? ` Bác sĩ phụ trách ${saidList(p.specialties.map(mid))}.` : ''
+  const byName = p.bookable_by_name ? ' Anh chị muốn hẹn đích danh, em ghi nhận rồi phòng khám xác nhận lại ạ.' : ''
+  return `Dạ, ${p.title_credential} ${name} có mặt ${when} ạ.${spec}${byName}`
+}
+
+/**
+ * A term said inside a sentence, for the play button beside its spelling.
+ * The owner is not checking a word — they are checking whether the word
+ * survives a sentence, which is where it will actually be heard.
+ */
+export function keytermSentence(term: string, phonetic: string): string {
+  const said = phonetic.trim() || term.trim()
+  return `Dạ, bên em có làm ${said} ạ. Anh chị muốn đặt lịch ${said} luôn không ạ?`
 }
 
 /* ------------------------------------------------------------ exchanges */
@@ -291,6 +416,7 @@ export function insuranceExchange(cfg: ReceptionistConfig): Exchange {
     q: 'Bên mình có nhận bảo hiểm y tế không ạ?',
     a: p.option === 'unset' ? null : insuranceSentence(p.option, p.note),
     missing: 'Chưa chọn có nhận BHYT hay không',
+    fallback: 'Dạ, câu này em xin ghi nhận và nhờ nhân viên gọi lại anh chị ạ.',
   }
 }
 
@@ -300,6 +426,7 @@ export function feeExchange(cfg: ReceptionistConfig): Exchange {
     q: 'Khám lần đầu có mất phí không ạ?',
     a: feeSentence(cfg.consultation_fee),
     missing: 'Chưa có phí khám ban đầu',
+    fallback: 'Dạ, phí khám ban đầu em xin ghi nhận và nhờ nhân viên báo lại anh chị ạ.',
   }
 }
 
@@ -308,17 +435,18 @@ export function facilityExchange(cfg: ReceptionistConfig): Exchange {
   return {
     segment: 'bao-hiem',
     q: 'Có chụp phim tại chỗ không ạ?',
-    a: list.length ? `Dạ có, phòng khám có ${list.join(', ')} tại chỗ ạ.` : null,
+    a: facilitySentence(list),
     missing: 'Chưa có thiết bị tại phòng khám',
+    fallback: 'Dạ, thiết bị tại phòng khám em xin ghi nhận và nhờ nhân viên trả lời anh chị ạ.',
   }
 }
 
 export function prepExchange(cfg: ReceptionistConfig): Exchange {
-  const v = cfg.pre_appointment_instructions.trim()
   return {
     segment: 'bao-hiem',
     q: 'Em cần mang theo gì không ạ?',
-    a: v ? `${v.replace(/[.\s]+$/, '')} ạ.` : null,
+    a: prepSentence(cfg.pre_appointment_instructions),
     missing: 'Chưa có hướng dẫn chuẩn bị',
+    fallback: 'Dạ, anh chị mang theo giấy tờ tuỳ thân là được ạ. Em xin nhờ nhân viên dặn thêm khi xác nhận lịch nhé.',
   }
 }

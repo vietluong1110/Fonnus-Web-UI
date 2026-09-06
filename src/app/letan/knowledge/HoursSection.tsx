@@ -6,7 +6,7 @@ import type { ClosureType, HolidayException, Weekday } from '../model'
 import { newId } from '../model'
 import { isOpenNow, summarizeHours } from '../readiness'
 import { useConfig, useDraft } from '../store'
-import { AddButton, AnchoredPopup, Card, DateRangeField, EmptyState, IconButton, SaveBar, Segmented, TimeField, ui, useAnchoredPopup, useAppear } from '../../ui'
+import { AddButton, AnchoredPopup, Card, DateRangeField, EmptyState, IconButton, Said, SaveBar, Segmented, TimeField, ui, useAnchoredPopup, useAppear } from '../../ui'
 import { localIso } from './answers'
 import { TryPanel } from '../tryout/TryPanel'
 import { KnowledgeSection } from './KnowledgeSection'
@@ -219,10 +219,10 @@ export function HoursSection() {
           now={now}
           agent={agent}
         />
-        <p className={styles.hoursSaid}>
-          <span className={styles.hoursSaidWho}>{agent} đọc:</span> {summarizeHours(live)}
+        <Said who={agent} verb="đọc">
+          {summarizeHours(live)}
           {breaks ? ` · ${breaks}` : ''}
-        </p>
+        </Said>
       </Card>
 
       <Card

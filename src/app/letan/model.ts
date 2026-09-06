@@ -241,15 +241,43 @@ export type PractitionerTitle =
   | 'Y sĩ'
   | 'Điều dưỡng'
 
+/** [ext] Nam / Nữ. Empty until answered — "có bác sĩ nữ không?" is a real call. */
+export type PractitionerGender = '' | 'nam' | 'nu'
+
+/**
+ * [ext] One block of time a practitioner is at the clinic, on one weekday.
+ *
+ * A day with no shift is not a day off — it is a day the practitioner keeps
+ * the clinic's own hours. Only the exceptions are written down, so a normal
+ * roster costs no typing and never goes stale when the clinic's hours change.
+ */
+export interface PractitionerShift {
+  id: string
+  day: Weekday
+  /** "08:00" */
+  from: string
+  /** "12:00" */
+  to: string
+}
+
 /** B2 · `practitioner_roster` (all O). */
 export interface Practitioner {
   id: string
   practitioner_name: string
   title_credential: PractitionerTitle
+  /** [ext] */
+  practitioner_gender: PractitionerGender
   specialties: string[]
   years_experience: number | null
   working_days: Weekday[]
+  /**
+   * The catalogue's free-text hours column, now **derived** — the UI writes
+   * it from `working_shifts` on every edit, the way `promo_description` is
+   * written from a promotion's services. The tenant edits the shifts.
+   */
   working_hours_note: string
+  /** [ext] The hours behind `working_hours_note`, per weekday. */
+  working_shifts: PractitionerShift[]
   /** Off by default: committing a named doctor without a live schedule is a broken promise. */
   bookable_by_name: boolean
   languages: string[]
