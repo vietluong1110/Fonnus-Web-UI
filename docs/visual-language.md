@@ -165,7 +165,7 @@ prop, which does this for you).
 | `dots`       | Chấm nhịp      | 22 (+110) | paper         | the hero and the call overlay, radially masked behind the orb, hidden below 900px |
 | `arcs`       | Cung chéo      | 26        | blush / terracotta | the Bảo mật section (masked under the cards); the featured plan card in cream; the sign-in panel; the assistant panel's header strip at ~8% |
 | `grid`       | Lưới lịch      | 28        | paper / milk  | hours and holidays cards (`Card pattern="grid"`); every `EmptyState` |
-| `ticks`      | Dấu thanh      | 24, −12°  | sage only     | sage notices (`Notice tone="sage"`) and the handoff bubble in call previews |
+| `ticks`      | Dấu thanh      | 24, −12°  | sage only     | nothing at present — it belonged to `Notice tone="sage"` and the handoff bubble, both retired with the gate chips (Sept 2026). Sage only, when a resolved state next needs one |
 | `band`       | Dải phân cách  | 120 × 60  | blush         | the divider band before "Bảng giá" (`Band.tsx`)    |
 | `night-dots` | Chấm nhịp, tối | 22        | night         | save bar, footer, enterprise band, sign-up panel   |
 

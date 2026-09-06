@@ -45,6 +45,15 @@ you read and half were things you pressed to make an empty row.
 receptionist's own line inside a call preview. Never a callout, never a badge inside a
 form.
 
+**Status is a fact about the clinic, never an obligation.** A row says what is currently
+set — `2 số · Linh gọi chị Lan trước` — and a row with nothing in it says what she
+cannot do without it, in her words, and wears the dashed edge. There is no "bắt buộc"
+chip to reach for: `GateTag`, the `gate` prop on `Card` and on every field, and the
+`.gateR1`/`.gateR2`/`.gateO`/`.gateSW` classes were deleted once the last three screens
+stopped using them. The catalogue's R1/R2 gates still exist where they belong — in
+`readiness.ts`, which decides what the product chases the owner about — not as a chip
+sitting beside a field the owner is already looking at.
+
 > **Check:** in one card, is anything dashed except an empty state or a suggestion? If
 > yes, one of them is wearing the wrong clothes.
 
@@ -124,9 +133,18 @@ value that is a **set of marks rather than text** — a doctor's week — must b
 `RowValue fixed`. Text that runs out ends in an ellipsis and loses a letter; a set of
 marks loses its last day, silently, and the row then says something untrue.
 
+**Two cards that end in the same sentence are one card.** `Chuyển máy` asked "when may
+she agree to fetch a person" and "which number does she ring" on two cards, and both
+ended in the same `Said` line, because they are two settings of one decision. Printing
+the sentence twice said the page had nothing to add the second time. They are now one
+card: the tiles, then the numbered list under a `Rule` band, then one line. The card
+that stayed separate — "when does she hand over *without being asked*" — earned it by
+saying something different, because there she is offering rather than agreeing.
+
 > **Check:** does the page have more than one card with the same title shape
 > (`Câu hỏi 1`, `Câu hỏi 2`)? Then it wants to be one card of entries — or, if the first
-> line of each would be worth scanning, one card of rows.
+> line of each would be worth scanning, one card of rows. And read the `Said` lines
+> down the page: if two are the same sentence, the two cards are one question.
 
 ---
 
@@ -253,6 +271,18 @@ to say anything on these screens, so it is the last thing to reach for.
   on reads "Theo giờ phòng khám" in quiet text; only the exceptions wear pills. A pill
   for the default would claim the owner had set something, and five identical pills is
   five things to check that nobody chose.
+- **A page whose output is not speech still ends in what it produces.** `Gửi email`
+  makes an email, so the card shows the email — addressed, with its subject, filled in
+  with one worked call, and the parts that change from call to call tinted. That tint is
+  the entire explanation of what a variable is; the row of «tên_khách» chips it replaced
+  asked an owner to learn a token vocabulary in order to read their own mail. Same test
+  as `Said`: show the thing that actually leaves the building, not the template that
+  makes it.
+- **And write it for them.** The same page used to hand a clinic owner three subject
+  lines and three bodies to compose, with tokens inserted at the caret. That is a
+  copywriting job given to somebody who wanted a notification. Fonnus owns the wording —
+  the frontend owns all Vietnamese copy anyway — the owner picks who receives it, and
+  `Sửa lời` is one press away for the few who want their own.
 - Every screen ends in something you can hear — the try-out rail. Nothing on these pages
   is theoretical.
 - A hint under a field earns its place only if it says something the field cannot show.
@@ -268,9 +298,21 @@ Every screen has to work on a desktop, on a tablet, and on a phone the owner is 
 while a patient waits. The layout may change; **the rules above may not**. The add
 button is top right at 1440px and at 375px.
 
-The frame is the same everywhere: `SectionHead` → one-line lede → work column beside the
-try-out rail (`KnowledgeSection` / `ProfileSection`). The rail is separated by the
-**gutter** — 380px column, 40px gap, a hairline down the middle of it — not by a fill.
+The frame is the same everywhere: back link and title → one-line lede → work column
+beside the try-out rail. The rail is separated by the **gutter** — 380px column, 40px
+gap, a hairline down the middle of it — not by a fill.
+
+**It is one file.** `SectionFrame` / `Section.module.css` holds the frame and the hub
+row; `KnowledgeSection`, `ProfileSection` and `SkillsSection` are three lines each,
+differing only in which hub the back link points at. Hồ sơ wrote the geometry and Kiến
+thức restated it — 180 byte-identical lines across two stylesheets, each carrying a
+comment saying "change them together" — and the third tab is what finally moved it. A
+tab that needs the frame does not restate it.
+
+**A tab without a hub is a tab you cannot stand back from.** Kỹ năng had a 220px list of
+skills down the left of its own pages instead, and that cost it all three of the things
+above: no way back, no lede, and no try-out rail — on the three screens about what she is
+*allowed to do*, which is the part an owner most wants to hear before trusting it.
 
 Traps that have each cost a session:
 
@@ -285,6 +327,16 @@ Traps that have each cost a session:
   card a containing block for fixed positioning and would break every anchored pop-up
   inside it. Measure with `useElementWidth`, or query a container on an inner list
   (`.services`, `.holidays`), as those two already do.
+- **A control that can stand in a card *or* nest inside a row's editor carries its own
+  container.** The week (`Week.module.css`) queried `rows` while it lived only inside a
+  doctor's open row; standing in a card on `Đặt lịch` there is no `rows` container above
+  it, and the phone layout would simply never have fired. It declares `week` on its own
+  list instead, and both callers get the same breakpoint.
+- **The page module must not be imported by what the pages import.** `SectionHead` lived
+  in `LeTanPage.tsx`, which imports every section, so a frame importing it closed the
+  loop — and Vite reports that as `does not provide an export named 'ProfileSection'`, a
+  message naming the wrong module entirely. The head moved into `SectionFrame`, beside
+  the frame that uses it.
 - The bottom edge is one sticky stack anchored by the save bar. Anything else wanting
   that edge goes through `BottomStackProvider`. Never a hard-coded offset, and never
   measure the bar — its height changes as its message wraps.
@@ -333,6 +385,16 @@ only evidence. Measure:
   })
 ```
 
+**A row that has just appeared measures 0 in the pane.** `useAppear` animates height, and
+the Browser pane stops the document timeline whenever it is not painting — so the
+animation sits at `currentTime: 0` for ever and every new row reports `height: 0`. The
+tell is `document.timeline.currentTime` not advancing across an `await`. Finish them
+before measuring:
+
+```js
+;[...list.children].forEach((r) => r.getAnimations().forEach((a) => a.finish()))
+```
+
 Then the repo's own gate: `npm run typecheck` clean, and the demo login still works
 (`0914378064` / `111002`).
 
@@ -341,6 +403,38 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-06 (fourth round — the dead kit)** — Rebuilding Kỹ năng retired the last
+  users of four pieces of `app/ui`, and a repo-wide grep found nothing else reaching for
+  any of them, so they went: `GateTag` + the `Gate` type + the `gate` prop threaded
+  through `Card`, `FieldFrame`, `TextField`, `TextArea`, `SelectField`, `NumberField`,
+  `MoneyRangeField`, `DateField`, `DateRangeField` and `TimeField`; `SpeechBubble`;
+  `Notice`; and `EmptyState`'s `action` slot, which let an add button appear inside an
+  empty state and then jump to the card head once a row existed (§2 — it must not move).
+  About 300 lines. Two things worth knowing before deleting anything similar: every
+  place in the app that draws speech owns its own bubble — the landing page's
+  `CallDemoPlayer`, `SetupChat`, `AuthPanel` — so nothing depended on the kit's, and
+  `PlayButton` sits *inside* `SpeechBubble` in the file while being used by five other
+  screens, so the cut has to be made between them. The `ticks` pattern is now drawn by
+  nothing; it stays in the catalogue, marked unused, the way `rings` already was. → §1.
+
+- **2026-09-06 (third round — Kỹ năng)** — Rebuilt `Chuyển máy`, `Gửi email` and
+  `Đặt lịch hẹn`, the last three pages still speaking the old vocabulary: `gate=` and
+  `SpeechBubble` appeared in exactly these three files and nowhere else in the repo, and
+  a `Notice tone="warm"` was doing callout duty inside a form — the one thing §1 forbids
+  blush from being. The tab had no hub, so its pages had no way back, no lede and **no
+  try-out rail**, on the three screens about what she is allowed to do. Giving it one
+  forced three things into the open: the section frame, which had been living as two
+  byte-identical copies (now `SectionFrame` / `Section.module.css`); the
+  week-and-time-blocks control `Bác sĩ` wrote, which `Đặt lịch` needed for exactly the
+  same question and which retired the last native `<input type="time">` in the app (now
+  `../Week`); and the fact that a control moving between a card and a row's editor has to
+  carry its own container query. Two rules that were genuinely new: two cards ending in
+  the same `Said` are one card, and a page whose output is an email ends in the
+  **email** — filled in with a worked call, its variable parts tinted — rather than in a
+  template and a legend. And one decision that was about the product rather than the
+  layout: an owner who wanted a notification should not be handed three email templates
+  to write. → §3, §7, §8.
 
 - **2026-09-06 (second round, on the owner's feedback)** — Three things the first pass
   got wrong. A doctor's hours were one free-text line, which cannot say "15:00–17:00 and

@@ -2,8 +2,6 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from
 import { createPortal } from 'react-dom'
 import type { CSSProperties, InputHTMLAttributes, KeyboardEvent, ReactNode, Ref, TextareaHTMLAttributes } from 'react'
 import { Icon } from '../../design-system'
-import type { Gate } from './Card'
-import { GateTag } from './Card'
 import styles from './Field.module.css'
 
 /*
@@ -19,7 +17,6 @@ import styles from './Field.module.css'
 
 interface FieldFrameProps {
   label?: ReactNode
-  gate?: Gate
   hint?: ReactNode
   error?: ReactNode
   /** Right-aligned extra in the label row, e.g. a character count. */
@@ -32,7 +29,7 @@ interface FieldFrameProps {
   children: ReactNode
 }
 
-export function FieldFrame({ label, gate, hint, error, labelExtra, htmlFor, style, className, compact, children }: FieldFrameProps) {
+export function FieldFrame({ label, hint, error, labelExtra, htmlFor, style, className, compact, children }: FieldFrameProps) {
   return (
     <div className={`${styles.field} ${compact ? styles.fieldCompact : ''} ${className ?? ''}`} style={style}>
       {label ? (
@@ -40,7 +37,6 @@ export function FieldFrame({ label, gate, hint, error, labelExtra, htmlFor, styl
           <label htmlFor={htmlFor} className={styles.label}>
             {label}
           </label>
-          {gate ? <GateTag gate={gate} /> : null}
           {labelExtra ? <span className={styles.count}>{labelExtra}</span> : null}
         </div>
       ) : null}
@@ -56,7 +52,7 @@ export function FieldFrame({ label, gate, hint, error, labelExtra, htmlFor, styl
   )
 }
 
-type FrameProps = Pick<FieldFrameProps, 'label' | 'gate' | 'hint' | 'error' | 'labelExtra' | 'style' | 'className'>
+type FrameProps = Pick<FieldFrameProps, 'label' | 'hint' | 'error' | 'labelExtra' | 'style' | 'className'>
 
 /**
  * The field skin on its own, for controls this file does not implement (the
@@ -101,7 +97,6 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
 
 export function TextField({
   label,
-  gate,
   hint,
   error,
   labelExtra,
@@ -118,7 +113,7 @@ export function TextField({
   const autoId = useId()
   const inputId = id ?? autoId
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className} compact={compact}>
+    <FieldFrame label={label} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className} compact={compact}>
       <span
         className={`${styles.control} ${error ? styles.controlError : ''} ${readOnly ? styles.controlReadonly : ''} ${compact ? styles.compact : ''}`}
       >
@@ -136,14 +131,14 @@ export interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
   ref?: Ref<HTMLTextAreaElement>
 }
 
-export function TextArea({ label, gate, hint, error, labelExtra, style, className, id, maxLength, value, ref, ...rest }: TextAreaProps) {
+export function TextArea({ label, hint, error, labelExtra, style, className, id, maxLength, value, ref, ...rest }: TextAreaProps) {
   const autoId = useId()
   const inputId = id ?? autoId
   const length = typeof value === 'string' ? value.length : 0
   return (
     <FieldFrame
       label={label}
-      gate={gate}
+     
       hint={hint}
       error={error}
       labelExtra={labelExtra ?? (maxLength ? `${length} / ${maxLength}` : undefined)}
@@ -213,7 +208,6 @@ const OPTION_HEIGHT = 37
  */
 export function SelectField<V extends string>({
   label,
-  gate,
   hint,
   error,
   labelExtra,
@@ -362,7 +356,7 @@ export function SelectField<V extends string>({
   }
 
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className} compact={compact}>
+    <FieldFrame label={label} hint={hint} error={error} labelExtra={labelExtra} htmlFor={inputId} style={style} className={className} compact={compact}>
       <button
         ref={triggerRef}
         id={inputId}
@@ -505,7 +499,6 @@ export interface MoneyRangeFieldProps extends FrameProps {
  */
 export function MoneyRangeField({
   label,
-  gate,
   hint,
   error,
   labelExtra,
@@ -525,7 +518,7 @@ export function MoneyRangeField({
   toDisabled,
 }: MoneyRangeFieldProps) {
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} labelExtra={labelExtra} style={style} className={className} compact={compact}>
+    <FieldFrame label={label} hint={hint} error={error} labelExtra={labelExtra} style={style} className={className} compact={compact}>
       <span className={`${styles.control} ${styles.rangeShell} ${error ? styles.controlError : ''} ${compact ? styles.compact : ''}`}>
         <input
           className={styles.rangeInput}

@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import type { CSSProperties, KeyboardEvent, ReactNode, RefObject } from 'react'
 import { Icon } from '../../design-system'
 import { FieldFrame } from './Field'
-import type { Gate } from './Card'
 import field from './Field.module.css'
 import styles from './Pickers.module.css'
 
@@ -347,7 +346,6 @@ const CAL_H = 336
 
 interface PickerFrameProps {
   label?: ReactNode
-  gate?: Gate
   hint?: ReactNode
   error?: ReactNode
   style?: CSSProperties
@@ -405,7 +403,7 @@ function Trigger({
 }
 
 /** One ISO date. */
-export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', label, gate, hint, error, style, className, compact, pill, reading = 'full', id, 'aria-label': ariaLabel }: PickerFrameProps & { value: string; onChange: (iso: string) => void; min?: string; placeholder?: string }) {
+export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', label, hint, error, style, className, compact, pill, reading = 'full', id, 'aria-label': ariaLabel }: PickerFrameProps & { value: string; onChange: (iso: string) => void; min?: string; placeholder?: string }) {
   const autoId = useId()
   const inputId = id ?? autoId
   const [open, setOpen] = useState(false)
@@ -420,7 +418,7 @@ export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', 
   }
 
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
+    <FieldFrame label={label} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
       <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={value ? (reading === 'short' ? fmtDM(value) : fmtDMY(value)) : placeholder} empty={!value} ariaLabel={ariaLabel} />
       {open && place ? (
         <AnchoredPopup place={place} panelRef={panelRef} label={ariaLabel ?? 'Chọn ngày'}>
@@ -443,7 +441,7 @@ export function DateField({ value, onChange, min, placeholder = 'Chọn ngày', 
 }
 
 /** Two ISO dates, inclusive. Pick the first day, then the last; one day is a range of one. */
-export function DateRangeField({ from, to, onChange, min, placeholder = 'Chọn ngày', label, gate, hint, error, style, className, compact, pill, reading = 'full', id, 'aria-label': ariaLabel }: PickerFrameProps & { from: string; to: string; onChange: (r: { from: string; to: string }) => void; min?: string; placeholder?: string }) {
+export function DateRangeField({ from, to, onChange, min, placeholder = 'Chọn ngày', label, hint, error, style, className, compact, pill, reading = 'full', id, 'aria-label': ariaLabel }: PickerFrameProps & { from: string; to: string; onChange: (r: { from: string; to: string }) => void; min?: string; placeholder?: string }) {
   const autoId = useId()
   const inputId = id ?? autoId
   const [open, setOpen] = useState(false)
@@ -481,7 +479,7 @@ export function DateRangeField({ from, to, onChange, min, placeholder = 'Chọn 
   const shownTo = pendingFrom ?? to
 
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
+    <FieldFrame label={label} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
       <Trigger triggerRef={triggerRef} id={inputId} open={open} onToggle={toggle} compact={compact} pill={pill} error={!!error} icon="calendar" text={from ? (reading === 'short' ? fmtRangeShort : fmtRange)(from, to) : placeholder} empty={!from} ariaLabel={ariaLabel} />
       {open && place ? (
         <AnchoredPopup place={place} panelRef={panelRef} label={ariaLabel ?? 'Chọn khoảng ngày'}>
@@ -524,7 +522,7 @@ export function parseTime(raw: string): string | null {
  * fields of a range cannot be put in the wrong order by picking. Typing is
  * left free: correcting a typo should not need the other field changed first.
  */
-export function TimeField({ value, onChange, min, max, placeholder = '--:--', label, gate, hint, error, style, className, compact, id, 'aria-label': ariaLabel }: PickerFrameProps & { value: string; onChange: (hhmm: string) => void; min?: string; max?: string; placeholder?: string }) {
+export function TimeField({ value, onChange, min, max, placeholder = '--:--', label, hint, error, style, className, compact, id, 'aria-label': ariaLabel }: PickerFrameProps & { value: string; onChange: (hhmm: string) => void; min?: string; max?: string; placeholder?: string }) {
   const autoId = useId()
   const inputId = id ?? autoId
   // An empty window (min after max) would leave nothing to pick, which reads
@@ -636,7 +634,7 @@ export function TimeField({ value, onChange, min, max, placeholder = '--:--', la
   }
 
   return (
-    <FieldFrame label={label} gate={gate} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
+    <FieldFrame label={label} hint={hint} error={error} htmlFor={inputId} style={style} className={className} compact={compact}>
       <span ref={shellRef} className={`${field.control} ${error ? field.controlError : ''} ${compact ? field.compact : ''} ${open ? field.triggerOpen : ''}`}>
         <span className={styles.triggerIcon}>
           <Icon name="hours" size={16} />

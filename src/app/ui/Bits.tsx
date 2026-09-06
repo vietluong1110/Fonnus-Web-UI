@@ -50,87 +50,7 @@ export function Tabs<V extends string>({
   )
 }
 
-/* ---------------------------------------------------------------- Notice */
-
-type NoticeTone = 'sage' | 'warm' | 'rose' | 'info' | 'neutral'
-const noticeClass: Record<NoticeTone, string> = {
-  sage: styles.noticeSage,
-  warm: styles.noticeWarm,
-  rose: styles.noticeRose,
-  info: styles.noticeInfo,
-  neutral: styles.noticeNeutral,
-}
-
-export function Notice({
-  tone = 'sage',
-  icon,
-  children,
-  actions,
-  style,
-}: {
-  tone?: NoticeTone
-  icon?: IconName
-  children: ReactNode
-  actions?: ReactNode
-  style?: CSSProperties
-}) {
-  return (
-    <div className={noticeClass[tone]} style={style} role={tone === 'rose' ? 'alert' : undefined}>
-      {/* Dấu thanh is the one pattern allowed on sage — the resolved state. */}
-      {tone === 'sage' ? <Pattern name="ticks" style={{ zIndex: -1 }} /> : null}
-      {icon ? <Icon name={icon} size={16} style={{ marginTop: 2 }} /> : null}
-      <div className={styles.noticeBody}>{children}</div>
-      {actions ? <div className={styles.noticeActions}>{actions}</div> : null}
-    </div>
-  )
-}
-
-/* ---------------------------------------------------------- SpeechBubble */
-
-const bubbleClass = {
-  assistant: styles.bubbleAssistant,
-  caller: styles.bubbleCaller,
-  handoff: styles.bubbleHandoff,
-}
-
-/**
- * A line the receptionist would say, on one of the three voice grounds. When
- * `speak` is on, a play button previews it with the browser's Vietnamese voice
- * — a stand-in for the real TTS endpoint (see `speak.ts`).
- */
-export function SpeechBubble({
-  speaker = 'assistant',
-  who,
-  children,
-  text,
-  speak = false,
-  muted = false,
-  style,
-}: {
-  speaker?: 'assistant' | 'caller' | 'handoff'
-  /** Small caps label above the line: "Linh nói". */
-  who?: ReactNode
-  children?: ReactNode
-  /** The plain text to voice when `speak` is set; defaults to `children` if it is a string. */
-  text?: string
-  speak?: boolean
-  muted?: boolean
-  style?: CSSProperties
-}) {
-  const voiced = text ?? (typeof children === 'string' ? children : '')
-  return (
-    <div className={styles.bubbleRow} style={style}>
-      <div className={bubbleClass[speaker]} style={{ width: '100%' }}>
-        {speaker === 'handoff' ? <Pattern name="ticks" style={{ zIndex: -1 }} /> : null}
-        {speak ? <PlayButton text={voiced} /> : null}
-        <div className={`${styles.bubbleText} ${muted ? styles.bubbleMuted : ''}`}>
-          {who ? <div className={styles.bubbleWho}>{who}</div> : null}
-          {children}
-        </div>
-      </div>
-    </div>
-  )
-}
+/* ----------------------------------------------------------- PlayButton */
 
 export function PlayButton({ text, label = 'Nghe thử' }: { text: string; label?: string }) {
   const { speaking, toggle, supported } = useSpeak(text)
@@ -157,6 +77,7 @@ export function IconButton({
   danger,
   disabled,
   size = 16,
+  className,
 }: {
   name: IconName
   label: string
@@ -164,11 +85,13 @@ export function IconButton({
   danger?: boolean
   disabled?: boolean
   size?: number
+  /** For a list that places its own delete — a grid cell it has to land in. */
+  className?: string
 }) {
   return (
     <button
       type="button"
-      className={`${styles.iconButton} ${danger ? styles.iconButtonDanger : ''}`}
+      className={`${styles.iconButton} ${danger ? styles.iconButtonDanger : ''} ${className ?? ''}`}
       onClick={onClick}
       aria-label={label}
       title={label}
@@ -330,12 +253,11 @@ export function SaveBar({
 
 /* ------------------------------------------------------------ EmptyState */
 
-export function EmptyState({ title, children, action }: { title: ReactNode; children?: ReactNode; action?: ReactNode }) {
+export function EmptyState({ title, children }: { title: ReactNode; children?: ReactNode }) {
   return (
     <div className={styles.empty}>
       <span className={styles.emptyTitle}>{title}</span>
       {children ? <span>{children}</span> : null}
-      {action ? <div style={{ marginTop: 6 }}>{action}</div> : null}
     </div>
   )
 }

@@ -1,5 +1,4 @@
-export { Card, GateTag } from './Card'
-export type { Gate } from './Card'
+export { Card } from './Card'
 export { FieldFrame, ControlShell, TextField, TextArea, SelectField, MoneyField, MoneyRangeField, NumberField, formatVnd, parseVnd } from './Field'
 export { DateField, DateRangeField, TimeField, AnchoredPopup, useAnchoredPopup, fmtDMY, fmtRange, fmtRangeShort, parseTime, isoOf } from './Pickers'
 export type { SelectOption } from './Field'
@@ -7,8 +6,6 @@ export { Radio, RadioGroup, Checkbox, Segmented, Switch } from './Choice'
 export { Chip, ChipButton, ChipInput } from './Chips'
 export {
   Tabs,
-  Notice,
-  SpeechBubble,
   PlayButton,
   IconButton,
   Disclosure,
