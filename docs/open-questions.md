@@ -40,9 +40,10 @@ redrawn to match.
 
 ### Q3 · What happens to `[ext]` fields the backend does not know?
 
-*Why:* Eleven fields are frontend inventions not in catalogue v1 — `agent_name`,
-`escalation_window`, `greeting_by_daypart`, `email_rules`, the two `*_confirmed` flags, and
-some row-level columns. Full list with a suggested resolution for each in
+*Why:* Fourteen fields are frontend inventions not in catalogue v1 — `agent_name`,
+`greeting_by_daypart`, `email_rules`, the two `*_confirmed` flags, the four columns an
+escalation target grew when `Chuyển máy` became one row per person (`role`, `window`,
+`triggers`, `fallback`), and some other row-level columns. Full list with a suggested resolution for each in
 [`field-catalogue-mapping.md`](./field-catalogue-mapping.md).
 
 Three options: store them (a `ui_state` JSONB column), accept and ignore them, or reject with

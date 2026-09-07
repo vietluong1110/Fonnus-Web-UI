@@ -6,7 +6,6 @@ import { pricedCount, summarizeHours } from '../readiness'
 import { useConfig } from '../store'
 import { formatVnd, useToast } from '../../ui'
 import { fmtDate } from './answers'
-import { derivedKeyterms } from './KeytermsSection'
 import { HubFoot, HubRow, sectionStyles } from '../SectionFrame'
 import styles from './Knowledge.module.css'
 
@@ -48,16 +47,11 @@ export function KnowledgeHub() {
   const fee = config.consultation_fee
   const doctors = config.practitioner_roster.filter((p) => p.practitioner_name.trim())
   const faqs = config.faq_pairs.filter((f) => f.question.trim() && f.answer.trim()).length
-  // The word list is the tenant's own rows plus every word the other pages
-  // already know; a derived word only has a stored row once it has been given
-  // a spelling, so the count of what is *done* is read the same way the page
-  // itself reads it.
+  // Every word on that page is one the clinic typed there, so the count is
+  // read the same way the page itself reads it.
   const ownTerms = config.keyterms.filter((k) => k.source === 'tenant')
-  const derivedTerms = derivedKeyterms(config)
-  const spelledDerived = new Map(config.keyterms.filter((k) => k.source === 'derived').map((k) => [k.term, k.phonetic_hint]))
-  const mine = ownTerms.length
-  const terms = mine + derivedTerms.length
-  const spelled = ownTerms.filter((k) => k.term.trim() && k.phonetic_hint.trim()).length + derivedTerms.filter((t) => (spelledDerived.get(t) ?? '').trim()).length
+  const terms = ownTerms.length
+  const spelled = ownTerms.filter((k) => k.term.trim() && k.phonetic_hint.trim()).length
   const hoursDone = config.operating_hours_confirmed && config.holidays_confirmed
 
   const asked: Row[] = [
@@ -125,7 +119,8 @@ export function KnowledgeHub() {
       segment: 'tu-khoa',
       icon: 'volume',
       title: 'Từ hay nghe nhầm',
-      sub: terms ? `${spelled}/${terms} từ có cách đọc${mine ? ` · ${mine} từ bạn thêm` : ''}` : 'Chưa có từ nào — điền tên phòng khám và dịch vụ trước',
+      sub: terms ? `${spelled}/${terms} từ có cách đọc` : `Chưa có từ nào — ${agent} dễ đọc sai tên riêng và thương hiệu`,
+      empty: terms === 0,
     },
   ]
 

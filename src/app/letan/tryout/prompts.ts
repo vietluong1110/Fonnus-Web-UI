@@ -61,7 +61,7 @@ export function promptsFor(section: string, cfg: ReceptionistConfig): Prompt[] {
      * skill rather than the knowledge behind it: asking for a person, naming a
      * red flag, holding a slot. The emergency line is a real red flag from the
      * pack, because "what happens if somebody says that" is the question an
-     * owner has about the emergency card and cannot answer by reading it.
+     * owner has about the emergency row and cannot answer by reading it.
      */
     case 'chuyen-may':
       return [line('Cho em gặp nhân viên với'), line('Em muốn nói chuyện với người thật'), line('Em bị chảy máu không cầm, đau lắm'), line('Bên mình mấy giờ đóng cửa vậy?')]

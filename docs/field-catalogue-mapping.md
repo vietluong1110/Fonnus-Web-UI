@@ -106,12 +106,12 @@ Legend: ✅ present and named identically · ⚠️ present but differs (see not
 
 | Catalogue | Model | |
 |---|---|---|
-| `escalation_targets` | `escalation_targets: EscalationTarget[]` | ✅ |
-| `after_hours_routine_behavior` | `after_hours_routine_behavior` | ✅ |
-| `callback_policy` | `callback_policy` | ✅ |
+| `escalation_targets` | `escalation_targets: EscalationTarget[]` | ⚠️ the two catalogue columns ✅; the row adds `role`, `window`, `triggers` and `fallback` `[ext]` |
+| `after_hours_routine_behavior` | — | ❌ **not collected.** Its three answers — log a call-back, take a message, try a transfer — are all already what happens: a target whose `window` is `after_hours` *is* the transfer, a number that rings out falls to that row's `fallback`, and taking a message is what is left when neither applies. A dropdown whose every option is the default only teaches the reader that the product has settings. Treat as the catalogue's own default (`log + hẹn gọi lại`), or drop the column |
+| `callback_policy` | — | ❌ **not collected.** The field asked a clinic to promise a call-back window ("trong 30 phút đầu giờ làm việc") on two different screens. A field that invites a clinic to over-promise is worse than no field, so the UI stopped asking and she says "nhân viên sẽ gọi lại sớm nhất". Drop the column, or accept it always empty |
 | `waiting_time_expectation` | `waiting_time_expectation` | ✅ |
-| `escalation_triggers` | `system.ts → ESCALATION_TRIGGERS_BASE` **+** `escalation_triggers_custom` | ⚠️ **split.** See *Split fields* |
-| — | `escalation_window` | `[ext]` |
+| `escalation_triggers` | `system.ts → ESCALATION_TRIGGERS_BASE` **+** `escalation_triggers_custom` | ⚠️ **split**, and the tenant half is now **derived** — see *Split fields* and *Derived fields* |
+| — | `EscalationTarget.role` / `.window` / `.triggers` / `.fallback` | `[ext]` |
 
 ### A6 · Voice and persona
 
@@ -135,8 +135,22 @@ Every field maps ✅ and identically: `endpointing_silence_ms`, `silence_nudge_e
 `end_call_after_n_nudges`, `call_closing_script`. `max_call_duration_seconds` is SW, in
 `system.ts`.
 
-`keyterms: Keyterm[]` ✅ with all three columns. The vertical pack rows come from
-`system.ts → KEYTERMS_PACK`; derived rows are computed client-side (see *Derived fields*).
+`keyterms: Keyterm[]` ✅ with all three columns, but only one of the three `source` values
+now reaches the record from the UI. **Every row an owner sees is `tenant`.** `Từ hay nghe
+nhầm` seeds five worked examples (`defaults.ts → exampleKeyterms`) so the page opens with
+the abstraction already demonstrated, and the owner renames, respells or deletes any of
+them.
+
+The other two are gone from the tenant's record:
+
+- **`pack`** — `system.ts → KEYTERMS_PACK` is the vertical's recogniser boost list. It used
+  to be seeded into every tenant record as rows the table then filtered out, which put six
+  invisible rows in the record. It belongs to the platform's recogniser, applied
+  server-side, and the frontend no longer writes it.
+- **`derived`** — see *Derived fields*.
+
+A record saved before this change is migrated on load (`api/tenant.mock.ts → migrate`):
+`pack` rows are dropped and anything already spelled becomes an ordinary `tenant` row.
 
 ### A8 · Knowledge and behaviour steering
 
@@ -174,7 +188,7 @@ catalogue-ising properly.
 | `facility_capabilities` | `facility_capabilities` | ✅ |
 | `pre_appointment_instructions` | `pre_appointment_instructions` | ✅ |
 | `practitioner_roster` | `practitioner_roster: Practitioner[]` | ⚠️ all nine columns ✅; model adds `id`, `practitioner_gender` and `working_shifts` `[ext]`. `working_hours_note` is now **derived** from `working_shifts` by the UI, never typed |
-| `after_hours_emergency_target` | `after_hours_emergency_target` | ⚠️ `{ phone, name }`; the catalogue types it as a phone |
+| `after_hours_emergency_target` | `after_hours_emergency_target` | ⚠️ `{ phone, name }`; the catalogue types it as a phone. **Now derived** — no form writes it; see *Derived fields* |
 | `emergency_red_flags` | `system.ts → EMERGENCY_RED_FLAGS_PACK` **+** `emergency_red_flags_custom` | ⚠️ **split** |
 | `emergency_instruction_script` | `system.ts → EMERGENCY_INSTRUCTION_SCRIPT` | ✅ SW |
 | `medical_advice_refusal_script` | `system.ts → MEDICAL_ADVICE_REFUSAL_SCRIPT` | ✅ SW |
@@ -194,7 +208,7 @@ The frontend enforces that structurally rather than by convention — the system
 
 | Catalogue field | System half | Tenant half |
 |---|---|---|
-| `escalation_triggers` | `ESCALATION_TRIGGERS_BASE` | `escalation_triggers_custom: string[]` |
+| `escalation_triggers` | `ESCALATION_TRIGGERS_BASE` | `escalation_triggers_custom: string[]` — **derived** from the rows of `escalation_targets` |
 | `emergency_red_flags` | `EMERGENCY_RED_FLAGS_PACK` | `emergency_red_flags_custom: string[]` |
 
 **The effective value the pipeline should use is the concatenation**, system rows first.
@@ -208,14 +222,16 @@ The frontend enforces that structurally rather than by convention — the system
 
 ## Derived fields the frontend currently computes
 
-Three catalogue-SD values are computed in the browser today. Each is a drift risk: the
+Four catalogue values are computed in the browser today — two of them SD in the catalogue, two of them columns the UI now writes from a richer shape of its own. Each is a drift risk: the
 pipeline needs the same answer, and two implementations in two languages will not agree
 forever.
 
 | Catalogue | Computed by | Note |
 |---|---|---|
 | `is_open_now` | `readiness.ts → isOpenNow()` | From hours, breaks and holidays, for the live "đang mở cửa" indicator |
-| `keyterms` (derived rows) | `KeytermsSection.tsx → derivedKeyterms()` | From `business_name` + service names + aliases + practitioner names, per the catalogue's A7 note. The **word** is derived; its `phonetic_hint` is not — writing one materialises a stored row with `source: 'derived'`, so a re-derivation must merge on `term` rather than replace the list |
+| `keyterms` (derived rows) | — | **Withdrawn.** The clinic's name, its services and its doctors used to appear on `Từ hay nghe nhầm` as rows that read but could not be renamed or deleted, with a tooltip explaining why. That is a report inside a form, and it grew the page the more of the product was filled in. Nothing derives keyterms now; an owner who wants a spelling for their clinic's name types the word like any other. Server-side derivation per the catalogue's A7 note is still open |
+| `escalation_triggers_custom` | `skills/lines.ts → derivedFromTargets()` | The flat union of every `EscalationTarget.triggers` entry that is not already in `ESCALATION_TRIGGERS_BASE`. The owner types a trigger on the person it belongs to; this is the shape the catalogue's column wants |
+| `after_hours_emergency_target` | `skills/lines.ts → derivedFromTargets()` | `{ phone, name }` of the first `escalation_targets` row whose `triggers` include `Khẩn cấp y tế` (`system.ts → EMERGENCY_TRIGGER`), preferring one with a dialable number. The on-call doctor was a second phone field on a card of its own, so the same fact was typed in one of two places depending on what it was for |
 | R1 / R2 readiness gates | `readiness.ts → computeReadiness()` | Not a catalogue field, but it applies the catalogue's gates — and the pipeline needs the same verdict to decide whether an agent may go live |
 
 > **Backend question.** Should these come down in `GET /tenant/config` instead? The frontend
@@ -237,7 +253,10 @@ because six of the fifteen built sections write at least one of them.
 | `assigned_phone` | The Fonnus number this receptionist answers on | Chosen from the FPT inventory pool during setup. Owned by the "Số điện thoại" tab; Lễ tân only reads it | **Store it**, but owned by number provisioning. Likely read-only here |
 | `operating_hours_confirmed` | Has the tenant looked at the pre-filled weekly hours? | The template is pre-filled, so "not empty" cannot prove the tenant agreed with it, and R1 needs an affirmative confirm | **Store it.** Without it, R1 passes on data nobody checked |
 | `holidays_confirmed` | Same, for the pre-seeded Tết dates | The catalogue itself says Tết is "the field that breaks agents" | **Store it**, same reasoning |
-| `escalation_window` | When the agent may attempt a transfer at all (`always` / `business_hours` / `after_hours`) | Wireframe 20. The catalogue has escalation targets and triggers but no time bound | Store, or fold into `after_hours_routine_behavior` |
+| `EscalationTarget.window` | When *this person* may be rung (`always` / `business_hours` / `after_hours`) | Wireframe 20, moved onto the row. The catalogue has escalation targets and triggers but no time bound, and it was a single page-level setting until `Chuyển máy` became one row per person — which is what a clinic actually wants: the manager in the day, the on-call doctor at night | Store as a column on the target |
+| `EscalationTarget.triggers` | What makes her ring *this person* rather than another | The catalogue's `escalation_triggers` is one flat list for the whole tenant, which cannot route. The union is written back to `escalation_triggers_custom` on every edit, so the flat column stays correct | Store as a join table or a text array on the target; keep the flat column derived |
+| `EscalationTarget.fallback` | What she does when that number does not answer (`callback` / `handle`) | Nothing in the catalogue says what happens after a failed transfer, and it is the difference between "nhân viên sẽ gọi lại" and her carrying on herself | Store as a column on the target |
+| `EscalationTarget.role` | "Quản lý phòng khám" — what she calls that person to a caller | A name alone ("chị Lan") does not tell a caller who they are about to speak to | Store as a column on the target |
 | `greeting_by_daypart` | Optional per-daypart greetings (`{ enabled, morning, afternoon, evening }`) | Wireframe 16. An extension of `greeting_script_custom` | Store as JSONB, or drop and keep one greeting |
 | `email_rules: EmailRule[]` | Per-intent email notification rules, with recipients and templates | The whole Kỹ năng → "Gửi email" skill. **Not in catalogue v1 at all** | **Needs a decision.** This is a feature, not a field — it implies an outbound email service |
 | `ServiceRow.from_template` | Did this row come from the vertical template? | Lets the UI tag a row "mẫu" so the tenant knows what still needs checking | Store, or re-derive server-side when seeding |
@@ -253,11 +272,11 @@ because six of the fifteen built sections write at least one of them.
 | `escalation_triggers_custom`, `emergency_red_flags_custom` | The tenant half of a split field | See *Split fields* above | Two columns recommended |
 
 `Keyterm.source` is **not** an `[ext]` field despite looking like one — the catalogue defines
-it as A7 `source [row]`. It is listed here because the UI reads it to decide what a row can
-do: a `tenant` row is renamed and deleted in place, a `derived` row shows the word from the
-page that owns it and takes only a spelling, and a `pack` row is **not rendered at all** —
-Fonnus maintains those words and an owner who cannot reach them from anywhere in the product
-should not be shown them. All three are still sent.
+it as A7 `source [row]`. It is listed here because the UI now only ever writes one of its
+three values. Every row on `Từ hay nghe nhầm` is `tenant`: the owner typed it there, so the
+owner can rename, respell and delete it. `pack` and `derived` rows are no longer written by
+the frontend at all — see A7 above for why each went. The column stays, because the
+recogniser's own pack is still a real thing on the server side.
 
 ---
 

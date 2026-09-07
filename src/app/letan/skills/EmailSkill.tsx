@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../../../design-system'
 import type { IconName } from '../../../design-system'
 import { isValidEmail } from '../../../auth/phone'
@@ -22,20 +22,23 @@ import {
   RowText,
   RowValue,
   SaveBar,
-  TextArea,
-  TextField,
+  TokenArea,
   ui,
   useToast,
 } from '../../ui'
 import { TryPanel } from '../tryout/TryPanel'
 import { SkillsSection } from './SkillsSection'
-import { INTENT_ASKS, SAMPLE, emailSummary, fill, filled } from './lines'
+import { INTENT_ASKS, VAR_LABELS, emailSummary, emailVars, fill, filled } from './lines'
 import styles from './Skills.module.css'
 
 /*
  * [ext] Gửi email — not in catalogue v1. One rule per call intent: when it
- * fires, who receives it, and the wording. Variables are «guillemet» tokens
- * the mailer fills in.
+ * fires, who receives it, and the wording.
+ *
+ * A variable is stored as a «guillemet» token because that is what the mailer
+ * fills in, and it is never shown as one: the envelope tints it, and the
+ * editor draws it as a pill carrying the words an owner would use. See
+ * `VAR_LABELS` in `lines.ts` and `TokenArea` in `app/ui`.
  */
 
 const KEYS = ['email_rules'] as const
@@ -74,14 +77,14 @@ function Envelope({ rule, to }: { rule: EmailRule; to: string[] }) {
       </div>
       <div className={styles.mailSubject}>
         {fill(rule.subject).map((r, i) => (
-          <span key={i} className={r.variable ? styles.mailVar : undefined} title={r.variable ? `«${r.variable}»` : undefined}>
+          <span key={i} className={r.variable ? styles.mailVar : undefined} title={r.variable ? VAR_LABELS[r.variable] : undefined}>
             {r.text}
           </span>
         ))}
       </div>
       <div className={styles.mailBody}>
         {runs.map((r, i) => (
-          <span key={i} className={r.variable ? styles.mailVar : undefined} title={r.variable ? `«${r.variable}»` : undefined}>
+          <span key={i} className={r.variable ? styles.mailVar : undefined} title={r.variable ? VAR_LABELS[r.variable] : undefined}>
             {r.text}
           </span>
         ))}
@@ -156,21 +159,6 @@ export function EmailSkill() {
   }, [openId])
 
   const setRule = (i: EmailIntent, patch: Partial<EmailRule>) => set('email_rules', rules.map((r) => (r.intent === i ? { ...r, ...patch } : r)))
-  const bodyRef = useRef<HTMLTextAreaElement>(null)
-
-  /** A token goes in at the caret, so an owner rewriting a line keeps their place. */
-  const insertVar = (rule: EmailRule, v: string) => {
-    const token = `«${v}»`
-    const el = bodyRef.current
-    if (!el) return setRule(rule.intent, { body: rule.body + token })
-    const start = el.selectionStart ?? rule.body.length
-    const end = el.selectionEnd ?? start
-    setRule(rule.intent, { body: rule.body.slice(0, start) + token + rule.body.slice(end) })
-    requestAnimationFrame(() => {
-      el.focus()
-      el.setSelectionRange(start + token.length, start + token.length)
-    })
-  }
 
   const on = rules.filter((r) => r.enabled && r.recipients.length).length
 
@@ -236,16 +224,23 @@ export function EmailSkill() {
                       that never think about it — which is most of them. */}
                   <Disclosure title="Sửa lời" subtitle="phần tô màu là thông tin của từng cuộc gọi">
                     <div className={ui.stack}>
-                      <TextField compact label="Tiêu đề" value={r.subject} onChange={(e) => setRule(r.intent, { subject: e.target.value })} maxLength={120} />
-                      <TextArea ref={bodyRef} label="Nội dung" value={r.body} onChange={(e) => setRule(r.intent, { body: e.target.value })} rows={5} maxLength={1200} />
-                      <div className={ui.row}>
-                        <span className={ui.hint}>Bấm để chèn:</span>
-                        {INTENT_VARS[r.intent].map((v) => (
-                          <button key={v} type="button" className={styles.varChip} title={`Thành "${SAMPLE[v] ?? v}"`} onClick={() => insertVar(r, v)}>
-                            {v}
-                          </button>
-                        ))}
-                      </div>
+                      <TokenArea
+                        singleLine
+                        label="Tiêu đề"
+                        value={r.subject}
+                        onChange={(v) => setRule(r.intent, { subject: v })}
+                        vars={emailVars(INTENT_VARS[r.intent])}
+                        maxLength={120}
+                      />
+                      <TokenArea
+                        label="Nội dung"
+                        value={r.body}
+                        onChange={(v) => setRule(r.intent, { body: v })}
+                        vars={emailVars(INTENT_VARS[r.intent])}
+                        rows={5}
+                        maxLength={1200}
+                        inserts
+                      />
                     </div>
                   </Disclosure>
 

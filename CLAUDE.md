@@ -98,6 +98,13 @@ npm run typecheck
   when it is empty, and `Suggestions` inside the same card when there are ready-made
   lines to adopt. Dashed means *content* — an empty state or a suggestion — never a
   button that makes a row. Reasons and the checks: `design-reference/ui-ux-principles.md`.
+- **A placeholder in a template is a pill, never syntax.** `Gửi email` stores
+  `«tên_khách»` because that is what the mailer fills in, and never shows it: use
+  `TokenArea` from `src/app/ui`, which draws each variable as a pill carrying the words
+  an owner would use (`Tên khách`), opens the list at the caret on `@`, and serialises
+  back to the same guillemet string. Same bargain the date and time fields make — the
+  stored value is the catalogue's, only the reading is ours. Labels live in
+  `skills/lines.ts → VAR_LABELS`.
 - **Icons are drawn, not installed.** Every icon, shape and pattern is an arc-and-dot
   drawing in `src/design-system/icons.ts` / `Shape.tsx` / `Pattern.tsx` with exactly one
   terracotta accent (`--icon-accent`). No Lucide, no stock set, no emoji glyphs (✓ ▾ →) in

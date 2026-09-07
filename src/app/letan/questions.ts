@@ -1,6 +1,8 @@
 import { formatPhone, isValidPhone, normalizePhone } from '../../auth/phone'
 import { newId } from './model'
-import type { ReceptionistConfig } from './model'
+import type { EscalationTarget, ReceptionistConfig } from './model'
+import { EMERGENCY_TRIGGER, TRANSFER_TRIGGERS } from './system'
+import { derivedFromTargets } from './skills/lines'
 
 /*
  * "Linh hỏi — bạn trả lời": the conversational rail on the Kiến thức hub.
@@ -41,6 +43,17 @@ const parseMoney = (raw: string): number | null => {
   return digits ? Number(digits) : null
 }
 
+/**
+ * A new person on the transfer list, plus the two catalogue columns the list
+ * writes — the same derivation `Chuyển máy` runs, so a number typed at the
+ * assistant lands identically to one typed on the page.
+ */
+function withTarget(cfg: ReceptionistConfig, part: Partial<EscalationTarget> & { phone: string; name: string }): Partial<ReceptionistConfig> {
+  const row: EscalationTarget = { id: newId('esc'), role: '', window: 'always', triggers: [], fallback: 'callback', ...part }
+  const escalation_targets = [...cfg.escalation_targets, row]
+  return { escalation_targets, ...derivedFromTargets(escalation_targets) }
+}
+
 export function buildQuestions(cfg: ReceptionistConfig): Question[] {
   const q: Question[] = []
 
@@ -56,7 +69,7 @@ export function buildQuestions(cfg: ReceptionistConfig): Question[] {
         const digits = normalizePhone(text)
         if (digits.length < 10) return { error: 'Em cần một số điện thoại 10 số ạ.' }
         const name = text.replace(/[\d\s.+-]+/g, ' ').trim() || 'nhân viên'
-        return { escalation_targets: [...c.escalation_targets, { id: newId('esc'), phone: digits, name }] }
+        return withTarget(c, { phone: digits, name, triggers: [TRANSFER_TRIGGERS[0]] })
       },
       confirm: (c) => `số chuyển máy ${formatPhone(c.escalation_targets[c.escalation_targets.length - 1]?.phone ?? '')}`,
     })
@@ -140,11 +153,14 @@ export function buildQuestions(cfg: ReceptionistConfig): Question[] {
       text: 'Khách sưng đau lúc 23:00 sau tiểu phẫu, em nối máy tới bác sĩ trực nào ạ? (số và tên)',
       chips: [],
       placeholder: 'VD: 0908 234 567 BS. Hùng',
-      applyText: (_c, text) => {
+      applyText: (c, text) => {
         const digits = normalizePhone(text)
         if (digits.length < 10) return { error: 'Em cần một số điện thoại 10 số ạ.' }
         const name = text.replace(/[\d\s.+-]+/g, ' ').trim() || 'bác sĩ trực'
-        return { after_hours_emergency_target: { phone: digits, name } }
+        // The on-call doctor is a row like any other; what makes them the
+        // on-call doctor is the trigger, and `after_hours_emergency_target`
+        // is read back off it.
+        return withTarget(c, { phone: digits, name, role: 'Bác sĩ trực', window: 'after_hours', triggers: [EMERGENCY_TRIGGER] })
       },
       confirm: () => 'số bác sĩ trực',
     })

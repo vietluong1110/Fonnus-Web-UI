@@ -30,6 +30,24 @@ export const ESCALATION_TRIGGERS_BASE = [
   'Linh nghe không rõ hai lần liên tiếp',
 ]
 
+/**
+ * The trigger with a rule attached: the row that takes it is the on-call
+ * doctor, so it is what `after_hours_emergency_target` is derived from and
+ * what makes a row show the red-flag list. Matched by value, the way
+ * `ESCALATION_TRIGGERS_BASE` already is.
+ */
+export const EMERGENCY_TRIGGER = 'Khẩn cấp y tế'
+
+/**
+ * The four cases a clinic reaches for a person, offered on every row of
+ * `Chuyển máy`. They are suggestions, not a closed set — a trigger is a
+ * sentence in the clinic's own words, and the box takes any of them.
+ */
+export const TRANSFER_TRIGGERS = ['Khách yêu cầu gặp nhân viên', 'Khách hỏi tư vấn y khoa', 'Có câu Linh không trả lời được', EMERGENCY_TRIGGER]
+
+/** The rest of what a dental clinic adds, behind "thêm gợi ý". */
+export const TRANSFER_TRIGGERS_MORE = ['Khách muốn nghe ý kiến bác sĩ', 'Khách nói tiếng nước ngoài']
+
 /** B3 · `emergency_red_flags` — vertical pack; tenant may add rows, never remove one. */
 export const EMERGENCY_RED_FLAGS_PACK = [
   'chảy máu không cầm',

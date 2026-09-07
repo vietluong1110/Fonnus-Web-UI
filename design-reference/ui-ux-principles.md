@@ -133,6 +133,26 @@ value that is a **set of marks rather than text** — a doctor's week — must b
 `RowValue fixed`. Text that runs out ends in an ellipsis and loses a letter; a set of
 marks loses its last day, silently, and the row then says something untrue.
 
+**A setting that is *about* one record belongs inside that record's row, not on a card
+above the list.** `Chuyển máy` had four cards over one shared list of phone numbers: when
+may she agree, when does she offer, what happens at 21:00, and a separate emergency card
+with a second phone field. Every clinic's actual question — *this* person in the day and
+*that* one at night — was unanswerable, because the numbers were a list with no meaning
+attached to any of them and the settings applied to all of them at once. One row per
+person, carrying its number, its job, what makes her ring it and what she does when it
+rings out, answers it and deletes three cards.
+
+The test is **what does this setting vary with?** If two records could reasonably want
+different answers, it is a field on the row. If the answer is a property of the clinic
+rather than of a record — what she does with an ordinary call at 21:00 — it stays a card.
+
+The corollary is that a record can absorb a *card*: the on-call doctor is no longer a
+phone field of its own, it is the row whose trigger is `Khẩn cấp y tế`, and the clinical
+red flags sit inside that row where they qualify something. The catalogue column
+`after_hours_emergency_target` is then **derived** from the list, the way
+`working_hours_note` is derived from a doctor's blocks — a page never asks for the same
+fact in two places, and the backend still gets its column.
+
 **Two cards that end in the same sentence are one card.** `Chuyển máy` asked "when may
 she agree to fetch a person" and "which number does she ring" on two cards, and both
 ended in the same `Said` line, because they are two settings of one decision. Printing
@@ -166,6 +186,18 @@ in one sentence.
 Every list gets one, including the ones that are usually full. `Bảng giá` shipped
 without an empty state because it always arrives seeded from the dental template; the
 one owner who cleared it saw a blank card that looked broken.
+
+**And when the *idea* is the hard part, seed the list instead of explaining it.**
+`Từ hay nghe nhầm` is about a phonetic hint, which is the most abstract thing anywhere in
+Lễ tân, and the best empty state in the world still leaves the owner guessing what one
+looks like. It now opens with five worked rows — `Invisalign → in-vi-da-lai` — that are
+the clinic's **own** rows: rename, respell, delete. An example nobody can touch is a
+screenshot, and a read-only row in a form is the one thing a reader least expects.
+
+That is also why the words the other pages already knew — the clinic's name, its services,
+its doctors — are no longer pulled onto this page as rows that read but do not edit. It
+made the page longer the more of the product was filled in, and every one of those rows
+offered a delete that was missing and a name that snapped back.
 
 > **Check:** empty each list on the page in your head. Does each one still say what the
 > thing is and what it changes about a call?
@@ -278,11 +310,35 @@ to say anything on these screens, so it is the last thing to reach for.
   asked an owner to learn a token vocabulary in order to read their own mail. Same test
   as `Said`: show the thing that actually leaves the building, not the template that
   makes it.
+- **A placeholder is a word, not syntax.** `Gửi email` stored `«tên_khách»` and *showed*
+  `«tên_khách»`, in a plain textarea, over a legend and a row of `tên_khách` chips. Snake
+  case, guillemets and a vocabulary to learn, on a screen for somebody who wanted a
+  notification. The value the mailer fills in has not changed; only the reading has
+  (`TokenArea` in `app/ui`, the same bargain `DateField` makes with ISO dates). A variable
+  is now a blush pill reading `Tên khách` that one backspace removes whole, `@` opens the
+  list of what this message knows at the caret, and the pills under the box do the same
+  for anyone who never tries `@`. **Whenever a field holds machine syntax, ask what the
+  owner would call the thing, and show that instead.**
 - **And write it for them.** The same page used to hand a clinic owner three subject
   lines and three bodies to compose, with tokens inserted at the caret. That is a
   copywriting job given to somebody who wanted a notification. Fonnus owns the wording —
   the frontend owns all Vietnamese copy anyway — the owner picks who receives it, and
   `Sửa lời` is one press away for the few who want their own.
+- **Delete the question whose every answer is already the default.** `Chuyển máy` asked
+  what she does with an ordinary call at 21:00 and offered three tiles: log a call-back,
+  take a message, try a transfer. All three were things that already happen — the row
+  with `Ngoài giờ` on it *is* the transfer, a number that rings out falls to that row's
+  own fallback, and taking a message is what is left when neither applies. A control like
+  that costs a decision, teaches nothing, and its only real message is "this product has
+  settings". The test: **write out what happens if the owner never touches it, for each
+  option in turn.** If the answers do not differ in a way a caller would notice, cut the
+  control and the field behind it.
+- **One weight means one kind.** The numbered rungs down the transfer list used to fill
+  only the first circle, on the reasoning that the eye should find it before it reads a
+  digit. But a difference in weight reads as a difference in *kind*, and there is none —
+  the second number is a number she rings, exactly like the first, just later. The digit
+  already carries the order. Reach for emphasis when one item is genuinely a different
+  sort of thing, not when it is merely first.
 - Every screen ends in something you can hear — the try-out rail. Nothing on these pages
   is theoretical.
 - A hint under a field earns its place only if it says something the field cannot show.
@@ -327,6 +383,16 @@ Traps that have each cost a session:
   card a containing block for fixed positioning and would break every anchored pop-up
   inside it. Measure with `useElementWidth`, or query a container on an inner list
   (`.services`, `.holidays`), as those two already do.
+- **An input inside a shell that draws its own ring needs `:focus-visible` spelled out,
+  not `outline: none`.** The global `:focus-visible { outline: 2px solid; outline-offset:
+  2px }` in `tokens/base.css` is specificity (0,1,0) — exactly the same as `.myInput`, and
+  it is emitted last, so it wins the tie. The result is a square ring floating two pixels
+  inside a rounded box that is already showing focus: a box inside a box. Write
+  `.myInput:focus, .myInput:focus-visible { outline: none }` — two selectors deep — the
+  way `Field.module.css` does. It has now been missed three times (`ChipInput boxed`,
+  `TileAdd`'s input, the call overlay's), so grep before adding a fourth: any
+  `outline: none` in a base rule with no `:focus-visible` companion in the same file is
+  the bug.
 - **A control that can stand in a card *or* nest inside a row's editor carries its own
   container.** The week (`Week.module.css`) queried `rows` while it lived only inside a
   doctor's open row; standing in a card on `Đặt lịch` there is no `rows` container above
@@ -403,6 +469,37 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-07 (sixth round — three notes on Chuyển máy)** — All three were the owner
+  seeing the seams. `Ngoài giờ, cuộc gọi thường` was cut along with its catalogue field:
+  every one of its three options was already what happens, so it only advertised that the
+  product has settings. The rung circles were unified — filling only the first implied a
+  difference in kind where there is only a difference in order. And the reported "box
+  inside a box" on a focused tag field turned out to be the global `:focus-visible`
+  winning a specificity tie against a plain `outline: none`; a repo-wide grep found two
+  more of the same (`TileAdd`'s input and the landing page's call overlay), neither of
+  which anyone had reported. Worth knowing for next time: the Browser pane's document
+  never takes real OS focus, so `el.focus()` will not reproduce a `:focus-visible` bug —
+  read the cascade out of `document.styleSheets` instead, or grep the source. → §7, §8.
+
+- **2026-09-06 (fifth round — on the owner's feedback)** — Three pages, one theme: *stop
+  showing the owner the machine's own shape*. `Gửi email` printed `«tên_khách»` in a
+  textarea over a legend and a rack of snake_case chips; it now draws a variable as a
+  blush pill reading `Tên khách`, with an `@` menu at the caret (`TokenArea` in `app/ui` —
+  a `contentEditable` that serialises back to the same guillemet string the mailer reads,
+  because the *stored* value was never the problem). `Chuyển máy` was four cards over one
+  anonymous list of numbers, so a clinic could not send the day calls to the manager and
+  the night calls to the on-call doctor; it is one row per person now, and the emergency
+  card folded into a row whose trigger is `Khẩn cấp y tế`, with the catalogue's
+  `after_hours_emergency_target` and `escalation_triggers_custom` derived off the list.
+  `Từ hay nghe nhầm` stopped importing the words the other pages knew as rows nobody could
+  rename, and seeds five worked examples instead. Two rules that were genuinely new: a
+  setting that varies per record is a field on the row, not a card above the list; and a
+  field holding machine syntax should show what the owner would call the thing. One trap:
+  Chrome writes a trailing space in a `contentEditable` as `&nbsp;`, so a merge-tag field
+  has to normalise U+00A0 on the way out or it silently stores a character that is not a
+  space — and its Enter wraps the line in a `<div>`, so take Enter yourself and insert a
+  line break. → §3, §4, §7.
 
 - **2026-09-06 (fourth round — the dead kit)** — Rebuilding Kỹ năng retired the last
   users of four pieces of `app/ui`, and a repo-wide grep found nothing else reaching for

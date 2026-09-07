@@ -87,7 +87,6 @@ export function computeReadiness(cfg: ReceptionistConfig): Readiness {
     { id: 'ai_bookable_slots_per_day', gate: 'R2', label: 'Số chỗ Linh được tự đặt', done: cfg.ai_bookable_slots_per_day > 0, path: ['ky-nang', 'dat-lich'], effort: 5 },
     { id: 'slot_duration', gate: 'R2', label: 'Thời lượng một cuộc hẹn', done: cfg.slot_duration > 0, path: ['ky-nang', 'dat-lich'], effort: 5 },
     { id: 'booking_confirmation_channel', gate: 'R2', label: 'Kênh xác nhận hẹn', done: !!cfg.booking_confirmation_channel, path: ['ky-nang', 'dat-lich'], effort: 5 },
-    { id: 'after_hours_routine_behavior', gate: 'R2', label: 'Cuộc gọi thường ngoài giờ', done: !!cfg.after_hours_routine_behavior, path: ['ky-nang', 'chuyen-may'], effort: 5 },
     {
       id: 'after_hours_emergency_target',
       gate: 'R2',

@@ -1,6 +1,6 @@
 import { LABELS, WEEKDAY_LONG } from '../defaults'
-import type { EmailIntent, EmailRule, ReceptionistConfig, SlotRule, Weekday } from '../model'
-import { EMERGENCY_INSTRUCTION_SCRIPT, UNRESOLVABLE_FALLBACK_SCRIPT } from '../system'
+import type { EmailIntent, EmailRule, EscalationTarget, ReceptionistConfig, SlotRule, Weekday } from '../model'
+import { EMERGENCY_INSTRUCTION_SCRIPT, EMERGENCY_TRIGGER, ESCALATION_TRIGGERS_BASE, UNRESOLVABLE_FALLBACK_SCRIPT } from '../system'
 import { shortVnd } from '../knowledge/answers'
 
 /*
@@ -45,10 +45,18 @@ export function hasHandoffNumber(cfg: ReceptionistConfig): boolean {
   return cfg.escalation_targets.some((t) => t.phone.trim().length >= 9)
 }
 
+/** A number long enough to ring. */
+export const targetReady = (t: EscalationTarget) => t.phone.trim().length >= 9
+
+/** How she names one person to a caller: the name, or the job when there is no name yet. */
+export function targetSaid(t: EscalationTarget): string {
+  return t.name.trim() || (t.role.trim() ? mid(trim(t.role)) : 'nhân viên')
+}
+
 /**
  * What she says when a caller *asks* for a person. With no number stored she
  * cannot connect anyone, so she says the one thing that is true — and that
- * sentence is the argument for the empty card above it.
+ * sentence is the argument for the empty list above it.
  */
 export function agreeLine(cfg: ReceptionistConfig): string {
   if (!hasHandoffNumber(cfg)) return `Dạ, ${UNRESOLVABLE_FALLBACK_SCRIPT.replace(/^Em /, 'em ')}`
@@ -56,37 +64,42 @@ export function agreeLine(cfg: ReceptionistConfig): string {
 }
 
 /**
- * What she says when *she* decides to hand over — nobody asked. A different
- * sentence from the one above, which is why the two live on two cards: one
- * is her agreeing, the other is her offering.
+ * One row's own sentence: what a caller hears when *this* person's turn comes.
+ *
+ * The emergency row says something else, because that call must not go the
+ * way an ordinary one does — she connects first and talks after.
  */
-export function offerLine(cfg: ReceptionistConfig): string {
-  if (!hasHandoffNumber(cfg)) return 'Dạ, câu này em chưa trả lời chính xác được. Em xin ghi nhận, nhân viên sẽ gọi lại anh chị ạ.'
-  return `Dạ, câu này em xin phép nhờ ${handoffTo(cfg)} trả lời trực tiếp cho chính xác. Em nối máy ngay ạ.`
+export function targetLine(t: EscalationTarget): string {
+  const who = targetSaid(t)
+  if (!targetReady(t)) return `Dạ, ${UNRESOLVABLE_FALLBACK_SCRIPT.replace(/^Em /, 'em ')}`
+  if (t.triggers.includes(EMERGENCY_TRIGGER)) return `Anh chị giữ máy, em nối máy với ${who} ngay ạ.`
+  return `Dạ, em nối máy với ${who} ngay ạ. Anh chị giữ máy giúp em một chút nhé.`
 }
 
-/** The one line under the tile grid: what "khi nào" actually means on a call. */
-export function transferWindowLine(cfg: ReceptionistConfig, agent: string): string {
-  switch (cfg.escalation_window) {
+/** And what she says the moment that number rings out. */
+export function fallbackLine(t: EscalationTarget): string {
+  const who = targetSaid(t)
+  return t.fallback === 'handle'
+    ? `Dạ, ${who} đang bận máy ạ. Anh chị cho em hỏi thêm để em hỗ trợ trước, được không ạ?`
+    : `Dạ, ${who} đang bận máy ạ. Em xin ghi nhận, nhân viên sẽ gọi lại anh chị sớm nhất ạ.`
+}
+
+/** The one line under a row's clock tiles: what "khi nào" means on a call. */
+export function transferWindowLine(t: EscalationTarget, agent: string): string {
+  const who = targetSaid(t)
+  switch (t.window) {
     case 'business_hours':
-      return `Ngoài giờ ${agent} không nối máy — cuộc gọi đi theo thẻ "Ngoài giờ" bên dưới.`
+      return `Ngoài giờ ${agent} không gọi ${who} — ${agent} ghi lời nhắn để nhân viên gọi lại.`
     case 'after_hours':
-      return `Trong giờ nhân viên đã nghe máy trực tiếp, nên ${agent} chỉ nối máy ngoài giờ.`
+      return `Trong giờ nhân viên đã nghe máy trực tiếp, nên ${agent} chỉ gọi ${who} ngoài giờ.`
     default:
-      return `Kể cả ngoài giờ. Nếu không ai nghe, ${agent} ghi lời nhắn thay vì để khách chờ.`
+      return `Kể cả 23 giờ. ${agent.charAt(0).toUpperCase()}${agent.slice(1)} thử gọi bất cứ lúc nào trường hợp bên trên xảy ra.`
   }
 }
 
-export function afterHoursLine(cfg: ReceptionistConfig): string {
-  const when = trim(cfg.callback_policy) ? mid(trim(cfg.callback_policy)) : 'sớm nhất'
-  switch (cfg.after_hours_routine_behavior) {
-    case 'take_message':
-      return 'Dạ, giờ này phòng khám nghỉ rồi ạ. Anh chị để lại lời nhắn, em ghi nhận và chuyển cho phòng khám ạ.'
-    case 'transfer':
-      return `Dạ, giờ này phòng khám nghỉ rồi ạ. Em thử nối máy với ${handoffTo(cfg)}, nếu không được em xin ghi lời nhắn ạ.`
-    default:
-      return `Dạ, giờ này phòng khám nghỉ rồi ạ. Em xin ghi lời nhắn, nhân viên sẽ gọi lại anh chị ${when} ạ.`
-  }
+/** The rows that take emergency calls, in the order she rings them. */
+export function emergencyTargets(cfg: ReceptionistConfig): EscalationTarget[] {
+  return cfg.escalation_targets.filter((t) => t.triggers.includes(EMERGENCY_TRIGGER))
 }
 
 /** The doctor on call, as she names them. */
@@ -100,13 +113,35 @@ export function hasEmergencyNumber(cfg: ReceptionistConfig): boolean {
 
 /**
  * The emergency line. Without a number she cannot connect anyone at 23:00,
- * and the fallback says exactly that — which is a stronger case for the field
+ * and the fallback says exactly that — which is a stronger case for the row
  * than any red badge was.
  */
 export function emergencyLine(cfg: ReceptionistConfig): string {
   if (!hasEmergencyNumber(cfg)) return 'Dạ, em rất tiếc, giờ này em chưa nối được với bác sĩ nào ạ. Em xin ghi nhận và nhờ nhân viên gọi lại anh chị sáng mai ạ.'
   const who = emergencyDoctor(cfg)
   return `Anh chị giữ máy, em nối máy với ${who === 'bác sĩ' ? 'bác sĩ' : who} ngay ạ. ${EMERGENCY_INSTRUCTION_SCRIPT.split('. ').slice(1).join('. ')}`.trim()
+}
+
+/**
+ * The two columns the catalogue wants, written from the rows.
+ *
+ * `escalation_triggers_custom` is the flat union of everything the owner typed
+ * on a person, minus the base set the platform already applies;
+ * `after_hours_emergency_target` is the first row that takes emergency calls.
+ * Both are derived on every edit, the way `working_hours_note` is derived from
+ * a doctor's blocks — so the catalogue's columns can never fall out of step
+ * with what the page shows.
+ */
+export function derivedFromTargets(targets: EscalationTarget[]): {
+  escalation_triggers_custom: string[]
+  after_hours_emergency_target: { phone: string; name: string }
+} {
+  const custom = [...new Set(targets.flatMap((t) => t.triggers))].filter((t) => !ESCALATION_TRIGGERS_BASE.includes(t))
+  const doctor = targets.find((t) => t.triggers.includes(EMERGENCY_TRIGGER) && targetReady(t)) ?? targets.find((t) => t.triggers.includes(EMERGENCY_TRIGGER))
+  return {
+    escalation_triggers_custom: custom,
+    after_hours_emergency_target: { phone: doctor?.phone ?? '', name: doctor?.name ?? '' },
+  }
 }
 
 /* ----------------------------------------------------------- gửi email */
@@ -125,6 +160,30 @@ export const SAMPLE: Record<string, string> = {
   tóm_tắt: 'Khách hỏi giá cạo vôi và niềng răng trong suốt, đã giữ lịch sáng thứ Bảy.',
   hẹn_gọi_lại: 'trong 30 phút đầu giờ làm việc',
   liên_kết: 'fonnus.vn/cuoc-goi/8241',
+}
+
+/**
+ * What each variable is *called*, in the owner's words.
+ *
+ * The key is what the mailer fills in and the label is what a clinic owner
+ * reads; nothing on screen ever shows the key. This map is the whole reason
+ * `Nội dung` stopped looking like source code — the field used to print
+ * `«tên_khách»` and then ask the reader to learn what that meant.
+ */
+export const VAR_LABELS: Record<string, string> = {
+  tên_khách: 'Tên khách',
+  số_gọi: 'Số điện thoại',
+  giờ_gọi: 'Giờ gọi',
+  giờ_hẹn: 'Giờ hẹn',
+  dịch_vụ: 'Dịch vụ',
+  tóm_tắt: 'Tóm tắt cuộc gọi',
+  hẹn_gọi_lại: 'Hẹn gọi lại',
+  liên_kết: 'Đường dẫn nghe lại',
+}
+
+/** The variables one template may use, as the field and the pill rack want them. */
+export function emailVars(keys: string[]): { key: string; label: string; sample?: string }[] {
+  return keys.map((key) => ({ key, label: VAR_LABELS[key] ?? key, sample: SAMPLE[key] }))
 }
 
 /** One run of a template: plain text, or a variable and the value standing in for it. */
