@@ -144,6 +144,13 @@
   color: var(--ink);
 }
 
+/* `.tileInput` above draws the ring; without this the global `:focus-visible`
+   outranks the `outline: none` in the rule above and adds a second one. */
+.input:focus,
+.input:focus-visible {
+  outline: none;
+}
+
 .input::placeholder {
   color: rgba(92, 82, 72, 0.6);
 }
