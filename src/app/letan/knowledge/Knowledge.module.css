@@ -619,21 +619,3 @@
  * the same control the closed row's week strip draws, so ticking a day and
  * reading it back are the same shapes.
  */
-/*
- * A word the table did not invent — the clinic's name, a service, a doctor.
- * It reads rather than edits, because renaming it happens on the page that
- * owns it; set on the input's own baseline so the column still lines up with
- * the rows the owner typed.
- */
-.termFixed {
-  min-width: 0;
-  /* The compact control's own 10px, so a word that reads and a word that
-     edits start on exactly one vertical down the column. */
-  padding: 0 10px;
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}

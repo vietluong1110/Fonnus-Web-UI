@@ -232,7 +232,7 @@ export function PractitionersSection() {
       title="Bác sĩ"
       lede={`Khách Việt hay hỏi đích danh: "bác sĩ Hùng hôm nay có ở phòng khám không?". Có danh sách này, ${agent} trả lời được ngày giờ có mặt và chuyên môn.`}
       rail={<TryPanel section="bac-si" config={live} />}
-      bar={<SaveBar {...d.bar} sub="Bác sĩ · tên bác sĩ cũng được thêm vào Từ hay nghe nhầm" />}
+      bar={<SaveBar {...d.bar} sub="Bác sĩ · áp dụng cho cuộc gọi tiếp theo" />}
     >
       <Card
         title="Bác sĩ của phòng khám"

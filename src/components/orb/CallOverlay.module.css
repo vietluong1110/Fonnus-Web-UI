@@ -170,6 +170,13 @@
   color: var(--ink);
 }
 
+/* The pill around it already carries the hairline and the overlay shadow; the
+   global `:focus-visible` would add a square ring inside it. */
+.input:focus,
+.input:focus-visible {
+  outline: none;
+}
+
 .roundButton {
   width: 40px;
   height: 40px;

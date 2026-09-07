@@ -43,11 +43,7 @@ export function SkillsHub() {
       icon: 'handoff',
       title: 'Chuyển máy cho người thật',
       sub: hasHandoffNumber(config)
-        ? [
-            `${numbers} số · ${agent} gọi ${handoffTo(config)} trước`,
-            LABELS.escalationWindow[config.escalation_window],
-            hasEmergencyNumber(config) ? 'có số trực khẩn cấp' : 'chưa có số trực khẩn cấp',
-          ].join(' · ')
+        ? [`${numbers} số · ${agent} gọi ${handoffTo(config)} trước`, hasEmergencyNumber(config) ? 'có số trực khẩn cấp' : 'chưa có số trực khẩn cấp'].join(' · ')
         : `Chưa có số nào — ${agent} không nối được cuộc gọi cho ai`,
       empty: !hasHandoffNumber(config),
     },

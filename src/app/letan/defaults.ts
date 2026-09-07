@@ -7,7 +7,6 @@ import type {
   SlotRule,
   Weekday,
 } from './model'
-import { KEYTERMS_PACK } from './system'
 
 /*
  * The seeded tenant record for a dental clinic: what a tenant sees the first
@@ -191,12 +190,26 @@ const defaultSlotRules: SlotRule[] = WEEKDAYS.map((day) => ({
           ],
 }))
 
-const packKeyterms: Keyterm[] = KEYTERMS_PACK.map((term, i) => ({
-  id: `kt-pack-${i}`,
-  term,
-  phonetic_hint: '',
-  source: 'pack',
-}))
+/*
+ * The word list opens with a handful of worked examples rather than empty.
+ *
+ * "Phonetic hint" is the most abstract thing anywhere in Lễ tân, and an empty
+ * table teaches nothing about it; four filled rows with the play button beside
+ * them teach it in one press. They are the tenant's own rows — editable,
+ * renameable, deletable — because an example nobody can touch is a screenshot.
+ *
+ * They are also the words this vertical actually mishears: the industry pack
+ * (`KEYTERMS_PACK`) used to be seeded here as invisible `pack` rows the table
+ * filtered out, which put six rows in the record that nobody could see or act
+ * on. The pack belongs to the platform's recogniser, not to the clinic's list.
+ */
+const exampleKeyterms: Keyterm[] = [
+  { term: 'Invisalign', phonetic_hint: 'in-vi-da-lai' },
+  { term: 'Implant', phonetic_hint: 'im-plăng' },
+  { term: 'Veneer', phonetic_hint: 'vơ-nia' },
+  { term: 'Zirconia', phonetic_hint: 'dơ-cô-ni-a' },
+  { term: 'Nha khoa Việt Smile', phonetic_hint: 'nha khoa Việt Xờ-mai' },
+].map((k, i) => ({ id: `kt-${i}`, ...k, source: 'tenant' as const }))
 
 export const DEFAULT_CONFIG: ReceptionistConfig = {
   agent_name: 'Linh',
@@ -251,10 +264,7 @@ export const DEFAULT_CONFIG: ReceptionistConfig = {
   identity_verification_rule: 'caller_id_date',
 
   escalation_targets: [],
-  escalation_window: 'always',
   escalation_triggers_custom: [],
-  after_hours_routine_behavior: 'log_callback',
-  callback_policy: 'Trong 30 phút đầu giờ làm việc',
   waiting_time_expectation: '',
 
   voice_selection: 'linh',
@@ -272,7 +282,7 @@ export const DEFAULT_CONFIG: ReceptionistConfig = {
   end_call_after_silence_enabled: true,
   end_call_after_n_nudges: 2,
   call_closing_script: 'Em chưa nghe rõ, em xin phép kết thúc. Anh/chị gọi lại giúp em ạ.',
-  keyterms: packKeyterms,
+  keyterms: exampleKeyterms,
 
   tenant_instructions: '',
   knowledge_files: [],
@@ -359,27 +369,21 @@ export const LABELS = {
   pricingShort: { range: 'Khoảng giá', exact: 'Giá chính xác', defer: 'Không báo giá' },
   payment: { cash: 'Tiền mặt', transfer: 'Chuyển khoản', card: 'Thẻ', momo: 'MoMo', zalopay: 'ZaloPay' },
   confirmation: { sms: 'SMS', zalo: 'Zalo', none: 'Không gửi' },
-  afterHours: {
-    log_callback: 'Ghi lời nhắn + hẹn gọi lại',
-    take_message: 'Chỉ ghi lời nhắn',
-    transfer: 'Thử chuyển máy, không được thì ghi lời nhắn',
-  },
-  /* A tile carries a name, not a sentence. The nuance the long labels hold is
-     said by the `Said` line under the grid instead, in her own words. */
-  afterHoursShort: {
-    log_callback: 'Hẹn gọi lại',
-    take_message: 'Ghi lời nhắn',
-    transfer: 'Thử nối máy',
-  },
+  /** Read on a row: when this person may be rung. */
   escalationWindow: {
-    always: 'Chuyển cả ngoài giờ',
+    always: 'Cả trong và ngoài giờ',
     business_hours: 'Chỉ trong giờ làm việc',
     after_hours: 'Chỉ ngoài giờ làm việc',
   },
   escalationWindowShort: {
-    always: 'Lúc nào cũng chuyển',
-    business_hours: 'Trong giờ làm việc',
+    always: 'Lúc nào cũng gọi',
+    business_hours: 'Trong giờ',
     after_hours: 'Ngoài giờ',
+  },
+  /** What she does when that person does not pick up. */
+  escalationFallback: {
+    callback: 'Hẹn gọi lại',
+    handle: 'Chủ động xử lý',
   },
   /** The four answers as a tile carries them: two or three words, on the card whose title already says "Bảo hiểm". */
   insuranceShort: {

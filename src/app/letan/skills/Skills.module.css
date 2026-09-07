@@ -6,117 +6,61 @@
  * blocks of time are ../Week.module.css, shared with Bác sĩ. What is left
  * here is three drawings that exist nowhere else:
  *
- *   - the ladder of numbers down the escalation list, which says "she tries
- *     them in this order" without a sentence saying it;
+ *   - the rung number in front of a person on the escalation list, which says
+ *     "she tries them in this order" without a sentence saying it;
  *   - the envelope, which is what a `Said` line is for a page whose output is
  *     an email rather than a spoken sentence;
  *   - the borrowed holiday lines, which read rather than edit because they
  *     belong to Giờ mở cửa.
  *
- * This file used to hold a subnav, a table of native time inputs and a rose
- * panel of red flags. All three are gone — the first because Kỹ năng now has
- * a hub like the other two tabs, the second because the week control replaced
- * it, and the third because a tinted callout inside a form is exactly what
- * drained blush of its meaning.
+ * This file used to hold a subnav, a table of native time inputs, a rose panel
+ * of red flags and a rack of «guillemet» tokens. All four are gone — Kỹ năng
+ * has a hub like the other two tabs, the week control replaced the time
+ * inputs, a tinted callout inside a form is exactly what drained blush of its
+ * meaning, and a variable is now a pill inside the field itself
+ * (`app/ui/TokenArea`).
  */
 
-/* ------------------------------------------------- chuyển máy · the ladder */
-
-.targets {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-  container: targets / inline-size;
-}
+/* ------------------------------------------------ chuyển máy · the rung */
 
 /*
- * A row is the rung number, the phone, the name, the delete. There is no
- * hairline between rows: the ladder line below *is* the separator, and it
- * carries the order as well, which a hairline cannot.
+ * The number in front of a person's row: she tries them from the top, and
+ * that is the whole reason the list has an order, so it is drawn rather than
+ * written. Same 28px circle `Bác sĩ` puts a monogram in, so the two staff
+ * lists read as the same kind of list.
+ *
+ * Every rung wears the same fill. The first one used to be the only solid one,
+ * on the reasoning that the eye should find it before it reads a digit — but
+ * a difference in weight reads as a difference in *kind*, and there is none:
+ * the second number is a number she rings, exactly like the first, just later.
+ * The digit already carries the order.
+ *
+ * It replaces a ladder — a rank column with a hairline running between the
+ * rungs — which worked while the numbers were a flat list of two fields. Once
+ * a number became a row that opens, the line would have had to jump a
+ * hundred-pixel editor to reach the rung below it.
  */
-.target {
-  position: relative;
-  display: grid;
-  grid-template-columns: 30px 180px minmax(0, 1fr) 32px;
-  gap: 10px;
-  align-items: center;
-  min-width: 0;
-}
-
-/*
- * The rung-to-rung line. It starts 3px under the circle — which sits at
- * 5–29px inside its grid row at both widths, because the row's height is the
- * compact field's either way — and runs past the row's bottom edge into the
- * gap, so the ladder reads as continuous however tall a row becomes.
- */
-.target:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  /* Centre of the 30px rank column. */
-  left: 15px;
-  top: 32px;
-  bottom: -10px;
-  width: 1px;
-  transform: translateX(-50%);
-  background: var(--border-hairline);
-  pointer-events: none;
-}
-
 .rank {
-  /* Centred in its 30px column, so the line below meets the circle's middle. */
-  justify-self: center;
-  width: 24px;
-  height: 24px;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: 1px solid var(--border-strong);
   display: inline-grid;
   place-items: center;
+  background: var(--terracotta);
+  --icon-accent: currentColor;
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
-  color: var(--ink-soft);
-}
-
-/* The one she rings first. Filled, so the eye finds it before it reads a digit. */
-.rankFirst {
-  background: var(--terracotta);
-  --icon-accent: currentColor;
-  border-color: var(--terracotta);
   color: var(--cream);
 }
 
-.targetName {
-  grid-column: 3;
-  grid-row: 1;
-}
-
-.targetDel {
-  grid-column: 4;
-  grid-row: 1;
-}
-
-/*
- * Beside the rail, and on a phone, a number and a name no longer fit on one
- * line. The name drops under them and keeps the ladder aligned, because the
- * rung is the one thing that must stay on its vertical.
- */
-@container targets (max-width: 439.98px) {
-  .target {
-    grid-template-columns: 30px minmax(0, 1fr) 32px;
-    row-gap: 8px;
-  }
-
-  .targetName {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .targetDel {
-    grid-column: 3;
-    grid-row: 1;
+/* On a phone the name and the number need the width more than the order does. */
+@container rows (max-width: 439.98px) {
+  .rank {
+    display: none;
   }
 }
 
@@ -193,25 +137,6 @@
   background: var(--surface-warm);
   color: var(--text-accent);
   font-weight: 500;
-}
-
-/* The tokens themselves, only inside "Sửa lời" where they are being typed. */
-.varChip {
-  appearance: none;
-  border: none;
-  background: var(--surface-warm);
-  border-radius: var(--radius-pill);
-  padding: 3px 11px;
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-accent);
-  cursor: pointer;
-}
-
-.varChip:hover {
-  background: var(--blush);
-  filter: brightness(0.97);
 }
 
 /* ------------------------------------------ đặt lịch · the borrowed days */

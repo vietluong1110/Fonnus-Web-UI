@@ -4,6 +4,8 @@ export { DateField, DateRangeField, TimeField, AnchoredPopup, useAnchoredPopup, 
 export type { SelectOption } from './Field'
 export { Radio, RadioGroup, Checkbox, Segmented, Switch } from './Choice'
 export { Chip, ChipButton, ChipInput } from './Chips'
+export { TokenArea } from './TokenArea'
+export type { TokenVar } from './TokenArea'
 export {
   Tabs,
   PlayButton,

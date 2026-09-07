@@ -192,6 +192,21 @@
   padding: 3px 2px;
 }
 
+/*
+ * Two selectors deep, and that is the whole point.
+ *
+ * `outline: none` in the rule above is specificity (0,1,0) and so is the global
+ * `:focus-visible` in tokens/base.css — a tie the global wins, because it is
+ * emitted last. So the box drew its own ring while the input inside it drew a
+ * second, square one two pixels out: a box inside a box, on the one control
+ * that already says "everything in here is yours". `.adderInput` was fixed this
+ * way and the boxed variant was missed.
+ */
+.boxedInput:focus,
+.boxedInput:focus-visible {
+  outline: none;
+}
+
 .boxedInput::placeholder {
   color: rgba(92, 82, 72, 0.6);
 }

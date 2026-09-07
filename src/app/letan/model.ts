@@ -182,18 +182,47 @@ export type BookingConfirmationChannel = 'sms' | 'zalo' | 'none'
  */
 export type IdentityVerificationRule = 'caller_id_date' | 'caller_id_date_name'
 
-/** A5 · `escalation_targets` — human numbers for live transfer (R1). */
+/**
+ * A5 · `escalation_targets` — human numbers for live transfer (R1).
+ *
+ * One row per person she can reach for, and everything about reaching them
+ * hangs off the row: the number, who they are, what makes her ring *them*,
+ * and what she does when they do not pick up. The page used to spread those
+ * four across four cards with one shared list of numbers underneath, which
+ * meant a clinic could not send the 21:00 calls to a different person from
+ * the 11:00 ones — the commonest thing a clinic actually wants.
+ *
+ * `role`, `window`, `triggers` and `fallback` are all `[ext]`; `triggers` is
+ * the per-person half of the catalogue's `escalation_triggers`, gathered back
+ * into `escalation_triggers_custom` on every write. See
+ * `docs/field-catalogue-mapping.md`.
+ */
 export interface EscalationTarget {
   id: string
   phone: string
   /** "chị Lan" — voiced as "Em nối máy với chị Lan ngay ạ." */
   name: string
+  /** [ext] "Quản lý phòng khám" — what she calls them to a caller. */
+  role: string
+  /** [ext] When this person may be rung at all. */
+  window: EscalationWindow
+  /** [ext] What makes her ring this person rather than another. */
+  triggers: string[]
+  /** [ext] What she does when the number does not answer. */
+  fallback: EscalationFallback
 }
 
-/** [ext] frame 20 — when the agent is allowed to try the transfer at all. */
+/** [ext] frame 20 — when the agent is allowed to try the transfer at all. Per person. */
 export type EscalationWindow = 'always' | 'business_hours' | 'after_hours'
 
-export type AfterHoursRoutineBehavior = 'log_callback' | 'take_message' | 'transfer'
+/**
+ * [ext] The transfer did not connect. Two answers, because there are only two
+ * honest ones: promise a call back, or carry on herself. A third that made a
+ * promise the clinic has to keep ("nhân viên gọi lại trong 30 phút") was
+ * taken out — a field that invites a clinic to over-promise is worse than no
+ * field.
+ */
+export type EscalationFallback = 'callback' | 'handle'
 
 /** A6 · voices are (gender × accent) pairs; picking one sets `voice_accent` too. */
 export type VoiceId = 'linh' | 'mai' | 'khang' | 'duc'
@@ -374,11 +403,12 @@ export interface ReceptionistConfig {
 
   /* ---- A5 · Escalation and human availability ---- */
   escalation_targets: EscalationTarget[] // R1
-  escalation_window: EscalationWindow // [ext]
-  /** TE additions on top of the SW base set in `system.ts`. */
+  /**
+   * TE additions on top of the SW base set in `system.ts`. Written *from* the
+   * rows above on every edit — the owner types a trigger on the person it
+   * belongs to, and this is the flat union the catalogue's column wants.
+   */
   escalation_triggers_custom: string[] // O
-  after_hours_routine_behavior: AfterHoursRoutineBehavior // R2
-  callback_policy: string // O
   waiting_time_expectation: string // O
 
   /* ---- A6 · Voice and persona ---- */
@@ -418,6 +448,12 @@ export interface ReceptionistConfig {
   practitioner_roster: Practitioner[] // O
 
   /* ---- B3 · Clinical safety and escalation ---- */
+  /**
+   * Written from `escalation_targets` on every edit: the first row that takes
+   * `Khẩn cấp y tế`. The on-call doctor used to be a second phone field on a
+   * card of its own, which meant typing a number in one of two places
+   * depending on what it was for.
+   */
   after_hours_emergency_target: { phone: string; name: string } // R2
   /** TE additions on top of the SW pack in `system.ts`; the pack cannot be removed. */
   emergency_red_flags_custom: string[] // O

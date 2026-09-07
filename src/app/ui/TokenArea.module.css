@@ -1,0 +1,194 @@
+/*
+ * The field that holds pills. Same skin as `.control` in Field.module.css —
+ * milk ground, 12px radius, the inset hairline that thickens to the focus
+ * ring — because it is a field, and one that holds a sentence with holes in
+ * it should not look like a different species from one that holds text.
+ */
+
+.shell {
+  position: relative;
+  min-width: 0;
+}
+
+.editor {
+  --ring: inset 0 0 0 1px var(--border-strong);
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--ring);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  line-height: 22px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  cursor: text;
+}
+
+.editor:hover {
+  --ring: inset 0 0 0 1px rgba(38, 31, 24, 0.36);
+}
+
+/*
+ * The ring is the focus mark. Without this the global `:focus-visible` rule in
+ * tokens/base.css draws a second outline inside it — the same box-inside-a-box
+ * every other control in the kit suppresses.
+ */
+.editor:focus,
+.editor:focus-visible {
+  outline: none;
+  --ring: inset 0 0 0 1.5px var(--focus-ring), 0 0 0 3px rgba(184, 92, 43, 0.13);
+}
+
+/* A subject line: one line, and what runs off the end scrolls rather than wraps. */
+.single {
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.single::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * The variable, as a word.
+ *
+ * Blush is speech everywhere else in the app, and this is the one other place
+ * it belongs: the pill is a stand-in for what the caller's own record will
+ * say, and it matches the tint the envelope above draws over the same words
+ * once they are filled in. Read the two together and "what a variable is" is
+ * answered without a sentence saying it.
+ */
+.token {
+  display: inline-block;
+  padding: 1px 9px;
+  margin: 0 1px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-warm);
+  color: var(--text-accent);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  vertical-align: 1px;
+  user-select: none;
+  cursor: default;
+}
+
+.placeholder {
+  position: absolute;
+  left: 14px;
+  top: 11px;
+  right: 14px;
+  font-size: var(--size-body-sm);
+  line-height: 22px;
+  color: rgba(92, 82, 72, 0.6);
+  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Nothing to look at: it exists so the pop-up has a rectangle at the caret to
+ * measure itself against. Fixed, so it takes the caret's own viewport
+ * coordinates and contributes no layout of its own.
+ */
+.anchor {
+  position: fixed;
+  width: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* ------------------------------------------------------------- the list */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.option {
+  appearance: none;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--size-body-sm);
+  line-height: 1.4;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.optionActive {
+  background: var(--action-ghost-hover);
+}
+
+.optionName {
+  flex: 0 0 auto;
+  font-weight: 500;
+}
+
+/* What it becomes on a real call. The list teaches by example, not by name. */
+.optionSample {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* -------------------------------------------------------- the pill rack */
+
+/*
+ * The same pills, outside the box, for the owner who never discovers `@`.
+ * They are controls rather than content, so they are solid: dashed means
+ * "content not yet filled in" and belongs to empty states and suggestions.
+ */
+.inserts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.insertsLead {
+  font-size: 12px;
+  line-height: 22px;
+  color: var(--ink-soft);
+  margin-right: 2px;
+}
+
+.insert {
+  appearance: none;
+  border: none;
+  background: var(--surface-warm);
+  border-radius: var(--radius-pill);
+  padding: 3px 11px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-accent);
+  cursor: pointer;
+  transition: filter var(--duration-fast) var(--ease-out);
+}
+
+.insert:hover {
+  filter: brightness(0.96);
+}

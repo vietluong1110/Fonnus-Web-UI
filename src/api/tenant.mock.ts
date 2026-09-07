@@ -13,6 +13,8 @@
 import { DEFAULT_CONFIG } from '../app/letan/defaults'
 import type { IndustryVertical, KnowledgeFile, ReceptionistConfig } from '../app/letan/model'
 import { CATALOGUE_VERSION, newId } from '../app/letan/model'
+import type { EscalationTarget, EscalationWindow } from '../app/letan/model'
+import { EMERGENCY_TRIGGER, TRANSFER_TRIGGERS } from '../app/letan/system'
 import type { TenantApi, TenantConfigEnvelope } from './contracts'
 import { ApiError } from './errors'
 import { delay, maybeFail, storage } from './mock-support'
@@ -22,6 +24,57 @@ const MAX_BYTES = 20 * 1024 * 1024
 
 let version = 1
 
+/**
+ * A record saved before a field changed *shape*.
+ *
+ * The merge below covers a key that did not exist yet; it cannot cover one
+ * whose contents moved. Two did:
+ *
+ *   - an escalation target grew a role, its own hours, its own triggers and a
+ *     fallback when `Chuyển máy` became one row per person. A row saved
+ *     without them reaches the page as `.triggers.includes()` on `undefined`.
+ *     The page-level window and the separate on-call doctor moved onto rows,
+ *     so both are carried across rather than dropped.
+ *   - `keyterms` no longer holds rows the owner cannot see: the industry pack
+ *     belongs to the recogniser, and a word derived from another page is now
+ *     simply a word. Anything already spelled becomes an ordinary row the
+ *     owner can rename.
+ */
+function migrate(saved: Partial<ReceptionistConfig> & { escalation_window?: EscalationWindow }): Partial<ReceptionistConfig> {
+  const hours = saved.escalation_window ?? 'always'
+  const targets: EscalationTarget[] = (saved.escalation_targets ?? []).map((row) => {
+    // Typed as whole because that is what it is *now*; on disk it may predate
+    // any of the four fields below.
+    const t = row as Partial<EscalationTarget> & Pick<EscalationTarget, 'id' | 'phone' | 'name'>
+    return {
+      id: t.id,
+      phone: t.phone,
+      name: t.name,
+      role: t.role ?? '',
+      window: t.window ?? hours,
+      triggers: t.triggers ?? [TRANSFER_TRIGGERS[0]],
+      fallback: t.fallback ?? 'callback',
+    }
+  })
+  const doctor = saved.after_hours_emergency_target
+  if (doctor?.phone.trim() && !targets.some((t) => t.triggers.includes(EMERGENCY_TRIGGER))) {
+    targets.push({
+      id: newId('esc'),
+      phone: doctor.phone,
+      name: doctor.name,
+      role: 'Bác sĩ trực',
+      window: 'after_hours',
+      triggers: [EMERGENCY_TRIGGER],
+      fallback: 'callback',
+    })
+  }
+  return {
+    ...saved,
+    ...(saved.escalation_targets ? { escalation_targets: targets } : {}),
+    ...(saved.keyterms ? { keyterms: saved.keyterms.filter((k) => k.source !== 'pack').map((k) => ({ ...k, source: 'tenant' as const })) } : {}),
+  }
+}
+
 function load(): ReceptionistConfig {
   const raw = storage.read(CONFIG_KEY)
   if (!raw) return DEFAULT_CONFIG
@@ -29,7 +82,7 @@ function load(): ReceptionistConfig {
     const saved = JSON.parse(raw) as Partial<ReceptionistConfig>
     // Merge over the defaults so a field added since this record was saved
     // still gets its default rather than arriving undefined.
-    return { ...DEFAULT_CONFIG, ...saved }
+    return { ...DEFAULT_CONFIG, ...migrate(saved) }
   } catch {
     return DEFAULT_CONFIG
   }
