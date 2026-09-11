@@ -2,7 +2,6 @@ import type { IconName } from '../../../design-system'
 import { appHref } from '../../../hooks/useRoute'
 import { LABELS } from '../defaults'
 import { useConfig } from '../store'
-import { ui } from '../../ui'
 import { HubFoot, HubRow, sectionStyles as styles } from '../SectionFrame'
 
 /**
@@ -71,7 +70,7 @@ export function ProfileTab() {
     <div className={styles.hub}>
       <div className={styles.rows}>
         {rows.map((r) => (
-          <HubRow key={r.segment} href={appHref('le-tan', 'ho-so', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
+          <HubRow key={r.segment} section={r.segment} href={appHref('le-tan', 'ho-so', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
         ))}
       </div>
 
@@ -79,10 +78,6 @@ export function ProfileTab() {
         Những gì {agent} <em>biết</em> về phòng khám — giá, giờ mở cửa, bác sĩ — nằm ở tab{' '}
         <a href={appHref('le-tan', 'kien-thuc')}>Kiến thức</a>.
       </HubFoot>
-
-      <span className={ui.hint}>
-        Chưa biết bắt đầu từ đâu? Trả lời Fonnus ở khung trợ lý — mỗi câu trả lời điền thẳng vào một mục.
-      </span>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect, useState } from 'react'
+import { useState } from 'react'
 import type { CSSProperties, ReactNode, Ref } from 'react'
 import { Button, Icon, Pattern } from '../../design-system'
 import type { IconName } from '../../design-system'
@@ -174,23 +174,10 @@ export function Slider({
 
 /**
  * The bottom edge of a section page is one sticky stack, and the save bar is
- * its anchor. Whatever else wants that edge while there are unsaved changes
- * — the assistant's button, on a width where the page has no rail column to
- * keep the assistant in — is handed in as `above`, and rides up with the bar
- * instead of measuring it. `onPresence` tells the page when the bar is on
- * screen, so the floating assistant can stand down while it is.
+ * its anchor. Nothing measures the bar — its height changes as the message
+ * wraps — so anything that ever wants that edge again belongs inside
+ * `.saveStack`, not beside it at a hard-coded offset.
  */
-interface BottomStack {
-  above: ReactNode
-  onPresence: (shown: boolean) => void
-}
-
-const BottomStackContext = createContext<BottomStack | null>(null)
-
-export function BottomStackProvider({ above, onPresence, children }: BottomStack & { children: ReactNode }) {
-  return <BottomStackContext.Provider value={{ above, onPresence }}>{children}</BottomStackContext.Provider>
-}
-
 export function SaveBar({
   dirty,
   saving,
@@ -213,20 +200,9 @@ export function SaveBar({
   label?: ReactNode
   sub?: ReactNode
 }) {
-  const stack = useContext(BottomStackContext)
-  const onPresence = stack?.onPresence
-  // Layout effect, not a passive one: the page takes the floating assistant
-  // down in response, and that has to land in the same paint as the bar.
-  useLayoutEffect(() => {
-    if (!onPresence) return
-    onPresence(dirty)
-    return () => onPresence(false)
-  }, [dirty, onPresence])
-
   if (!dirty) return null
   return (
     <div className={styles.saveStack}>
-      {stack?.above}
       <div className={styles.saveBar} role="region" aria-label="Lưu thay đổi">
         {/* Night surfaces take the dots only — arcs read too loud on brown. */}
         <Pattern name="night-dots" style={{ zIndex: -1 }} />

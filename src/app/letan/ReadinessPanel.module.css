@@ -1,0 +1,657 @@
+/*
+ * The readiness panel — the right-hand column of every Lễ tân hub.
+ *
+ * Three shapes, one component:
+ *
+ *   rail    beside the hub rows (380px): the ring with each tab named beside
+ *           its arc, the levels under it, then the next jobs.
+ *   band    stacked above the rows on a tablet (container ≥ 560px): the ring
+ *           and levels on the left, the jobs on the right.
+ *   phone   (< 640px viewport): a smaller ring with the tabs as a list beside
+ *           it, and only the first job — the rows are right underneath.
+ *
+ * The container is the wrapper, never the milk panel: `container-type` on a
+ * card would make it a containing block for fixed pop-ups (ui-ux-principles
+ * §8). Nothing inside pops up, but the rule is kept so the next person does
+ * not have to work out that it is safe.
+ *
+ * Colour: the meter is one hue. The unfilled part of every arc is a paler
+ * step of the same terracotta (`--meter-track`), not grey, so the ring reads
+ * as one object whose state is visible all the way round.
+ */
+
+.wrap {
+  container: readiness / inline-size;
+  min-width: 0;
+}
+
+.panel {
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Same head as the try-out panel on a sub-page, so the two rails match. */
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15.5px;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+}
+
+.meta {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------------------------ rings */
+
+.ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.ring > svg {
+  position: absolute;
+  inset: 0;
+}
+
+.ringInner {
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--text-accent);
+}
+
+.track {
+  fill: none;
+  stroke: var(--meter-track);
+}
+
+.fill {
+  fill: none;
+  stroke: var(--terracotta);
+}
+
+.dashed {
+  fill: none;
+  stroke: var(--border-dashed);
+  stroke-dasharray: 2.5 3;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 28px 16px 20px;
+}
+
+.ringWrap,
+.ringWrapSmall {
+  position: relative;
+  width: 100%;
+}
+
+.ringWrapSmall {
+  width: 112px;
+  flex: 0 0 auto;
+}
+
+/* Room under the ring for the label of the arc at the foot. */
+.ringWrap {
+  padding-bottom: 34px;
+}
+
+.ringBox {
+  position: relative;
+  width: 100%;
+}
+
+.ringSvg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ringLabel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.ringLabel .num {
+  font-size: 11.5px;
+  font-weight: 400;
+}
+
+.ringLabelOn {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.labelRight {
+  transform: translate(0, -50%);
+  align-items: flex-start;
+}
+
+.labelLeft {
+  transform: translate(-100%, -50%);
+  align-items: flex-end;
+}
+
+.labelBelow {
+  transform: translate(-50%, 0);
+  align-items: center;
+}
+
+/* The number in the hole: the one figure the page leads with. */
+.hole {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 176px;
+  height: 176px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.ringWrapSmall .hole {
+  width: 112px;
+  height: 112px;
+}
+
+.percent {
+  font-family: var(--font-num);
+  font-weight: 600;
+  font-size: 48px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.percentSmall {
+  font-size: 32px;
+}
+
+.percentSign {
+  font-size: 0.46em;
+  margin-left: 2px;
+  letter-spacing: 0;
+}
+
+.holeLabel {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+/* ----------------------------------------------------------------- levels */
+
+.levels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.level {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+/* The line from the previous level's dot to this one, behind both. */
+.levelLine {
+  position: absolute;
+  top: 8px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--meter-track);
+}
+
+.levelLineOn {
+  background: var(--terracotta);
+}
+
+/* Above every line: the line into the next level is drawn after this dot,
+   and without it the next level's line painted over the right half of the check. */
+.levelDot {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-card);
+}
+
+.level_done .levelDot {
+  background: var(--terracotta);
+  color: var(--cream);
+}
+
+.level_now .levelDot {
+  box-shadow: inset 0 0 0 2px var(--terracotta);
+}
+
+.level_now .levelDot::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+
+/* Not reached yet: dashed, the app's mark for "not filled in". */
+.level_next .levelDot {
+  border: 1.5px dashed var(--border-dashed);
+}
+
+.levelLabel {
+  font-size: 11.5px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.level_now .levelLabel {
+  font-weight: 600;
+}
+
+.level_next .levelLabel {
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------------- jobs */
+
+.jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.job {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 4px;
+  margin: 0 -4px;
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.job:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.jobIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: var(--text-accent);
+}
+
+.jobStrong .jobIcon {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-page);
+}
+
+.jobText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.jobTitle {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.jobStrong .jobTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.jobMeta {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+/* What a job adds to the number. A fact about the job, not a reward. */
+.gain {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  background: var(--surface-card);
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-accent);
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  --icon-accent: currentColor;
+  color: var(--text-on-accent);
+  font-size: var(--size-ui);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.go:hover {
+  background: var(--action-primary-hover);
+  color: var(--text-on-accent);
+  text-decoration: none;
+}
+
+/* The rest of the jobs, behind one closed row that says how many. */
+.more {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-hairline);
+  margin-top: 2px;
+}
+
+.moreToggle {
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: calc(100% + 8px);
+  margin: 4px -4px 0;
+  padding: 8px 4px;
+  border-radius: var(--radius-md);
+  font-size: var(--size-ui);
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.moreToggle:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+}
+
+.moreChevron {
+  display: inline-flex;
+  transition: transform var(--duration-base) var(--ease-arc);
+}
+
+.moreChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* 0fr -> 1fr: the list grows to its own height with nothing measured. */
+.moreBody {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-arc);
+}
+
+.moreBodyOpen {
+  grid-template-rows: 1fr;
+}
+
+.moreList {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.allDone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.allDoneIcon {
+  display: inline-flex;
+  color: var(--text-accent);
+  flex: 0 0 auto;
+}
+
+/* -------------------------------------------------------------- phone bits */
+
+.compact {
+  display: none;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 16px 14px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+}
+
+.legendLevel {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.legendLevel b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.legendRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.legendRow .num {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.legendRowOn {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ----------------------------------------------------------- tablet band */
+
+@container readiness (min-width: 560px) {
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+
+  .stage {
+    border-right: 1px solid var(--border-hairline);
+    padding: 26px 20px 20px;
+  }
+
+  .jobsCol .jobs {
+    border-top: none;
+    padding-top: 18px;
+  }
+}
+
+/* ------------------------------------------------------------------ phone */
+
+@media (max-width: 639.98px) {
+  .stage {
+    display: none;
+  }
+
+  .compact {
+    display: flex;
+  }
+}
+
+/* ------------------------------------------------------ sub-page section card */
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cardPct {
+  font-family: var(--font-num);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.cardNext {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.cardNextIcon {
+  display: inline-flex;
+  color: var(--text-accent);
+  flex: 0 0 auto;
+}
+
+.cardNextText {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job,
+  .go,
+  .moreToggle,
+  .moreChevron,
+  .moreBody {
+    transition: none;
+  }
+}

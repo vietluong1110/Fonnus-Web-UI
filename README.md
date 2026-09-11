@@ -144,7 +144,7 @@ sub-tabs, all under `#/app/le-tan/`:
 | Path                       | What it configures                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------- |
 | `ho-so`                    | Who she is: name, voice (4 voices = gender × accent), speed, style, English, greeting, steering text, turn-taking |
-| `kien-thuc`                | Hub: seven rows in two groups, each a one-line summary of what is set, beside the Fonnus assistant. Files and websites go to the assistant, which reads them into the sections |
+| `kien-thuc`                | Hub: seven rows in two groups, each a one-line summary of what is set, beside the readiness panel |
 | `kien-thuc/dia-diem`       | Business identity + address (R1), directions / parking / links / VAT, branches               |
 | `kien-thuc/gio-mo-cua`     | Weekly hours (R1) as shifts on a scrolling week calendar — drag to add, move or resize, click to type; the gap between shifts is the break — live "open now", and holiday exceptions pre-seeded with Vietnamese holidays incl. Tết (R2) — one page, one confirmation |
 | `kien-thuc/dich-vu`        | Price list: 12 dental template rows under renamable, collapsible group cards (drag rows between groups), one row open for editing at a time; combo packages, pricing policy, not-offered, payments, promotions |
@@ -169,8 +169,8 @@ read-only with a "Hệ thống" tag.
 **State and the backend seam.** `store.tsx` holds one `ReceptionistConfig`,
 loaded through `api.tenant.getConfig()`. Every section edits a draft
 (`useDraft(keys, label)`) and commits through `saveSection(patch)` — one PATCH
-per section, carrying only that section's catalogue keys. The question rail and
-the setup assistant write through `update()` immediately.
+per section, carrying only that section's catalogue keys. `update()` writes a
+single key immediately, for controls that are not part of a section's draft.
 
 The save is optimistic and rolls back per key on failure, so a failure in one
 section cannot undo a concurrent write from another or from the rail. No
@@ -178,16 +178,22 @@ storage key appears in this file: persistence belongs to the mock, because a
 localStorage mirror that outlives the server's truth is a stale cache. See
 "The backend seam" below.
 
-**Readiness** (`readiness.ts`) applies the catalogue's gates: R1 = the agent
-can pick up, say the address and hours, and hand off; R2 = it can quote, book,
-and is safe with real patients. Each check deep-links to the page that fixes
-it. `isOpenNow` derives the catalogue's `is_open_now` from hours, breaks and
-holidays for the live indicator.
+**Readiness** (`readiness.ts`, drawn by `ReadinessPanel.tsx`) measures the record
+the way the owner sees it: thirteen sections under three tabs, each a short list
+of checks with an effort estimate. A section's progress is the mean of its
+checks, and the one number is the mean of all thirteen, so the hub's ring, split
+by tab, adds up to the number in its hole. The catalogue's gates decide the three
+levels: R1 = *Nghe máy được* (pick up, say the address and hours, hand off), R2 =
+*Trả lời tốt* (quote, book, safe with real patients), everything = *Lành nghề*.
+The panel lists the jobs left for the next level, best value per minute first,
+each with its time and what it adds; every job links to the page that fixes it.
+Hub rows wear the same ring round their icon, and each sub-page has the section's
+own slice above the try-out call. `isOpenNow` derives the catalogue's
+`is_open_now` from hours, breaks and holidays for the live indicator.
 
-**"Linh hỏi — bạn trả lời"** (`questions.ts`, `assistant/queue.ts`) turns the missing
-fields into one question at a time with quick-reply chips and a free-text
-line; every answer writes the field it belongs to, so the forms and the meter
-move at once. Skips are per browser session.
+The setup assistant ("Linh hỏi — bạn trả lời") was removed from the UI in Sept
+2026. `questions.ts` and the `assistant` API group remain, used only by the
+mock, for when it comes back as its own project.
 
 **"Gọi thử"** (`letan/tryout/TryPanel.tsx`, `api/receptionist.*`) is the rail beside every
 Lễ tân form: a call you can hold. It opens with the compliance line and the greeting, then

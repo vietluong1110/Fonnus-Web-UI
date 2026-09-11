@@ -21,8 +21,9 @@ import styles from './Knowledge.module.css'
  * Seven ways in, in two groups. Group one is what callers ask; group two is
  * what makes her answers better. Same row vocabulary as the Hồ sơ hub, and
  * the same rule: nothing is "bắt buộc" — an empty row is dashed, and that is
- * the whole nudge. Files and websites have no row of their own: they go to
- * the assistant beside the hub, which reads them into these sections.
+ * the whole nudge. Files and websites have no row of their own: uploads were
+ * the setup assistant's job, and went with it (Sept 2026). The record keeps
+ * `knowledge_files` / `website_scrape_url` for when they come back.
  */
 
 interface Row {
@@ -90,7 +91,7 @@ export function KnowledgeHub() {
       title: 'BHYT, bảo hiểm và khám ban đầu',
       sub:
         insurance === 'unset'
-          ? 'Chưa trả lời — Fonnus đang hỏi bạn câu này ở khung bên'
+          ? `Chưa trả lời — ${agent} chưa biết có nhận BHYT không`
           : [LABELS.insurance[insurance], fee == null ? null : `khám ban đầu ${fee === 0 ? 'miễn phí' : `${formatVnd(fee)} đ`}`, config.facility_capabilities.length ? `${config.facility_capabilities.length} thiết bị` : null]
               .filter(Boolean)
               .join(' · '),
@@ -124,7 +125,7 @@ export function KnowledgeHub() {
     },
   ]
 
-  const row = (r: Row) => <HubRow key={r.segment} href={appHref('le-tan', 'kien-thuc', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
+  const row = (r: Row) => <HubRow key={r.segment} section={r.segment} href={appHref('le-tan', 'kien-thuc', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
 
   return (
     <div className={sectionStyles.hub}>

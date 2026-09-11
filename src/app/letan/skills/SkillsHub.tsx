@@ -71,7 +71,7 @@ export function SkillsHub() {
     <div className={styles.hub}>
       <div className={styles.rows}>
         {rows.map((r) => (
-          <HubRow key={r.segment} href={appHref('le-tan', 'ky-nang', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
+          <HubRow key={r.segment} section={r.segment} href={appHref('le-tan', 'ky-nang', r.segment)} icon={r.icon} title={r.title} sub={r.sub} empty={r.empty} />
         ))}
       </div>
 

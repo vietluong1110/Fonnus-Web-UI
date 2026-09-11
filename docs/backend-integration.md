@@ -132,7 +132,7 @@ Each row is independently shippable and independently testable.
 | 4 | `auth` | the OTP routes | Needs a real SMS provider, so it is usually gated on something outside this repo. |
 | 5 | `tenant` | knowledge-file upload | Multipart, plus whatever indexes the file. |
 | 6 | `voice` | `POST /tts/preview` | Cheap, visible, and it makes ten play buttons real. |
-| 7 | `assistant` | the chat stream | Needs the model. Wire format not agreed — talk first. |
+| 7 | `assistant` | the chat stream | Needs the model. Wire format not agreed — talk first. **No UI consumes it since Sept 2026** — the setup assistant was removed; the group stays so it can come back as its own project. |
 | 8 | `voice` | the session | Needs the pipeline **and** the cost controls. See open-questions Q21. |
 
 Tick them off in this table as you go.

@@ -41,9 +41,14 @@ Nothing else. In particular it is **not** an add button. It used to be, on five
 different pages, and the result was that half the dashed boxes on a screen were things
 you read and half were things you pressed to make an empty row.
 
-**Blush (`--surface-warm`) means speech** — the assistant's panel, and the
-receptionist's own line inside a call preview. Never a callout, never a badge inside a
-form.
+**Blush (`--surface-warm`) means speech** — the receptionist's own line inside a call
+preview, and a merge-tag pill standing for words the mailer will say. Never a callout,
+never a badge inside a form.
+
+**The orb means "talk to her".** It is the call button in the header and the face of the
+try-out panel, and it appears nowhere else — not as decoration, not inside a meter. A
+readiness ring once held the orb in its hole; it looked pressable, and it repeated the
+try-out orb one click away on the sub-page.
 
 **Status is a fact about the clinic, never an obligation.** A row says what is currently
 set — `2 số · Linh gọi chị Lan trước` — and a row with nothing in it says what she
@@ -404,15 +409,49 @@ Traps that have each cost a session:
   message naming the wrong module entirely. The head moved into `SectionFrame`, beside
   the frame that uses it.
 - The bottom edge is one sticky stack anchored by the save bar. Anything else wanting
-  that edge goes through `BottomStackProvider`. Never a hard-coded offset, and never
-  measure the bar — its height changes as its message wraps.
+  that edge goes inside `.saveStack`. Never a hard-coded offset, and never measure the
+  bar — its height changes as its message wraps.
 
 > **Check:** at 375px — does the page scroll sideways? Is any action off the card? Both
 > are measurable; `document.documentElement.scrollWidth > innerWidth` answers the first.
 
 ---
 
-## 9. Copy
+## 9. The hub's rail measures; the sub-page's rail talks
+
+A hub page is rows beside `ReadinessPanel`; a sub-page is a form beside the try-out call,
+with the section's slice of the same panel (`SectionReadinessCard`) above it. Same 380px
+column, same gutter, so the two kinds of page share one geometry.
+
+- **One number, one hue.** The panel leads with a single percentage in the hole of a
+  hollow ring. The ring is cut into the three tabs, each filled to its own progress, so
+  the breakdown *is* the ring and the parts add up to the number. Every unfilled arc is
+  `--meter-track`, a paler step of the same terracotta — never grey.
+- **Levels come from the gates, not from the percentage.** *Nghe máy được* is every R1
+  check, *Trả lời tốt* every R2 check, *Lành nghề* everything. A level is a promise about
+  what she can do, so it cannot be reached by filling nice-to-haves. The gates still never
+  appear on a field (§1).
+- **Only the jobs for the next level, with their price.** "Còn 2 việc để lên …", best value
+  per minute first, each with how long it takes and what it adds (`+4%`). Past halfway,
+  count what is left, not what is done. One prominent job and a button, and the rest
+  behind one closed row, `Xem 3 việc còn lại`. Two loose jobs under the button read as a
+  second list that did not add up to the count above it.
+- **A meter moves; it never jumps.** The ring's arcs, the number in its hole, the row
+  rings and the sub-page card all rise to a new value over ~900ms on the arc ease. Each
+  place remembers what *it* last showed, so an owner who saves on a sub-page and goes
+  back sees the hub rise from where they left it, even though the save landed first.
+  Reduced motion jumps; a timer floor lands the value when frames are not running.
+- **The row and the panel are the same measurement.** A hub row's icon sits in the ring
+  the panel is drawn with; an empty row says what filling it adds. Once the number exists
+  in two places they must never disagree, which is why both read `computeReadiness`.
+- **A gain is a fact, not a reward.** No confetti, no badges, no points that buy nothing.
+
+> **Check:** does the orb appear anywhere that does not start a call? Does any meter
+> track use grey? Do the row rings, the tab labels and the number agree?
+
+---
+
+## 10. Copy
 
 All of it Vietnamese, all of it owned by the frontend. Code, comments and this document
 are English.
@@ -469,6 +508,20 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-11 — the assistant goes, the rail measures.** The setup assistant cost more to
+  build than it saved, and removing it left a 380px hole on every hub. Three layouts were
+  tried on a canvas; the owner picked a readiness rail, then rejected two things about it:
+  the orb in the ring's hole (the orb means "call", and it repeated the sub-page's try-out
+  orb), and a follow-up that turned the panel into a lifecycle of states after 100%. What
+  shipped is a hollow ring split by tab with the number in the hole, three levels tied to
+  the R1/R2 gates, and the next jobs with time and gain. `readiness.ts` was rewritten from
+  a flat list of gate checks into thirteen sections, because the ring, the rows and the
+  sub-page card all had to show the same number. Second round, same day: the level line was drawn after the previous dot and cut
+  through its check (dots now sit at `z-index: 1`), and the job list became one offer plus
+  a closed `Xem N việc còn lại`. One trap: `.ring svg { position:
+  absolute }` also caught the icon *inside* the ring and threw it into the corner — scope
+  it to `.ring > svg`. → §1, §9.
 
 - **2026-09-07 (sixth round — three notes on Chuyển máy)** — All three were the owner
   seeing the seams. `Ngoài giờ, cuộc gọi thường` was cut along with its catalogue field:

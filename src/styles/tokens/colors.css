@@ -58,6 +58,8 @@
 --action-secondary:var(--milk);
 --action-secondary-hover:#FBF3E4;
 --action-ghost-hover:rgba(184,92,43,.08);
+/* The unfilled part of a meter: a paler step of the same terracotta, never grey. */
+--meter-track:rgba(184,92,43,.14);
 --focus-ring:var(--terracotta);
 /* The one terracotta part of every icon, shape and pattern (see design-system/icons.ts).
    Night surfaces switch it to --terracotta-night; a terracotta surface sets it to currentColor. */
@@ -88,6 +90,7 @@
 --action-secondary:var(--night-surface);
 --action-secondary-hover:#372D22;
 --action-ghost-hover:rgba(224,138,80,.12);
+--meter-track:rgba(224,138,80,.18);
 --icon-accent:var(--terracotta-night);
 --chart-1:var(--terracotta-night);
 --chart-2:var(--lemongrass-night);

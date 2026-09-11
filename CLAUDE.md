@@ -51,8 +51,9 @@ Code, comments and documentation are in English.
 
 ## Network access goes through `src/api/`
 
-No component calls `fetch`. Shared state reaches the API through one of three providers —
-`SessionProvider`, `ConfigProvider`, `SetupChatProvider`.
+No component calls `fetch`. Shared state reaches the API through one of two providers —
+`SessionProvider` and `ConfigProvider`. (The `assistant` API group still exists for the
+backend, but nothing in the UI uses it since the setup assistant was removed in Sept 2026.)
 
 The one exception: a **one-shot form submission** with no shared result may call
 `api.*` directly with local `busy` / `error` state. The test is *does more than one component
@@ -128,13 +129,10 @@ npm run typecheck
   carry the reset — copy it with the pattern.
 - The bottom edge of a section page is one sticky stack, anchored by the save bar
   (`.saveStack` in `Bits.module.css`). On a phone it clears the tab bar by reading
-  `--tabbar-h` (published by `AppShell.module.css`). Anything else that wants that
-  edge while there are unsaved changes — the assistant's button — is handed to the
-  bar through `BottomStackProvider` and rides above it. On a wide page the assistant
-  window stands at the foot of the rail column instead, sticky at the same 16px as
-  the bar, so the two share a bottom edge. Never pin something to the bottom with a
-  hard-coded offset, and never measure the bar — its height changes as the message
-  wraps.
+  `--tabbar-h` (published by `AppShell.module.css`). Anything that ever wants that
+  edge again goes *inside* `.saveStack`, not beside it. Never pin something to the
+  bottom with a hard-coded offset, and never measure the bar — its height changes as
+  the message wraps.
 - `html { scrollbar-gutter: stable }` in `global.css`. A hub page fits the viewport
   and a section page does not, so without it the scrollbar appears on one and not the
   other and the centred content column shifts 7–8px between them. It looked like the
@@ -145,9 +143,13 @@ npm run typecheck
   are three-line wrappers over it; the hub's own version of the same geometry is
   `.withRail` in `LeTanPage.module.css` — change the two together. A milk panel beside
   milk cards is correct; the rule is what does the work.
-- Blush (`--surface-warm`) means **speech**: the Fonnus assistant panel, and the
-  receptionist's own line inside a call preview. Never a callout or a badge inside a
-  form — that is what drained the tint of meaning last time.
+- Blush (`--surface-warm`) means **speech**: the receptionist's own line inside a call
+  preview. Never a callout or a badge inside a form — that is what drained the tint
+  of meaning last time.
+- **The orb means "talk to her", and nothing else.** It is the header's call button and
+  the try-out panel's face. It is not decoration and not a progress indicator: inside
+  a meter it looks pressable and repeats the thing one click away. The hub's readiness
+  panel (`ReadinessPanel.tsx`) draws a ring with the number in the hole instead.
 - `design-reference/` is an archive. Nothing imports it and nothing builds it — with one
   exception: `ui-ux-principles.md`, which is a living document and is meant to be edited.
 
