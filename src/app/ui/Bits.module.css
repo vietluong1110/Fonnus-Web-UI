@@ -235,15 +235,11 @@
 
 /*
  * The bottom edge of a section page is one sticky stack, and the save bar is
- * its anchor. Anything else that wants that edge while there are unsaved
- * changes — the assistant's button, on a width where the page has no rail
- * column to keep the assistant in — comes in through `BottomStackProvider`
- * and sits above the bar's right corner, rising with it. Nothing measures
- * the bar: its height changes with how the message wraps.
+ * its anchor. Nothing measures the bar: its height changes with how the
+ * message wraps.
  *
  * `margin-top: auto` is for the stretched form column of a wide page: the
- * stack rests on the column's floor, level with the assistant window at the
- * foot of the rail beside it, rather than hanging under the last card.
+ * stack rests on the column's floor rather than hanging under the last card.
  */
 .saveStack {
   position: sticky;
@@ -292,8 +288,8 @@
 
 /*
  * Phone. The tab bar owns the bottom edge (`--tabbar-h`, published by the
- * shell) and the stack sits clear of it; the assistant's button is inside the
- * stack, so nothing here is reached by guessing at a height.
+ * shell) and the stack sits clear of it, so nothing here is reached by
+ * guessing at a height.
  *
  * The bar itself stops being one row: "Bạn có thay đổi chưa lưu" plus a
  * subtitle plus two buttons on a 358px line wraps into four ragged lines with

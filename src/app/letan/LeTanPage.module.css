@@ -186,15 +186,14 @@
 /* ------------------------------------------------------------- tab layout */
 
 /*
- * A hub page beside the setup assistant. The rail is a fixed 380px so the
- * conversation keeps a comfortable measure whatever the window does, and the
- * hub column takes what is left.
+ * A hub page beside its readiness panel (ReadinessPanel). The rail is a
+ * fixed 380px — the same column the try-out call takes on a sub-page, so the
+ * two kinds of page share one geometry — and the hub column takes the rest.
  *
- * The two sides are different *kinds* of thing — a list of the clinic's own
- * settings, and a tool that talks — so they are separated the way a copilot
- * panel is separated everywhere else: a rule down the gutter, and a ground of
- * its own on the panel (see SetupChat.module.css). Cards alone were not
- * enough; both sides were milk on paper and read as one field of cards.
+ * The two sides are different kinds of thing — the clinic's own settings,
+ * and a measurement of them — so they are separated by the gutter: a rule
+ * down the middle of a 40px gap, the same as a sub-page. Both are milk
+ * panels; the rule does the separating, not a fill.
  */
 .withRail {
   position: relative;
@@ -220,14 +219,15 @@
   pointer-events: none;
 }
 
-/* Narrow: one column, and the assistant goes on top — it is the fastest way
-   through setup, so it should not be something you scroll to find. */
+/* Narrow: one column, and the panel goes on top — it says what to do next,
+   so it should not be something you scroll past the rows to find. It lays
+   itself out as a band at this width (a container query in its own sheet). */
 @media (max-width: 1180.98px) {
   .withRail {
     display: flex;
     flex-direction: column;
     /* The 40px above is the width of a gutter with a rule down it. Stacked
-       there is no gutter, and 40px of blank paper between the assistant and
+       there is no gutter, and 40px of blank paper between the panel and
        the sections reads as two unrelated pages. */
     gap: 20px;
     /*

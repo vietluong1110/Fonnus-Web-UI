@@ -13,7 +13,6 @@ export {
   Disclosure,
   Slider,
   SaveBar,
-  BottomStackProvider,
   EmptyState,
   AddButton,
   DeleteButton,
