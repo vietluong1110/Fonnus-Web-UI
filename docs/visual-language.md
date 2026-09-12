@@ -180,6 +180,46 @@ Rules:
   which surface you are on.
 - **Night takes the dots only.** Arcs read too loud on brown.
 
+## Charts
+
+A chart is drawn in the same two elements as everything else, and in **one hue**.
+
+`--chart-step-1` … `--chart-step-5` (tokens/colors.css) are terracotta from a
+pale wash to the full colour. Every figure the product shows is a *magnitude* —
+how many calls, how long, how much of the whole — so the ramp is sequential, and
+which bar is which comes from **position plus a label that is always on screen**,
+never from hue.
+
+This is not taste; it was measured. The palette's three `--chart-*` accents do
+not separate as a categorical set: terracotta against lemongrass is ΔE 5.4 for a
+deutan reader where 8 is the floor, and 13.9 for normal vision where 15 is. A
+clinic owner with the commonest form of colour blindness cannot tell two such
+bars apart, and a third of them would read as grey. `--chart-1/2/3` stay for what
+they are good for — a single state dot, one lone figure — and never for two
+series of one chart.
+
+What follows from the ramp:
+
+- **The unfilled part of anything is a paler step of the same hue, never grey.**
+  Already the rule for meters (`--meter-track`); a bar's track is the same.
+- **Two touching marks are separated by 2px of the card showing through**, not by
+  a stroke around them. A stroke is ink that is not data.
+- **Bars cap at 24px** and round only at the data end; the leftover in the slot
+  is air.
+- **Every value is readable without the picture** — on the cap, at the end of the
+  bar, or in the legend. The one exception is a grid of twenty-four hours, where
+  twenty-four numbers would be noise: those state themselves in `title` and in a
+  visually-hidden list.
+- **A legend is present whenever there are two or more parts**, because width and
+  darkness alone are not identity. One series needs none — the title says what is
+  plotted.
+- **Motion is the rising arc**, as a CSS transition on the bar's own length, so a
+  value that changes slides to the new one instead of restarting from zero.
+- **A change is a fact, not a verdict.** A delta is up or down, never green or
+  red: a clinic closed for Tết took fewer calls and did nothing wrong.
+
+The pieces live in `src/app/pages/overview/Charts.tsx`.
+
 ## Do / Don't
 
 **Do**
@@ -196,3 +236,5 @@ Rules:
 - Filled icons, double-outline icons, gradients or shadows on icons.
 - Mixing Lucide or any stock set into this one.
 - Illustrations with faces, emotions or characters.
+- Colouring a chart's series by hue — `--chart-1/2/3` are not a categorical
+  palette and do not separate (see **Charts**). One hue, five steps.

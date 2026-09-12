@@ -62,6 +62,7 @@ src/api/
   assistant.mock.ts / assistant.live.ts
   receptionist.mock.ts / receptionist.live.ts   the "gọi thử" panel's reply
   voice.mock.ts     / voice.live.ts
+  insights.mock.ts  / insights.live.ts          everything Tổng quan draws
   leads.mock.ts     / leads.live.ts
 
   mock-support.ts   delay(), maybeFail(), the demo fixtures
@@ -95,12 +96,12 @@ VITE_API_MODE=live
 weeks. A single global on/off would mean nobody could test your first endpoint until every
 other one existed.
 
-Groups: `auth`, `tenant`, `assistant`, `voice`, `leads`.
+Groups: `auth`, `tenant`, `assistant`, `receptionist`, `voice`, `insights`, `leads`.
 
 The console says which is which on every page load:
 
 ```
-[fonnus] API mode: mock. Faked in the browser: auth, assistant, voice, leads.
+[fonnus] API mode: mock. Faked in the browser: auth, assistant, voice, insights, leads.
 ```
 
 ### No CORS in development
@@ -134,6 +135,7 @@ Each row is independently shippable and independently testable.
 | 6 | `voice` | `POST /tts/preview` | Cheap, visible, and it makes ten play buttons real. |
 | 7 | `assistant` | the chat stream | Needs the model. Wire format not agreed — talk first. **No UI consumes it since Sept 2026** — the setup assistant was removed; the group stays so it can come back as its own project. |
 | 8 | `voice` | the session | Needs the pipeline **and** the cost controls. See open-questions Q21. |
+| 9 | `insights` | `GET /insights/overview` | The Tổng quan tab. Needs call records to exist first, so it is naturally late — but it is one read-only endpoint with no writes and no concurrency, so it is the easiest of the lot once there is data to aggregate. |
 
 Tick them off in this table as you go.
 

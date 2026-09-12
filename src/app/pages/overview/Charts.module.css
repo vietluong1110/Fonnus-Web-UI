@@ -1,0 +1,329 @@
+/*
+ * The marks. Everything here is one hue in five steps — see Charts.tsx and the
+ * ramp's own comment in tokens/colors.css for why there is no second colour.
+ *
+ * The motion is the app's rising arc, and it is a *transition* on `--to`
+ * rather than a keyframe: a bar whose value changes when the range switches
+ * slides to its new height, instead of dropping to zero and growing again.
+ * `--at` staggers the row. Both are set inline by the component.
+ */
+
+/* --------------------------------------------------------------- columns */
+
+.columns {
+  display: flex;
+  align-items: flex-end;
+  /* 2px of card between neighbours: the gap is what separates two bars, never
+     a stroke around them. */
+  gap: 2px;
+  min-width: 0;
+}
+
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.columnTrack {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.columnBar {
+  width: 100%;
+  /* Capped, never the width of its slot — the leftover is air, and a 24px bar
+     reads the same on a phone as in a 700px card. */
+  max-width: 24px;
+  height: var(--to, 0%);
+  /* Rounded at the data end, square on the baseline it grows from. */
+  border-radius: 4px 4px 0 0;
+  background: var(--chart-step-3);
+  transition: height var(--duration-arc) var(--ease-arc) var(--at, 0ms);
+}
+
+.columnNow .columnBar {
+  background: var(--chart-step-5);
+}
+
+.columnCap,
+.columnName {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  text-align: center;
+  min-width: 0;
+}
+
+.columnCap {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+}
+
+.columnNow .columnCap,
+.columnNow .columnName {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* A hairline under the columns: the baseline they are measured from. */
+.axis {
+  height: 1px;
+  background: var(--border-hairline);
+}
+
+/* ----------------------------------------------------------- ranked bars */
+
+.ranked {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.rank {
+  display: grid;
+  grid-template-columns: minmax(96px, 168px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.rankName {
+  font-size: 13px;
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.rankTrack {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  /* The unfilled part is a paler step of the same hue, never grey — the rule
+     the readiness meter already follows. */
+  background: var(--meter-track);
+  min-width: 0;
+}
+
+.rankFill {
+  display: block;
+  height: 100%;
+  width: var(--to, 0%);
+  border-radius: var(--radius-pill);
+  background: var(--chart-step-5);
+  transition: width var(--duration-arc) var(--ease-arc) var(--at, 0ms);
+}
+
+.rankValue {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/*
+ * Under a phone the label cannot share a line with the bar and stay readable,
+ * so it takes the row above and the bar spans the full width beneath it. The
+ * value stays on the label's line, where it is read with the name.
+ */
+@media (max-width: 519.98px) {
+  .rank {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 10px;
+  }
+
+  /*
+   * Placed explicitly, not left to auto-placement: the bar spans both columns,
+   * and a spanning item pushes whatever follows it in the DOM onto a third row
+   * — which put the value under the bar instead of beside the name it belongs
+   * to. Name and value share the first line; the bar takes the second.
+   */
+  .rankName {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .rankValue {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .rankTrack {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* ------------------------------------------------------------- the band */
+
+.band {
+  display: flex;
+  gap: 2px;
+  height: 16px;
+  min-width: 0;
+}
+
+.bandSeg {
+  border-radius: 3px;
+  min-width: 3px;
+}
+
+.bandSeg:first-child {
+  border-radius: var(--radius-pill) 3px 3px var(--radius-pill);
+}
+
+.bandSeg:last-child {
+  border-radius: 3px var(--radius-pill) var(--radius-pill) 3px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legendRow {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+/* The share that is a gap rather than an outcome wears the app's one mark for
+   "not filled in": a dashed edge (ui-ux-principles §1). */
+.swatchGap {
+  box-shadow: inset 0 0 0 1px var(--border-dashed);
+}
+
+.legendGapLabel {
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+.legendValue {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------- the hour grid */
+
+.hourWrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hours {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.hourCell {
+  height: 36px;
+  border-radius: 4px;
+  transition: background var(--duration-base) var(--ease-out);
+}
+
+.hourAxis {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.hourTick {
+  font-family: var(--font-num);
+  font-size: 10.5px;
+  line-height: 1.3;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* The opening window, drawn rather than tinted. */
+.hourBracket {
+  position: relative;
+  height: 26px;
+  margin-top: 4px;
+}
+
+.bracket {
+  position: absolute;
+  top: 4px;
+  height: 6px;
+  border: 1px solid var(--border-strong);
+  border-bottom: none;
+  opacity: 0.65;
+}
+
+.bracketLabel {
+  position: absolute;
+  top: 12px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------- sparkline */
+
+.spark {
+  display: block;
+  width: 100%;
+  height: 28px;
+  /* The end dot sits on the right edge; without this its outer half is cut. */
+  overflow: visible;
+}
+
+.sparkLine {
+  fill: none;
+  stroke: var(--chart-step-3);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparkDot {
+  fill: var(--chart-step-5);
+  /* A ring of card, so the dot stays a dot where the line passes under it. */
+  stroke: var(--surface-card);
+  stroke-width: 2;
+}
+
+/* ------------------------------------------------------------------ a11y */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .columnBar,
+  .rankFill,
+  .hourCell {
+    transition: none;
+  }
+}

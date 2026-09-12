@@ -1,0 +1,259 @@
+<div class="{{theme}}" style="grid-template-columns:64px minmax(0,1fr)">
+
+  <!-- Under 900px the shell's sidebar narrows to an icon rail (AppShell.module.css). -->
+  <aside class="side" style="padding:18px 10px 14px; align-items:center">
+    <div class="brand" style="padding:0 0 16px; justify-content:center">
+      <svg viewBox="8 7 48 56" width="24" height="28" fill="none" aria-hidden="true">
+        <path d="M17 20 A21 21 0 0 1 47 20" stroke="var(--terracotta)" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="32" cy="42" r="18" fill="var(--ink)"/>
+      </svg>
+    </div>
+    <nav class="nav" style="align-items:center; width:100%">
+      <span class="navItem on" style="justify-content:center; padding:10px 0">@icon(overview,18)</span>
+      <span class="navItem" style="justify-content:center; padding:10px 0">@icon(answered,18)</span>
+      <span class="navItem" style="justify-content:center; padding:10px 0">@icon(appointment,18)</span>
+      <span class="navItem" style="justify-content:center; padding:10px 0; position:relative">@icon(caller,18)<span class="navDot" style="position:absolute; top:7px; right:10px; margin:0"></span></span>
+      <span class="navItem" style="justify-content:center; padding:10px 0">@icon(incoming,18)</span>
+      <span class="navItem" style="justify-content:center; padding:10px 0">@icon(settings,18)</span>
+    </nav>
+    <div class="sideFoot" style="width:100%; display:flex; justify-content:center">
+      <span class="avatar">NH</span>
+    </div>
+  </aside>
+
+  <main class="main" style="padding:24px 28px 36px">
+    <div class="inner">
+
+      <div class="pageHead">
+        <h1 class="pageTitle">Tổng quan</h1>
+        <span class="pageDate">Chủ nhật, 13/09/2026</span>
+        <span class="spacer"></span>
+        <span class="range">
+          <span class="rangeChip on">Hôm nay</span>
+          <span class="rangeChip">7 ngày</span>
+          <span class="rangeChip">30 ngày</span>
+        </span>
+      </div>
+
+      <div class="strip up" style="animation-delay:40ms; flex-wrap:wrap; row-gap:12px">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true" style="flex:0 0 auto">
+          <circle cx="23" cy="23" r="20" fill="none" stroke="var(--track)" stroke-width="5"/>
+          <circle cx="23" cy="23" r="20" fill="none" stroke="var(--terracotta)" stroke-width="5"
+                  stroke-linecap="round" stroke-dasharray="85.5 125.7" transform="rotate(-90 23 23)"/>
+          <text x="23" y="27" text-anchor="middle" font-family="IBM Plex Sans, sans-serif"
+                font-size="13" font-weight="600" fill="var(--ink)">68</text>
+        </svg>
+        <span class="stripText">
+          <span class="stripTitle">Linh đã sẵn sàng 68%</span>
+          <span class="stripMeta">Còn 3 việc để lên “Trả lời tốt”</span>
+        </span>
+        <span class="stripRule"></span>
+        <span class="stripJob">
+          <span class="jobIcon">@icon(price,20)</span>
+          <span class="jobText">
+            <span class="jobTitle">Thêm giá cho 6 dịch vụ</span>
+            <span class="jobMeta">Kiến thức · khoảng 4 phút</span>
+          </span>
+          <span class="gain">+4%</span>
+        </span>
+        <span class="spacer"></span>
+        <span class="go">Làm ngay @icon(arrow-right,16)</span>
+      </div>
+
+      <!-- The hero keeps its size; the three facts move beside it instead of under. -->
+      <section class="card up" style="animation-delay:90ms">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap">
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <span class="eyebrow">Linh nghe máy hôm nay</span>
+            <div class="hero">
+              <span class="heroNum">18</span>
+              <span class="heroUnit">cuộc gọi</span>
+            </div>
+            <span class="delta">@icon(arrow-up,16) +3 so với chủ nhật tuần trước</span>
+          </div>
+          <div style="display:flex; gap:26px">
+            <span style="display:flex; flex-direction:column; gap:2px">
+              <span class="num" style="font-size:17px; color:var(--ink)">20:41</span>
+              <span class="statLabel">cuộc gần nhất</span>
+            </span>
+            <span style="display:flex; flex-direction:column; gap:2px">
+              <span class="num" style="font-size:17px; color:var(--ink)">6p 10s</span>
+              <span class="statLabel">cuộc dài nhất</span>
+            </span>
+            <span style="display:flex; flex-direction:column; gap:2px">
+              <span class="num" style="font-size:17px; color:var(--ink)">0</span>
+              <span class="statLabel">cuộc bị lỡ</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid12">
+        <div class="statCard s3 up" style="animation-delay:120ms; padding:16px 18px">
+          <span class="statTop">@icon(appointment,18) <span class="statLabel">Lịch hẹn</span></span>
+          <span class="statNum" style="font-size:27px">4</span>
+          <span class="statLabel">+1 so với CN trước</span>
+        </div>
+        <div class="statCard s3 up" style="animation-delay:150ms; padding:16px 18px">
+          <span class="statTop">@icon(time-saved,18) <span class="statLabel">Khỏi nghe máy</span></span>
+          <span class="statNum" style="font-size:27px">1g 12p</span>
+          <span class="statLabel">TB 2p 24s mỗi cuộc</span>
+        </div>
+        <div class="statCard s3 up" style="animation-delay:180ms; padding:16px 18px">
+          <span class="statTop">@icon(after-hours,18) <span class="statLabel">Ngoài giờ</span></span>
+          <span class="statNum" style="font-size:27px">6</span>
+          <span class="statLabel">trước 8:00, sau 17:30</span>
+        </div>
+        <div class="statCard s3 up" style="animation-delay:210ms; padding:16px 18px">
+          <span class="statTop">@icon(handoff,18) <span class="statLabel">Chuyển người thật</span></span>
+          <span class="statNum" style="font-size:27px">2</span>
+          <span class="statLabel">16 cuộc Linh xong hết</span>
+        </div>
+      </div>
+
+      <section class="card up" style="animation-delay:240ms">
+        <div class="cardHead">
+          <div class="cardHeadText">
+            <h3 class="cardTitle">Cần bạn xem</h3>
+            <span class="cardSub">4 việc từ cuộc gọi thật trong 7 ngày qua</span>
+          </div>
+          <span class="cardAct">Tất cả cuộc gọi @icon(chevron-right,16)</span>
+        </div>
+        <div class="rows">
+          <div class="row gap">
+            <span class="rowIcon">@icon(price,20)</span>
+            <span class="rowText">
+              <span class="rowTitle">5 khách hỏi giá niềng răng trong suốt</span>
+              <span class="rowSub">Linh chưa có giá để đọc — hiện Linh xin ghi nhận rồi nhờ gọi lại</span>
+            </span>
+            <span class="rowAct">Thêm giá @icon(chevron-right,16)</span>
+          </div>
+          <div class="row gap">
+            <span class="rowIcon">@icon(hours,20)</span>
+            <span class="rowText">
+              <span class="rowTitle">3 khách hỏi chủ nhật có làm không</span>
+              <span class="rowSub">Giờ chủ nhật bạn chưa xác nhận — Linh đang đọc giờ mẫu</span>
+            </span>
+            <span class="rowAct">Xác nhận giờ @icon(chevron-right,16)</span>
+          </div>
+          <div class="row">
+            <span class="rowIcon">@icon(appointment,20)</span>
+            <span class="rowText">
+              <span class="rowTitle">2 lịch hẹn chờ bạn xác nhận</span>
+              <span class="rowSub">Chị Trang 9:30 thứ Ba · anh Dũng 15:00 thứ Tư</span>
+            </span>
+            <span class="rowAct">Mở lịch hẹn @icon(chevron-right,16)</span>
+          </div>
+          <div class="row">
+            <span class="rowIcon">@icon(after-hours,20)</span>
+            <span class="rowText">
+              <span class="rowTitle">4 cuộc ngoài giờ chưa ai gọi lại</span>
+              <span class="rowSub">Tối qua 19:10 – 21:05 · Linh đã ghi lại số và nội dung</span>
+            </span>
+            <span class="rowAct">Nghe lại @icon(chevron-right,16)</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card up" style="animation-delay:280ms">
+        <div class="cardHead">
+          <div class="cardHeadText">
+            <h3 class="cardTitle">Cuộc gọi theo ngày</h3>
+            <span class="cardSub">7 ngày qua · 148 cuộc</span>
+          </div>
+          <span class="cardSub num">trung bình 21/ngày</span>
+        </div>
+        <div class="cols" style="height:150px">
+          <div class="col"><span class="colCap">21</span><div class="colTrack" style="height:110px"><div class="colBar bar" style="height:81%; animation-delay:300ms"></div></div><span class="colName">T2</span></div>
+          <div class="col"><span class="colCap">17</span><div class="colTrack" style="height:110px"><div class="colBar bar" style="height:65%; animation-delay:340ms"></div></div><span class="colName">T3</span></div>
+          <div class="col"><span class="colCap">24</span><div class="colTrack" style="height:110px"><div class="colBar bar" style="height:92%; animation-delay:380ms"></div></div><span class="colName">T4</span></div>
+          <div class="col"><span class="colCap">19</span><div class="colTrack" style="height:110px"><div class="colBar bar" style="height:73%; animation-delay:420ms"></div></div><span class="colName">T5</span></div>
+          <div class="col"><span class="colCap">26</span><div class="colTrack" style="height:110px"><div class="colBar bar" style="height:100%; animation-delay:460ms"></div></div><span class="colName">T6</span></div>
+          <div class="col"><span class="colCap">23</span><div class="colTrack" style="height:110px"><div class="colBar bar" style="height:88%; animation-delay:500ms"></div></div><span class="colName">T7</span></div>
+          <div class="col nowCol"><span class="colCap">18</span><div class="colTrack" style="height:110px"><div class="colBar now bar" style="height:69%; animation-delay:540ms"></div></div><span class="colName">Hôm nay</span></div>
+        </div>
+        <div class="axis"></div>
+      </section>
+
+      <div class="grid12">
+        <section class="card s6 up" style="animation-delay:320ms">
+          <div class="cardHead">
+            <div class="cardHeadText">
+              <h3 class="cardTitle">Giờ máy reo nhiều nhất</h3>
+              <span class="cardSub">trung bình 7 ngày</span>
+            </div>
+          </div>
+          <div>
+            <div class="hours">
+              <span class="hourCell"></span><span class="hourCell"></span><span class="hourCell"></span>
+              <span class="hourCell"></span><span class="hourCell"></span><span class="hourCell"></span>
+              <span class="hourCell"></span>
+              <span class="hourCell" style="background:var(--s2)"></span>
+              <span class="hourCell" style="background:var(--s4)"></span>
+              <span class="hourCell" style="background:var(--s5)"></span>
+              <span class="hourCell" style="background:var(--s4)"></span>
+              <span class="hourCell" style="background:var(--s3)"></span>
+              <span class="hourCell" style="background:var(--s2)"></span>
+              <span class="hourCell" style="background:var(--s2)"></span>
+              <span class="hourCell" style="background:var(--s4)"></span>
+              <span class="hourCell" style="background:var(--s5)"></span>
+              <span class="hourCell" style="background:var(--s4)"></span>
+              <span class="hourCell" style="background:var(--s3)"></span>
+              <span class="hourCell" style="background:var(--s2)"></span>
+              <span class="hourCell" style="background:var(--s2)"></span>
+              <span class="hourCell" style="background:var(--s2)"></span>
+              <span class="hourCell"></span><span class="hourCell"></span><span class="hourCell"></span>
+            </div>
+            <div class="hourAxis">
+              <span class="hourTick">0</span><span></span><span></span><span></span><span></span><span></span>
+              <span class="hourTick">6</span><span></span><span></span><span></span><span></span><span></span>
+              <span class="hourTick">12</span><span></span><span></span><span></span><span></span><span></span>
+              <span class="hourTick">18</span><span></span><span></span><span></span><span></span>
+              <span class="hourTick">23</span>
+            </div>
+          </div>
+          <span class="cardSub">Đông nhất <b style="color:var(--ink)">9:00</b> và <b style="color:var(--ink)">15:00</b>. Sau 18:00 vẫn còn <b style="color:var(--ink)">14%</b>.</span>
+        </section>
+
+        <section class="card s6 up" style="animation-delay:360ms">
+          <div class="cardHead">
+            <div class="cardHeadText">
+              <h3 class="cardTitle">Cuộc gọi kết thúc thế nào</h3>
+              <span class="cardSub">148 cuộc</span>
+            </div>
+          </div>
+          <div class="band">
+            <span class="bandSeg" style="flex:112; background:var(--s5)"></span>
+            <span class="bandSeg" style="flex:21; background:var(--s3)"></span>
+            <span class="bandSeg" style="flex:9; background:var(--s2)"></span>
+            <span class="bandSeg" style="flex:6; background:var(--s1)"></span>
+          </div>
+          <div class="legend">
+            <span class="legendRow"><span class="swatch" style="background:var(--s5)"></span><span>Linh trả lời xong</span><span class="legendVal">112 · 76%</span></span>
+            <span class="legendRow"><span class="swatch" style="background:var(--s3)"></span><span>Chuyển cho người thật</span><span class="legendVal">21 · 14%</span></span>
+            <span class="legendRow"><span class="swatch" style="background:var(--s2)"></span><span>Khách cúp máy sớm</span><span class="legendVal">9 · 6%</span></span>
+            <span class="legendRow"><span class="swatch" style="background:var(--s1); box-shadow:inset 0 0 0 1px var(--dash)"></span><span style="color:var(--terracotta-deep); font-weight:500">Linh chưa trả lời được</span><span class="legendVal">6 · 4%</span></span>
+          </div>
+        </section>
+      </div>
+
+      <section class="card up" style="animation-delay:400ms">
+        <div class="cardHead">
+          <div class="cardHeadText">
+            <h3 class="cardTitle">Khách gọi để làm gì</h3>
+            <span class="cardSub">7 ngày qua</span>
+          </div>
+        </div>
+        <div class="ranked">
+          <div class="rank"><span class="rankName">Đặt hoặc đổi lịch hẹn</span><span class="rankTrack"><span class="rankFill hbar" style="width:100%; display:block; animation-delay:420ms"></span></span><span class="rankVal">52 · 35%</span></div>
+          <div class="rank"><span class="rankName">Hỏi giá dịch vụ</span><span class="rankTrack"><span class="rankFill hbar" style="width:73%; display:block; animation-delay:455ms"></span></span><span class="rankVal">38 · 26%</span></div>
+          <div class="rank"><span class="rankName">Hỏi giờ mở cửa, địa chỉ</span><span class="rankTrack"><span class="rankFill hbar" style="width:46%; display:block; animation-delay:490ms"></span></span><span class="rankVal">24 · 16%</span></div>
+          <div class="rank"><span class="rankName">Hỏi về bác sĩ</span><span class="rankTrack"><span class="rankFill hbar" style="width:27%; display:block; animation-delay:525ms"></span></span><span class="rankVal">14 · 9%</span></div>
+          <div class="rank"><span class="rankName">BHYT và thanh toán</span><span class="rankTrack"><span class="rankFill hbar" style="width:21%; display:block; animation-delay:560ms"></span></span><span class="rankVal">11 · 7%</span></div>
+          <div class="rank"><span class="rankName">Việc khác</span><span class="rankTrack"><span class="rankFill hbar" style="width:17%; display:block; animation-delay:595ms"></span></span><span class="rankVal">9 · 6%</span></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>

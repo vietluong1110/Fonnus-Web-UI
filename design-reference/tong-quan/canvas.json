@@ -1,0 +1,121 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1500,
+      "title": "A · Hôm nay, rồi cả tuần — 1440"
+    },
+    {
+      "file": "VariantB.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 1520,
+      "title": "B · Bảng số — 1440"
+    },
+    {
+      "file": "VariantC.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1580,
+      "title": "C · Một ngày của Linh — 1440"
+    },
+    {
+      "file": "PhoneA.dc.html",
+      "x": 0,
+      "y": 1760,
+      "w": 390,
+      "h": 2400,
+      "title": "A · điện thoại 390"
+    },
+    {
+      "file": "PhoneB.dc.html",
+      "x": 550,
+      "y": 1760,
+      "w": 390,
+      "h": 2080,
+      "title": "B · điện thoại 390"
+    },
+    {
+      "file": "PhoneC.dc.html",
+      "x": 1100,
+      "y": 1760,
+      "w": 390,
+      "h": 2350,
+      "title": "C · điện thoại 390"
+    },
+    {
+      "file": "TabletA.dc.html",
+      "x": 1650,
+      "y": 1760,
+      "w": 834,
+      "h": 1820,
+      "title": "A · máy tính bảng 834"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "decision",
+      "x": 1560,
+      "y": -700,
+      "w": 1440,
+      "text": "ĐÃ CHỌN: HƯỚNG B — 13/09/2026\n\nHướng B đã được dựng thật trong repo: src/app/pages/overview/ (OverviewPage, StatTile, Charts, Attention, ReadinessStrip) trên nhánh tong-quan-overview. Số liệu qua nhóm API mới `insights` (mock + live cùng một interface).\n\nTừ đây CODE là bản gốc, không phải canvas này. Ba khung dưới đây giữ lại để nhớ đã cân nhắc những gì — đừng sửa chúng rồi mong sản phẩm đổi theo.\n\nMột điều đổi so với bản mock: biểu đồ dùng MỘT sắc đất nung năm bậc (--chart-step-1…5), vì --chart-1/2/3 không tách được cho người mù màu deutan. Xem docs/visual-language.md § Charts."
+    },
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -430,
+      "w": 900,
+      "text": "TỔNG QUAN — ba hướng\n\nMặc định mở ở “Hôm nay”, có chuyển sang 7 / 30 ngày. Dải sẵn sàng nằm trên cùng (không phải cột rail), nên cả chiều ngang dành cho số liệu.\n\nMỗi hướng đều có: dải sẵn sàng · số của hôm nay · thẻ “Cần bạn xem” · bốn biểu đồ. Khác nhau ở chỗ cái gì dẫn dắt trang."
+    },
+    {
+      "id": "engine",
+      "x": 960,
+      "y": -430,
+      "w": 900,
+      "text": "“Cần bạn xem” là bản lề của trang\n\nMỗi dòng là một lỗ hổng do khách gọi thật tạo ra — “5 khách hỏi giá niềng trong suốt, Linh chưa có giá” — bấm một lần là tới đúng ô cần điền. Dòng nào nói về thông tin còn thiếu thì viền đứt (nguyên tắc §1); dòng chỉ là sự việc thì viền liền.\n\nĐó là cách khuyến khích điền thông tin mà không cần một danh sách nhắc việc."
+    },
+    {
+      "id": "palette",
+      "x": 1920,
+      "y": -430,
+      "w": 900,
+      "text": "MỘT SẮC, NĂM BẬC — không phải ba màu\n\nBộ --chart-1/2/3 trong repo (đất nung / lá sả / mực nhạt) không tách được: kiểm bằng validator, cặp đất nung–lá sả chỉ đạt ΔE 5.4 với người mù màu deutan (ngưỡng 8) và 13.9 với mắt thường (ngưỡng 15).\n\nNên mọi biểu đồ ở đây dùng một sắc đất nung năm bậc, nhận diện bằng vị trí và nhãn trực tiếp — đúng với luật “một số, một sắc” của bảng sẵn sàng."
+    },
+    {
+      "id": "dir-a",
+      "x": 0,
+      "y": -200,
+      "w": 620,
+      "text": "A · HÔM NAY, RỒI CẢ TUẦN  (đề xuất)\n\nMột con số lớn dẫn trang, bốn thẻ nhỏ bên cạnh, rồi “Cần bạn xem”, rồi lưới bốn biểu đồ.\n\n+ Trả lời ngay câu hỏi “hôm nay thế nào” trong 2 giây; thứ bậc rõ; phẳng lặng, giống Lễ tân nhất.\n− Bốn biểu đồ nằm dưới nếp gấp."
+    },
+    {
+      "id": "dir-b",
+      "x": 1560,
+      "y": -200,
+      "w": 620,
+      "text": "B · BẢNG SỐ\n\nBốn ô số bằng nhau kèm đường xu hướng, rồi biểu đồ lớn, rồi lưới ba, “Cần bạn xem” xuống cuối.\n\n+ Quét nhanh nhất, nhiều thông tin nhất, quen thuộc với người đã dùng SaaS.\n− Bốn ô bằng nhau thì không ô nào dẫn; trông giống mọi dashboard khác; việc cần làm bị đẩy xuống cuối."
+    },
+    {
+      "id": "dir-c",
+      "x": 3120,
+      "y": -200,
+      "w": 620,
+      "text": "C · MỘT NGÀY CỦA LINH\n\nCả ngày vẽ một lần: một đường, một thang giờ, mỗi cuộc gọi là một chấm — đúng ngữ pháp “cung và chấm” của Fonnus. Số liệu treo vào hình. Cuối trang, bảy ngày vẽ lại cùng một thang.\n\n+ Riêng biệt nhất, nhìn là hiểu nhịp phòng khám; ngoài giờ tự hiện ra.\n− Khó so sánh ngày này với ngày kia; là một hình mới cả sản phẩm phải học."
+    },
+    {
+      "id": "responsive",
+      "x": 0,
+      "y": 1610,
+      "w": 1180,
+      "text": "BA BỀ NGANG — cùng một luật\n\nĐiện thoại: thanh tab dưới cùng, thẻ số xếp 2×2, thanh ngang thành hai dòng (tên trên, thanh dưới), mọi ô xếp chồng và khai lại align-items: stretch. Máy tính bảng (834px): cột bên thu thành rãnh biểu tượng 64px như AppShell đã làm dưới 900px.\n\nHướng C trên điện thoại: đường ngày xoay dọc — điện thoại thừa chiều cao, thiếu chiều ngang. Không vẽ thanh trạng thái giả."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

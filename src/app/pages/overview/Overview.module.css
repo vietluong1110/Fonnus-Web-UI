@@ -1,0 +1,502 @@
+/*
+ * Tổng quan — the frame, the figures and the queue. The marks themselves are
+ * in Charts.module.css.
+ *
+ * The page is one column at every width; there is no rail. Lễ tân's 380px rail
+ * carries a try-out call, and there is nothing to try out here — this page
+ * reports what already happened. What the rail would have held, the readiness
+ * strip holds instead, as a band across the top, which is why the whole width
+ * goes to call data.
+ *
+ * Three widths, one layout language:
+ *
+ *   ≥ 1100px   four figures across, then 2fr + 1fr, then three across
+ *   640–1100   two figures across, the pair stacks, the three wrap 2 + 1
+ *   < 640px    everything stacks, the figures stay two across
+ *
+ * The trio wraps with flex rather than a grid so the third card fills the last
+ * row instead of leaving a hole beside it, and every container that switches
+ * from grid to a flex column restates `align-items: stretch` — a grid
+ * instruction left on a flex column sizes each child to its own max-content,
+ * which is what once blew a 375px page 620px wide (CLAUDE.md).
+ */
+
+/* ------------------------------------------------------------------- head */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dateline {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* Pushes the range switch to the right edge, and disappears when the head
+   wraps on a phone — the control then sits under the title, left-aligned. */
+.headSpacer {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------- readiness strip */
+
+/*
+ * The same measurement as the ring on every Lễ tân hub, laid on its side.
+ *
+ * It is a band and not a rail because this page's subject is the call data,
+ * and it says exactly what the hub's panel says in its first two lines: how
+ * ready she is, and the one job that moves her up. Everything else about
+ * readiness stays on Lễ tân, one press away.
+ */
+.strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: 12px 20px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* The percentage in the ring's hole. The ring is ReadinessPanel's, at the one
+   size that fits a band rather than a rail. */
+.stripPct {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* The primary action of the whole page when she is not finished yet. */
+.stripGo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.stripGo:hover {
+  background: var(--action-primary-hover);
+  color: var(--text-on-accent);
+  text-decoration: none;
+}
+
+.stripText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.stripTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.stripMeta {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.stripRule {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border-hairline);
+  margin: 2px 4px;
+  flex: 0 0 auto;
+}
+
+/* The next job, named with the glyph its section wears everywhere else. */
+.job {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.job:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.jobIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.jobText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.jobTitle {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.jobMeta {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* Everything is set: the strip stops offering work and states the fact. */
+.stripDone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  min-width: 0;
+}
+
+@media (max-width: 819.98px) {
+  .strip {
+    flex-wrap: wrap;
+    /* Grid's `stretch` is not inherited by a wrapped flex row; state it. */
+    align-items: center;
+    row-gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .stripRule {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- figures */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-card);
+  align-items: stretch;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+}
+
+.tileHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tileLabel {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  min-width: 0;
+}
+
+.tileFigure {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/*
+ * The figure is in the number face, proportional rather than tabular: tabular
+ * figures are for a column of numbers that has to line up, and a headline that
+ * sits alone reads better with its own spacing.
+ */
+.tileValue {
+  font-family: var(--font-num);
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 12.5px;
+  font-weight: 500;
+  /* A change is a fact, not a verdict: more calls is not "good" and fewer is
+     not "bad" — a clinic that closed for Tết is not failing. So the delta is
+     never green or red, only up or down. */
+  color: var(--ink-soft);
+}
+
+.deltaIcon {
+  display: inline-flex;
+}
+
+.deltaDown {
+  transform: rotate(180deg);
+}
+
+.tileFoot {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  min-width: 0;
+}
+
+@media (max-width: 1099.98px) {
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------- the grid */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--gap-card);
+  align-items: stretch;
+}
+
+.trio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-card);
+  align-items: stretch;
+}
+
+.trio > * {
+  flex: 1 1 272px;
+  min-width: 0;
+}
+
+@media (max-width: 1099.98px) {
+  .split {
+    display: flex;
+    flex-direction: column;
+    /* The grid line above is an instruction to a grid. Restate it. */
+    align-items: stretch;
+    gap: var(--gap-card);
+  }
+}
+
+/* The head of a chart card: title and subtitle left, one figure right. */
+.cardNote {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* One quiet line under a chart, naming what the picture cannot say. */
+.chartNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.chartNoteIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.chartNote b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------- the queue */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/*
+ * The geometry is Section.module.css's `.rowLink` — a hub row and a queue row
+ * are the same object at a glance, and the owner should not have to notice
+ * they are on a different page. This is the SECOND copy of those numbers; a
+ * third should move the box into `app/ui` as a shared row, the way the section
+ * frame itself moved once Kỹ năng needed it.
+ */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.row:hover {
+  background: var(--action-secondary-hover);
+  transform: translateY(var(--lift-hover));
+  text-decoration: none;
+  color: var(--ink);
+}
+
+/*
+ * A row naming something she does not know yet wears the dashed edge — the
+ * app's one mark for "content, not filled in" (ui-ux-principles §1). A row
+ * that is only a fact about the day stays solid.
+ */
+.rowGap {
+  border: 1px dashed var(--border-dashed);
+}
+
+.rowIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.rowTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.rowSub {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowGap .rowSub {
+  color: var(--text-accent);
+}
+
+.rowAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+/*
+ * Phone: the summary wraps instead of ellipsing — four words and a "…" say
+ * nothing — and the action drops under the text, where it is still a 44px
+ * target. Same decision Section.module.css makes for a hub row.
+ */
+@media (max-width: 639.98px) {
+  .row {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 15px;
+    flex-wrap: wrap;
+  }
+
+  .rowIcon {
+    margin-top: 2px;
+  }
+
+  .rowSub {
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .rowAction {
+    padding: 6px 0;
+  }
+}
+
+/* --------------------------------------------------------- the first day */
+
+.firstDay {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  min-width: 0;
+}
+
+.firstDayArt {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ink);
+}
+
+.firstDayText {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.firstDayBody {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 52ch;
+}
+
+@media (max-width: 639.98px) {
+  .firstDay {
+    flex-direction: column;
+    /* Not a grid here, but the same trap: state what the children should do. */
+    align-items: flex-start;
+    gap: 14px;
+  }
+}

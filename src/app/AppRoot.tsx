@@ -4,12 +4,14 @@ import { navigate, useAppPath } from '../hooks/useRoute'
 import { AppShell, activeNav } from './AppShell'
 import { ConfigProvider } from './letan/store'
 import { LeTanPage } from './letan/LeTanPage'
+import { OverviewPage } from './pages/overview/OverviewPage'
 import { PlaceholderPage } from './pages/Placeholder'
 import { ConnectionError, ShellSkeleton } from './Boot'
 
 /**
  * Everything under `#/app`. Guards the session, then picks the page from the
- * first path segment. Only Lễ tân is built; the other five are placeholders.
+ * first path segment. Tổng quan and Lễ tân are built; the other four are
+ * placeholders.
  *
  * The guard has three answers, not two. "Still checking" is a real state — the
  * session lives in an httpOnly cookie this app cannot read, so the only way to
@@ -57,7 +59,15 @@ export function AppRoot() {
 
   return (
     <ConfigProvider>
-      <AppShell>{nav.key === 'le-tan' ? <LeTanPage path={path.slice(1)} /> : <PlaceholderPage title={nav.label} />}</AppShell>
+      <AppShell>
+        {nav.key === 'le-tan' ? (
+          <LeTanPage path={path.slice(1)} />
+        ) : nav.key === 'tong-quan' ? (
+          <OverviewPage />
+        ) : (
+          <PlaceholderPage title={nav.label} />
+        )}
+      </AppShell>
     </ConfigProvider>
   )
 }
