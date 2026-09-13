@@ -1,6 +1,6 @@
 /*
  * Tổng quan — the frame, the figures and the queue. The marks themselves are
- * in Charts.module.css.
+ * in app/ui/Charts.module.css.
  *
  * The page is one column at every width; there is no rail. Lễ tân's 380px rail
  * carries a try-out call, and there is nothing to try out here — this page
@@ -43,15 +43,17 @@
   min-width: 0;
 }
 
+/* A range change keeps the old figures on screen, quieter, until the new ones land. */
+.busy {
+  opacity: 0.55;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
 /* ------------------------------------------------------- readiness strip */
 
 /*
- * The same measurement as the ring on every Lễ tân hub, laid on its side.
- *
- * It is a band and not a rail because this page's subject is the call data,
- * and it says exactly what the hub's panel says in its first two lines: how
- * ready she is, and the one job that moves her up. Everything else about
- * readiness stays on Lễ tân, one press away.
+ * The same measurement as the ring on every Lễ tân hub, laid on its side, with
+ * the jobs that move it laid out after it — as many as the band has room for.
  */
 .strip {
   display: flex;
@@ -61,13 +63,11 @@
   background: var(--surface-card);
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-card);
-  padding: 12px 20px;
+  padding: 12px 16px 12px 20px;
   color: var(--ink);
-  text-decoration: none;
 }
 
-/* The percentage in the ring's hole. The ring is ReadinessPanel's, at the one
-   size that fits a band rather than a rail. */
+/* The percentage in the ring's hole. */
 .stripPct {
   font-family: var(--font-num);
   font-variant-numeric: var(--numeric-tabular);
@@ -77,35 +77,11 @@
   color: var(--ink);
 }
 
-/* The primary action of the whole page when she is not finished yet. */
-.stripGo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--action-primary);
-  color: var(--text-on-accent);
-  font-family: var(--font-ui);
-  font-size: 13.5px;
-  font-weight: var(--weight-ui);
-  line-height: 1.2;
-  white-space: nowrap;
-  text-decoration: none;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.stripGo:hover {
-  background: var(--action-primary-hover);
-  color: var(--text-on-accent);
-  text-decoration: none;
-}
-
 .stripText {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
@@ -113,59 +89,147 @@
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.4;
+  white-space: nowrap;
 }
 
 .stripMeta {
   font-size: 12.5px;
   line-height: 1.45;
   color: var(--ink-soft);
+  white-space: nowrap;
 }
 
 .stripRule {
   width: 1px;
   align-self: stretch;
   background: var(--border-hairline);
-  margin: 2px 4px;
+  margin: 2px 0;
   flex: 0 0 auto;
 }
 
-/* The next job, named with the glyph its section wears everywhere else. */
-.job {
+/*
+ * The jobs. One row, never wrapping: ReadinessStrip measures how many whole
+ * pills fit and folds the rest into `+N việc`. The row clips — the pills it
+ * hides are taken out of flow, but a pill mid-resize must not spill — so it
+ * carries 4px of padding back out as negative margin, or the clip would take
+ * the focus ring and the hover lift with it.
+ */
+.chips {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex: 1 1 0;
   min-width: 0;
-  color: var(--ink);
-  text-decoration: none;
+  overflow: hidden;
+  padding: 4px;
+  margin: -4px;
 }
 
-.job:hover {
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.jobIcon {
+.chip {
   display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex: 0 0 auto;
-}
-
-.jobText {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
   min-width: 0;
-}
-
-.jobTitle {
+  height: 36px;
+  padding: 0 5px 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-page);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
-.jobMeta {
-  font-size: 11.5px;
-  line-height: 1.4;
+.chip:hover {
+  background: var(--action-secondary-hover);
+  color: var(--ink);
+  text-decoration: none;
+  transform: translateY(var(--lift-hover));
+}
+
+.chip:focus-visible,
+.chipMore:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.chipLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* What the job adds to the number. A fact about the job, not a reward. */
+.chipGain {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-accent);
+}
+
+/* The best job per minute is the page's primary action — the old "Làm ngay". */
+.chipFirst {
+  flex-shrink: 1;
+  max-width: 100%;
+  background: var(--action-primary);
+  --icon-accent: currentColor;
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+
+.chipFirst:hover {
+  background: var(--action-primary-hover);
+  color: var(--text-on-accent);
+}
+
+.chipFirst .chipGain {
+  background: color-mix(in srgb, currentColor 20%, transparent);
+  color: inherit;
+}
+
+.chipMore {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
   color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.chipMore:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* Out of flow and invisible, but still measured. */
+.chipHidden {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Everything is set: the strip stops offering work and states the fact. */
@@ -178,17 +242,21 @@
   min-width: 0;
 }
 
+/* Below a tablet the jobs take a row of their own under the ring. */
 @media (max-width: 819.98px) {
   .strip {
     flex-wrap: wrap;
-    /* Grid's `stretch` is not inherited by a wrapped flex row; state it. */
-    align-items: center;
     row-gap: 12px;
     padding: 14px 16px;
   }
 
   .stripRule {
     display: none;
+  }
+
+  .chips,
+  .stripDone {
+    flex-basis: 100%;
   }
 }
 
@@ -248,17 +316,25 @@
 }
 
 .delta {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  padding: 1px 4px;
+  margin: -1px -4px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-num);
   font-variant-numeric: var(--numeric-tabular);
   font-size: 12.5px;
   font-weight: 500;
-  /* A change is a fact, not a verdict: more calls is not "good" and fewer is
-     not "bad" — a clinic that closed for Tết is not failing. So the delta is
-     never green or red, only up or down. */
+  /* A change is a fact, not a verdict: never green or red, only up or down. */
   color: var(--ink-soft);
+  cursor: default;
+  outline: none;
+}
+
+.delta:focus-visible {
+  box-shadow: var(--ring-focus);
 }
 
 .deltaIcon {
@@ -267,6 +343,36 @@
 
 .deltaDown {
   transform: rotate(180deg);
+}
+
+/* What the change is against. The chart tip's night paper, one line, at once. */
+.deltaTip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 30;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--night);
+  color: var(--cream-night);
+  box-shadow: var(--shadow-overlay);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.delta:hover .deltaTip,
+.delta:focus-visible .deltaTip {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .tileFoot {
@@ -279,6 +385,13 @@
 @media (max-width: 1099.98px) {
   .tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deltaTip,
+  .busy {
+    transition: none;
   }
 }
 
@@ -313,8 +426,11 @@
   }
 }
 
-/* The head of a chart card: title and subtitle left, one figure right. */
-.cardNote {
+/* The key to the dotted line on the day chart, in its card's head. */
+.avgKey {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-num);
   font-variant-numeric: var(--numeric-tabular);
   font-size: 12.5px;
@@ -322,11 +438,29 @@
   white-space: nowrap;
 }
 
-/* One quiet line under a chart, naming what the picture cannot say. */
+.avgSwatch {
+  width: 18px;
+  height: 2px;
+  background-image: radial-gradient(circle, var(--ink-soft) 0.9px, transparent 1.3px);
+  background-size: 6px 2px;
+  background-repeat: repeat-x;
+}
+
+/*
+ * One quiet line under a chart, naming what the picture cannot say. Pushed to
+ * the card's foot and given room for two lines, so across a row of cards
+ * stretched to one height the notes' hairlines line up — `margin-top: auto`
+ * alone aligns their *bottoms*, which left a two-line note's rule 19px above a
+ * one-line note's.
+ */
 .chartNote {
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  margin-top: auto;
+  /* padding-top + two lines of 12.5px at 1.5 */
+  min-height: calc(12px + 3em);
+  box-sizing: border-box;
   border-top: 1px solid var(--border-hairline);
   padding-top: 12px;
   font-size: 12.5px;
@@ -355,10 +489,8 @@
 
 /*
  * The geometry is Section.module.css's `.rowLink` — a hub row and a queue row
- * are the same object at a glance, and the owner should not have to notice
- * they are on a different page. This is the SECOND copy of those numbers; a
- * third should move the box into `app/ui` as a shared row, the way the section
- * frame itself moved once Kỹ năng needed it.
+ * are the same object at a glance. This is the SECOND copy of those numbers; a
+ * third should move the box into `app/ui` as a shared row.
  */
 .row {
   display: flex;
@@ -435,9 +567,8 @@
 }
 
 /*
- * Phone: the summary wraps instead of ellipsing — four words and a "…" say
- * nothing — and the action drops under the text, where it is still a 44px
- * target. Same decision Section.module.css makes for a hub row.
+ * Phone: the summary wraps instead of ellipsing, and the action drops under the
+ * text, where it is still a 44px target.
  */
 @media (max-width: 639.98px) {
   .row {
@@ -495,7 +626,6 @@
 @media (max-width: 639.98px) {
   .firstDay {
     flex-direction: column;
-    /* Not a grid here, but the same trap: state what the children should do. */
     align-items: flex-start;
     gap: 14px;
   }

@@ -13,12 +13,12 @@ export interface NavEntry {
   key: string
   label: string
   icon: IconName
-  /** First path segment under `#/app/`; empty for Tổng quan. */
+  /** First path segment under `#/app/`. Every page has one — a bare `#/app` redirects (AppRoot). */
   segment: string
 }
 
 export const NAV: NavEntry[] = [
-  { key: 'tong-quan', label: 'Tổng quan', icon: 'overview', segment: '' },
+  { key: 'tong-quan', label: 'Tổng quan', icon: 'overview', segment: 'tong-quan' },
   { key: 'cuoc-goi', label: 'Cuộc gọi', icon: 'answered', segment: 'cuoc-goi' },
   { key: 'lich-hen', label: 'Lịch hẹn', icon: 'appointment', segment: 'lich-hen' },
   { key: 'le-tan', label: 'Lễ tân', icon: 'caller', segment: 'le-tan' },
@@ -62,7 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar} aria-label="Điều hướng">
-        <a className={styles.logo} href={appHref()} aria-label="Tổng quan">
+        <a className={styles.logo} href={appHref('tong-quan')} aria-label="Tổng quan">
           <span className={styles.logoFull}>
             <Logo variant="horizontal" height={26} />
           </span>

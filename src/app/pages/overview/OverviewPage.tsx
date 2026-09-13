@@ -4,32 +4,36 @@ import { api, isCanceled, messageFor } from '../../../api'
 import type { InsightRange, InsightsOverview } from '../../../api'
 import { appHref } from '../../../hooks/useRoute'
 import { ContentSkeleton, RetryCard } from '../../Boot'
-import { Card, EmptyState, Segmented, ui } from '../../ui'
+import { Band, Card, Columns, EmptyState, HourGrid, RankedBars, Segmented, ui } from '../../ui'
+import type { ChartTip, Column, Ranked, Segment } from '../../ui'
 import { useConfig } from '../../letan/store'
 import type { Weekday } from '../../letan/model'
-import { Band, Columns, HourGrid, RankedBars } from './Charts'
-import type { Column, Segment } from './Charts'
 import { AttentionCard } from './Attention'
 import { ReadinessStrip } from './ReadinessStrip'
 import { StatTile } from './StatTile'
 import {
   DURATION_LABEL,
+  DURATION_LONG,
   INTENT_LABEL,
   RANGES,
   RANGE_IN,
   RANGE_SPAN,
   WEEKDAY_SHORT,
   fmtDateline,
+  fmtDayLong,
   fmtDayMonth,
   fmtDuration,
   fmtShare,
+  fmtTime,
   outcomeLabel,
+  perTen,
   rangeBefore,
+  vsAverage,
 } from './labels'
 import styles from './Overview.module.css'
 
 /*
- * `#/app` — Tổng quan.
+ * `#/app/tong-quan` — Tổng quan.
  *
  * What happened on the phone, and the one list you act on. The page answers two
  * questions in that order: *what is going on*, and *what should I fill in next* —
@@ -54,6 +58,25 @@ function openWindow(hours: { day: Weekday; open: boolean; from: string; to: stri
   const from = open.reduce((min, d) => (d.from < min ? d.from : min), open[0].from)
   const to = open.reduce((max, d) => (d.to > max ? d.to : max), open[0].to)
   return { from, to, fromHour: Number(from.slice(0, 2)), toHour: Number(to.slice(0, 2)) }
+}
+
+/** The last index holding the extreme — so of two equal days, the more recent is named. */
+function lastIndexOf(values: number[], pick: (a: number, b: number) => boolean): number {
+  let at = -1
+  values.forEach((v, i) => {
+    if (at < 0 || pick(v, values[at]) || v === values[at]) at = i
+  })
+  return at
+}
+
+/** `n` local midnights ending on the day of `end`. */
+function daysEnding(end: Date, n: number): Date[] {
+  return Array.from({ length: n }, (_, i) => {
+    const d = new Date(end)
+    d.setHours(0, 0, 0, 0)
+    d.setDate(d.getDate() - (n - 1 - i))
+    return d
+  })
 }
 
 export function OverviewPage() {
@@ -119,7 +142,7 @@ export function OverviewPage() {
 
       <ReadinessStrip />
 
-      <div aria-busy={busy} style={busy ? { opacity: 0.55, transition: 'opacity 120ms' } : undefined}>
+      <div aria-busy={busy} className={busy ? styles.busy : undefined}>
         <OverviewBody data={data} agent={agent} range={range} onRange={setRange} />
       </div>
     </>
@@ -148,9 +171,8 @@ function OverviewBody({
    * A clinic that has never taken a call needs to be told what will appear
    * here. A clinic opening the page at seven in the morning has simply not
    * been rung yet today, knows perfectly well what the page is, and wants the
-   * week — telling *them* "khi số Fonnus đổ chuông…" would read as the product
-   * having forgotten them. The week behind the figure is what tells the two
-   * apart, and it is on every response whatever the range.
+   * week. The week behind the figure is what tells the two apart, and it is on
+   * every response whatever the range.
    */
   if (total === 0) {
     const everRung = data.calls.trend.some((c) => c > 0)
@@ -161,67 +183,92 @@ function OverviewBody({
     )
   }
 
+  const now = new Date(data.generated_at)
   const window_ = openWindow(config.operating_hours_by_weekday)
+  const compare = rangeBefore(range, now.getDay() as Weekday)
 
   /*
-   * The day columns.
+   * The days.
    *
    * `by_day` has one entry for `today`, which is not a chart — a single column
    * says nothing a number has not already said. So a one-day range borrows the
    * figure's own seven-day trend, which the contract guarantees is always seven
    * points ending on the same day.
    */
-  const dayColumns: Column[] = (() => {
-    if (data.by_day.length > 1) {
-      const long = data.by_day.length > 10
-      return data.by_day.map((d, i) => {
-        const date = new Date(`${d.date}T00:00:00`)
-        const last = i === data.by_day.length - 1
-        return {
-          key: d.date,
-          label: long
-            ? i % 5 === 0 || last
-              ? fmtDayMonth(date.toISOString())
-              : ''
-            : last
-              ? 'Hôm nay'
-              : WEEKDAY_SHORT[date.getDay() as Weekday],
-          value: d.count,
-          now: last,
-          title: `${fmtDayMonth(date.toISOString())}: ${d.count} cuộc`,
-        }
-      })
-    }
-    const end = new Date(data.generated_at)
-    return data.calls.trend.map((count, i) => {
-      const d = new Date(end)
-      d.setDate(d.getDate() - (data.calls.trend.length - 1 - i))
-      const last = i === data.calls.trend.length - 1
-      return {
-        key: d.toISOString().slice(0, 10),
-        label: last ? 'Hôm nay' : WEEKDAY_SHORT[d.getDay() as Weekday],
-        value: count,
-        now: last,
-        title: `${fmtDayMonth(d.toISOString())}: ${count} cuộc`,
-      }
-    })
-  })()
+  const days =
+    data.by_day.length > 1
+      ? data.by_day.map((d) => ({ date: new Date(`${d.date}T00:00:00`), count: d.count }))
+      : daysEnding(now, data.calls.trend.length).map((date, i) => ({ date, count: data.calls.trend[i] }))
+  const counts = days.map((d) => d.count)
+  const dense = days.length > 12
+  const last = days.length - 1
 
-  const dayAverage = Math.round(
-    dayColumns.reduce((sum, c) => sum + c.value, 0) / Math.max(1, dayColumns.length),
-  )
-  /** The busiest day in the range — the one fact the figure alone does not carry. */
-  const busiestDay = [...dayColumns].sort((a, b) => b.value - a.value)[0]
-  const compare = rangeBefore(range, new Date(data.generated_at).getDay() as Weekday)
+  /*
+   * Today is never over when the page is read, so it is left out of the
+   * average and out of "quietest day" — at nine in the morning it would drag
+   * the line down and win the quietest-day label every single time.
+   */
+  const complete = counts.slice(0, last)
+  const dayAverage = complete.length ? Math.round(complete.reduce((a, b) => a + b, 0) / complete.length) : null
+  const busiestAt = lastIndexOf(counts, (a, b) => a > b)
+  const quietestAt = lastIndexOf(complete, (a, b) => a < b)
+
+  /*
+   * Ticks. Seven days name every day. Thirty name the first day, today, and
+   * each Monday far enough from both ends not to collide with them — about one
+   * a week, which is the unit an owner thinks of a month in.
+   */
+  const tickFor = (date: Date, i: number): string => {
+    if (i === last) return 'Hôm nay'
+    if (!dense) return WEEKDAY_SHORT[date.getDay() as Weekday]
+    if (i === 0) return fmtDayMonth(date)
+    // Five slots clear of the first tick and six of "Hôm nay", which is wider: at a
+    // phone's ~10px slots that is the least that keeps the two labels apart.
+    return date.getDay() === 1 && i >= 5 && i <= last - 6 ? fmtDayMonth(date) : ''
+  }
+
+  const dayColumns: Column[] = days.map((d, i) => ({
+    key: String(d.date.getTime()),
+    tick: tickFor(d.date, i),
+    value: d.count,
+    now: i === last,
+    cap: !dense || i === last || i === busiestAt || i === quietestAt,
+    tip: {
+      head: i === last ? `Hôm nay, ${fmtDayMonth(d.date)}` : fmtDayLong(d.date),
+      value: `${d.count} cuộc`,
+      meta:
+        i === last
+          ? `Tính đến ${fmtTime(data.generated_at)}`
+          : dayAverage != null
+            ? vsAverage(d.count, dayAverage)
+            : undefined,
+    },
+  }))
+  const dayTotal = counts.reduce((a, b) => a + b, 0)
   const weekTotal = data.calls.trend.reduce((a, b) => a + b, 0)
 
-  const intents = [...data.by_intent]
+  /** One tip per sparkline point: the day, and the figure on it. */
+  const trendDays = daysEnding(now, data.calls.trend.length)
+  const trendTips = (points: number[], show: (v: number) => string): ChartTip[] =>
+    points.map((v, i) => ({
+      head: i === points.length - 1 ? `Hôm nay, ${fmtDayMonth(trendDays[i])}` : fmtDayLong(trendDays[i]),
+      value: show(v),
+    }))
+
+  const share = (count: number): ChartTip => ({
+    head: '',
+    value: `${count} cuộc · ${fmtShare(count, total)}`,
+    meta: perTen(count, total),
+  })
+
+  const intents: Ranked[] = [...data.by_intent]
     .sort((a, b) => b.count - a.count)
     .map((r) => ({
       key: r.intent,
       label: INTENT_LABEL[r.intent],
       value: r.count,
-      note: `${r.count} · ${fmtShare(r.count, total)}`,
+      share: fmtShare(r.count, total),
+      tip: { ...share(r.count), head: INTENT_LABEL[r.intent] },
     }))
 
   /*
@@ -243,7 +290,18 @@ function OverviewBody({
     note: `${o.count} · ${fmtShare(o.count, total)}`,
     step: stepOf(o.outcome),
     gap: o.outcome === 'unanswered',
+    tip: { ...share(o.count), head: outcomeLabel(o.outcome, agent) },
   }))
+
+  const hourTips: ChartTip[] = data.by_hour.map((count, h) => {
+    const outside = window_ != null && (h < window_.fromHour || h >= window_.toHour)
+    const part = count > 0 ? `${fmtShare(count, total)} số cuộc` : undefined
+    return {
+      head: `${h}:00 – ${h + 1}:00`,
+      value: `${count} cuộc`,
+      meta: outside ? ['Ngoài giờ mở cửa', part].filter(Boolean).join(' · ') : part,
+    }
+  })
 
   const busiest = data.by_hour
     .map((count, hour) => ({ count, hour }))
@@ -255,10 +313,11 @@ function OverviewBody({
   const durationMax = Math.max(...data.by_duration.map((d) => d.count))
   const durations: Column[] = data.by_duration.map((d) => ({
     key: d.bucket,
-    label: DURATION_LABEL[d.bucket],
+    tick: DURATION_LABEL[d.bucket],
     value: d.count,
     now: d.count === durationMax,
-    title: `${DURATION_LABEL[d.bucket]}: ${d.count} cuộc`,
+    cap: true,
+    tip: { ...share(d.count), head: DURATION_LONG[d.bucket] },
   }))
 
   return (
@@ -267,44 +326,44 @@ function OverviewBody({
         <StatTile
           icon="answered"
           label={`Cuộc gọi ${agent} nghe`}
-          value={String(data.calls.value)}
           amount={data.calls.value}
           previous={data.calls.previous}
           compare={compare}
           trend={data.calls.trend}
+          trendTips={trendTips(data.calls.trend, (v) => `${v} cuộc`)}
           foot={
             range === 'today'
               ? `7 ngày qua · ${weekTotal} cuộc`
-              : busiestDay
-                ? `Đông nhất ${busiestDay.label} · ${busiestDay.value} cuộc`
-                : undefined
+              : `Đông nhất ${fmtDayMonth(days[busiestAt].date)} · ${days[busiestAt].count} cuộc`
           }
         />
         <StatTile
           icon="appointment"
           label="Lịch hẹn giữ được"
-          value={String(data.bookings.value)}
           amount={data.bookings.value}
           previous={data.bookings.previous}
           compare={compare}
           trend={data.bookings.trend}
+          trendTips={trendTips(data.bookings.trend, (v) => `${v} lịch hẹn`)}
           foot={`${fmtShare(data.bookings.value, total)} số cuộc thành lịch hẹn`}
         />
         <StatTile
           icon="time-saved"
           label="Trung bình mỗi cuộc"
-          value={fmtDuration(data.avg_duration.value)}
+          amount={data.avg_duration.value}
+          format={fmtDuration}
           trend={data.avg_duration.trend}
+          trendTips={trendTips(data.avg_duration.trend, fmtDuration)}
           foot={`Tổng ${fmtDuration(data.talk_time.value)} bạn không phải nghe máy`}
         />
         <StatTile
           icon="after-hours"
           label="Gọi ngoài giờ"
-          value={String(data.after_hours.value)}
           amount={data.after_hours.value}
           previous={data.after_hours.previous}
           compare={compare}
           trend={data.after_hours.trend}
+          trendTips={trendTips(data.after_hours.trend, (v) => `${v} cuộc`)}
           foot={window_ ? `Trước ${window_.from} và sau ${window_.to}` : 'Ngoài giờ mở cửa'}
         />
       </div>
@@ -312,14 +371,21 @@ function OverviewBody({
       <div className={styles.split}>
         <Card
           title="Cuộc gọi theo ngày"
-          subtitle={`${dayColumns.length > 10 ? '30 ngày qua' : '7 ngày qua'} · ${dayColumns.reduce((s, c) => s + c.value, 0)} cuộc`}
-          actions={<span className={styles.cardNote}>trung bình {dayAverage}/ngày</span>}
+          subtitle={`${dense ? '30 ngày qua' : '7 ngày qua'} · ${dayTotal} cuộc`}
+          actions={
+            dayAverage != null ? (
+              <span className={styles.avgKey}>
+                <span className={styles.avgSwatch} aria-hidden="true" />
+                Trung bình {dayAverage}/ngày
+              </span>
+            ) : null
+          }
         >
-          <Columns columns={dayColumns} height={150} />
+          <Columns columns={dayColumns} label="Cuộc gọi theo ngày" average={dayAverage ?? undefined} fill />
         </Card>
 
         <Card title="Khách gọi để làm gì" subtitle={RANGE_SPAN[range]}>
-          <RankedBars rows={intents} />
+          <RankedBars rows={intents} label="Khách gọi để làm gì" />
         </Card>
       </div>
 
@@ -327,6 +393,8 @@ function OverviewBody({
         <Card title="Giờ máy reo nhiều nhất" subtitle={RANGE_SPAN[range]}>
           <HourGrid
             hours={data.by_hour}
+            tips={hourTips}
+            ticks={['0h', '6h', '12h', '18h', '24h']}
             openFrom={window_?.fromHour ?? 8}
             openTo={window_?.toHour ?? 20}
             label={window_ ? `Giờ mở cửa ${window_.from} – ${window_.to}` : 'Chưa có giờ mở cửa'}
@@ -351,11 +419,11 @@ function OverviewBody({
         </Card>
 
         <Card title="Cuộc gọi kết thúc thế nào" subtitle={`${total} cuộc`}>
-          <Band segments={outcomes} />
+          <Band segments={outcomes} label="Cuộc gọi kết thúc thế nào" />
         </Card>
 
         <Card title="Cuộc gọi kéo dài bao lâu" subtitle={`${total} cuộc`}>
-          <Columns columns={durations} height={92} />
+          <Columns columns={durations} label="Cuộc gọi kéo dài bao lâu" height={124} />
           <div className={styles.chartNote}>
             <span className={styles.chartNoteIcon}>
               <Icon name="time-saved" size={16} />
@@ -413,9 +481,7 @@ function FirstDay({ agent, hasPhone }: { agent: string; hasPhone: boolean }) {
  * Today has not started yet — but last week did.
  *
  * One line and one press to the week, rather than four tiles of zeroes: the
- * figures exist, they are simply not about today, and the owner asking "hôm
- * nay thế nào" at 7am is better served by "chưa ai gọi" than by a screen of
- * charts that all read nought.
+ * figures exist, they are simply not about today.
  */
 function QuietDay({ agent, week, onRange }: { agent: string; week: number; onRange: (r: InsightRange) => void }) {
   return (

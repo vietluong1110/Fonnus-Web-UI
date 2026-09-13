@@ -130,9 +130,43 @@ export function fmtTime(iso: string): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-export function fmtDayMonth(iso: string): string {
-  const d = new Date(iso)
+export function fmtDayMonth(when: string | Date): string {
+  const d = new Date(when)
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+/** `Thứ Bảy, 12/09` — a day named in full, for the first line of a chart tip. */
+export function fmtDayLong(d: Date): string {
+  return `${WEEKDAY[d.getDay() as Weekday]}, ${fmtDayMonth(d)}`
+}
+
+/** A bucket named in full where a tip has room: the column says `2–4p`, the tip `Từ 2 đến 4 phút`. */
+export const DURATION_LONG: Record<DurationBucket, string> = {
+  under_1m: 'Dưới 1 phút',
+  '1_2m': 'Từ 1 đến 2 phút',
+  '2_4m': 'Từ 2 đến 4 phút',
+  '4_6m': 'Từ 4 đến 6 phút',
+  over_6m: 'Trên 6 phút',
+}
+
+/**
+ * A share in the unit an owner counts in. "27%" is exact; "cứ 10 cuộc có 3
+ * cuộc" is what they would say to a colleague, and it is the one line a tip adds
+ * to a row that already prints the percentage.
+ */
+export function perTen(count: number, total: number): string | undefined {
+  if (total <= 0 || count <= 0) return undefined
+  const k = Math.round((count / total) * 10)
+  if (k < 1) return 'Chưa đến 1 trong 10 cuộc'
+  if (k >= 10) return 'Gần như mọi cuộc'
+  return `Cứ 10 cuộc có ${k} cuộc`
+}
+
+/** A day against the range's average — a fact, like every delta here, never a verdict. */
+export function vsAverage(value: number, average: number): string {
+  const diff = value - average
+  if (diff === 0) return 'Đúng bằng trung bình'
+  return diff > 0 ? `Hơn trung bình ${diff} cuộc` : `Ít hơn trung bình ${-diff} cuộc`
 }
 
 /** Inside a sentence: "4 việc từ cuộc gọi thật trong 7 ngày qua". */

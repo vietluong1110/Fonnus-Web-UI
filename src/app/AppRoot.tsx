@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useSession } from '../auth/SessionProvider'
-import { navigate, useAppPath } from '../hooks/useRoute'
+import { appHref, navigate, useAppPath } from '../hooks/useRoute'
 import { AppShell, activeNav } from './AppShell'
 import { ConfigProvider } from './letan/store'
 import { LeTanPage } from './letan/LeTanPage'
@@ -30,6 +30,14 @@ export function AppRoot() {
   useEffect(() => {
     const nav = activeNav(path)
     document.title = `${nav.label} · Fonnus`
+  }, [path])
+
+  // Tổng quan lives at `#/app/tong-quan`, like every other page at its own
+  // segment. A bare `#/app` is still the door sign-in, the OAuth return URI and
+  // old bookmarks use, so it forwards — with `replace`, not a new entry, or
+  // Back would land on a hash that immediately bounces forward again.
+  useEffect(() => {
+    if (!path.length) window.location.replace(appHref('tong-quan'))
   }, [path])
 
   // The landing page scrolls smoothly between its anchors; inside the app

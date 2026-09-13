@@ -462,9 +462,13 @@ copy.
   380px rail, because every screen there ends in something you can hear. There is
   nothing to try out on a page about calls that already happened, so the rail goes and
   the width is the page's. What the rail would have carried — how ready she is — is a
-  **band across the top**: the number, the level being worked towards, and the single
-  best next job. The rest of the readiness panel stays on Lễ tân, because the same meter
-  drawn twice in a product is one meter too many.
+  **band across the top**: the number, the level being worked towards, and **as many of
+  the next jobs as the band has room for**, each its own pill, the best one filled. What
+  does not fit folds into `+N việc`, which opens the full list on Lễ tân. The count is
+  measured, not set per breakpoint — a Vietnamese job title runs from 12 to 30
+  characters, so "three on desktop" either clips or leaves a hole. (The first version
+  showed one job beside a "Làm ngay" button for that same job, and left 350px of empty
+  band beside a line that said *còn 4 việc*.)
 - **Every figure carries a comparison, or it is not a figure.** Eighteen calls is good
   or bad only against last Sunday. `today` compares against the *same weekday* a week
   ago, never yesterday — a clinic's Sunday and its Tuesday are different businesses, and
@@ -500,6 +504,19 @@ stays solid.
 
 There is no "mọi thứ đều ổn" card. An empty queue is the normal state of a well-set-up
 clinic, and a card saying so would sit there for ever reporting nothing.
+
+**Every page has its own address.** Tổng quan is `#/app/tong-quan`, like `#/app/cuoc-goi`;
+a bare `#/app` forwards there with `location.replace`, because it is still the door that
+sign-in, the OAuth return URI and old bookmarks use — and a pushed entry would make Back
+land on a hash that bounces straight forward again.
+
+**A chart answers the pointer at once, and the same way everywhere.** No hover delay on a
+plot — the tip is the reading, not an interruption — the whole slot is the target, the
+mark lights and its neighbours step back, and one night-paper tip glides between marks.
+The rules and the reason for each are in `docs/visual-language.md` § Charts; the one to
+remember when building the next reporting page is that **a tip adds exactly one thing
+the chart does not already print** — against the average, *cứ 10 cuộc có 3 cuộc* — or it
+is the same number shown twice.
 
 > **Check:** cover the charts. Does the page still say what to do next? Cover the queue.
 > Does the page still say what happened? If either answer is no, one half is carrying the
@@ -564,6 +581,21 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-13 (later) — Tổng quan, second pass on the owner's audit.** Four things the
+  owner saw and three measured: the intent bars were 86px and 94px wide in the same card
+  (the figure beside each bar set its width); the day chart's counts sat in a row up to
+  48px above short bars; thirty days of 24px bars at a 2px gap were a barcode with a label
+  on every bar; the readiness band had a 352px spacer. Also found: the sparkline's end dot
+  rendered as a flattened lozenge, because a `<circle>` inside `preserveAspectRatio="none"`
+  stretches with the box (dots are now positioned elements over the line); the 30-day tile
+  foot read *Đông nhất · 28 cuộc* with no day, because the column label it borrowed was
+  blank on a dense axis; and the three bottom cards' notes hung at three heights (now
+  `margin-top: auto`). The chart kit moved to `app/ui/Charts.tsx` so the next reporting
+  page takes the same hover model rather than a copy. One trap: the day's in-progress
+  column must stay out of the average and out of "quietest day", or at nine in the morning
+  it drags the line down and wins the label every day. → §10, docs/visual-language.md §
+  Charts.
 
 - **2026-09-13 — Tổng quan, the first tab that reports.** Three directions were drawn on
   a canvas (a hero-led day, a dense stat band, a drawn 24-hour timeline); the owner picked

@@ -204,21 +204,56 @@ What follows from the ramp:
   Already the rule for meters (`--meter-track`); a bar's track is the same.
 - **Two touching marks are separated by 2px of the card showing through**, not by
   a stroke around them. A stroke is ink that is not data.
-- **Bars cap at 24px** and round only at the data end; the leftover in the slot
-  is air.
-- **Every value is readable without the picture** — on the cap, at the end of the
-  bar, or in the legend. The one exception is a grid of twenty-four hours, where
-  twenty-four numbers would be noise: those state themselves in `title` and in a
-  visually-hidden list.
+- **A column is 60% of its slot, capped at 36px**, rounded only at the data end.
+  A fixed width does not survive a change of range: 24px made seven days a row of
+  matchsticks in a 700px card and left thirty days no air between bars at all.
+- **A number sits on the mark it counts.** A column's count rides its own cap; a
+  ranked bar's count sits on its name's line, right-aligned. Never a row of
+  figures pinned to the top of the plot, where a short bar's number floats 50px
+  above it.
+- **A long series names only what is worth naming.** Past twelve columns the caps
+  go, except today, the busiest and the quietest; ticks drop to one a week, and
+  the first and last hold to the plot's edges. The rest is one hover away.
+- **Bars that are compared start and end in the same place.** A ranked list puts
+  the name and figure on one line and the bar full-width under both, at every
+  width — a bar sharing its line with a label gets whatever the label leaves.
+- **A reference line is dotted, never dashed.** Dashed is the mark for content not
+  yet filled in (ui-ux-principles §1). Its key sits in the card's head.
+- **Every value is readable without the pointer** — on the cap, on the row, or in
+  the legend. The grid of twenty-four hours is the exception, where twenty-four
+  numbers would be noise; there the tip and a visually-hidden list carry them.
 - **A legend is present whenever there are two or more parts**, because width and
   darkness alone are not identity. One series needs none — the title says what is
   plotted.
-- **Motion is the rising arc**, as a CSS transition on the bar's own length, so a
-  value that changes slides to the new one instead of restarting from zero.
+- **Motion is the rising arc.** Marks grow from the baseline when a chart arrives
+  and slide to a new length when the range changes, instead of restarting from zero.
 - **A change is a fact, not a verdict.** A delta is up or down, never green or
   red: a clinic closed for Tết took fewer calls and did nothing wrong.
 
-The pieces live in `src/app/pages/overview/Charts.tsx`.
+### Pointing at a chart
+
+One model for every chart, in `useScrub`:
+
+- **The tip appears the moment the pointer is on the plot.** The usual 300–500ms
+  wait is for hidden content that interrupts — a menu, a popover over a button. On
+  a chart the tip *is* the reading, and a delay on every bar turns a scrub into
+  wading. It stays harmless because it only ever opens inside the plot.
+- **The target is the whole slot, not the ink**, so a 6px column is as easy to hit
+  as a full one, and the gaps between marks never flicker it off.
+- **Focus plus context.** The mark under the pointer takes the full hue and a wash
+  of `--action-ghost-hover`; everything else in the chart drops to half strength.
+  A heat grid is the exception — its colour is the reading — so its cell gets a
+  ring instead.
+- **One tip, night paper and cream type**, the same object as the header's "Gọi
+  thử" label: a head (which day, which bucket), the value, and at most one line the
+  chart does not already print — against the average, or *cứ 10 cuộc có 3 cuộc*.
+  It glides from mark to mark rather than fading between them, clamps to the chart
+  so it never leaves the card on a phone, and flips below near the viewport's top.
+- **Touch:** a tap keeps its tip until the next tap elsewhere; a sideways drag
+  scrubs and a vertical one still scrolls. **Keyboard:** the chart takes focus and
+  arrow keys walk the marks; only then is the tip announced.
+
+The pieces live in `src/app/ui/Charts.tsx`.
 
 ## Do / Don't
 
