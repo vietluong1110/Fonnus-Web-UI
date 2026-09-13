@@ -409,7 +409,91 @@ a marketing page and a challenge there costs more leads than it saves. Rate-limi
 
 ---
 
-## 7. Specified later — shape only
+## 7. Insights — the Tổng quan tab
+
+### `GET /insights/overview?range=today|7d|30d`
+
+Everything that tab draws, in one response. **One call, not six**: five figures, four
+breakdowns and the attention queue are one screen and one moment, and separate requests
+would let the tiles and the charts disagree with each other while they landed.
+
+```jsonc
+{
+  "range": "7d",
+  "generated_at": "2026-09-13T00:50:11.000Z",
+
+  // Each figure carries the same span immediately before it, and a week behind it.
+  // `previous` is null for a clinic with no history — the UI then shows no delta
+  // rather than a meaningless "+100%".
+  // `trend` is ALWAYS exactly 7 daily points, oldest first, ending on the range's
+  // last day, whatever the range. Its last point must be the same partial day the
+  // figure counts, or the tile and its own sparkline disagree on screen.
+  "calls":        { "value": 120, "previous": 142, "trend": [20,15,22,16,23,24,0] },
+  "bookings":     { "value": 24,  "previous": 28,  "trend": [4,3,5,3,5,4,0] },
+  "talk_time":    { "value": 15600, "previous": 18900, "trend": [...] },  // seconds
+  "avg_duration": { "value": 130,   "previous": 133,   "trend": [...] },  // seconds
+  "after_hours":  { "value": 8,     "previous": 9,     "trend": [...] },
+
+  "by_day":  [{ "date": "2026-09-07", "count": 20 }, /* … one per day, oldest first */ ],
+  "by_hour": [0,0,0,0,0,0,1,4,9,13,14,10,6,6,12,13,12,8,6,3,3,0,0,0],  // 24, midnight first
+
+  "by_intent":   [{ "intent": "booking", "count": 43 }, /* … */ ],
+  "by_outcome":  [{ "outcome": "answered", "count": 91 }, /* … */ ],
+  "by_duration": [{ "bucket": "under_1m", "count": 28 }, /* … */ ],
+
+  "attention": [ /* below */ ]
+}
+```
+
+**Every breakdown must add up to `calls.value`.** The four of them are read together on
+one screen, and a percentage that does not reconcile with the figure above it is the
+fastest way to lose an owner's trust in the whole page. Round with largest-remainder, not
+per-slice.
+
+**Closed sets, never free text.** The frontend owns all Vietnamese copy, so these are
+machine codes and this app maps them (`src/app/pages/overview/labels.ts`):
+
+| Field | Values |
+|---|---|
+| `intent` | `booking`, `pricing`, `hours_location`, `practitioner`, `insurance_payment`, `other` |
+| `outcome` | `answered`, `transferred`, `abandoned`, `unanswered` |
+| `bucket` | `under_1m`, `1_2m`, `2_4m`, `4_6m`, `over_6m` |
+
+Anything the classifier cannot place is `other`. Do not invent a seventh intent and do not
+send a label — a server-authored sentence arrives in a voice the rest of the screen does
+not share, and there is nowhere in it to put the receptionist's name.
+
+### `attention` — what a real call turned up
+
+Each item is one row of "Cần bạn xem", and each kind carries exactly the values its
+Vietnamese sentence interpolates. **No prose, and no links**: where a row leads is the
+frontend's business, because the routes are hashes.
+
+```jsonc
+[
+  { "id": "…", "kind": "missing_price", "count": 5, "service": "Cấy ghép implant" },
+  { "id": "…", "kind": "unconfirmed_hours", "count": 3, "weekday": 0 },
+  { "id": "…", "kind": "pending_appointments", "count": 2,
+    "appointments": [{ "customer_name": "Chị Trang", "starts_at": "2026-09-15T02:30:00Z" }] },
+  { "id": "…", "kind": "after_hours_callback", "count": 4,
+    "from": "2026-09-12T13:10:00Z", "to": "2026-09-12T14:05:00Z" },
+  { "id": "…", "kind": "unanswered_question", "count": 2,
+    "question": "Có làm răng cho người đang mang thai không?" }
+]
+```
+
+`weekday` is `Date.getDay()` — Sunday 0 — matching `operating_hours_by_weekday`.
+`service` is the tenant's own `service_name` from `service_catalog`, verbatim, so the row
+names the thing the owner named.
+
+Derive these from calls against the tenant record: a caller who asked the price of a
+`service_catalog` row with no `price_from`; a caller asking about a weekday while
+`operating_hours_confirmed` is false; a turn the model could not answer. An empty array is
+normal and the card then does not render — there is no "everything is fine" row.
+
+---
+
+## 8. Specified later — shape only
 
 These have interfaces in `src/api/` so the UI can be built against them, but no agreed wire
 format. Do not implement from this section.
@@ -419,13 +503,13 @@ format. Do not implement from this section.
 | **Setup assistant chat** | Streaming (SSE) | Sends a turn, receives interleaved text deltas and structured `Partial<ReceptionistConfig>` patches. The assistant gets exactly the write authority today's canned parser has — it proposes a patch, the client applies it through the same path as a form |
 | **Voice session** | WebSocket or WebRTC | Bidirectional audio plus a transcript event stream. The client owns no codec decisions; it toggles a microphone boolean |
 | **Landing voice demo** | Cost control **first** | Unauthenticated, and every click costs Deepgram + Qwen + ElevenLabs. Needs a per-IP budget, a max duration and a kill switch before the endpoint exists. See Q21 |
-| `GET /calls` | — | The "Cuộc gọi" tab, currently a placeholder |
+| `GET /calls` | — | The "Cuộc gọi" tab, currently a placeholder. Separate from §7: that is aggregates, this is the list |
 | `GET /appointments` | — | The "Lịch hẹn" tab |
 | `GET /numbers` | — | FPT inventory pool for number provisioning; sets `assigned_phone` |
 
 ---
 
-## 8. Open questions
+## 9. Open questions
 
 The decisions above that are genuinely open are collected in
 **[`open-questions.md`](./open-questions.md)**, one per line, written so the list can be sent

@@ -1,0 +1,224 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+/* Tokens lifted verbatim from src/styles/tokens/*.css — no rounded values. */
+.app {
+  --paper: #F7EFE1; --milk: #FFFBF2; --blush: #F3DCC9; --sage: #E2E7D4; --rose: #F8E3DF;
+  --terracotta: #B85C2B; --terracotta-deep: #8A4118; --terracotta-button: #A04E1F; --cream: #FFF6E8;
+  --lemongrass: #6E7F53; --ink: #261F18; --ink-soft: #5C5248;
+  --warning: #8F6300;
+  --hairline: rgba(38,31,24,.10); --strong: rgba(38,31,24,.22); --dash: rgba(184,92,43,.40);
+  --track: rgba(184,92,43,.14); --ghost: rgba(184,92,43,.08); --hover: #FBF3E4;
+  /* One hue, five steps. The chart palette is sequential on purpose: the repo's
+     --chart-1/2/3 (terracotta / lemongrass / ink-soft) do not separate for a
+     deutan reader, so identity here comes from position and a direct label. */
+  --s1: rgba(184,92,43,.12); --s2: rgba(184,92,43,.28); --s3: rgba(184,92,43,.48);
+  --s4: rgba(184,92,43,.70); --s5: #B85C2B;
+  --display: "Baloo 2", "Be Vietnam Pro", system-ui, sans-serif;
+  --ui: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  --num: "IBM Plex Sans", "Be Vietnam Pro", system-ui, sans-serif;
+  --arc: cubic-bezier(.2,.7,.3,1);
+}
+.app.dark {
+  --paper: #221B14; --milk: #2D251C; --blush: #33291F; --sage: #2C3327; --rose: #3A2620;
+  --terracotta: #E08A50; --terracotta-deep: #E08A50; --terracotta-button: #E08A50; --cream: #221B14;
+  --lemongrass: #AFBE93; --ink: #F3E9DA; --ink-soft: rgba(243,233,218,.66);
+  --hairline: rgba(243,233,218,.10); --strong: rgba(243,233,218,.22); --dash: rgba(224,138,80,.44);
+  --track: rgba(224,138,80,.18); --ghost: rgba(224,138,80,.12); --hover: #372D22;
+  --s1: rgba(224,138,80,.14); --s2: rgba(224,138,80,.30); --s3: rgba(224,138,80,.50);
+  --s4: rgba(224,138,80,.72); --s5: #E08A50;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #F7EFE1; }
+.app {
+  font-family: var(--ui); font-size: 16px; line-height: 1.65; font-weight: 400;
+  color: var(--ink); background: var(--paper);
+  -webkit-font-smoothing: antialiased; text-wrap: pretty;
+  display: grid; grid-template-columns: 216px minmax(0, 1fr); min-height: 100vh;
+}
+a { color: var(--terracotta-deep); text-decoration: none; }
+a:hover { color: var(--terracotta); }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; font-weight: 500; }
+.eyebrow {
+  font-family: var(--ui); font-size: 12px; font-weight: 600; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--terracotta); line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ sidebar */
+.side {
+  background: var(--milk); border-right: 1px solid var(--hairline);
+  display: flex; flex-direction: column; padding: 22px 14px 18px; gap: 3px;
+}
+.brand { padding: 0 10px 20px; display: flex; align-items: center; gap: 9px; }
+.wordmark { font-family: var(--display); font-weight: 600; font-size: 21px; letter-spacing: -.03em; color: var(--ink); }
+.nav { display: flex; flex-direction: column; gap: 3px; }
+.navItem {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px;
+  font-size: 13.5px; line-height: 1.4; font-weight: 500; color: var(--ink-soft); white-space: nowrap;
+}
+.navItem.on { background: var(--terracotta); color: var(--cream); font-weight: 600; }
+.app.dark .navItem.on { color: #221B14; }
+.navDot { width: 7px; height: 7px; border-radius: 50%; background: var(--warning); flex: 0 0 auto; margin-left: auto; }
+.sideFoot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--hairline); }
+.who { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--blush); color: var(--terracotta-deep);
+  display: grid; place-items: center; font-family: var(--ui); font-weight: 600; font-size: 12.5px; flex: 0 0 auto;
+}
+.whoText { display: flex; flex-direction: column; min-width: 0; }
+.whoName { font-size: 13px; font-weight: 600; line-height: 1.35; }
+.whoMeta { font-size: 11.5px; color: var(--ink-soft); line-height: 1.35; }
+
+/* --------------------------------------------------------------- page frame */
+.main { min-width: 0; padding: 28px 36px 40px; display: flex; flex-direction: column; gap: 18px; }
+.inner { width: 100%; max-width: 1180px; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.pageHead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pageTitle { margin: 0; font-family: var(--display); font-weight: 600; font-size: 24px; line-height: 1.3; letter-spacing: -.01em; color: var(--ink); }
+.pageDate { font-size: 13px; color: var(--ink-soft); }
+.spacer { flex: 1; }
+
+/* Controls are pills. A range switch is a filter, so it wears the chip, not a tab. */
+.range { display: inline-flex; gap: 6px; }
+.rangeChip {
+  display: inline-flex; align-items: center; padding: 5px 14px; border-radius: 999px;
+  font-family: var(--ui); font-size: 12.5px; line-height: 1.5; color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--strong); background: transparent; white-space: nowrap;
+}
+.rangeChip.on { background: var(--terracotta-button); color: #FFF6E8; box-shadow: none; font-weight: 500; }
+.app.dark .rangeChip.on { color: #221B14; }
+
+/* ---------------------------------------------------------------------- card */
+.card {
+  background: var(--milk); border: 1px solid var(--hairline); border-radius: 16px;
+  padding: 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.card.tight { padding: 16px 20px; }
+.cardHead { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; }
+.cardHeadText { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-width: 0; }
+.cardTitle { margin: 0; font-family: var(--display); font-weight: 600; font-size: 17px; line-height: 1.3; color: var(--ink); }
+.cardSub { font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); }
+.cardAct { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 500; color: var(--terracotta-deep); white-space: nowrap; }
+
+/* -------------------------------------------------------- readiness strip */
+.strip {
+  background: var(--milk); border: 1px solid var(--hairline); border-radius: 16px;
+  padding: 12px 20px; display: flex; align-items: center; gap: 16px; min-width: 0;
+}
+.stripText { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.stripTitle { font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+.stripMeta { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+.stripRule { width: 1px; align-self: stretch; background: var(--hairline); margin: 2px 4px; }
+.stripJob { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.jobIcon { display: inline-flex; color: var(--ink); flex: 0 0 auto; }
+.jobText { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.jobTitle { font-size: 13px; font-weight: 500; line-height: 1.4; }
+.jobMeta { font-size: 11.5px; color: var(--ink-soft); line-height: 1.4; }
+.gain {
+  font-family: var(--num); font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600;
+  color: var(--terracotta-deep); background: var(--track); border-radius: 999px; padding: 2px 8px; flex: 0 0 auto;
+}
+.go {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 999px;
+  background: var(--terracotta-button); color: #FFF6E8; font-family: var(--ui); font-size: 13.5px;
+  font-weight: 500; line-height: 1.2; white-space: nowrap; flex: 0 0 auto;
+}
+.app.dark .go { color: #221B14; }
+
+/* --------------------------------------------------------------------- rows */
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.row {
+  display: flex; align-items: center; gap: 14px; background: var(--milk);
+  border: 1px solid var(--hairline); border-radius: 14px; padding: 14px 16px; min-width: 0;
+}
+/* Dashed means content not yet filled in (principles §1). A queue row naming a gap
+   in what Linh knows is exactly that; a row that is merely a fact stays solid. */
+.row.gap { border: 1px dashed var(--dash); }
+.rowIcon { display: inline-flex; flex: 0 0 auto; color: var(--ink); }
+.rowText { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.rowTitle { font-size: 14.5px; font-weight: 600; line-height: 1.4; }
+.rowSub { font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); }
+.row.gap .rowSub { color: var(--terracotta-deep); }
+.rowAct { display: inline-flex; align-items: center; gap: 3px; font-size: 12.5px; font-weight: 500; color: var(--terracotta-deep); white-space: nowrap; flex: 0 0 auto; }
+
+/* ------------------------------------------------------------------- figures */
+.hero { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.heroNum { font-family: var(--num); font-weight: 600; font-size: 64px; line-height: 1; letter-spacing: -.02em; color: var(--ink); }
+.heroUnit { font-size: 15px; color: var(--ink-soft); }
+.delta { display: inline-flex; align-items: center; gap: 4px; font-family: var(--num); font-variant-numeric: tabular-nums; font-size: 12.5px; font-weight: 500; color: var(--ink-soft); }
+.statNum { font-family: var(--num); font-weight: 600; font-size: 30px; line-height: 1.1; letter-spacing: -.01em; color: var(--ink); }
+.statLabel { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+.statCard { background: var(--milk); border: 1px solid var(--hairline); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.statTop { display: flex; align-items: center; gap: 8px; }
+
+/* ------------------------------------------------------------ marks & motion */
+/* The rising arc is the only motion idiom: a short lift-and-settle, staggered. */
+@keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes widen { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes lift { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.bar { transform-origin: bottom; animation: grow 520ms var(--arc) both; }
+.hbar { transform-origin: left; animation: widen 520ms var(--arc) both; }
+.up { animation: lift 320ms var(--arc) both; }
+@media (prefers-reduced-motion: reduce) { .bar, .hbar, .up { animation: none; } }
+
+.cols { display: flex; align-items: flex-end; gap: 2px; }
+.col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 0; }
+.colTrack { width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.colBar { width: 100%; max-width: 24px; border-radius: 4px 4px 0 0; background: var(--s3); }
+.colBar.now { background: var(--s5); }
+.colCap { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--ink-soft); }
+.colName { font-size: 11.5px; color: var(--ink-soft); line-height: 1.4; }
+.col.nowCol .colName, .col.nowCol .colCap { color: var(--ink); font-weight: 600; }
+.axis { height: 1px; background: var(--hairline); }
+
+/* ranked bars */
+.ranked { display: flex; flex-direction: column; gap: 11px; }
+.rank { display: grid; grid-template-columns: 168px minmax(0,1fr) 62px; align-items: center; gap: 12px; }
+.rankName { font-size: 13px; line-height: 1.4; }
+.rankTrack { height: 12px; border-radius: 999px; background: var(--track); }
+.rankFill { height: 100%; border-radius: 999px; background: var(--s5); }
+.rankVal { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--ink-soft); text-align: right; }
+
+/* hour heat: one hue, five steps, 2px surface gaps */
+.hours { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; }
+.hourCell { height: 36px; border-radius: 4px; background: var(--s1); }
+.hourAxis { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-top: 6px; }
+.hourTick { font-family: var(--num); font-size: 10.5px; color: var(--ink-soft); text-align: center; }
+
+/* stacked band: steps of one hue, separated by a 2px surface gap */
+.band { display: flex; gap: 2px; height: 16px; }
+.bandSeg { border-radius: 3px; }
+.bandSeg:first-child { border-radius: 999px 3px 3px 999px; }
+.bandSeg:last-child { border-radius: 3px 999px 999px 3px; }
+.legend { display: flex; flex-direction: column; gap: 8px; }
+.legendRow { display: grid; grid-template-columns: 10px minmax(0,1fr) auto; align-items: center; gap: 10px; font-size: 12.5px; }
+.swatch { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+.legendVal { font-family: var(--num); font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+
+.grid12 { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 20px; }
+.s3 { grid-column: span 3; } .s4 { grid-column: span 4; } .s5c { grid-column: span 5; }
+.s6 { grid-column: span 6; } .s7 { grid-column: span 7; } .s8 { grid-column: span 8; } .s12 { grid-column: span 12; }
+
+/* ------------------------------------------------------------------- phone */
+/* Source order puts this after `.app`, so the same specificity wins the tie. */
+.phone { display: flex; flex-direction: column; min-height: 100vh; }
+.phoneMain { padding: 18px 16px 26px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.phoneHead { display: flex; flex-direction: column; gap: 10px; }
+.phoneHead .pageTitle { font-size: 21px; }
+.rangeScroll { display: flex; gap: 6px; }
+.tabbar {
+  position: sticky; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr);
+  background: var(--milk); border-top: 1px solid var(--hairline); padding: 9px 4px 12px;
+}
+.tabItem { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink-soft); font-size: 10.5px; line-height: 1.3; padding: 3px 0; }
+.tabItem.on { color: var(--terracotta-deep); font-weight: 600; }
+
+/* At phone width every stacked container restates `align-items: stretch` —
+   a grid instruction left on a flex column sizes children to max-content. */
+.phone .strip { flex-wrap: wrap; align-items: center; row-gap: 12px; gap: 12px; padding: 14px 16px; }
+.phone .stripRule { display: none; }
+.phone .stripTitle { font-size: 13px; }
+.phone .go { padding: 8px 13px; font-size: 12.5px; }
+.phone .row { align-items: flex-start; gap: 12px; padding: 13px 14px; flex-wrap: wrap; }
+.phone .rank { grid-template-columns: minmax(0, 1fr) 62px; gap: 8px 10px; }
+.phone .card { padding: 18px 16px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }

@@ -451,7 +451,80 @@ column, same gutter, so the two kinds of page share one geometry.
 
 ---
 
-## 10. Copy
+## 10. A page that reports, not a page that asks
+
+`Tổng quan` is the first screen in the app whose subject is not the record. Everything
+in Lễ tân is a question being answered; this one is an answer being read. Four things
+follow, and they are what every later reporting tab — `Cuộc gọi`, `Lịch hẹn` — should
+copy.
+
+- **The frame is the same; the rail is not.** A Lễ tân page is a work column beside a
+  380px rail, because every screen there ends in something you can hear. There is
+  nothing to try out on a page about calls that already happened, so the rail goes and
+  the width is the page's. What the rail would have carried — how ready she is — is a
+  **band across the top**: the number, the level being worked towards, and **as many of
+  the next jobs as the band has room for**, each its own pill, the best one filled. What
+  does not fit folds into `+N việc`, which opens the full list on Lễ tân. The count is
+  measured, not set per breakpoint — a Vietnamese job title runs from 12 to 30
+  characters, so "three on desktop" either clips or leaves a hole. (The first version
+  showed one job beside a "Làm ngay" button for that same job, and left 350px of empty
+  band beside a line that said *còn 4 việc*.)
+- **Every figure carries a comparison, or it is not a figure.** Eighteen calls is good
+  or bad only against last Sunday. `today` compares against the *same weekday* a week
+  ago, never yesterday — a clinic's Sunday and its Tuesday are different businesses, and
+  a Monday measured against Sunday reports a boom every week. When there is no history
+  the delta is **absent**, not `+100%`.
+- **A change is a fact, not a verdict.** No green, no red. A clinic closed for Tết took
+  fewer calls and did nothing wrong; a product that paints that red is scolding an owner
+  for a holiday.
+- **Two zeroes are two screens.** A clinic that has never taken a call needs to be told
+  what will appear here. A clinic opening the page at seven in the morning has simply not
+  been rung yet, knows what the page is, and wants the week — telling *them* "khi số
+  Fonnus đổ chuông…" reads as the product having forgotten them. The week behind the
+  figure tells the two apart, which is why it is on every response whatever the range.
+- **Four figures side by side must each say something different underneath.** The first
+  pass gave all four the same footnote — *so với 7 ngày trước đó* — which is one fact
+  printed four times. The comparison moved into the delta's tooltip, where it belongs,
+  and each foot now carries something only that tile knows: the busiest day, the share
+  of calls that became appointments, the hours that count as "ngoài giờ".
+- **Two numbers about the same thing must never disagree, and they will.** The figure
+  read `120` while its own sparkline summed to `132`, because the trend counted a whole
+  day the figure had only reached the middle of. Any figure and any chart drawn from the
+  same data need one source and one cut-off. Same rule as §9's ring and rows; it is just
+  easier to break when the two are a number and a picture rather than two numbers.
+
+**And the queue is what makes the page worth opening.** "Cần bạn xem" is not a checklist
+— it is a list of gaps *real callers found*, each one press from the field that closes
+it. A readiness meter says an owner is at 68%; *"5 khách hỏi giá cấy ghép implant — Linh
+chưa có giá để đọc"* says what 68% costs them, in their own callers' words, and that is
+the whole argument for filling anything in. §1 still decides the clothes: a row naming
+something she does not know is content not yet filled in and wears the dashed edge; a row
+that is only a fact about the day — two appointments waiting, four calls to return —
+stays solid.
+
+There is no "mọi thứ đều ổn" card. An empty queue is the normal state of a well-set-up
+clinic, and a card saying so would sit there for ever reporting nothing.
+
+**Every page has its own address.** Tổng quan is `#/app/tong-quan`, like `#/app/cuoc-goi`;
+a bare `#/app` forwards there with `location.replace`, because it is still the door that
+sign-in, the OAuth return URI and old bookmarks use — and a pushed entry would make Back
+land on a hash that bounces straight forward again.
+
+**A chart answers the pointer at once, and the same way everywhere.** No hover delay on a
+plot — the tip is the reading, not an interruption — the whole slot is the target, the
+mark lights and its neighbours step back, and one night-paper tip glides between marks.
+The rules and the reason for each are in `docs/visual-language.md` § Charts; the one to
+remember when building the next reporting page is that **a tip adds exactly one thing
+the chart does not already print** — against the average, *cứ 10 cuộc có 3 cuộc* — or it
+is the same number shown twice.
+
+> **Check:** cover the charts. Does the page still say what to do next? Cover the queue.
+> Does the page still say what happened? If either answer is no, one half is carrying the
+> other.
+
+---
+
+## 11. Copy
 
 All of it Vietnamese, all of it owned by the frontend. Code, comments and this document
 are English.
@@ -508,6 +581,43 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-13 (later) — Tổng quan, second pass on the owner's audit.** Four things the
+  owner saw and three measured: the intent bars were 86px and 94px wide in the same card
+  (the figure beside each bar set its width); the day chart's counts sat in a row up to
+  48px above short bars; thirty days of 24px bars at a 2px gap were a barcode with a label
+  on every bar; the readiness band had a 352px spacer. Also found: the sparkline's end dot
+  rendered as a flattened lozenge, because a `<circle>` inside `preserveAspectRatio="none"`
+  stretches with the box (dots are now positioned elements over the line); the 30-day tile
+  foot read *Đông nhất · 28 cuộc* with no day, because the column label it borrowed was
+  blank on a dense axis; and the three bottom cards' notes hung at three heights (now
+  `margin-top: auto`). The chart kit moved to `app/ui/Charts.tsx` so the next reporting
+  page takes the same hover model rather than a copy. One trap: the day's in-progress
+  column must stay out of the average and out of "quietest day", or at nine in the morning
+  it drags the line down and wins the label every day. → §10, docs/visual-language.md §
+  Charts.
+
+- **2026-09-13 — Tổng quan, the first tab that reports.** Three directions were drawn on
+  a canvas (a hero-led day, a dense stat band, a drawn 24-hour timeline); the owner picked
+  the stat band. Building it turned up more about *numbers* than about layout. The one
+  finding worth carrying everywhere: **`--chart-1/2/3` are not a categorical palette** —
+  run through a CVD validator, terracotta against lemongrass separates by ΔE 5.4 for a
+  deutan reader (floor 8) and 13.9 for normal vision (floor 15), so two such bars are the
+  same bar to a common form of colour blindness. Charts are now one hue in five steps
+  (`--chart-step-1…5`), which is what the readiness meter had already been doing alone.
+  Three bugs that are each a rule above: a figure and its own sparkline disagreed (120 vs
+  132) because the trend counted a whole day the figure had only half of; four tiles
+  printed the same footnote; and the empty state told a two-hundred-day-old clinic the
+  first-day story at seven in the morning. Two smaller traps: a grid item spanning
+  `1 / -1` pushes whatever follows it in the DOM onto a *third* row, so a phone layout
+  that wants "name and value, then bar" has to place all three explicitly; and the queue
+  rows are the **second** copy of `Section.module.css`'s `.rowLink` geometry — a third
+  use should move that box into `app/ui`, the way the section frame moved once Kỹ năng
+  needed it. Also noted and **not** fixed: `[data-theme="dark"]` exists in the tokens but
+  nothing in the app sets it, and all 90 colour declarations under `src/app` use the raw
+  `--ink` / `--ink-soft` rather than the `--text-body` / `--text-muted` aliases that
+  flip — so dark mode is currently unreachable *and* would not work if it were. That is a
+  repo-wide sweep, not this page's to make. → §10, and docs/visual-language.md § Charts.
 
 - **2026-09-11 — the assistant goes, the rail measures.** The setup assistant cost more to
   build than it saved, and removing it left a 380px hole on every hub. Three layouts were

@@ -1,0 +1,9 @@
+# Build output of build.mjs — regenerate with `node build.mjs`.
+*.dc.html
+
+# The seeded Claude Design canvas: ~2.8 MB of editor payload wrapped around the
+# artboards above. It is published, not stored. Re-seed with seed-canvas.mjs.
+tong-quan-dashboard.html
+
+# The static preview harness writes here (`node preview.mjs && node sheet.mjs`).
+_preview/

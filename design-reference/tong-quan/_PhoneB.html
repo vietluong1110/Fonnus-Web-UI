@@ -1,0 +1,219 @@
+<div class="{{theme}} phone">
+  <main class="phoneMain">
+
+    <div class="phoneHead">
+      <div style="display:flex; align-items:baseline; gap:10px">
+        <h1 class="pageTitle">Tổng quan</h1>
+        <span class="pageDate">CN, 13/09</span>
+      </div>
+      <div class="rangeScroll">
+        <span class="rangeChip on">Hôm nay</span>
+        <span class="rangeChip">7 ngày</span>
+        <span class="rangeChip">30 ngày</span>
+      </div>
+    </div>
+
+    <div class="strip up" style="animation-delay:40ms">
+      <svg width="42" height="42" viewBox="0 0 46 46" aria-hidden="true" style="flex:0 0 auto">
+        <circle cx="23" cy="23" r="20" fill="none" stroke="var(--track)" stroke-width="5"/>
+        <circle cx="23" cy="23" r="20" fill="none" stroke="var(--terracotta)" stroke-width="5"
+                stroke-linecap="round" stroke-dasharray="85.5 125.7" transform="rotate(-90 23 23)"/>
+        <text x="23" y="27" text-anchor="middle" font-family="IBM Plex Sans, sans-serif"
+              font-size="13" font-weight="600" fill="var(--ink)">68</text>
+      </svg>
+      <span class="stripText" style="flex:1">
+        <span class="stripTitle">Linh đã sẵn sàng 68%</span>
+        <span class="stripMeta">Thêm giá cho 6 dịch vụ · +4%</span>
+      </span>
+      <span class="go" style="padding:7px 14px; font-size:13px">Làm ngay @icon(arrow-right,16)</span>
+    </div>
+
+    <!-- The band folds to two columns; every tile keeps its number, its
+         comparison and its trend, so nothing is dropped on a phone. -->
+    <div class="pair">
+      <div class="statCard up" style="animation-delay:90ms; padding:16px; gap:6px">
+        <span class="statTop">@icon(answered,18) <span class="statLabel">Cuộc gọi</span></span>
+        <span style="display:flex; align-items:baseline; gap:6px">
+          <span class="statNum" style="font-size:28px">18</span>
+          <span class="delta">@icon(arrow-up,16) +3</span>
+        </span>
+        <svg class="spark" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 12.9 L20 21.6 L40 6.4 L60 17.3 L80 2 L100 8.5 L120 19.5" fill="none"
+                stroke="var(--s3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          <circle cx="120" cy="19.5" r="4" fill="var(--terracotta)" stroke="var(--milk)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+
+      <div class="statCard up" style="animation-delay:120ms; padding:16px; gap:6px">
+        <span class="statTop">@icon(appointment,18) <span class="statLabel">Lịch hẹn</span></span>
+        <span style="display:flex; align-items:baseline; gap:6px">
+          <span class="statNum" style="font-size:28px">4</span>
+          <span class="delta">@icon(arrow-up,16) +1</span>
+        </span>
+        <svg class="spark" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 15 L20 21 L40 6 L60 11 L80 2 L100 8 L120 13" fill="none"
+                stroke="var(--s3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          <circle cx="120" cy="13" r="4" fill="var(--terracotta)" stroke="var(--milk)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+
+      <div class="statCard up" style="animation-delay:150ms; padding:16px; gap:6px">
+        <span class="statTop">@icon(time-saved,18) <span class="statLabel">TB mỗi cuộc</span></span>
+        <span class="statNum" style="font-size:28px">2p 24s</span>
+        <svg class="spark" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 9 L20 12 L40 8 L60 14 L80 11 L100 16 L120 14" fill="none"
+                stroke="var(--s3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          <circle cx="120" cy="14" r="4" fill="var(--terracotta)" stroke="var(--milk)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+
+      <div class="statCard up" style="animation-delay:180ms; padding:16px; gap:6px">
+        <span class="statTop">@icon(after-hours,18) <span class="statLabel">Ngoài giờ</span></span>
+        <span style="display:flex; align-items:baseline; gap:6px">
+          <span class="statNum" style="font-size:28px">6</span>
+          <span class="delta">33%</span>
+        </span>
+        <svg class="spark" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 18 L20 20 L40 14 L60 17 L80 10 L100 12 L120 7" fill="none"
+                stroke="var(--s3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          <circle cx="120" cy="7" r="4" fill="var(--terracotta)" stroke="var(--milk)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+    </div>
+
+    <section class="card up" style="animation-delay:220ms">
+      <div class="cardHead">
+        <div class="cardHeadText">
+          <h3 class="cardTitle">Cuộc gọi theo ngày</h3>
+          <span class="cardSub">7 ngày · 148 cuộc</span>
+        </div>
+      </div>
+      <div class="cols" style="height:140px">
+        <div class="col"><span class="colCap">21</span><div class="colTrack" style="height:104px"><div class="colBar bar" style="height:81%; animation-delay:240ms"></div></div><span class="colName">T2</span></div>
+        <div class="col"><span class="colCap">17</span><div class="colTrack" style="height:104px"><div class="colBar bar" style="height:65%; animation-delay:275ms"></div></div><span class="colName">T3</span></div>
+        <div class="col"><span class="colCap">24</span><div class="colTrack" style="height:104px"><div class="colBar bar" style="height:92%; animation-delay:310ms"></div></div><span class="colName">T4</span></div>
+        <div class="col"><span class="colCap">19</span><div class="colTrack" style="height:104px"><div class="colBar bar" style="height:73%; animation-delay:345ms"></div></div><span class="colName">T5</span></div>
+        <div class="col"><span class="colCap">26</span><div class="colTrack" style="height:104px"><div class="colBar bar" style="height:100%; animation-delay:380ms"></div></div><span class="colName">T6</span></div>
+        <div class="col"><span class="colCap">23</span><div class="colTrack" style="height:104px"><div class="colBar bar" style="height:88%; animation-delay:415ms"></div></div><span class="colName">T7</span></div>
+        <div class="col nowCol"><span class="colCap">18</span><div class="colTrack" style="height:104px"><div class="colBar now bar" style="height:69%; animation-delay:450ms"></div></div><span class="colName">CN</span></div>
+      </div>
+      <div class="axis"></div>
+    </section>
+
+    <section class="card up" style="animation-delay:260ms">
+      <div class="cardHead">
+        <div class="cardHeadText">
+          <h3 class="cardTitle">Khách gọi để làm gì</h3>
+        </div>
+      </div>
+      <div class="ranked">
+        <div class="rank"><span class="rankName">Đặt hoặc đổi lịch hẹn</span><span class="rankVal">52</span><span class="rankTrack" style="grid-column:1/-1"><span class="rankFill hbar" style="width:100%; display:block; animation-delay:280ms"></span></span></div>
+        <div class="rank"><span class="rankName">Hỏi giá dịch vụ</span><span class="rankVal">38</span><span class="rankTrack" style="grid-column:1/-1"><span class="rankFill hbar" style="width:73%; display:block; animation-delay:315ms"></span></span></div>
+        <div class="rank"><span class="rankName">Hỏi giờ mở cửa, địa chỉ</span><span class="rankVal">24</span><span class="rankTrack" style="grid-column:1/-1"><span class="rankFill hbar" style="width:46%; display:block; animation-delay:350ms"></span></span></div>
+        <div class="rank"><span class="rankName">Hỏi về bác sĩ</span><span class="rankVal">14</span><span class="rankTrack" style="grid-column:1/-1"><span class="rankFill hbar" style="width:27%; display:block; animation-delay:385ms"></span></span></div>
+        <div class="rank"><span class="rankName">BHYT và thanh toán</span><span class="rankVal">11</span><span class="rankTrack" style="grid-column:1/-1"><span class="rankFill hbar" style="width:21%; display:block; animation-delay:420ms"></span></span></div>
+        <div class="rank"><span class="rankName">Việc khác</span><span class="rankVal">9</span><span class="rankTrack" style="grid-column:1/-1"><span class="rankFill hbar" style="width:17%; display:block; animation-delay:455ms"></span></span></div>
+      </div>
+    </section>
+
+    <section class="card up" style="animation-delay:300ms">
+      <div class="cardHead">
+        <div class="cardHeadText">
+          <h3 class="cardTitle">Cuộc gọi kéo dài bao lâu</h3>
+          <span class="cardSub">TB 2p 24s</span>
+        </div>
+      </div>
+      <div class="cols" style="height:112px">
+        <div class="col"><span class="colCap">34</span><div class="colTrack" style="height:76px"><div class="colBar bar" style="height:74%; background:var(--s3); animation-delay:320ms"></div></div><span class="colName">&lt;1p</span></div>
+        <div class="col"><span class="colCap">41</span><div class="colTrack" style="height:76px"><div class="colBar bar" style="height:89%; background:var(--s4); animation-delay:350ms"></div></div><span class="colName">1–2p</span></div>
+        <div class="col"><span class="colCap">46</span><div class="colTrack" style="height:76px"><div class="colBar bar" style="height:100%; background:var(--s5); animation-delay:380ms"></div></div><span class="colName">2–4p</span></div>
+        <div class="col"><span class="colCap">19</span><div class="colTrack" style="height:76px"><div class="colBar bar" style="height:41%; background:var(--s3); animation-delay:410ms"></div></div><span class="colName">4–6p</span></div>
+        <div class="col"><span class="colCap">8</span><div class="colTrack" style="height:76px"><div class="colBar bar" style="height:17%; background:var(--s2); animation-delay:440ms"></div></div><span class="colName">&gt;6p</span></div>
+      </div>
+      <div class="axis"></div>
+    </section>
+
+    <section class="card up" style="animation-delay:340ms">
+      <div class="cardHead">
+        <div class="cardHeadText">
+          <h3 class="cardTitle">Giờ máy reo nhiều nhất</h3>
+          <span class="cardSub">trung bình 7 ngày</span>
+        </div>
+      </div>
+      <div>
+        <div class="hours" style="gap:1.5px">
+          <span class="hourCell" style="height:30px"></span><span class="hourCell" style="height:30px"></span><span class="hourCell" style="height:30px"></span>
+          <span class="hourCell" style="height:30px"></span><span class="hourCell" style="height:30px"></span><span class="hourCell" style="height:30px"></span>
+          <span class="hourCell" style="height:30px"></span>
+          <span class="hourCell" style="height:30px; background:var(--s2)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s4)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s5)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s4)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s3)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s2)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s2)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s4)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s5)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s4)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s3)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s2)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s2)"></span>
+          <span class="hourCell" style="height:30px; background:var(--s2)"></span>
+          <span class="hourCell" style="height:30px"></span><span class="hourCell" style="height:30px"></span><span class="hourCell" style="height:30px"></span>
+        </div>
+        <div class="hourAxis" style="gap:1.5px">
+          <span class="hourTick">0</span><span></span><span></span><span></span><span></span><span></span>
+          <span class="hourTick">6</span><span></span><span></span><span></span><span></span><span></span>
+          <span class="hourTick">12</span><span></span><span></span><span></span><span></span><span></span>
+          <span class="hourTick">18</span><span></span><span></span><span></span><span></span>
+          <span class="hourTick">23</span>
+        </div>
+      </div>
+      <span class="cardSub">Đông nhất <b style="color:var(--ink)">9:00</b> và <b style="color:var(--ink)">15:00</b>.</span>
+    </section>
+
+    <section class="card up" style="animation-delay:380ms">
+      <div class="cardHead">
+        <div class="cardHeadText">
+          <h3 class="cardTitle">Cần bạn xem</h3>
+          <span class="cardSub">4 việc · 7 ngày qua</span>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row gap">
+          <span class="rowIcon" style="margin-top:2px">@icon(price,20)</span>
+          <span class="rowText">
+            <span class="rowTitle">5 khách hỏi giá niềng răng trong suốt</span>
+            <span class="rowSub">Linh chưa có giá để đọc</span>
+            <span class="rowAct" style="margin-top:4px">Thêm giá @icon(chevron-right,16)</span>
+          </span>
+        </div>
+        <div class="row gap">
+          <span class="rowIcon" style="margin-top:2px">@icon(hours,20)</span>
+          <span class="rowText">
+            <span class="rowTitle">3 khách hỏi chủ nhật có làm không</span>
+            <span class="rowSub">Giờ chủ nhật bạn chưa xác nhận</span>
+            <span class="rowAct" style="margin-top:4px">Xác nhận giờ @icon(chevron-right,16)</span>
+          </span>
+        </div>
+        <div class="row">
+          <span class="rowIcon" style="margin-top:2px">@icon(appointment,20)</span>
+          <span class="rowText">
+            <span class="rowTitle">2 lịch hẹn chờ bạn xác nhận</span>
+            <span class="rowSub">Chị Trang 9:30 T3 · anh Dũng 15:00 T4</span>
+            <span class="rowAct" style="margin-top:4px">Mở lịch hẹn @icon(chevron-right,16)</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar">
+    <span class="tabItem on">@icon(overview,20) Tổng quan</span>
+    <span class="tabItem">@icon(answered,20) Cuộc gọi</span>
+    <span class="tabItem">@icon(appointment,20) Lịch hẹn</span>
+    <span class="tabItem">@icon(caller,20) Lễ tân</span>
+    <span class="tabItem">@icon(menu,20) Thêm</span>
+  </nav>
+</div>

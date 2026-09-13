@@ -16,6 +16,7 @@ import type {
   ReceptionistConfig,
   SpeakingSpeed,
   VoiceId,
+  Weekday,
 } from '../app/letan/model'
 
 /** Every method takes this, so a caller can cancel on unmount. */
@@ -322,6 +323,104 @@ export interface VoiceApi {
 }
 
 // ---------------------------------------------------------------------------
+// Insights — what the Tổng quan tab reads
+// ---------------------------------------------------------------------------
+
+/** The period the whole page is scoped to. `today` is midnight to now. */
+export type InsightRange = 'today' | '7d' | '30d'
+
+/**
+ * One figure with the context that makes it mean something: the same span
+ * immediately before it, and a short trend behind it.
+ */
+export interface InsightMetric {
+  value: number
+  /** `null` for a clinic with no history yet — the tile then shows no delta. */
+  previous: number | null
+  /**
+   * Exactly seven points, one per day, oldest first, ending on the range's last
+   * day — whatever the range. Thirty columns inside a 260px tile are a texture,
+   * not a trend, so the tile always draws a week and the range only changes the
+   * figure above it.
+   */
+  trend: number[]
+}
+
+/**
+ * Why the caller rang. A closed set: the backend classifies, and this app owns
+ * every Vietnamese word for it (`pages/overview/labels.ts`). Anything the
+ * classifier cannot place is `other` — never a free-text label, which would be
+ * server-authored copy on screen.
+ */
+export type CallIntent =
+  | 'booking'
+  | 'pricing'
+  | 'hours_location'
+  | 'practitioner'
+  | 'insurance_payment'
+  | 'other'
+
+/** How the call ended. `unanswered` is the one that feeds `attention`. */
+export type CallOutcome = 'answered' | 'transferred' | 'abandoned' | 'unanswered'
+
+export type DurationBucket = 'under_1m' | '1_2m' | '2_4m' | '4_6m' | 'over_6m'
+
+/**
+ * One line of "Cần bạn xem" — something a real call turned up that the owner
+ * can act on. A union rather than a `{ kind, text }` pair on purpose: each
+ * kind carries exactly the values its Vietnamese sentence interpolates, so the
+ * server never sends prose and the frontend never has to parse any.
+ *
+ * Where a row leads is this app's business, not the backend's — the routes are
+ * hashes and they belong in `labels.ts`, not in a response.
+ */
+export type AttentionItem =
+  /** Callers asked the price of a service that has none in `service_catalog`. */
+  | { id: string; kind: 'missing_price'; count: number; service: string }
+  /** Callers asked about a weekday whose hours the owner has not confirmed. */
+  | { id: string; kind: 'unconfirmed_hours'; count: number; weekday: Weekday }
+  /** Held by the receptionist, still waiting on the clinic. */
+  | {
+      id: string
+      kind: 'pending_appointments'
+      count: number
+      appointments: { customer_name: string; starts_at: string }[]
+    }
+  /** Calls outside opening hours that nobody has returned. ISO datetimes. */
+  | { id: string; kind: 'after_hours_callback'; count: number; from: string; to: string }
+  /** A question she had no answer for, in the caller's own words. */
+  | { id: string; kind: 'unanswered_question'; count: number; question: string }
+
+export interface InsightsOverview {
+  range: InsightRange
+  /** ISO. The page dates itself from this rather than from the browser clock. */
+  generated_at: string
+
+  calls: InsightMetric
+  bookings: InsightMetric
+  /** Seconds of talk time across the range — "bạn không phải nghe máy". */
+  talk_time: InsightMetric
+  /** Seconds. */
+  avg_duration: InsightMetric
+  after_hours: InsightMetric
+
+  /** One entry per day in the range, oldest first. ISO dates. */
+  by_day: { date: string; count: number }[]
+  /** 24 numbers, midnight first: the average day inside the range. */
+  by_hour: number[]
+  by_intent: { intent: CallIntent; count: number }[]
+  by_outcome: { outcome: CallOutcome; count: number }[]
+  by_duration: { bucket: DurationBucket; count: number }[]
+
+  attention: AttentionItem[]
+}
+
+export interface InsightsApi {
+  /** `GET /insights/overview?range=…` — everything the Tổng quan tab draws, in one call. */
+  overview(range: InsightRange, opts?: Signal): Promise<InsightsOverview>
+}
+
+// ---------------------------------------------------------------------------
 // Leads
 // ---------------------------------------------------------------------------
 
@@ -346,9 +445,18 @@ export interface FonnusApi {
   assistant: AssistantApi
   receptionist: ReceptionistApi
   voice: VoiceApi
+  insights: InsightsApi
   leads: LeadsApi
 }
 
 /** The switchable groups. Keep in sync with `FonnusApi`'s keys. */
-export const API_GROUPS = ['auth', 'tenant', 'assistant', 'receptionist', 'voice', 'leads'] as const
+export const API_GROUPS = [
+  'auth',
+  'tenant',
+  'assistant',
+  'receptionist',
+  'voice',
+  'insights',
+  'leads',
+] as const
 export type ApiGroup = (typeof API_GROUPS)[number]
