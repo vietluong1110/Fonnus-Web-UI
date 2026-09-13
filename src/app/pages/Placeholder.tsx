@@ -4,7 +4,7 @@ import { appHref } from '../../hooks/useRoute'
 import { Card, ui } from '../ui'
 
 /*
- * The four tabs that are neither Tổng quan nor Lễ tân. They exist so the
+ * The tabs that are not built yet — Cuộc gọi, Số điện thoại, Cài đặt. They exist so the
  * sidebar is honest about the app's shape; the screens themselves come after
  * the receptionist is configurable. Copy states the fact and points at the
  * tab that configures her.
@@ -19,7 +19,6 @@ type Art = { shape: ShapeName } | { icon: IconName }
 
 const BLURB: Record<string, { art: Art; lede: string }> = {
   'Cuộc gọi': { art: { shape: 'always-on' }, lede: 'Danh sách cuộc gọi, bản ghi âm và tóm tắt từng cuộc.' },
-  'Lịch hẹn': { art: { shape: 'appointment-grid' }, lede: 'Lịch hẹn Linh đã giữ cho khách, theo ngày và theo bác sĩ.' },
   'Số điện thoại': { art: { icon: 'incoming' }, lede: 'Số phòng khám đang chuyển tiếp, số Fonnus trong gói, và thuê thêm số mới.' },
   'Cài đặt': { art: { icon: 'settings' }, lede: 'Tài khoản, gói và thanh toán, thông báo, bảo mật.' },
 }

@@ -11,6 +11,7 @@
  * change that document in the same commit.
  */
 import type {
+  BookingConfirmationChannel,
   IndustryVertical,
   KnowledgeFile,
   ReceptionistConfig,
@@ -421,6 +422,109 @@ export interface InsightsApi {
 }
 
 // ---------------------------------------------------------------------------
+// Appointments — what the Lịch hẹn tab reads
+// ---------------------------------------------------------------------------
+
+/**
+ * Where an appointment stands.
+ *
+ * - `held` — inside the receptionist's booking rules. Nothing for the clinic to do.
+ * - `pending` — a time she may not give away herself; she noted it, the clinic decides.
+ * - `arrived` / `no_show` — marked by the front desk, the second only after the start.
+ * - `cancelled` — by the caller on a later call, or by the clinic.
+ */
+export type AppointmentStatus = 'held' | 'pending' | 'arrived' | 'no_show' | 'cancelled'
+
+/** Why a `pending` appointment waits. A machine code; this app writes the sentence. */
+export type PendingReason = 'outside_booking_hours' | 'over_daily_limit'
+
+/**
+ * What was sent to the caller after booking. `failed` is the one the clinic is
+ * told about — a number with no Zalo, a message that bounced. `informed` is the
+ * clinic saying it rang the caller itself.
+ */
+export type ConfirmationState = 'sent' | 'failed' | 'not_sent' | 'informed'
+
+/**
+ * One appointment the receptionist booked. Only hers: staff-booked appointments
+ * arrive when the clinic's own software is synced, and are not in this contract.
+ *
+ * Names, notes and the service are recorded content — the tenant's own words
+ * and the caller's — so they come back verbatim. Every sentence around them is
+ * this app's (`pages/appointments/labels.ts`).
+ */
+export interface Appointment {
+  id: string
+  /** ISO datetime. */
+  starts_at: string
+  duration_min: number
+  status: AppointmentStatus
+  /** Set when, and only when, `status` is `pending`. */
+  pending_reason: PendingReason | null
+  /** A caller rang back to move it. She never moves a booking herself. ISO datetime. */
+  change_request: { starts_at: string } | null
+  /** The tenant's own `service_name` from `service_catalog`, as it was when booked. */
+  service_name: string
+  /** The price she read out, from the same row. `null` when the list had none. */
+  price_from: number | null
+  price_to: number | null
+  /** The `practitioner_roster` row, its name as the roster wrote it ("BS Hùng"). `null`: no preference. */
+  practitioner: { id: string; name: string } | null
+  /** As she wrote it down, salutation included — "Chị Trang", "Bé Bảo An". */
+  patient_name: string
+  /** Who rang, when the caller booked for somebody else — a parent for a child. */
+  booked_by: string | null
+  phone: string
+  /** Visits before this one. `0` is a new patient. */
+  prior_visits: number
+  /** What she noted on the call, in the caller's words. May be empty. */
+  note: string
+  /** The `pre_appointment_instructions` she read to the caller, or `null`. */
+  instructions: string | null
+  /** The call she booked on. `null` once the recording has been purged. */
+  call: { id: string; started_at: string; duration_s: number } | null
+  confirmation: { channel: BookingConfirmationChannel; state: ConfirmationState; at: string | null }
+}
+
+export interface AppointmentsWeek {
+  /** ISO dates, inclusive — the days asked for. */
+  from: string
+  to: string
+  /** ISO. */
+  generated_at: string
+  /** Everything starting inside `from`–`to`, cancelled included. */
+  appointments: Appointment[]
+  /**
+   * Every upcoming appointment waiting on the clinic, whatever week it falls in —
+   * `pending`, a `change_request`, a `failed` confirmation. The strip above the
+   * calendar reads this, so a request for next Thursday is not hidden behind the
+   * week the owner happens to be looking at.
+   */
+  attention: Appointment[]
+  /** Whether this clinic has ever had one. Tells a quiet week from a first week. */
+  has_any: boolean
+}
+
+/** The light actions an owner has on an appointment. Moving a time is not one of them. */
+export type AppointmentAction =
+  | 'confirm'
+  | 'decline'
+  | 'accept_change'
+  | 'keep_time'
+  | 'arrived'
+  | 'no_show'
+  | 'cancel'
+  | 'restore'
+  | 'informed'
+
+export interface AppointmentsApi {
+  /** `GET /appointments?from=YYYY-MM-DD&to=YYYY-MM-DD` */
+  list(from: string, to: string, opts?: Signal): Promise<AppointmentsWeek>
+  /** `POST /appointments/{id}/actions` — the appointment as it now stands. */
+  act(id: string, action: AppointmentAction, opts?: Signal): Promise<Appointment>
+}
+
+// ---------------------------------------------------------------------------
 // Leads
 // ---------------------------------------------------------------------------
 
@@ -446,6 +550,7 @@ export interface FonnusApi {
   receptionist: ReceptionistApi
   voice: VoiceApi
   insights: InsightsApi
+  appointments: AppointmentsApi
   leads: LeadsApi
 }
 
@@ -457,6 +562,7 @@ export const API_GROUPS = [
   'receptionist',
   'voice',
   'insights',
+  'appointments',
   'leads',
 ] as const
 export type ApiGroup = (typeof API_GROUPS)[number]

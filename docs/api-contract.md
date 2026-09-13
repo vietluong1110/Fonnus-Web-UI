@@ -493,7 +493,90 @@ normal and the card then does not render — there is no "everything is fine" ro
 
 ---
 
-## 8. Specified later — shape only
+## 8. Appointments — the Lịch hẹn tab
+
+Only the appointments the receptionist booked. Staff-booked appointments arrive when the
+clinic's own software is synced, and are not part of this contract.
+
+### `GET /appointments?from=YYYY-MM-DD&to=YYYY-MM-DD`
+
+One week, as the tab draws it, plus the clinic's whole attention list.
+
+```jsonc
+{
+  "from": "2026-09-14",
+  "to": "2026-09-20",
+  "generated_at": "2026-09-14T02:40:00.000Z",
+
+  // Everything that STARTS inside from–to, inclusive, cancelled included, oldest first.
+  "appointments": [
+    {
+      "id": "…",
+      "starts_at": "2026-09-17T08:00:00Z",
+      "duration_min": 30,
+      "status": "held",                 // held | pending | arrived | no_show | cancelled
+      "pending_reason": null,           // set only when status is pending: outside_booking_hours | over_daily_limit
+      "change_request": null,           // { "starts_at": "…" } — the caller rang back to move it
+      "service_name": "Cạo vôi răng",   // the tenant's own service_catalog row, verbatim, as booked
+      "price_from": 300000, "price_to": 500000,   // what she read out; null when the row had none
+      "practitioner": { "id": "…", "name": "BS Hùng" },   // null: no preference
+      "patient_name": "Chị Trang",      // as she wrote it, salutation included
+      "booked_by": null,                // who rang, when booking for someone else — "Chị Hạnh"
+      "phone": "0903 812 217",
+      "prior_visits": 1,                // 0 = new patient
+      "note": "Hỏi giá hôm thứ Bảy, sáng Chủ Nhật gọi lại đặt lịch.",
+      "instructions": "Chị nhớ đến sớm 10 phút nhé ạ.",   // pre_appointment_instructions as read, or null
+      "call": { "id": "…", "started_at": "2026-09-13T03:31:00Z", "duration_s": 84 },   // null once purged
+      "confirmation": { "channel": "zalo", "state": "sent", "at": "2026-09-13T03:32:10Z" }
+                                        // state: sent | failed | not_sent | informed
+    }
+  ],
+
+  // Every UPCOMING appointment waiting on the clinic, whatever week it is in:
+  // status pending, or held with a change_request, or held with confirmation.state failed.
+  "attention": [ /* same shape */ ],
+
+  // Whether this clinic has ever had an appointment. A quiet week and a first week are two screens.
+  "has_any": true
+}
+```
+
+**Recorded content, not copy.** `service_name`, `practitioner.name`, `patient_name`,
+`booked_by`, `note` and `instructions` are the tenant's words and the caller's, and come back
+verbatim. Every sentence around them — "Khách xin 18:30 — ngoài khung giờ Linh được tự giữ
+chỗ" — is written by the frontend from the machine codes (`src/app/pages/appointments/labels.ts`).
+Do not send a status label or a reason sentence.
+
+`attention` is not filtered by the week so that a request for next Thursday is not hidden
+behind the week the owner happens to be looking at.
+
+### `POST /appointments/{id}/actions`
+
+```jsonc
+{ "action": "confirm" }
+```
+
+Returns the appointment as it now stands. The light actions an owner has — moving a time to
+one the caller did not ask for is not one of them:
+
+| `action` | Allowed when | Effect |
+|---|---|---|
+| `confirm` | `pending` | `held`, `pending_reason: null`; send the confirmation |
+| `decline` | `pending` | `cancelled` |
+| `accept_change` | `change_request` set | `starts_at` takes the requested time; `change_request: null`; re-confirm |
+| `keep_time` | `change_request` set | `change_request: null` |
+| `arrived` | `held` | `arrived` |
+| `no_show` | `held`, after `starts_at` | `no_show` |
+| `cancel` | `held` | `cancelled`; tell the caller |
+| `restore` | `arrived`, `no_show`, or `cancelled` before `starts_at` | `held` |
+| `informed` | `confirmation.state` is `failed` | `confirmation.state: "informed"`, `at: now` — the clinic rang the caller itself |
+
+An action that is not allowed from the current state is `409` with `code:
+"appointment_state"`; the frontend reloads the week.
+
+---
+
+## 9. Specified later — shape only
 
 These have interfaces in `src/api/` so the UI can be built against them, but no agreed wire
 format. Do not implement from this section.
@@ -504,12 +587,11 @@ format. Do not implement from this section.
 | **Voice session** | WebSocket or WebRTC | Bidirectional audio plus a transcript event stream. The client owns no codec decisions; it toggles a microphone boolean |
 | **Landing voice demo** | Cost control **first** | Unauthenticated, and every click costs Deepgram + Qwen + ElevenLabs. Needs a per-IP budget, a max duration and a kill switch before the endpoint exists. See Q21 |
 | `GET /calls` | — | The "Cuộc gọi" tab, currently a placeholder. Separate from §7: that is aggregates, this is the list |
-| `GET /appointments` | — | The "Lịch hẹn" tab |
 | `GET /numbers` | — | FPT inventory pool for number provisioning; sets `assigned_phone` |
 
 ---
 
-## 9. Open questions
+## 10. Open questions
 
 The decisions above that are genuinely open are collected in
 **[`open-questions.md`](./open-questions.md)**, one per line, written so the list can be sent

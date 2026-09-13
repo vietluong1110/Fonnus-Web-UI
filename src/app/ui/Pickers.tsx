@@ -74,7 +74,18 @@ export function useAnchoredPopup(
    * pushed across the page — a pop-up near the right edge shrinks first
    * and moves second, and never below `minWidth`.
    */
-  size: { width: number; height: number; minWidth?: number },
+  size: {
+    width: number
+    height: number
+    minWidth?: number
+    /**
+     * `beside` opens it to the right of the trigger, or to its left when the
+     * right has no room, top-aligned with it. For a trigger that sits among
+     * others it must not cover — a calendar block, whose next appointment is
+     * directly underneath.
+     */
+    side?: 'below' | 'beside'
+  },
 ) {
   const [place, setPlace] = useState<Place | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -114,6 +125,17 @@ export function useAnchoredPopup(
     if (!el) return
     const r = el.getBoundingClientRect()
     const height = Math.min(panelRef.current?.offsetHeight || size.height, window.innerHeight - 2 * EDGE_Y)
+    if (size.side === 'beside') {
+      const vw = document.documentElement.clientWidth
+      const right = r.right + GAP
+      const leftOf = r.left - GAP - size.width
+      const left =
+        right + size.width <= vw - EDGE_X ? right : leftOf >= EDGE_X ? leftOf : Math.max(EDGE_X, Math.min(r.left, vw - size.width - EDGE_X))
+      const top = Math.max(EDGE_Y, Math.min(r.top, window.innerHeight - EDGE_Y - height))
+      const width = size.width
+      setPlace((prev) => (prev && prev.left === left && prev.top === top && prev.width === width ? prev : { left, top, width }))
+      return
+    }
     const under = r.bottom + GAP
     const over = r.top - GAP - height
     const fitsUnder = under + height <= window.innerHeight - EDGE_Y
@@ -124,7 +146,7 @@ export function useAnchoredPopup(
     // Same numbers means the same object, so the effect below settles instead
     // of re-running on an identity that changed but said nothing new.
     setPlace((prev) => (prev && prev.left === left && prev.top === top && prev.width === width ? prev : { left, top, width }))
-  }, [triggerRef, size.width, size.height, size.minWidth])
+  }, [triggerRef, size.width, size.height, size.minWidth, size.side])
 
   useLayoutEffect(() => {
     if (!open) {
@@ -197,9 +219,22 @@ export function useAnchoredPopup(
 }
 
 /** The panel at `place`, as wide as it was placed — the hook's `size.width`, or what it shrank to. */
-export function AnchoredPopup({ place, panelRef, children, label }: { place: Place; panelRef: RefObject<HTMLDivElement | null>; children: ReactNode; label?: string }) {
+export function AnchoredPopup({
+  place,
+  panelRef,
+  children,
+  label,
+  className,
+}: {
+  place: Place
+  panelRef: RefObject<HTMLDivElement | null>
+  children: ReactNode
+  label?: string
+  /** For a panel that lays out its own content edge to edge — the appointment card. */
+  className?: string
+}) {
   return createPortal(
-    <div ref={panelRef} data-popup="" role="dialog" aria-label={label} className={styles.popup} style={{ left: place.left, top: place.top, width: place.width }}>
+    <div ref={panelRef} data-popup="" role="dialog" aria-label={label} className={`${styles.popup} ${className ?? ''}`} style={{ left: place.left, top: place.top, width: place.width }}>
       {children}
     </div>,
     document.body,
