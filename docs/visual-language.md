@@ -114,6 +114,7 @@ proposals a designer may redraw, not as canon — each is marked `[ext]` in
 | `card`         | `credit-card`              | a card, terracotta stripe                          |
 | `insurance`    | `shield-plus`, `heart-pulse` | the same card, its stripe replaced by a terracotta cross and one ink name line — a BHYT card, not a shield |
 | `wallet`       | `wallet`                   | a wallet, terracotta clasp pocket                  |
+| `qr`           | `qr-code`                  | three finder squares, terracotta dot where the data starts |
 | `trash`        | `trash-2`                  | a bin, terracotta handle arc                       |
 | `edit`         | `pencil`                   | a pencil, terracotta tip                           |
 | `sign-out`     | `log-out`                  | a door edge, terracotta arrow leaving              |

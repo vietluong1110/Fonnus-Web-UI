@@ -1,0 +1,1550 @@
+/*
+ * Số điện thoại — the clinic's numbers and the kho, and the open one beside them.
+ *
+ * The frame is Cuộc gọi's (ui-ux-principles §12): a work column and a 380px
+ * rail behind the gutter — 40px with a hairline down the middle — not a fill.
+ * This is its fourth copy (`Section.module.css`, `.withRail`, `Calls.module.css`);
+ * §12 says the next one moves it into `app/ui`, and that move should take all
+ * four at once rather than a fifth file importing half of it.
+ *
+ *   ≥ 1181px   columns + rail
+ *   640–1180   one column; a number or a purchase opens as a drawer
+ *   < 640px    the rows fold; the panel is a sheet over the whole screen
+ */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  white-space: nowrap;
+}
+
+.soft {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.lit {
+  color: var(--text-accent);
+}
+
+.spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------ the frame */
+
+.work {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 40px;
+  align-items: stretch;
+}
+
+.work::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 400px;
+  width: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+.workSolo {
+  display: flex;
+  flex-direction: column;
+  /* A grid instruction left on a flex column sizes children to max-content (CLAUDE.md). */
+  align-items: stretch;
+}
+
+.workSolo::before {
+  display: none;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.rail {
+  min-width: 0;
+}
+
+.panel {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+}
+
+/*
+ * The panel's own scrollbar: WeekPlanner's thin pill on no track, not the
+ * system's grey bar with arrows. Chrome ignores these rules on any element that
+ * also sets `scrollbar-width`, so the standard properties go only to browsers
+ * that do not read the webkit ones.
+ */
+.panel::-webkit-scrollbar,
+.drawerScroll::-webkit-scrollbar,
+.sheetScroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.panel::-webkit-scrollbar-track,
+.drawerScroll::-webkit-scrollbar-track,
+.sheetScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Clear of the rounded corners. */
+.panel::-webkit-scrollbar-track {
+  margin: 16px 0;
+}
+
+.panel::-webkit-scrollbar-thumb,
+.drawerScroll::-webkit-scrollbar-thumb,
+.sheetScroll::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 3px solid var(--surface-card);
+  background-clip: padding-box;
+}
+
+.panel::-webkit-scrollbar-thumb:hover,
+.drawerScroll::-webkit-scrollbar-thumb:hover,
+.sheetScroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-soft);
+}
+
+.panel::-webkit-scrollbar-button,
+.drawerScroll::-webkit-scrollbar-button,
+.sheetScroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .panel,
+  .drawerScroll,
+  .sheetScroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px 18px 20px;
+  animation: rise var(--duration-slow) var(--ease-arc) both;
+}
+
+/* --------------------------------------------------------- owned numbers */
+
+/*
+ * The rows sit inside the card's own padding, so their edges line up with the
+ * kho's tiles below — the card padding every other tab uses.
+ */
+.rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  container: numbers / inline-size;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 150px 160px 16px;
+  column-gap: 14px;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+.row:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.row:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+.rowOn,
+.rowOn:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.rowOn::before,
+.rowOn + .row::before {
+  display: none;
+}
+
+.mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.rowNumber {
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.rowSub {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Two columns on a wide list, one line of two things on a narrow one. */
+.rowMeta {
+  display: contents;
+}
+
+.who {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.chev {
+  display: inline-flex;
+  color: var(--ink-soft);
+}
+
+@container numbers (max-width: 559.98px) {
+  .row {
+    grid-template-columns: 32px minmax(0, 1fr) 16px;
+    grid-template-areas:
+      'mark text chev'
+      'mark meta chev';
+    row-gap: 4px;
+    column-gap: 12px;
+    padding: 12px 10px;
+  }
+
+  .mark {
+    grid-area: mark;
+    align-self: start;
+  }
+
+  .rowText {
+    grid-area: text;
+  }
+
+  .rowMeta {
+    grid-area: meta;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .chev {
+    grid-area: chev;
+  }
+
+  .rowSub {
+    display: none;
+  }
+}
+
+/* A receptionist with no number: content not filled in (§1), in the list it belongs to. */
+.gapRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 60px;
+  margin-top: 6px;
+  padding: 10px 14px 10px 12px;
+  border: 1px dashed var(--border-dashed);
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.gapRow:hover {
+  background: var(--action-ghost-hover);
+  border-style: solid;
+  border-color: var(--terracotta);
+}
+
+.gapTitle {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.gapAct {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------ receptionist */
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  color: var(--text-accent);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.avatarSm {
+  width: 22px;
+  height: 22px;
+  font-size: 11.5px;
+  box-shadow: inset 0 0 0 1.25px var(--ink);
+  padding-top: 1px;
+}
+
+.avatarDashed {
+  box-shadow: none;
+  border: 1.5px dashed var(--border-dashed);
+  color: var(--ink-soft);
+}
+
+.agents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.agentTile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.agentTile:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+.agentTile:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1.5px var(--focus-ring),
+    0 0 0 3px rgba(184, 92, 43, 0.13);
+}
+
+/* Selected is the terracotta fill every tile in the app wears (Tiles.module.css). */
+.agentOn,
+.agentOn:hover {
+  background: var(--terracotta);
+  --icon-accent: currentColor;
+  color: var(--cream);
+  box-shadow: none;
+}
+
+.agentOn .avatar {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--cream);
+  color: var(--cream);
+}
+
+.agentText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.agentName {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.agentSub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agentOn .agentSub {
+  color: var(--cream);
+  opacity: 0.82;
+}
+
+/* ----------------------------------------------------------------- status */
+
+.dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+
+/* The unfilled part of a meter is a paler terracotta, never grey (§9). */
+.meter {
+  position: relative;
+  width: 44px;
+  height: 4px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+}
+
+/* It creeps and stops short: nobody knows how long a bank or a carrier takes. */
+.meterCreep {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  animation: creep 14s var(--ease-arc) forwards;
+}
+
+@keyframes creep {
+  to {
+    width: 88%;
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pillLive {
+  background: rgba(184, 92, 43, 0.12);
+  color: var(--text-accent);
+}
+
+.pillAct {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ kho */
+
+.poolTools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.search {
+  flex: 0 1 240px;
+  min-width: 200px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.chipCount {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  color: var(--ink-soft);
+}
+
+.chips [aria-pressed='true'] .chipCount {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Tiles.module.css's tile, holding a number instead of a drawing. */
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 13px 14px 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  animation: rise var(--duration-slow) var(--ease-arc) both;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.tile:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+.tile:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1.5px var(--focus-ring),
+    0 0 0 3px rgba(184, 92, 43, 0.13);
+}
+
+.tileNumber {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tileTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 17px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.tagDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+
+/* Where the number is and what it costs, pinned to the tile's foot. */
+.tileFine {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.tileOn,
+.tileOn:hover {
+  background: var(--terracotta);
+  box-shadow: none;
+  color: var(--cream);
+}
+
+.tileOn .soft,
+.tileOn .tileTag,
+.tileOn .tileFine {
+  color: var(--cream);
+  opacity: 0.82;
+}
+
+.tileOn .lit {
+  color: var(--cream);
+}
+
+.tileOn .tagDot {
+  background: var(--cream);
+}
+
+/* Held by another clinic: hatched, the planner's "not available" (§10). */
+.tileHeld,
+.tileHeld:hover {
+  cursor: default;
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  background: repeating-linear-gradient(135deg, transparent 0 7px, rgba(38, 31, 24, 0.06) 7px 8px);
+}
+
+.tileHeld .lit {
+  color: var(--ink-soft);
+}
+
+.poolFoot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+}
+
+.footNote {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* Back and forth through the kho. Controls are pills; these are round ones. */
+.pager {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageBtn {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+.pageBtn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+.pageBtn:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.pageNo {
+  min-width: 56px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------- the panel */
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.plate {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plateNumber {
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.plateSub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.sect {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectLabel {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.rule {
+  height: 1px;
+  background: var(--border-hairline);
+}
+
+.kv {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.kvIcon {
+  width: 20px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  justify-content: center;
+  margin-top: 1px;
+  color: var(--ink);
+}
+
+.kvSub {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.total {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.totalLabel {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.totalSub {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.totalNum {
+  margin-left: auto;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.error {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--error);
+}
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-accent);
+  cursor: pointer;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+/* Button.tsx's secondary pill, as a link — it dials. */
+.callLink,
+.gateway {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--action-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+  font-size: var(--size-ui);
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.callLink:hover,
+.gateway:hover {
+  background: var(--action-secondary-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.gateway {
+  padding: 12px 16px;
+  background: var(--action-primary);
+  box-shadow: none;
+  color: var(--text-on-accent);
+}
+
+.gateway:hover {
+  background: var(--action-primary-hover);
+  color: var(--text-on-accent);
+}
+
+/* ------------------------------------------------------------------- pay */
+
+.qrWrap {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.qr {
+  display: block;
+  width: 176px;
+  height: 176px;
+  padding: 12px;
+  box-sizing: content-box;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.qrCap {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.payRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.payRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.payRow + .payRow {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.payKey {
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+}
+
+.payVal {
+  margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  text-align: right;
+}
+
+.copy {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-accent);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.copy:hover {
+  background: var(--action-ghost-hover);
+}
+
+/*
+ * The payment window, the one countdown in the app (owner's call, 13 Sept 2026).
+ * A pill in the panel's corner, in tabular digits so they do not shake; the last
+ * minute takes the accent. It ticks a digit a second and never animates.
+ */
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-page);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.clockLate {
+  background: rgba(184, 92, 43, 0.12);
+  box-shadow: none;
+  color: var(--text-accent);
+}
+
+.doneMark {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--terracotta);
+  --icon-accent: currentColor;
+  color: var(--cream);
+}
+
+.doneTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+}
+
+/* ----------------------------------------------------------------- facts */
+
+/* Cuộc gọi's fact row: one thing the number left behind, one icon. */
+.fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  background: var(--surface-card);
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+}
+
+button.fact {
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+button.fact:hover {
+  background: var(--action-secondary-hover);
+}
+
+.factGap {
+  border: 1px dashed var(--border-dashed);
+}
+
+.factMark {
+  width: 20px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.factText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.factTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.factGap .factTitle {
+  font-weight: 500;
+}
+
+.factSub {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.factAct {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------ forwarding */
+
+.fw {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fwDraw {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface-page);
+}
+
+.mini {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.miniNew {
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.miniLabel {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.miniNum {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arc {
+  display: block;
+  margin: 0 auto;
+}
+
+.arcFlow,
+.arcHead {
+  stroke: var(--terracotta);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.arcFlow {
+  stroke-dasharray: 4 6;
+  animation: flow 1.2s linear infinite;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.stepNum {
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.code {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-page);
+}
+
+.codeText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.fwFoot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------- release */
+
+.relFoot {
+  display: flex;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.release {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  background: var(--surface-page);
+  animation: rise var(--duration-slow) var(--ease-arc) both;
+}
+
+.releaseTitle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.releaseLine {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.releaseLine svg {
+  margin-top: 1px;
+}
+
+.releaseActs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* The one action on the page that cannot be taken back, in the error colour. */
+.danger {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px rgba(178, 58, 46, 0.35);
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  color: var(--error);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.danger:hover {
+  background: var(--surface-rose);
+}
+
+.danger:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------- overlays */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(38, 31, 24, 0.34);
+  animation: fade var(--duration-base) var(--ease-out);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-overlay);
+  animation: drawerIn var(--duration-slow) var(--ease-arc);
+}
+
+.drawerBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 0 18px;
+}
+
+.drawerScroll,
+.sheetScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.barTitle {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.close {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--action-ghost-hover);
+  color: var(--text-accent);
+}
+
+/* Over the whole screen, tab bar included. */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  animation: sheetIn var(--duration-slow) var(--ease-arc);
+}
+
+.sheetBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px 6px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.disc {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.disc:active {
+  background: var(--action-ghost-hover);
+}
+
+.sheet .body {
+  padding: 14px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ------------------------------------------------------------------ motion */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .body,
+  .tile,
+  .release,
+  .scrim,
+  .drawer,
+  .sheet,
+  .arcFlow {
+    animation: none;
+  }
+
+  .meterCreep {
+    animation: none;
+    width: 60%;
+  }
+}
+
+/* ------------------------------------------------------------------ widths */
+
+@media (max-width: 1180.98px) {
+  .work {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .work::before {
+    display: none;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .search {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  /* One row of chips that scrolls sideways, each a 44px target. */
+  .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 2px 16px;
+    scrollbar-width: none;
+  }
+
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chips > button {
+    min-height: 44px;
+    flex: 0 0 auto;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tile {
+    min-height: 88px;
+    padding: 12px;
+  }
+
+  .tileNumber {
+    font-size: 15.5px;
+  }
+
+  .gapRow {
+    min-height: 64px;
+  }
+
+  .copy {
+    min-height: 44px;
+  }
+
+  .pageBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .plateNumber {
+    font-size: 25px;
+  }
+}

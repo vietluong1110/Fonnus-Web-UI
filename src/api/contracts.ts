@@ -662,6 +662,139 @@ export interface AppointmentsApi {
 }
 
 // ---------------------------------------------------------------------------
+// Numbers — what the Số điện thoại tab reads and writes
+// ---------------------------------------------------------------------------
+
+/**
+ * The shape a number's last digits make, as a machine code. The app names it
+ * (`pages/numbers/labels.ts`): lộc phát (…68, …86), thần tài (…39, …79), tứ quý
+ * (four of a digit), sảnh tiến (four rising), dễ nhớ (a repeated pair).
+ */
+export type NumberPattern = 'loc_phat' | 'than_tai' | 'tu_quy' | 'sanh_tien' | 'de_nho'
+
+/**
+ * A receptionist a number can ring through to. Today a tenant has one; the tab
+ * is drawn for several (docs/open-questions.md Q25).
+ */
+export interface Receptionist {
+  id: string
+  /** Her `agent_name`. */
+  name: string
+  /** The branch she answers for, as `branch_list` names it. `null` for the main clinic. */
+  branch: string | null
+}
+
+/** When the clinic's old line hands a call to the Fonnus number. */
+export type ForwardMode = 'all' | 'no_answer' | 'busy'
+
+/** A number the clinic has bought. */
+export interface OwnedNumber {
+  id: string
+  /** Digits only, national format: `02473077199`. The app spaces it. */
+  number: string
+  receptionist_id: string
+  /** `activating` until the carrier routes calls to her, then `live`. */
+  status: 'activating' | 'live'
+  /** ISO. */
+  bought_at: string
+  /**
+   * What the owner says they set up on their old line. Fonnus cannot see that
+   * line, so this is the owner's note, not a state the server checks.
+   */
+  forwarding: { from_number: string; mode: ForwardMode } | null
+}
+
+export interface NumbersOverview {
+  numbers: OwnedNumber[]
+  receptionists: Receptionist[]
+  /** Who the VAT invoice is made out to. `null` until the clinic has given it. */
+  invoice: { legal_name: string; tax_code: string } | null
+}
+
+/** One number the clinic could take. */
+export interface PoolNumber {
+  number: string
+  pattern: NumberPattern | null
+  /** How many trailing digits the pattern covers — the ones the app lights. `0` without one. */
+  pattern_digits: number
+  /** Another clinic is mid-checkout on it. Shown, but not pressable. */
+  held: boolean
+  /** Per number, not per page: the kho will hold other cities. */
+  area: { code: string; city: string }
+  /** One-time, in đồng, VAT included. Per number, because prices will differ. */
+  price_vnd: number
+}
+
+export interface PoolQuery {
+  pattern?: NumberPattern | null
+  /** Digits. Numbers ending in them first, then numbers containing them after the area code. */
+  q?: string
+  cursor?: string | null
+  /** How many to return. The server caps it; the page asks for a full grid (9, or 8 on a phone). */
+  limit?: number
+}
+
+export interface PoolPage {
+  numbers: PoolNumber[]
+  next_cursor: string | null
+  /** For the search, whatever the pattern — the numbers on the chips. */
+  counts: Record<'all' | NumberPattern, number>
+}
+
+/** A number kept for this clinic while the owner pays. */
+export interface NumberHold {
+  id: string
+  number: string
+  /** ISO. Shown as a clock time, never as a countdown. */
+  held_until: string
+  /** The price quoted for this hold; the checkout charges exactly this. */
+  price_vnd: number
+}
+
+export type PayMethod = 'vietqr' | 'card' | 'momo'
+
+export interface Checkout {
+  id: string
+  hold_id: string
+  number: string
+  method: PayMethod
+  amount_vnd: number
+  /** `expired`: `expires_at` passed unpaid. */
+  status: 'awaiting_payment' | 'paid' | 'expired' | 'failed'
+  /** ISO. The payment window — five minutes from checkout — which the panel counts down. The server enforces it. */
+  expires_at: string
+  /** VietQR: the code to scan, and the transfer details for anyone typing them instead. */
+  vietqr: { image_url: string; bank: string; account_number: string; account_name: string; memo: string } | null
+  /** Card and MoMo: the payment gateway's page. `null` when the gateway has none. */
+  redirect_url: string | null
+  /** MoMo: a code to scan with the MoMo app. */
+  qr_image_url: string | null
+  /** The number, once paid. */
+  owned: OwnedNumber | null
+}
+
+export interface NumbersApi {
+  /** `GET /numbers` — what the clinic owns and who can answer. */
+  overview(opts?: Signal): Promise<NumbersOverview>
+  /** `GET /numbers/pool?pattern=…&q=…&cursor=…` */
+  pool(query: PoolQuery, opts?: Signal): Promise<PoolPage>
+  /** `POST /numbers/holds` `{ number }` — `409 number_taken` when someone got there first. */
+  hold(number: string, opts?: Signal): Promise<NumberHold>
+  /** `DELETE /numbers/holds/{id}` — the owner walked away before paying. */
+  releaseHold(holdId: string, opts?: Signal): Promise<void>
+  /** `POST /numbers/checkouts` — `409 hold_expired` when the hold ran out. */
+  checkout(holdId: string, input: { receptionist_id: string; method: PayMethod }, opts?: Signal): Promise<Checkout>
+  /** `GET /numbers/checkouts/{id}` — polled while the owner pays. */
+  checkoutStatus(id: string, opts?: Signal): Promise<Checkout>
+  /** `PATCH /numbers/{id}` `{ receptionist_id }` */
+  assign(id: string, receptionistId: string, opts?: Signal): Promise<OwnedNumber>
+  /** `PATCH /numbers/{id}` `{ forwarding }` — `null` clears it. */
+  setForwarding(id: string, forwarding: OwnedNumber['forwarding'], opts?: Signal): Promise<OwnedNumber>
+  /** `DELETE /numbers/{id}` — the number goes back to the pool. */
+  release(id: string, opts?: Signal): Promise<void>
+}
+
+// ---------------------------------------------------------------------------
 // Leads
 // ---------------------------------------------------------------------------
 
@@ -689,6 +822,7 @@ export interface FonnusApi {
   insights: InsightsApi
   calls: CallsApi
   appointments: AppointmentsApi
+  numbers: NumbersApi
   leads: LeadsApi
 }
 
@@ -702,6 +836,7 @@ export const API_GROUPS = [
   'insights',
   'calls',
   'appointments',
+  'numbers',
   'leads',
 ] as const
 export type ApiGroup = (typeof API_GROUPS)[number]

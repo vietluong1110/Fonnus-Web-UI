@@ -360,3 +360,40 @@ replaced on 1 Jan 2026).
 voice; owner-only access to recordings until roles exist; log every recording fetch.
 
 **Answer:**
+
+---
+
+### Q25 · Numbers: what does a number cost, how fast is it live, and who can answer it?
+
+*Why:* The Số điện thoại tab (`api-contract.md` §10) sells a pool number for a one-time
+400.000đ and lets the owner say which receptionist answers it. Several facts behind that screen
+are not settled, and the copy changes with each one.
+
+- **Price.** `CONTEXT.md` says a tenant picks a pool number "at no charge"; FPT charges
+  400.000đ one-time and 20.000đ a month per number. The owner asked for 400.000đ one-time and
+  no monthly line on screen. Which is true at launch — and if a monthly fee exists, it has to be
+  on the checkout before the owner pays, not discovered on an invoice.
+- **VAT.** Is 400.000đ VAT-inclusive? A number resold with the AI service may be telecom (10%)
+  or IT (8%) — ask an accountant. The app shows one total and never a pre-tax figure.
+- **Activation.** Instant from Fonnus's own inventory, or FPT's 1–3 working days? The app polls
+  `activating → live` and says "Đang kích hoạt" with no promised time.
+- **Paperwork.** FPT and VNPT ask a business for its registration certificate. Does activation
+  need an upload, and does it block payment or follow it?
+- **Invoice details.** `invoice` is `null` for a clinic that has never given them. The owner
+  took the invoice line off the checkout (13 Sept), so they are not collected there. Cài đặt?
+- **Several receptionists.** The tab is drawn for several (one per branch), each number ringing
+  one of them. The tenant record describes one. When does a tenant get a second, and is
+  `assigned_phone` still one field then?
+- **Forwarding codes.** The guide shows `*21*` / `*61*` / `*67*` with `#21#` to cancel — the
+  GSM codes most Vietnamese lines accept. Confirm per carrier; a clinic's own switchboard may
+  differ.
+- **Pool areas and prices.** 024 at 400.000đ only for now. The contract already carries `area`
+  and `price_vnd` on every pool number and each tile prints them. When 028 and 0236 arrive, the
+  kho gets a city pill; should it default to the clinic's `city`? Will prices differ by city, by
+  pattern (a tứ quý costing more), or both?
+
+**Recommendation:** show the monthly fee if one exists; VAT-inclusive prices; collect invoice
+details once in Cài đặt and let the checkout link there; activation that does not block on
+paperwork.
+
+**Answer:**

@@ -694,7 +694,160 @@ An action that is not allowed from the current state is `409` with `code:
 
 ---
 
-## 10. Specified later — shape only
+## 10. Numbers — the Số điện thoại tab
+
+The clinic buys a fixed-line number from a pool shared by every tenant, and says which
+receptionist answers it. Mock: `src/api/numbers.mock.ts`. Open decisions — the monthly fee,
+VAT, activation time, paperwork, several receptionists — are **Q25**.
+
+### `GET /numbers`
+
+```jsonc
+{
+  "numbers": [
+    {
+      "id": "num_7f2c…",
+      "number": "02473077199",                 // digits only, national format
+      "receptionist_id": "rcp_main",
+      "status": "live",                        // "activating" until the carrier routes it
+      "bought_at": "2026-09-02T02:00:00.000Z",
+      "forwarding": { "from_number": "02437562211", "mode": "all" }   // or null
+    }
+  ],
+  "receptionists": [{ "id": "rcp_main", "name": "Linh", "branch": null }],
+  "invoice": { "legal_name": "Công ty TNHH Nha khoa Việt Smile", "tax_code": "0312345678" }  // or null
+}
+```
+
+- **`assigned_phone` on the tenant record is derived from this**, never written by
+  `PATCH /tenant/config`: the main receptionist's first number, rewritten whenever a number is
+  bought, reassigned or given back. The Lễ tân header reads it.
+- `forwarding` is the owner's note that they set the old line to forward. Fonnus cannot see the
+  old line, so nothing checks it.
+- `name` is that receptionist's `agent_name`; `branch` names her row in `branch_list`.
+
+### `GET /numbers/pool?pattern=…&q=…&cursor=…&limit=…`
+
+| Param | Values |
+|---|---|
+| `pattern` | Optional. `loc_phat` (…68, …86), `than_tai` (…39, …79), `tu_quy` (four of a digit), `sanh_tien` (four rising), `de_nho` (a repeated pair) |
+| `q` | Optional digits. Numbers **ending** in them first, then numbers containing them after the area code |
+| `cursor` | Optional, opaque, from the previous page's `next_cursor`. Forward only: the app keeps the cursors it was given, so its "back" arrow re-asks for the one before — no `prev_cursor` needed |
+| `limit` | Optional. The page asks for a full grid — 9, or 8 on a phone. Server caps it |
+
+```jsonc
+{
+  "numbers": [
+    {
+      "number": "02473066868", "pattern": "loc_phat", "pattern_digits": 4, "held": false,
+      "area": { "code": "024", "city": "Hà Nội" },
+      "price_vnd": 400000                      // one-time, VAT included
+    },
+    {
+      "number": "02473088686", "pattern": "loc_phat", "pattern_digits": 4, "held": true,
+      "area": { "code": "024", "city": "Hà Nội" },
+      "price_vnd": 400000
+    }
+  ],
+  "next_cursor": "9",
+  "counts": { "all": 146, "loc_phat": 5, "than_tai": 4, "tu_quy": 3, "sanh_tien": 3, "de_nho": 4 }
+}
+```
+
+- **`area` and `price_vnd` are per number**, not per page or per tenant. Today every number is
+  024 at 400.000đ; the kho is meant to hold other cities and prices, and each tile prints both
+  (`HN · 400.000đ, một lần`). The frontend owns the short city label (`024` → `HN`).
+- The page number the app shows (`2 / 17`) is `counts[pattern ?? 'all']` over `limit`, so the
+  server does not return a total.
+
+- **The pool is the server's**, searched and paged there: every clinic draws from it, so a copy
+  in the browser is stale the moment another clinic pays.
+- Default order puts one of each pattern first and plain numbers between them. Excludes
+  numbers any tenant owns.
+- `held` is another tenant's hold. The number is shown hatched and cannot be pressed — which is
+  how an owner sees the pool is shared.
+- `counts` respect `q` and ignore `pattern`: they are the numbers on the chips.
+- `pattern` is the server's classification, so a lucky number is named the same way for every
+  clinic. `pattern_digits` is how many trailing digits the app lights.
+
+### `POST /numbers/holds` → `NumberHold`
+
+```jsonc
+{ "number": "02473066868" }
+// 201 → { "id": "hold_…", "number": "02473066868", "held_until": "2026-09-13T02:55:00.000Z", "price_vnd": 400000 }
+```
+
+`price_vnd` is the price quoted for this hold, and the checkout's `amount_vnd` must equal it — a
+price that changes between the tile and the button is exactly the surprise cost the checkout
+must not have. `409` with code `number_taken` when another tenant holds or owns it. A hold lasts long enough to
+pay by transfer (the mock uses 15 minutes). The app shows `held_until` as a clock time and never
+as a countdown. `DELETE /numbers/holds/{id}` → `204` when the owner walks away.
+
+### `POST /numbers/checkouts` → `Checkout`
+
+```jsonc
+{ "hold_id": "hold_…", "receptionist_id": "rcp_main", "method": "vietqr" }   // vietqr | card | momo
+```
+
+```jsonc
+{
+  "id": "co_…",
+  "hold_id": "hold_…",
+  "number": "02473066868",
+  "method": "vietqr",
+  "amount_vnd": 400000,
+  "status": "awaiting_payment",               // paid | expired | failed
+  "expires_at": "2026-09-13T02:45:00.000Z",   // five minutes from now; the panel counts it down
+  "vietqr": {
+    "image_url": "https://…",                 // a dynamic VietQR with amount and memo
+    "bank": "Vietcombank",
+    "account_number": "1027889966",
+    "account_name": "CONG TY CO PHAN FONNUS",
+    "memo": "FONNUS 6868"
+  },
+  "redirect_url": null,                       // card / MoMo: the gateway's page
+  "qr_image_url": null,                       // MoMo: a code for the MoMo app
+  "owned": null                               // the OwnedNumber, once paid
+}
+```
+
+- `409` with code `hold_expired` when the hold ran out. The app asks for a new hold and says so.
+- **`expires_at` is a real deadline, and the server must keep it.** The panel shows a
+  five-minute clock counting down to it (the owner asked for the urgency, 13 Sept 2026). A
+  checkout still unpaid at `expires_at` becomes `expired`; the app returns to the review with
+  code `checkout_expired`, keeps the hold if it still has time, and a new checkout gets a new
+  window. A transfer that lands after expiry still has to be matched to the number or refunded —
+  that is the webhook's problem, not the owner's.
+- **The receptionist is part of the purchase**, so a number is never paid for and left ringing
+  nobody. The first status after `paid` is `activating`.
+- The VAT invoice goes to `invoice` from `GET /numbers`, and is issued when payment lands
+  (Decree 70/2025/NĐ-CP). The checkout panel does **not** show it — the owner took the line out
+  (13 Sept 2026) — so where those details are collected and checked is still Q25.
+
+### `GET /numbers/checkouts/{id}` → `Checkout`
+
+The app polls this every two seconds while the owner pays, and immediately when they press
+"Tôi đã chuyển khoản" or the payment clock reaches zero. No retries on the server's side of a poll — the next poll is the retry.
+Payment confirmation comes from the bank or gateway webhook (SePay, payOS, MoMo IPN), not from
+the owner. `failed` returns the app to the review with code `payment_failed`.
+
+### `PATCH /numbers/{id}` → `OwnedNumber`
+
+```jsonc
+{ "receptionist_id": "rcp_vy" }                                     // who answers
+{ "forwarding": { "from_number": "02437562211", "mode": "no_answer" } }  // or null to clear
+```
+
+`404` with code `number_not_found`. Reassigning takes effect on the next call.
+
+### `DELETE /numbers/{id}` → `204`
+
+The number goes back to the pool and stops ringing through to the receptionist. No refund. The
+app says all of that in the confirmation before calling this.
+
+---
+
+## 11. Specified later — shape only
 
 These have interfaces in `src/api/` so the UI can be built against them, but no agreed wire
 format. Do not implement from this section.
@@ -704,11 +857,10 @@ format. Do not implement from this section.
 | **Setup assistant chat** | Streaming (SSE) | Sends a turn, receives interleaved text deltas and structured `Partial<ReceptionistConfig>` patches. The assistant gets exactly the write authority today's canned parser has — it proposes a patch, the client applies it through the same path as a form |
 | **Voice session** | WebSocket or WebRTC | Bidirectional audio plus a transcript event stream. The client owns no codec decisions; it toggles a microphone boolean |
 | **Landing voice demo** | Cost control **first** | Unauthenticated, and every click costs Deepgram + Qwen + ElevenLabs. Needs a per-IP budget, a max duration and a kill switch before the endpoint exists. See Q21 |
-| `GET /numbers` | — | FPT inventory pool for number provisioning; sets `assigned_phone` |
 
 ---
 
-## 11. Open questions
+## 12. Open questions
 
 The decisions above that are genuinely open are collected in
 **[`open-questions.md`](./open-questions.md)**, one per line, written so the list can be sent

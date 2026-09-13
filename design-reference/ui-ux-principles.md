@@ -629,6 +629,59 @@ through one at a time. What it settled, for `Lịch hẹn` and anything else sha
 
 ---
 
+## 13. A page that sells something
+
+`Số điện thoại` is the first screen where the owner pays. It was chosen from three directions (a
+list beside the open thing, a step-by-step purchase page, a switchboard of wires); the owner
+picked the list, because it is the Cuộc gọi frame and sets no new pattern. What it settled, for
+any later screen that takes money — a plan upgrade, an add-on:
+
+- **Lead with the gap, not the catalogue.** The first thing on the page is what the clinic owns
+  and, dashed, the receptionist callers cannot reach yet — `Linh chưa có số`. Pressing it opens
+  the kho already buying for her. A store page that opens on the shelf asks the owner to work out
+  why they are there.
+- **Few choices, and the ones people remember first.** Nine at a time, the lucky patterns on
+  pills and first in the grid, their digits lit. An owner choosing a number is unsure and in a
+  hurry, which is when a long list stops helping.
+- **Pages go both ways.** A grid of choices pages with a back and a forward arrow and says where
+  it is (`2 / 17`). A "show others" button that only goes forward loses the number the owner
+  almost picked.
+- **The whole price before the choice, on the thing itself.** Each tile carries its own fine
+  print — `HN · 400.000đ, một lần` — even while every number costs the same: the kho will hold
+  other cities and prices, and a price in the card's head would have to move then. The total at
+  checkout is that figure, quoted again by the hold, VAT included; nothing new appears after the
+  button.
+- **The checkout carries only what the owner decides.** The number, who answers it, how to pay,
+  the total. The owner took out the VAT invoice line and her greeting: neither is a decision at
+  that moment, and both made a short panel long.
+- **A hold is a clock time; paying is the one countdown.** The hold reads `Giữ cho bạn đến
+  09:55`. Once the QR or the gateway is on screen, a clock in the panel's corner counts a
+  five-minute payment window down. That is the owner's call (13 Sept 2026) and it overrides the
+  design system's "no countdowns" — for this one place. It stays honest only because the server
+  keeps the same deadline: at zero the checkout expires and the panel returns to the review with
+  the hold intact. **Never draw a countdown the server does not enforce** — that is the dark
+  pattern. And no "waiting on the bank" meter beside it: a clock and a bar would say the same
+  thing twice.
+- **Decide what the thing is for inside the purchase.** Who answers the number is part of buying
+  it, preselected for the receptionist without one. Anything bought and not yet useful is a
+  support call later.
+- **A shared resource shows that it is shared.** A number another clinic is paying for is
+  hatched and cannot be pressed — the planner's "not available" — rather than hidden.
+- **Payment confirms itself.** The page polls the checkout; `Tôi đã chuyển khoản` only asks
+  sooner. The receipt of money is the gateway's word, not the owner's.
+- **Say what cannot be undone before it happens.** Giving a number back is a quiet
+  `DeleteButton` until pressed, then a short list of consequences in icons — callers stop
+  reaching her, the number returns to the kho, no refund — and only then the button, in the error
+  colour.
+- **Card details never touch this app.** Card and MoMo open the gateway's page; the app draws
+  tiles and waits.
+
+> **Check:** press the dashed row — does the kho say who it is choosing for? Pick a number and
+> leave — is the hold handed back? Is there any figure at checkout that was not on the page
+> before it?
+
+---
+
 ## Verifying a change
 
 The pane's screenshots are unreliable on these pages, so do not let a picture be the
@@ -670,6 +723,39 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-13 (later) — Số điện thoại, the payment clock.** The owner removed the creeping
+  "Đang chờ ngân hàng báo về" meter and asked for a five-minute countdown in the pay step's
+  corner, for urgency; the design system forbids countdowns, so it was built as a real window
+  (`Checkout.expires_at`, enforced by the server) rather than a decoration. The "Đang kích hoạt"
+  meter after payment went too — a status the owner cannot act on does not belong on a
+  confirmation.
+- **2026-09-13 (late) — Số điện thoại, first review on screen.** A list card that pulled its
+  rows out to 12px from the edge (Cuộc gọi's trick) sat visibly wider than the plain card
+  beneath it; one card padding on a page, always. "Xem số khác" became back / forward arrows,
+  and the city and price moved onto every tile. **The double animation:** the grid was keyed on
+  the page *asked for*, so the moment the owner pressed, the leaving page re-mounted and played
+  in, then the arriving page played in again — key a grid on the page that *arrived*. A panel
+  that scrolls draws its own scrollbar (WeekPlanner's pill); Chrome ignores `::-webkit-scrollbar`
+  on an element that also sets `scrollbar-width`. The forwarding arc was an SVG arc whose top
+  left the viewBox and whose head pointed off the curve — draw a curve that fits its box and lay
+  the head along its last tangent.
+
+- **2026-09-13 (night) — Số điện thoại, the first page that takes money.** Three clickable
+  directions on a canvas; the owner picked the list beside the open thing, and chose several
+  receptionists, 024 only, and card / QR / MoMo as mock payment. New API group `numbers` (an
+  overview, a shared pool, holds, checkouts polled until paid, assign / forward / release), with
+  `assigned_phone` now *derived* from what the clinic owns instead of written by Lễ tân. Things
+  worth carrying: a canvas review caught a payment timer that confirmed a purchase nobody was
+  looking at, so the page's poll lives on the checkout id and stops the moment the owner goes
+  back; "Trả" had meant both *pay* and *give back* on one screen, so paying is `Thanh toán` and
+  giving back is `Trả lại số`; and the wait bar had filled in exactly the time payment took,
+  which made it a countdown by another name — it now creeps and stops short. The rail geometry
+  is now in four stylesheets; §12's promised move into `app/ui` should take all four at once.
+  Research behind it: choice overload on unsure, hurried choosers (Chernev 2015), surprise costs
+  as the top checkout abandonment reason (Baymard), countdowns as a catalogued dark pattern
+  (Mathur et al.), VietQR auto-confirmation (SePay, payOS), e-invoice timing (Decree
+  70/2025/NĐ-CP). Open decisions are Q25. → §13.
 
 - **2026-09-13 (evening) — Lịch hẹn, the week grid.** Three clickable directions on a
   canvas at three widths, one sheet of what the page should show; the owner picked the

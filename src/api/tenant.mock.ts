@@ -97,6 +97,21 @@ function persist(config: ReceptionistConfig): TenantConfigEnvelope {
 /** Called on sign-out: one owner's record must not greet the next one. */
 export function clearMockTenantData(): void {
   storage.remove(CONFIG_KEY)
+  // The numbers the mock clinic bought (`numbers.mock.ts`) belong to the same owner.
+  storage.remove('fonnus.numbers.v1')
+}
+
+/**
+ * The stored record, for a mock that writes a field the server will derive
+ * rather than accept — `assigned_phone`, which follows the numbers the clinic
+ * owns (`numbers.mock.ts`). Not part of `TenantApi`: live, the server does this.
+ */
+export function readMockConfig(): ReceptionistConfig {
+  return load()
+}
+
+export function writeMockConfig(patch: Partial<ReceptionistConfig>): void {
+  persist({ ...load(), ...patch })
 }
 
 export const tenantMock: TenantApi = {
