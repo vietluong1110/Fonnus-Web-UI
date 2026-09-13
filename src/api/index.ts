@@ -32,6 +32,8 @@ import { callsMock } from './calls.mock'
 import { callsLive } from './calls.live'
 import { appointmentsMock } from './appointments.mock'
 import { appointmentsLive } from './appointments.live'
+import { numbersMock } from './numbers.mock'
+import { numbersLive } from './numbers.live'
 import { leadsMock } from './leads.mock'
 import { leadsLive } from './leads.live'
 
@@ -44,6 +46,7 @@ export const api: FonnusApi = {
   insights: isLive('insights') ? insightsLive : insightsMock,
   calls: isLive('calls') ? callsLive : callsMock,
   appointments: isLive('appointments') ? appointmentsLive : appointmentsMock,
+  numbers: isLive('numbers') ? numbersLive : numbersMock,
   leads: isLive('leads') ? leadsLive : leadsMock,
 }
 

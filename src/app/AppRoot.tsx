@@ -7,13 +7,14 @@ import { LeTanPage } from './letan/LeTanPage'
 import { OverviewPage } from './pages/overview/OverviewPage'
 import { CallsPage } from './pages/calls/CallsPage'
 import { AppointmentsPage } from './pages/appointments/AppointmentsPage'
+import { NumbersPage } from './pages/numbers/NumbersPage'
 import { PlaceholderPage } from './pages/Placeholder'
 import { ConnectionError, ShellSkeleton } from './Boot'
 
 /**
  * Everything under `#/app`. Guards the session, then picks the page from the
- * first path segment. Tổng quan, Cuộc gọi, Lịch hẹn and Lễ tân are built; the
- * other two are placeholders.
+ * first path segment. Every tab is built except Cài đặt, which is a
+ * placeholder.
  *
  * The guard has three answers, not two. "Still checking" is a real state — the
  * session lives in an httpOnly cookie this app cannot read, so the only way to
@@ -78,6 +79,8 @@ export function AppRoot() {
           <CallsPage path={path.slice(1)} />
         ) : nav.key === 'lich-hen' ? (
           <AppointmentsPage />
+        ) : nav.key === 'so-dien-thoai' ? (
+          <NumbersPage path={path.slice(1)} />
         ) : (
           <PlaceholderPage title={nav.label} />
         )}

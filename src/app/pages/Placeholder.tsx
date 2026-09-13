@@ -4,7 +4,7 @@ import { appHref } from '../../hooks/useRoute'
 import { Card, ui } from '../ui'
 
 /*
- * The tabs that are not built yet — Số điện thoại, Cài đặt. They exist so the
+ * The tab that is not built yet — Cài đặt. It exists so the
  * sidebar is honest about the app's shape; the screens themselves come after
  * the receptionist is configurable. Copy states the fact and points at the
  * tab that configures her.
@@ -18,7 +18,6 @@ import { Card, ui } from '../ui'
 type Art = { shape: ShapeName } | { icon: IconName }
 
 const BLURB: Record<string, { art: Art; lede: string }> = {
-  'Số điện thoại': { art: { icon: 'incoming' }, lede: 'Số phòng khám đang chuyển tiếp, số Fonnus trong gói, và thuê thêm số mới.' },
   'Cài đặt': { art: { icon: 'settings' }, lede: 'Tài khoản, gói và thanh toán, thông báo, bảo mật.' },
 }
 

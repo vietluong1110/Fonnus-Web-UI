@@ -258,6 +258,14 @@ export const ICONS = {
   insurance: [{ r: [3, 6, 18, 12, 2.5] }, { d: 'M6.6 12h3.6M8.4 10.2v3.6', accent: true }, { d: 'M13.4 10.6h4.6M13.4 13.8h3' }],
   /** [ext] Ví điện tử — a wallet, the clasp pocket on the right. */
   wallet: [{ r: [3.5, 6.5, 17, 11, 2.5] }, { d: 'M14.6 10.4h5.9v3.2h-5.9a1.6 1.6 0 0 1 0-3.2z', accent: true }],
+  /** [ext] Mã QR — three finder squares; the accent dot is where the data starts. */
+  qr: [
+    { r: [3.5, 3.5, 7, 7, 2] },
+    { r: [13.5, 3.5, 7, 7, 2] },
+    { r: [3.5, 13.5, 7, 7, 2] },
+    { c: [17, 17, 1.9], fill: true, accent: true },
+    { d: 'M14 20.5h.5M20.5 14v.5M20.5 20.5h.5' },
+  ],
   /** [ext] Xoá — a bin; the handle arc is the accent. */
   trash: [
     { d: 'M5 7.2h14' },

@@ -116,6 +116,10 @@ const BY_CODE: Record<string, string> = {
   invalid_email: 'Email chưa đúng. Bạn kiểm tra lại giúp mình nhé.',
   file_too_large: 'Tệp quá lớn. Mỗi tệp tối đa 20 MB.',
   unsupported_file_type: 'Định dạng tệp này chưa được hỗ trợ.',
+  number_taken: 'Số này vừa có phòng khám khác chọn. Bạn chọn số khác giúp mình nhé.',
+  hold_expired: 'Hết thời gian giữ số. Bạn chọn lại số này giúp mình nhé.',
+  payment_failed: 'Thanh toán chưa thành công. Bạn thử lại hoặc chọn cách trả khác nhé.',
+  checkout_expired: 'Hết 5 phút thanh toán. Bạn bấm Thanh toán để lấy mã mới nhé.',
 }
 
 const BY_KIND: Record<ApiErrorKind, string> = {
