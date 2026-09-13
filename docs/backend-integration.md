@@ -64,6 +64,7 @@ src/api/
   voice.mock.ts     / voice.live.ts
   insights.mock.ts  / insights.live.ts          everything Tổng quan draws
   calls.mock.ts     / calls.live.ts             the Cuộc gọi list, one call, callbacks
+  appointments.mock.ts / appointments.live.ts   the Lịch hẹn week, and its actions
   leads.mock.ts     / leads.live.ts
 
   mock-support.ts   delay(), maybeFail(), the demo fixtures
@@ -97,7 +98,7 @@ VITE_API_MODE=live
 weeks. A single global on/off would mean nobody could test your first endpoint until every
 other one existed.
 
-Groups: `auth`, `tenant`, `assistant`, `receptionist`, `voice`, `insights`, `calls`, `leads`.
+Groups: `auth`, `tenant`, `assistant`, `receptionist`, `voice`, `insights`, `calls`, `appointments`, `leads`.
 
 The console says which is which on every page load:
 

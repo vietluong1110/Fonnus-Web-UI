@@ -523,6 +523,36 @@ is the same number shown twice.
 > Does the page still say what happened? If either answer is no, one half is carrying the
 > other.
 
+### A calendar is drawn in the planner's vocabulary
+
+`Lịch hẹn` is the second reporting page and the first whose subject is *time*. It was
+chosen from three directions (a week grid, a day list beside a rail, horizontal week
+bands); the owner picked the grid, because it is the calendar they already know. What
+it settled, for any later screen that puts records on a timeline:
+
+- **Draw it the way the hours planner draws it.** Hour lines only, the time before opening
+  and after closing quieter, a break hatched, a shut day hatched all the way down. An
+  owner who has drawn their opening hours on `Giờ mở cửa` already knows how to read it —
+  and the open appointment is the planner's shift: solid terracotta, cream words.
+- **Status is a shape, never a hue.** Held is the terracotta wash; waiting on the clinic
+  is milk with a solid ring and the one terracotta dot; arrived is a grey wash; no-show is
+  an outline; cancelled is a hairline with the name struck through. **Waiting is not
+  dashed** — dashed is content not filled in (§1), and a request for a slot is a fact
+  about the day. **Cancelled is not red** — a change is a fact, not a verdict (§10).
+- **The attention strip is not scoped to the week on screen.** A request for next
+  Thursday must not hide behind this week, so the API returns it with every week and the
+  strip takes the owner to its day.
+- **One appointment, three containers, the same content.** Beside its block at ≥ 1100px
+  (`useAnchoredPopup` with `side: 'beside'` — below would cover the next appointment),
+  a drawer from the right on a tablet, a bottom sheet on a phone. An owner learns the
+  card once.
+- **A phone shows one day under a seven-day strip.** Seven columns in 350px is a texture,
+  not a week; the strip keeps the week one tap away and carries the dot for a day with
+  something waiting.
+- **The actions are light, and the call is always one of them.** Confirm, decline, accept
+  or refuse the caller's own move, arrived, no-show, cancel. Nothing on the page moves a
+  time the caller did not ask for — that is a phone call, and `Gọi khách` is a `tel:` link.
+
 ---
 
 ## 11. Copy
@@ -640,6 +670,18 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-13 (evening) — Lịch hẹn, the week grid.** Three clickable directions on a
+  canvas at three widths, one sheet of what the page should show; the owner picked the
+  grid. Scope the owner set: only the receptionist's bookings, doctors as filter pills,
+  view plus light actions. New API group `appointments` (a week plus the clinic-wide
+  attention list, and one action endpoint). Two traps: `useAnchoredPopup` closes on *any*
+  scroll, so a popover opened from the strip has to wait until the grid has scrolled the
+  block into view (`revealId` → timer → open), or it opens and closes in the same frame;
+  and the popover's anchor must be re-read from the block on every render (a ref on the
+  open block), because accepting a caller's move remounts the block in another column and
+  the old element measures as zero. Built in its own worktree because another session was
+  building Cuộc gọi in the same files. → §10, "A calendar is drawn in the planner's vocabulary".
 
 - **2026-09-13 (evening) — Cuộc gọi, the first list of records.** Three directions were drawn
   on a clickable canvas (list + rail, rows that open in place, a page per call); the owner

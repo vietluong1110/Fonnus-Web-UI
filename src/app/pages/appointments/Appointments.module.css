@@ -1,0 +1,1299 @@
+/*
+ * Lịch hẹn — the head, the week, and the appointment.
+ *
+ * The page is Tổng quan's frame (ui-ux-principles §10): one column, no rail,
+ * because nothing here is heard. The week is drawn in the vocabulary of the
+ * hours planner on Giờ mở cửa (WeekPlanner.module.css) — hour lines only, a
+ * hatched gap for a break, a terracotta block for the thing on the calendar —
+ * so an owner who has drawn their opening hours already knows how to read it.
+ *
+ * Three widths:
+ *
+ *   ≥ 1100px   the week; an appointment opens beside its block
+ *   640–1100   the week; an appointment opens as a drawer from the right
+ *   < 640px    one day under a seven-day strip; an appointment is a bottom sheet
+ */
+
+/* ------------------------------------------------------------------- head */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dateline {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* "Hôm nay", "Tuần này" — where the owner is, said once, beside the date. */
+.when {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-accent);
+  padding: 1px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--action-ghost-hover);
+}
+
+.headSpacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.navBtn:hover {
+  background: var(--action-ghost-hover);
+}
+
+.todayBtn {
+  appearance: none;
+  border: none;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.todayBtn:hover {
+  background: var(--action-secondary-hover);
+}
+
+/* Already on today: still pressable, no longer asking to be. */
+.todayQuiet {
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.navBtn:focus-visible,
+.todayBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* A week change keeps the old week on screen, quieter, until the new one lands. */
+.busy {
+  opacity: 0.55;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+/* ---------------------------------------------------------------- toolbar */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chipCount {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+}
+
+/* The key to the blocks. Width and fill alone are not identity (visual-language § Charts). */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.swatchHeld {
+  background: rgba(184, 92, 43, 0.2);
+}
+
+.swatchLook {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.swatchArrived {
+  background: rgba(38, 31, 24, 0.08);
+}
+
+.swatchCancelled {
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* The one terracotta dot: something waits on the owner. */
+.needDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  flex: 0 0 auto;
+  display: inline-block;
+}
+
+/* ------------------------------------------------------------------ strip */
+
+/* Tổng quan's readiness strip geometry: one band, a lead, a rule, pills. */
+.strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: 10px 14px 10px 18px;
+}
+
+.stripLead {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.stripMark {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+}
+
+.stripMark .needDot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  box-shadow: 0 0 0 2px var(--surface-card);
+}
+
+.stripTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.stripRule {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 0;
+  background: var(--border-hairline);
+  flex: 0 0 auto;
+}
+
+.attChips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px;
+  margin: -4px;
+}
+
+.attChips::-webkit-scrollbar {
+  display: none;
+}
+
+.attChip {
+  appearance: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-page);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.attChip:hover {
+  background: var(--action-secondary-hover);
+  transform: translateY(var(--lift-hover));
+}
+
+.attChip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.attChipOn {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.attWhen {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------- the grid */
+
+.gridCard {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  min-width: 0;
+}
+
+/*
+ * The week scrolls inside itself, the day's head sticky above it, so the
+ * header, the pills and the strip stay in reach while the owner looks at the
+ * evening. The height leaves the page's own head on screen at a laptop's 800px.
+ */
+.gScroll {
+  position: relative;
+  max-height: max(420px, calc(100vh - 270px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(38, 31, 24, 0.22) transparent;
+}
+
+.gHead {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  display: grid;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.colHead {
+  appearance: none;
+  border: none;
+  border-left: 1px solid var(--border-hairline);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 10px 10px 9px;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.colHead:hover {
+  background: var(--action-ghost-hover);
+}
+
+.colHead:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
+
+.colHeadStatic {
+  cursor: default;
+}
+
+.colHeadStatic:hover {
+  background: transparent;
+}
+
+.chTop {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+
+.chDow {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chDate {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.chCap {
+  font-family: var(--font-num);
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.colHeadToday .chDow {
+  color: var(--text-accent);
+}
+
+.colHeadToday .chDate {
+  color: var(--cream);
+  background: var(--terracotta);
+  border-radius: var(--radius-pill);
+  padding: 0 7px;
+  margin-left: -2px;
+}
+
+.gBody {
+  position: relative;
+  display: grid;
+}
+
+.gHours {
+  position: relative;
+}
+
+.hourLabel {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-50%);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+
+.nowLabel {
+  position: absolute;
+  right: 4px;
+  z-index: 6;
+  transform: translateY(-50%);
+  padding: 2px 5px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta-deep);
+  color: var(--cream);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.gCols {
+  position: relative;
+  display: grid;
+  background-image: linear-gradient(to bottom, var(--border-hairline) 0, var(--border-hairline) 1px, transparent 1px);
+  background-size: 100% var(--hour);
+}
+
+.col {
+  position: relative;
+  min-width: 0;
+  border-left: 1px solid var(--border-hairline);
+}
+
+.colToday {
+  background: rgba(184, 92, 43, 0.035);
+}
+
+/* A day the clinic is shut, faintly hatched — the planner's closed day. */
+.colClosed {
+  background-image: repeating-linear-gradient(135deg, transparent 0 7px, rgba(38, 31, 24, 0.035) 7px 8px);
+}
+
+/* Before opening and after closing: the day is quieter, not gone. */
+.off {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: rgba(38, 31, 24, 0.035);
+  pointer-events: none;
+}
+
+.brk {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background-image: repeating-linear-gradient(135deg, transparent 0 7px, rgba(38, 31, 24, 0.06) 7px 8px);
+  pointer-events: none;
+}
+
+.brkLabel {
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- blocks */
+
+.blk {
+  appearance: none;
+  border: none;
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 7px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(184, 92, 43, 0.16);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+  animation: rise var(--duration-slow) var(--ease-arc) both;
+}
+
+.blk:hover {
+  z-index: 3;
+  background: rgba(184, 92, 43, 0.26);
+  transform: translateY(var(--lift-hover));
+}
+
+.blk:focus-visible {
+  outline: none;
+  z-index: 4;
+  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 4px var(--focus-ring);
+}
+
+.bLine {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.bTime {
+  flex: 0 0 auto;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-accent);
+}
+
+.bName {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bSvc,
+.bDoc {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bDoc {
+  font-size: 11px;
+}
+
+.blk .needDot {
+  margin-left: auto;
+}
+
+/* Sizes, by how tall the appointment is: the doctor goes first, then the service. */
+.bXs {
+  justify-content: center;
+  padding: 2px 7px;
+}
+
+.bXs .bSvc,
+.bXs .bDoc,
+.bSm .bDoc {
+  display: none;
+}
+
+/* Two appointments side by side: the name matters more than the time. */
+.bNarrow .bTime {
+  display: none;
+}
+
+/* Waiting on the clinic: milk with a ring, never dashed — dashed is content not filled in. */
+.bLook {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.bLook:hover {
+  background: var(--action-secondary-hover);
+}
+
+.bArrived {
+  background: rgba(38, 31, 24, 0.055);
+  color: var(--ink-soft);
+}
+
+.bArrived:hover {
+  background: rgba(38, 31, 24, 0.09);
+}
+
+.bNoShow {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink-soft);
+}
+
+/* Cancelled: faded and struck through. Never red — a change is a fact, not a verdict. */
+.bCancelled {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  color: rgba(92, 82, 72, 0.75);
+}
+
+.bCancelled .bName {
+  text-decoration: line-through;
+  text-decoration-color: rgba(92, 82, 72, 0.55);
+}
+
+.bArrived .bTime,
+.bNoShow .bTime,
+.bCancelled .bTime {
+  color: var(--ink-soft);
+}
+
+.bNoShow:hover,
+.bCancelled:hover {
+  background: var(--action-ghost-hover);
+}
+
+/* The one that is open: the planner's shift — solid terracotta, cream words. */
+.bOpen,
+.bOpen:hover {
+  z-index: 5;
+  background: var(--terracotta);
+  color: var(--cream);
+  --icon-accent: currentColor;
+  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 3.5px var(--terracotta-deep);
+}
+
+.bOpen .bTime,
+.bOpen .bSvc,
+.bOpen .bDoc {
+  color: var(--cream);
+}
+
+.bOpen .needDot {
+  background: var(--cream);
+}
+
+/* Now: the logo's ink dot riding a line across today. */
+.nowLine {
+  position: absolute;
+  left: -1px;
+  right: 0;
+  z-index: 6;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--terracotta-deep);
+  pointer-events: none;
+}
+
+.nowDot {
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface-card);
+}
+
+/* ------------------------------------------------------------ phone week */
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.wd {
+  appearance: none;
+  border: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 60px;
+  padding: 8px 2px 9px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.wd:active {
+  background: var(--action-ghost-hover);
+}
+
+.wdDow {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.wdDate {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.wdCount {
+  font-family: var(--font-num);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.wd .needDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.wdToday .wdDow {
+  color: var(--text-accent);
+}
+
+.wdOn,
+.wdOn:active {
+  background: var(--terracotta);
+  color: var(--cream);
+}
+
+.wdOn .wdDow,
+.wdOn .wdCount {
+  color: var(--cream);
+  opacity: 0.85;
+}
+
+.wdOn .needDot {
+  background: var(--cream);
+}
+
+.wd:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* ------------------------------------------------------- the appointment */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px 18px;
+  min-width: 0;
+}
+
+.dtTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.stPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--action-ghost-hover);
+  color: var(--text-accent);
+}
+
+.stPillLook {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.stPillArrived {
+  background: rgba(38, 31, 24, 0.06);
+  color: var(--ink);
+}
+
+.stPillQuiet {
+  background: transparent;
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.dtClose {
+  margin-left: auto;
+}
+
+.dtHead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dtTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 21px;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+}
+
+.dtWhen {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* What is left for the clinic: a fact about the day, so a solid row (§1). */
+.askRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  background: var(--surface-page);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.askRow .needDot {
+  margin-top: 6px;
+}
+
+.kvs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kv {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.kvIcon {
+  display: inline-flex;
+  justify-content: center;
+  width: 20px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.kvText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.kvMain {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.kvSub {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.newTag {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink-soft);
+}
+
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.noteText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Blush is speech: her own words to the caller. */
+.said {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.saidWho {
+  padding: 0 6px;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.saidText {
+  padding: 8px 13px;
+  border-radius: 16px;
+  background: var(--surface-warm);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.callRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 10px;
+  border-radius: 14px;
+  background: var(--surface-page);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.callRow:hover {
+  background: var(--action-secondary-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.callRow .kvMain {
+  font-size: 13.5px;
+}
+
+.playDisc {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+  --icon-accent: currentColor;
+}
+
+.chev {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+}
+
+.confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.confirmGap {
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+.acts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* "Gọi khách" is a tel: link, dressed as the secondary pill. */
+.callBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--action-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.callBtn:hover {
+  background: var(--action-secondary-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.callBtnPrimary,
+.callBtnPrimary:hover {
+  background: var(--action-primary);
+  box-shadow: none;
+  color: var(--text-on-accent);
+  --icon-accent: currentColor;
+}
+
+.callBtnPrimary:hover {
+  background: var(--action-primary-hover);
+}
+
+.quiet {
+  appearance: none;
+  border: none;
+  background: none;
+  margin-left: auto;
+  padding: 8px 6px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-link);
+  cursor: pointer;
+}
+
+.quiet:hover {
+  text-decoration: underline;
+}
+
+.quiet:disabled {
+  opacity: 0.42;
+  cursor: default;
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------- overlays */
+
+/* The popover beside a block: the pickers' panel, laid out edge to edge. */
+.popPanel {
+  padding: 0;
+  gap: 0;
+  border-radius: var(--radius-card);
+  max-height: calc(100vh - 16px);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(38, 31, 24, 0.34);
+  animation: fnFadeIn var(--duration-base) var(--ease-out);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 71;
+  width: min(420px, 92vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-overlay);
+  animation: drawerIn var(--duration-slow) var(--ease-arc);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 71;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  box-shadow: var(--shadow-overlay);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: fnSheetUp var(--duration-slow) var(--ease-arc);
+}
+
+.sheetGrip {
+  width: 38px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  flex: 0 0 auto;
+}
+
+.overlayScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ------------------------------------------------------------ first week */
+
+.firstDay {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  min-width: 0;
+}
+
+.firstDayArt {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ink);
+}
+
+.firstDayText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------- motion */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blk,
+  .drawer,
+  .sheet,
+  .scrim {
+    animation: none;
+  }
+
+  .busy {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------- widths */
+
+@media (max-width: 1099.98px) {
+  .legend {
+    display: none;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .head {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .headText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .navBtn,
+  .todayBtn {
+    height: 40px;
+  }
+
+  .navBtn {
+    width: 40px;
+  }
+
+  /* The pills scroll sideways rather than stacking three rows above the day. */
+  .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 -16px;
+    padding: 2px 16px;
+  }
+
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .stripRule {
+    display: none;
+  }
+
+  .attChips {
+    margin: 0 -14px;
+    padding: 2px 14px;
+  }
+
+  .attChip {
+    height: 40px;
+  }
+
+  /* One day is short enough to scroll with the page, not inside a box. */
+  .gScroll {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .detail {
+    padding: 8px 16px 20px;
+  }
+
+  .callBtn {
+    padding: 11px 18px;
+  }
+
+  .firstDay {
+    flex-direction: column;
+    gap: 14px;
+  }
+}
