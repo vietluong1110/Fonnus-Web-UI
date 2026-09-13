@@ -134,7 +134,33 @@ gates nothing.
 picks a page from the first path segment; `AppShell` is the frame: a 216px
 milk sidebar (logo, the six tabs, the clinic / owner block with a sign-out
 menu) and a paper content column. Below 900px the sidebar narrows to an icon
-rail. Only **Lễ tân** is built; the other five tabs are honest placeholders.
+rail. **Tổng quan**, **Cuộc gọi**, **Lịch hẹn** and **Lễ tân** are built; the other two tabs
+are honest placeholders.
+
+### Cuộc gọi
+
+`#/app/cuoc-goi` lists every call — time, number, what the caller asked, how it ended, how
+long — under day bands, with chips for the calls that still need a person. `#/app/cuoc-goi/{id}`
+opens one: the caller and "Gọi lại", a one-line summary, what she did (a callback owed, an
+appointment, a transfer, what she did not know and the field that fixes it), the recording,
+and the conversation turn by turn. Press a line to hear it; the line being played lights up.
+
+It is the Lễ tân frame reused: the list in the work column, the open call in the 380px rail.
+Under 1181px the call opens as a drawer; under 640px as a sheet over the screen.
+`src/app/pages/calls/`, reading `api.calls` (`docs/api-contract.md` §8).
+
+### Lịch hẹn
+
+`#/app/lich-hen` is the week of appointments the receptionist booked, on a time grid drawn
+like the hours planner: blocks as long as the appointment, a now line, the lunch break
+hatched, doctor pills to narrow it. Above it, "cần bạn xem" — the requests she could not
+close alone, from every week. Press a block for the appointment: who, what she noted and told
+them, the call it came from, whether the confirmation arrived, and the light actions
+(confirm, accept a caller's move, arrived / no-show, cancel, call).
+
+It opens beside its block from 1100px, as a drawer below that, and as a sheet under 640px,
+where the week becomes one day under a seven-day strip.
+`src/app/pages/appointments/`, reading `api.appointments` (`docs/api-contract.md` §9).
 
 ### Lễ tân
 

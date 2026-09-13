@@ -5,7 +5,7 @@
  * back with the clinic's whole attention list alongside it, so the strip above
  * the calendar never has to make a second request to stay honest.
  *
- * Wire shape: `docs/api-contract.md` §8.
+ * Wire shape: `docs/api-contract.md` §9.
  */
 import type { Appointment, AppointmentsApi, AppointmentsWeek } from './contracts'
 import { http } from './http'

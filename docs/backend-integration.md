@@ -63,6 +63,7 @@ src/api/
   receptionist.mock.ts / receptionist.live.ts   the "gọi thử" panel's reply
   voice.mock.ts     / voice.live.ts
   insights.mock.ts  / insights.live.ts          everything Tổng quan draws
+  calls.mock.ts     / calls.live.ts             the Cuộc gọi list, one call, callbacks
   appointments.mock.ts / appointments.live.ts   the Lịch hẹn week, and its actions
   leads.mock.ts     / leads.live.ts
 
@@ -97,12 +98,12 @@ VITE_API_MODE=live
 weeks. A single global on/off would mean nobody could test your first endpoint until every
 other one existed.
 
-Groups: `auth`, `tenant`, `assistant`, `receptionist`, `voice`, `insights`, `appointments`, `leads`.
+Groups: `auth`, `tenant`, `assistant`, `receptionist`, `voice`, `insights`, `calls`, `appointments`, `leads`.
 
 The console says which is which on every page load:
 
 ```
-[fonnus] API mode: mock. Faked in the browser: auth, assistant, voice, insights, leads.
+[fonnus] API mode: mock. Faked in the browser: auth, assistant, voice, insights, calls, leads.
 ```
 
 ### No CORS in development
@@ -137,6 +138,7 @@ Each row is independently shippable and independently testable.
 | 7 | `assistant` | the chat stream | Needs the model. Wire format not agreed — talk first. **No UI consumes it since Sept 2026** — the setup assistant was removed; the group stays so it can come back as its own project. |
 | 8 | `voice` | the session | Needs the pipeline **and** the cost controls. See open-questions Q21. |
 | 9 | `insights` | `GET /insights/overview` | The Tổng quan tab. Needs call records to exist first, so it is naturally late — but it is one read-only endpoint with no writes and no concurrency, so it is the easiest of the lot once there is data to aggregate. |
+| 10 | `calls` | `GET /calls`, `GET /calls/{id}`, `POST /calls/{id}/callback` | The Cuộc gọi tab. The call log already stores transcripts and recordings; the work is the events, the gaps and the summary (Q24), and making `counts` agree with row 9's figures for the same range. |
 
 Tick them off in this table as you go.
 

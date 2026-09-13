@@ -422,6 +422,143 @@ export interface InsightsApi {
 }
 
 // ---------------------------------------------------------------------------
+// Calls — what the Cuộc gọi tab reads
+// ---------------------------------------------------------------------------
+
+/**
+ * The chips above the list. Applied by the server, not the page: the list is
+ * paged, so a filter over the rows already loaded would count and show only
+ * what happened to arrive first.
+ *
+ * `callback` means a callback she promised that nobody has made yet.
+ */
+export type CallFilter = 'all' | 'callback' | 'booked' | 'transferred' | 'unanswered'
+
+/**
+ * Something the receptionist did not know, found on one call. The same three
+ * kinds `attention` counts across many calls, carrying the same values, so
+ * Tổng quan's "5 khách hỏi giá…" and the call it came from name the same thing.
+ */
+export type KnowledgeGap =
+  | { kind: 'missing_price'; service: string }
+  | { kind: 'unconfirmed_hours'; weekday: Weekday }
+  | { kind: 'unanswered_question'; question: string }
+
+/** One row of the list. */
+export interface CallSummary {
+  id: string
+  /** ISO datetime. */
+  started_at: string
+  duration_s: number
+  /** Digits only, national format: `0903812217`. The app spaces it. */
+  caller_number: string
+  /**
+   * What the caller said their name is, as she would address them — `Chị
+   * Trang`. `null` until she has learned it, on this call or an earlier one
+   * from the same number.
+   */
+  caller_name: string | null
+  /** This call's place among every call from the number, oldest first: 1 is a first call. */
+  caller_call_number: number
+  intent: CallIntent
+  /**
+   * What the caller wanted, in a few words — `Giá cấy ghép implant`. Written
+   * from the conversation, so it is content about the call like the transcript
+   * is, never interface copy. See docs/open-questions.md Q24.
+   */
+  topic: string
+  outcome: CallOutcome
+  /** She held an appointment during the call. Independent of `outcome`. */
+  booked: boolean
+  /** Outside the clinic's opening hours on that weekday. */
+  after_hours: boolean
+  /** A callback she promised the caller. `done_at` stays null until someone makes it. */
+  callback: { due_by: string | null; done_at: string | null } | null
+  /** The first thing she did not know on this call. */
+  gap: KnowledgeGap | null
+}
+
+/**
+ * Something she did during the call, as a machine code. The Vietnamese is this
+ * app's (`pages/calls/labels.ts`); dates are ISO.
+ */
+export type CallEvent =
+  | { type: 'availability_checked'; date: string }
+  | { type: 'appointment_held'; starts_at: string }
+  | { type: 'message_taken'; callback_by: string | null }
+  | { type: 'transferred'; to_name: string; answered: boolean; ring_s: number }
+  | { type: 'transfer_ended'; to_name: string; talk_s: number }
+  | { type: 'caller_hung_up' }
+
+/**
+ * The conversation, in order. `at_ms` is from the start of the recording, so a
+ * line and the audio under it are the same moment.
+ *
+ * `disclosure` is the opening AI and recording notice — the same words on every
+ * call, so it carries no text.
+ */
+export type CallTurn =
+  | { kind: 'disclosure'; at_ms: number }
+  | { kind: 'caller' | 'agent'; at_ms: number; text: string; gap?: KnowledgeGap }
+  | { kind: 'event'; at_ms: number; event: CallEvent }
+
+export interface CallDetail extends CallSummary {
+  /** One or two sentences on what happened, written from the conversation. Content, like `topic`. */
+  summary: string
+  /**
+   * `null` once the recording is past `recording_retention`, or when the caller
+   * declined recording — the transcript may outlive it.
+   */
+  recording: { url: string; duration_ms: number } | null
+  turns: CallTurn[]
+  booking: { starts_at: string; service: string; practitioner: string | null } | null
+  transfer: { to_name: string; answered: boolean; ring_s: number; talk_s: number } | null
+  /** Every other call from this number, newest first. */
+  others: CallSummary[]
+}
+
+export interface CallListQuery {
+  range: InsightRange
+  filter: CallFilter
+  /**
+   * Digits match the number (`217` finds `0903 812 217`); anything else matches
+   * the name, the topic and the transcript, ignoring Vietnamese diacritics.
+   */
+  q?: string
+  /** From the previous page's `next_cursor`. */
+  cursor?: string | null
+}
+
+export interface CallListPage {
+  /** ISO. The page dates itself from this rather than from the browser clock. */
+  generated_at: string
+  /** Newest first. */
+  calls: CallSummary[]
+  next_cursor: string | null
+  /**
+   * For the range and search, whatever the filter — the numbers on the chips.
+   * `callback` counts only callbacks not yet made.
+   */
+  counts: Record<CallFilter, number>
+  /**
+   * Calls per day for the range, search *and* filter, newest first — the count on
+   * each day's band. From the server, because a page boundary can fall mid-day.
+   */
+  by_day: { date: string; count: number }[]
+}
+
+export interface CallsApi {
+  /** `GET /calls?range=…&filter=…&q=…&cursor=…` */
+  list(query: CallListQuery, opts?: Signal): Promise<CallListPage>
+
+  /** `GET /calls/{id}` — the conversation, the recording and what she did. */
+  get(id: string, opts?: Signal): Promise<CallDetail>
+
+  /** `POST /calls/{id}/callback` `{ done }` — the owner made the callback, or undid saying so. */
+  setCallbackDone(id: string, done: boolean, opts?: Signal): Promise<CallSummary>
+}
+
+// ---------------------------------------------------------------------------
 // Appointments — what the Lịch hẹn tab reads
 // ---------------------------------------------------------------------------
 
@@ -550,6 +687,7 @@ export interface FonnusApi {
   receptionist: ReceptionistApi
   voice: VoiceApi
   insights: InsightsApi
+  calls: CallsApi
   appointments: AppointmentsApi
   leads: LeadsApi
 }
@@ -562,6 +700,7 @@ export const API_GROUPS = [
   'receptionist',
   'voice',
   'insights',
+  'calls',
   'appointments',
   'leads',
 ] as const

@@ -493,7 +493,125 @@ normal and the card then does not render — there is no "everything is fine" ro
 
 ---
 
-## 8. Appointments — the Lịch hẹn tab
+## 8. Calls — the Cuộc gọi tab
+
+§7 is aggregates; this is the list they are aggregated from. The tab shows the calls, one
+call's conversation beside its recording, and the callbacks she promised. Mock:
+`src/api/calls.mock.ts`.
+
+### `GET /calls?range=…&filter=…&q=…&cursor=…`
+
+| Param | Values |
+|---|---|
+| `range` | `today`, `7d`, `30d` — the same day boundaries as §7, on the clinic's wall clock |
+| `filter` | `all`, `callback` (a callback promised and not yet made), `booked`, `transferred`, `unanswered` |
+| `q` | Optional. Three or more digits (spaces and dots ignored) match the number; anything else matches the caller's name, the topic and the transcript, **ignoring Vietnamese diacritics** — `nieng` finds `niềng` |
+| `cursor` | Optional, opaque, from the previous page's `next_cursor` |
+
+```jsonc
+{
+  "generated_at": "2026-09-13T03:45:00.000Z",
+  "calls": [
+    {
+      "id": "c_8f3a…",
+      "started_at": "2026-09-13T03:05:12.000Z",
+      "duration_s": 64,
+      "caller_number": "0987204553",        // digits only, national format
+      "caller_name": null,                  // "Chị Trang" once she has learned it
+      "caller_call_number": 1,              // this call's place among the number's calls
+      "intent": "pricing",                  // §7's closed set
+      "topic": "Giá cấy ghép implant",      // content — see below
+      "outcome": "unanswered",              // §7's closed set
+      "booked": false,
+      "after_hours": false,
+      "callback": { "due_by": "2026-09-13T10:00:00.000Z", "done_at": null },
+      "gap": { "kind": "missing_price", "service": "Cấy ghép implant" }
+    }
+  ],
+  "next_cursor": "eyJvIjo0MH0",
+  "counts": { "all": 128, "callback": 3, "booked": 24, "transferred": 17, "unanswered": 5 },
+  "by_day": [{ "date": "2026-09-13", "count": 9 }, /* … newest first */ ]
+}
+```
+
+**Filtering, search and paging are the server's.** The list is paged, so doing any of them
+over the rows already loaded would count and show only what arrived first.
+
+- `counts` is for the range and `q`, **whatever the filter** — it is what the chips print.
+  `callback` counts only callbacks not yet made.
+- `by_day` is for the range, `q` **and** the filter — the count on each day's band. It comes
+  from the server because a page boundary can fall in the middle of a day.
+- Newest first. Page size is the server's choice; the mock uses 40.
+- **`counts.all` must equal §7's `calls.value` for the same range**, and `counts.booked` its
+  `bookings.value`. The two tabs are read by the same owner on the same morning.
+
+`gap` is the first thing she did not know on the call. Its three kinds carry exactly the
+values §7's `attention` items of the same name carry — `missing_price.service`,
+`unconfirmed_hours.weekday`, `unanswered_question.question` — so the queue row and the calls
+behind it name the same thing.
+
+### `GET /calls/{id}`
+
+Everything `GET /calls` returns for the row, plus:
+
+```jsonc
+{
+  // …every CallSummary field…
+  "summary": "Khách hỏi giá cấy ghép implant. Linh chưa có giá nên hẹn nhân viên gọi lại trước 17:00.",
+  "recording": { "url": "https://…signed…", "duration_ms": 64000 },   // or null
+  "turns": [
+    { "kind": "disclosure", "at_ms": 0 },
+    { "kind": "caller", "at_ms": 6000, "text": "Cho mình hỏi cấy ghép implant…" },
+    { "kind": "agent", "at_ms": 11000, "text": "Dạ, em chưa có giá…",
+      "gap": { "kind": "missing_price", "service": "Cấy ghép implant" } },
+    { "kind": "event", "at_ms": 44000,
+      "event": { "type": "message_taken", "callback_by": "2026-09-13T10:00:00.000Z" } }
+  ],
+  "booking": null,     // { "starts_at", "service", "practitioner" | null }
+  "transfer": null,    // { "to_name", "answered", "ring_s", "talk_s" }
+  "others": [ /* every other call from this number, newest first, as CallSummary */ ]
+}
+```
+
+- **`at_ms` is on the recording's clock.** Pressing a line seeks the audio to it and the line
+  being played lights up, so a turn and the audio under it must be the same moment.
+- `disclosure` is the opening AI and recording notice (`greeting_compliance_block`). It
+  carries no text: it is the same words on every call and the app says what it is.
+- `recording.url` should be short-lived and support HTTP range requests, or seeking in the
+  browser's audio element downloads the whole file first. `null` once the recording is past
+  `recording_retention`, or when the caller declined recording — the transcript may outlive it.
+- A turn's `gap` marks the line she said *because* she did not know.
+
+Events are machine codes; every Vietnamese word is this app's (`pages/calls/labels.ts`):
+
+| `event.type` | Fields | Reads as |
+|---|---|---|
+| `availability_checked` | `date` (ISO date) | Linh xem lịch trống thứ Năm |
+| `appointment_held` | `starts_at` | Đã giữ lịch · T5 17/09 · 15:00 |
+| `message_taken` | `callback_by` (ISO or null) | Ghi lời nhắn · gọi lại trước 17:00 |
+| `transferred` | `to_name`, `answered`, `ring_s` | Chuyển máy cho BS Hùng · nghe máy sau 12 giây |
+| `transfer_ended` | `to_name`, `talk_s` | BS Hùng nói chuyện với khách · 53s |
+| `caller_hung_up` | — | Khách cúp máy |
+
+**`topic`, `summary` and the turns' `text` are content, not copy.** They are about the call —
+what was said, and a model's short account of it — in the same way a transcript is. They are
+the one place prose from the server reaches the screen, and every label, button and sentence
+around them is still the frontend's. Who writes them, and in what voice, is Q24.
+
+### `POST /calls/{id}/callback`
+
+```jsonc
+{ "done": true }      // → 200, the call's CallSummary with callback.done_at set
+{ "done": false }     // → 200, done_at back to null ("Hoàn tác")
+```
+
+Idempotent. `done_at` is the server's clock. `404` with code `call_not_found`; `409` with
+code `no_callback` when the call carries no callback. The UI applies the change before the
+response and rolls it back on failure, with the error beside the button.
+
+---
+
+## 9. Appointments — the Lịch hẹn tab
 
 Only the appointments the receptionist booked. Staff-booked appointments arrive when the
 clinic's own software is synced, and are not part of this contract.
@@ -576,7 +694,7 @@ An action that is not allowed from the current state is `409` with `code:
 
 ---
 
-## 9. Specified later — shape only
+## 10. Specified later — shape only
 
 These have interfaces in `src/api/` so the UI can be built against them, but no agreed wire
 format. Do not implement from this section.
@@ -586,12 +704,11 @@ format. Do not implement from this section.
 | **Setup assistant chat** | Streaming (SSE) | Sends a turn, receives interleaved text deltas and structured `Partial<ReceptionistConfig>` patches. The assistant gets exactly the write authority today's canned parser has — it proposes a patch, the client applies it through the same path as a form |
 | **Voice session** | WebSocket or WebRTC | Bidirectional audio plus a transcript event stream. The client owns no codec decisions; it toggles a microphone boolean |
 | **Landing voice demo** | Cost control **first** | Unauthenticated, and every click costs Deepgram + Qwen + ElevenLabs. Needs a per-IP budget, a max duration and a kill switch before the endpoint exists. See Q21 |
-| `GET /calls` | — | The "Cuộc gọi" tab, currently a placeholder. Separate from §7: that is aggregates, this is the list |
 | `GET /numbers` | — | FPT inventory pool for number provisioning; sets `assigned_phone` |
 
 ---
 
-## 10. Open questions
+## 11. Open questions
 
 The decisions above that are genuinely open are collected in
 **[`open-questions.md`](./open-questions.md)**, one per line, written so the list can be sent
