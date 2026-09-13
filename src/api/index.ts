@@ -13,6 +13,7 @@
  * See docs/backend-integration.md.
  */
 import { API_MODE, HAS_MOCKS, isLive } from './env'
+import { API_GROUPS } from './contracts'
 import type { FonnusApi } from './contracts'
 
 import { authMock } from './auth.mock'
@@ -27,6 +28,8 @@ import { voiceMock } from './voice.mock'
 import { voiceLive } from './voice.live'
 import { insightsMock } from './insights.mock'
 import { insightsLive } from './insights.live'
+import { callsMock } from './calls.mock'
+import { callsLive } from './calls.live'
 import { leadsMock } from './leads.mock'
 import { leadsLive } from './leads.live'
 
@@ -37,13 +40,14 @@ export const api: FonnusApi = {
   receptionist: isLive('receptionist') ? receptionistLive : receptionistMock,
   voice: isLive('voice') ? voiceLive : voiceMock,
   insights: isLive('insights') ? insightsLive : insightsMock,
+  calls: isLive('calls') ? callsLive : callsMock,
   leads: isLive('leads') ? leadsLive : leadsMock,
 }
 
 // A one-line reminder in the console, so nobody debugs a mock for an hour
 // wondering why their breakpoint in the backend never hits.
 if (import.meta.env.DEV && HAS_MOCKS) {
-  const faked = (['auth', 'tenant', 'assistant', 'receptionist', 'voice', 'insights', 'leads'] as const).filter((g) => !isLive(g))
+  const faked = API_GROUPS.filter((g) => !isLive(g))
   // eslint-disable-next-line no-console
   console.info(
     `[fonnus] API mode: ${API_MODE}. Faked in the browser: ${faked.join(', ')}. ` +

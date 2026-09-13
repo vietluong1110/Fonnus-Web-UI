@@ -461,7 +461,8 @@ copy.
 - **The frame is the same; the rail is not.** A Lễ tân page is a work column beside a
   380px rail, because every screen there ends in something you can hear. There is
   nothing to try out on a page about calls that already happened, so the rail goes and
-  the width is the page's. What the rail would have carried — how ready she is — is a
+  the width is the page's. (A page of *records* is different: it keeps the rail, for the one
+  record that is open — §12.) What the rail would have carried — how ready she is — is a
   **band across the top**: the number, the level being worked towards, and **as many of
   the next jobs as the band has room for**, each its own pill, the best one filled. What
   does not fit folds into `+N việc`, which opens the full list on Lễ tân. The count is
@@ -540,6 +541,64 @@ are English.
 
 ---
 
+## 12. A list of records, with one of them open
+
+`Cuộc gọi` is the first screen whose subject is a list of records the product made — not
+settings being answered (Lễ tân), not figures being read (Tổng quan), but calls to look
+through one at a time. What it settled, for `Lịch hẹn` and anything else shaped like it:
+
+- **The Lễ tân frame serves list–detail too.** The list is the work column; the open record
+  is the 380px rail behind the gutter, sticky. On Lễ tân that rail is the try-out call; here
+  it is the call that already happened — still a conversation, still in that column. §10's
+  "the rail goes" is about a page of figures; a page of records keeps it. Under 1181px the
+  record opens as a drawer from the right, under 640px as a sheet over the tab bar. The
+  geometry now lives in three stylesheets (`Section.module.css`, `.withRail`,
+  `Calls.module.css`); a fourth copy should move it into `app/ui`.
+- **The open record lives in the address.** `#/app/cuoc-goi/{id}`, so a queue row elsewhere
+  can point at one call and Back closes an overlay. On a desktop a new selection *replaces*
+  the entry — twenty calls looked at should not be twenty presses of Back; on a tablet or a
+  phone it *pushes*, because there Back is how you close.
+- **Summary first, evidence second.** The person and the one action (`Gọi lại`) → a sentence
+  of what happened → the facts it left → the recording → the turns. An owner reads the top
+  and opens the transcript to check it; the order says which is which.
+- **One fact row per thing the record left behind**, in the Tổng quan queue row's geometry,
+  one icon each: the callback owed, the appointment, the transfer — and, dashed, what she did
+  not know, one press from the field that fixes it. It carries the same values as the queue
+  item of the same kind, so the queue and the call behind it cannot name different things.
+- **A paged list filters, searches and counts on the server.** Counts over the rows that
+  happened to load are wrong from page one. The chips' numbers ignore the filter — they are
+  the choices; each day band's number respects it — it is what is under the band.
+- **What she did sits between the turns**, as a code the frontend words — `Đã giữ lịch · T5
+  17/09 · 15:00`. "Why did she transfer?" is answered where it happened, not in a log.
+- **Pressing a line plays it; the line being played lights up and the rest wait at half
+  strength.** Following the recording scrolls by `scrollTop`. A press that ends a text
+  selection does not seek — an owner copying what a caller said is not asking to hear it —
+  and the timestamp is the line's keyboard target.
+- **The player is drawn in arcs and dots, not as a waveform.** One line on the meter track,
+  the logo's ink dot as the playhead, a terracotta dot where an appointment was held, ink dots
+  for anything else she did, a dashed ring where she first did not know something. A waveform
+  of a phone call shows loudness, which nobody acts on.
+- **A label another tab already says is imported, not restated.** An outcome reads `Linh chưa
+  trả lời được` on both tabs because both call `outcomeLabel`. The canvas drew its own words
+  for the same four outcomes, and they had already drifted by the second pass.
+- **The dashed mark keys on the gap, not on the outcome.** `Linh đang đọc giờ mẫu cho chủ
+  nhật` is an answered call and a gap; `đổi lịch` she could not do is unanswered and not a gap.
+- **Content is not copy.** A transcript, a topic and a summary are about the call and come
+  from the server; every word around them is still this app's. The contract says which fields
+  are which (`api-contract.md` §8, Q24), so the line does not blur one field at a time.
+- **Marking a callback done is optimistic.** The dot leaves the row and the chip count falls at
+  once; a failure puts both back and says why beside the button — no toast.
+- **A list folds on its own width** — a container query on the list, not a media query —
+  because it is narrow beside the rail on a small laptop as well as on a phone. `display:
+  contents` lets two cells be two grid columns when wide and one flex line when narrow, from
+  one markup.
+
+> **Check:** on a phone, open a call and press Back — does it close the sheet rather than leave
+> the tab? Mark a callback done — do the dot and the chip count move together? Search `217` —
+> does it find the number, and `nieng` the word `niềng`?
+
+---
+
 ## Verifying a change
 
 The pane's screenshots are unreliable on these pages, so do not let a picture be the
@@ -581,6 +640,20 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-13 (evening) — Cuộc gọi, the first list of records.** Three directions were drawn
+  on a clickable canvas (list + rail, rows that open in place, a page per call); the owner
+  picked the rail, and it was built the same day with a new `calls` API group. Its mock takes
+  each day's volume from the insights mock, so the list and Tổng quan's figure count the same
+  calls — bookings do not reconcile yet, and the contract says they must. Four things worth
+  carrying: a paged list cannot filter or count on the client; outcome labels must be imported
+  from the tab that said them first (the canvas's own words had already drifted by its second
+  pass); the dashed mark keys on the gap rather than on an outcome; and a mock recording is a
+  generated silent WAV, so seeking, speed and "ended" run through the real `<audio>` path
+  instead of a pretend clock. Research that shaped it: owner-facing call logs (Jobber,
+  Smith.ai, Rosie) lead with outcome and follow-up and keep the transcript as evidence, while
+  developer consoles (Retell, Vapi, Synthflow) are the wrong model. Not yet checked on screen
+  — typecheck and a production build are clean. → §12.
 
 - **2026-09-13 (later) — Tổng quan, second pass on the owner's audit.** Four things the
   owner saw and three measured: the intent bars were 86px and 94px wide in the same card

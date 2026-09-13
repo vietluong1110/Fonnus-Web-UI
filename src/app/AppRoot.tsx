@@ -5,6 +5,7 @@ import { AppShell, activeNav } from './AppShell'
 import { ConfigProvider } from './letan/store'
 import { LeTanPage } from './letan/LeTanPage'
 import { OverviewPage } from './pages/overview/OverviewPage'
+import { CallsPage } from './pages/calls/CallsPage'
 import { PlaceholderPage } from './pages/Placeholder'
 import { ConnectionError, ShellSkeleton } from './Boot'
 
@@ -72,6 +73,8 @@ export function AppRoot() {
           <LeTanPage path={path.slice(1)} />
         ) : nav.key === 'tong-quan' ? (
           <OverviewPage />
+        ) : nav.key === 'cuoc-goi' ? (
+          <CallsPage path={path.slice(1)} />
         ) : (
           <PlaceholderPage title={nav.label} />
         )}
