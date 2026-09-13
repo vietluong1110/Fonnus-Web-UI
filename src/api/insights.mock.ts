@@ -289,3 +289,10 @@ export const insightsMock: InsightsApi = {
     return out
   },
 }
+
+/*
+ * The Cuộc gọi mock builds its call list from these same volumes, so the two
+ * tabs count the same calls on the same day — a list of 40 calls under a tile
+ * that says 120 is exactly the disagreement ui-ux-principles §10 forbids.
+ */
+export { OPEN_FROM, OPEN_TO, addDays, dayNumber, hoursOnDay, hoursSoFar, isoDate, noise }

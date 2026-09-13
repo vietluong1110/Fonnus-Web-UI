@@ -141,7 +141,7 @@ eight times (200 × 200). `<Shape name="…" size={…} />`.
 
 | Name               | Vietnamese                 | Meaning                                                         | On the site                                     |
 | ------------------ | -------------------------- | --------------------------------------------------------------- | ----------------------------------------------- |
-| `always-on`        | Nghe máy 24/7              | a closed ring; the terracotta arc covers the hours no one is on | "Vì sao" answer band; "Cuộc gọi" placeholder    |
+| `always-on`        | Nghe máy 24/7              | a closed ring; the terracotta arc covers the hours no one is on | "Vì sao" answer band                            |
 | `rising-arcs`      | Cuộc gọi được trả lời      | three arcs rising from one point — the motion idiom             | "Vì sao" heading; "Tổng quan" placeholder       |
 | `handoff`          | Chuyển cho bác sĩ          | two points, one arc; the destination is sage                    | the ringed card in "Bảo mật"                    |
 | `relieved-owner`   | Chủ phòng khám nhẹ người   | the person below, the call held above; no face                  | "Phòng khám đang dùng" heading                  |

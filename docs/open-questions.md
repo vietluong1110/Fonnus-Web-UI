@@ -336,3 +336,27 @@ than looking finished.
 - `null` means "not answered", distinct from `0` and `""`
 
 **Answer:**
+
+---
+
+### Q24 · Calls: who writes `topic` and `summary`, and who in a clinic may open a recording?
+
+*Why:* The Cuộc gọi tab (`api-contract.md` §8) shows a few words on what the caller wanted and
+a one-sentence account of the call. They are the only server-written prose on any screen, so
+their voice matters: *"Khách hỏi giá cấy ghép implant. Linh chưa có giá nên hẹn nhân viên gọi
+lại trước 17:00."* — plain, in the receptionist's name, no diagnosis, no judgement of the
+caller. And transcripts and recordings of a clinic's calls carry health details, which Law
+91/2025/QH15 and Decree 356/2025/ND-CP treat as sensitive personal data (Decree 13/2023 was
+replaced on 1 Jan 2026).
+
+- Is `summary` model-written after the call, and on which model — the same cross-border
+  assessment as the live pipeline?
+- Is there a style guide for it, and who reviews it?
+- Can every signed-in user of the clinic open every recording, or only the owner? Today there
+  is one owner per clinic (Q10), so the UI does not gate anything.
+- Is opening a recording logged?
+
+**Recommendation:** model-written with a fixed Vietnamese style prompt kept in this repo's
+voice; owner-only access to recordings until roles exist; log every recording fetch.
+
+**Answer:**

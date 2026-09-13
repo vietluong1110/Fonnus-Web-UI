@@ -1,0 +1,1390 @@
+/*
+ * Cuộc gọi — the list, and one call beside it.
+ *
+ * The frame is Lễ tân's: a work column and a 380px rail separated by the gutter
+ * — a 40px gap with a hairline down the middle — not by a fill. The list is the
+ * work; the rail holds the open call, sticky, the way it holds the try-out call
+ * on every Lễ tân sub-page. The geometry is `.work` in `letan/Section.module.css`
+ * and `.withRail` in `LeTanPage.module.css`; this is its third copy, and a fourth
+ * should move it into `app/ui`.
+ *
+ * Three widths:
+ *
+ *   ≥ 1181px   list + rail
+ *   640–1180   the list alone; a call opens as a drawer from the right
+ *   < 640px    the list folds to two lines; a call is a sheet over the screen
+ *
+ * The list folds by a container query on the list itself, not the viewport, so
+ * it folds wherever it is narrow — beside the rail on a small laptop included.
+ */
+
+/* ------------------------------------------------------------------- head */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dateline {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.headSpacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.range {
+  display: inline-flex;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------- toolbar */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.chipCount {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  color: var(--ink-soft);
+}
+
+.chips [aria-pressed='true'] .chipCount {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* The row's dot, on the chip that finds those rows — the chip is the legend. */
+.chipDot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+
+.chips [aria-pressed='true'] .chipDot {
+  background: currentColor;
+}
+
+.search {
+  margin-left: auto;
+  flex: 0 1 300px;
+  min-width: 220px;
+}
+
+/* A new query keeps the old rows on screen, quieter, until the new ones land. */
+.busy {
+  opacity: 0.55;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+/* ------------------------------------------------------------ the frame */
+
+.work {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 40px;
+  /* Both columns run the row's full height, so the rail's panel has the tall box
+     a sticky child needs to move in. */
+  align-items: stretch;
+}
+
+.work::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Centre of the gutter: the 380px column + half of the 40px gap. */
+  right: 400px;
+  width: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+/* No call to show (an empty list, or a narrow window): the list takes the width. */
+.workSolo {
+  display: flex;
+  flex-direction: column;
+  /* A grid instruction left on a flex column sizes children to max-content (CLAUDE.md). */
+  align-items: stretch;
+}
+
+.workSolo::before {
+  display: none;
+}
+
+.rail {
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------- the list */
+
+/* Doubled: `Card`'s own padding lives in a stylesheet this one cannot out-order. */
+.listCard.listCard {
+  padding: 12px;
+  gap: 4px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  container: calls / inline-size;
+}
+
+.thead,
+.row {
+  display: grid;
+  grid-template-columns: 8px 52px 140px minmax(0, 1fr) 184px 56px;
+  column-gap: 12px;
+  align-items: center;
+}
+
+/* Header text, band text and row text all start 24px in: 12 of card, 12 of row. */
+.thead {
+  padding: 4px 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.right {
+  text-align: right;
+}
+
+.band {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  margin-top: 4px;
+  background: var(--surface-page);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bandDate {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.bandCount {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.row {
+  position: relative;
+  min-height: 58px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+.row:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.row:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+/* The call open in the rail: ringed, the way an open row is ringed on Dịch vụ. */
+.rowOn,
+.rowOn:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.rowOn::before,
+.rowOn + .row::before {
+  display: none;
+}
+
+.cDot {
+  display: flex;
+  align-items: center;
+}
+
+/* A callback promised and not yet made. The page's one terracotta dot. */
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  flex: 0 0 auto;
+}
+
+.cTime {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.sub {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cCaller {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.number {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+/* Two columns on a wide list, one line of two things on a narrow one. */
+.cMeta {
+  display: contents;
+}
+
+.cAsk {
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.cOut {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.outLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.outGap .outLabel {
+  color: var(--text-accent);
+  text-decoration: underline dashed var(--border-dashed);
+  text-underline-offset: 4px;
+}
+
+.cDur {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+@container calls (max-width: 699.98px) {
+  .thead,
+  .row {
+    grid-template-columns: 8px 46px 124px minmax(0, 1fr) 164px 50px;
+  }
+}
+
+/*
+ * Narrow: number and time, then what happened · what they asked, and the length.
+ * Every area is placed explicitly — an item spanning `1 / -1` pushes whatever
+ * follows it onto a third row (lessons log, 2026-09-13).
+ */
+@container calls (max-width: 559.98px) {
+  .thead {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'dot caller time'
+      '. meta dur';
+    row-gap: 3px;
+    column-gap: 10px;
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+
+  .cDot {
+    grid-area: dot;
+  }
+
+  .cCaller {
+    grid-area: caller;
+  }
+
+  .cTime {
+    grid-area: time;
+    text-align: right;
+    font-size: 13px;
+  }
+
+  .cMeta {
+    grid-area: meta;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .cDur {
+    grid-area: dur;
+    font-size: 12.5px;
+  }
+
+  .number {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .cCaller .sub,
+  .cTime .sub {
+    display: none;
+  }
+
+  .cOut {
+    order: -1;
+    flex: 0 1 auto;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+
+  .cOut svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .cOut::after {
+    content: '·';
+    margin-left: 2px;
+    color: var(--ink-soft);
+  }
+
+  .cAsk {
+    flex: 1 1 auto;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+
+.emptyWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* ------------------------------------------------------------ the panel */
+
+.panel {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panelTop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 14px;
+}
+
+.panelPlayer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-hairline);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.panelScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 14px 18px;
+  scroll-behavior: smooth;
+}
+
+.panelStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px 16px;
+}
+
+.skel {
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  background: var(--meter-track);
+}
+
+.caller {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.callerText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.callerNumber {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.callerNumberSm {
+  font-size: 17px;
+}
+
+.callerWho {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Button.tsx, primary, size sm — as a link, because it dials. */
+.callBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  --icon-accent: currentColor;
+  color: var(--text-on-accent);
+  font-size: var(--size-ui);
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.callBtn:hover {
+  background: var(--action-primary-hover);
+  color: var(--text-on-accent);
+  text-decoration: none;
+}
+
+.callBtn:active {
+  transform: scale(var(--press-scale));
+}
+
+.callBtn:focus-visible,
+.callDisc:focus-visible,
+.disc:focus-visible,
+.close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.meta {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.summary {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ facts */
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* The Tổng quan queue row's geometry, a step tighter for a 380px column. */
+.fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 11px 14px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.factAnchor {
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.factAnchor:hover {
+  background: var(--action-secondary-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.factAnchor:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* Something she does not know yet: content not filled in (§1). */
+.factGap {
+  border: 1px dashed var(--border-dashed);
+}
+
+.factMark {
+  display: inline-flex;
+  justify-content: center;
+  width: 20px;
+  flex: 0 0 auto;
+}
+
+.factText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.factTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.factGap .factTitle {
+  font-weight: 500;
+}
+
+.factSub {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.factAct {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+.factButton {
+  flex: 0 0 auto;
+}
+
+.factLink {
+  flex: 0 0 auto;
+}
+
+.factError {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--error);
+  padding: 0 4px;
+}
+
+/* ----------------------------------------------------------------- player */
+
+.playerWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.play {
+  appearance: none;
+  border: none;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--action-primary);
+  --icon-accent: currentColor;
+  color: var(--text-on-accent);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.play:hover {
+  background: var(--action-primary-hover);
+}
+
+.play:active {
+  transform: scale(var(--press-scale));
+}
+
+.play:focus-visible,
+.speed:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* The line: a paler step of the same terracotta, never grey (§9). */
+.track {
+  position: relative;
+  flex: 1;
+  min-width: 60px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 2px);
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+}
+
+.track:focus-visible {
+  outline: none;
+}
+
+.trackFill {
+  position: absolute;
+  left: 0;
+  top: calc(50% - 2px);
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+}
+
+.mark {
+  position: absolute;
+  top: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.markBook {
+  background: var(--terracotta);
+  box-shadow: 0 0 0 2px var(--surface-card);
+}
+
+.markEvent {
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface-card);
+}
+
+.markGap {
+  background: var(--surface-card);
+  border: 1.5px dashed var(--terracotta);
+}
+
+/* The logo's ink dot, riding the line. */
+.playhead {
+  position: absolute;
+  top: calc(50% - 7px);
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface-card);
+  pointer-events: none;
+}
+
+.track:focus-visible .playhead {
+  box-shadow:
+    0 0 0 2px var(--surface-card),
+    0 0 0 5px var(--focus-ring);
+}
+
+.time {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.speed {
+  appearance: none;
+  border: none;
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.speed:hover {
+  background: var(--action-ghost-hover);
+}
+
+.playerNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------- transcript */
+
+.tx {
+  list-style: none;
+  margin: 0;
+  padding: 2px 2px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  max-width: 86%;
+  cursor: pointer;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+/* The caller is the one being answered, so they sit on the far side (AuthPanel). */
+.turnCaller {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.who {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 6px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.who b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ts {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0 2px;
+  margin: 0 -2px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.ts:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.turn:hover .ts,
+.event:hover .ts,
+.disclosure:hover .ts {
+  color: var(--text-accent);
+}
+
+/* No tails — the identity bans them. The ground carries the speaker. */
+.bubble {
+  display: block;
+  padding: 9px 14px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* Blush is her speech (§1). */
+.bubbleAgent {
+  background: var(--surface-warm);
+}
+
+.bubbleCaller {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.turn:hover .bubbleAgent {
+  box-shadow: 0 0 0 1px var(--border-dashed);
+}
+
+.turn:hover .bubbleCaller {
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+
+/* The line she said because she did not know. */
+.turnGap .bubble {
+  outline: 1px dashed var(--terracotta);
+  outline-offset: 2px;
+}
+
+.gapNote {
+  padding: 1px 6px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-accent);
+}
+
+/* The line being played, and the lines still to come. */
+.isCurrent .ts {
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+.isCurrent .bubbleAgent {
+  box-shadow: 0 0 0 2px var(--terracotta);
+}
+
+.isCurrent .bubbleCaller {
+  box-shadow: inset 0 0 0 2px var(--terracotta);
+}
+
+.isAhead {
+  opacity: 0.45;
+}
+
+/* What she did, between the turns. */
+.event {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.event::before,
+.event::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-hairline);
+}
+
+.eventText {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 82%;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.event:hover .eventText,
+.isCurrent .eventText {
+  color: var(--ink);
+}
+
+.disclosure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+/* ------------------------------------------------------------------ others */
+
+.others {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.othersLabel {
+  padding: 0 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.other {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.other:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.other:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
+}
+
+.otherTitle {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.otherChev {
+  display: inline-flex;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------ drawer (tablet) */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(38, 31, 24, 0.34);
+  animation: fade var(--duration-base) var(--ease-out);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-overlay);
+  animation: drawerIn var(--duration-slow) var(--ease-arc);
+}
+
+.panelDrawer {
+  position: static;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+}
+
+.drawerBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 0;
+}
+
+.close {
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--action-ghost-hover);
+  color: var(--text-accent);
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pagerText {
+  margin-right: 6px;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* --------------------------------------------------------- sheet (phone) */
+
+/* Over the whole screen, tab bar included: a call is read with both thumbs. */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-page);
+  animation: sheetIn var(--duration-slow) var(--ease-arc);
+}
+
+.sheetBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px 6px;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.disc {
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.disc:active {
+  background: var(--action-ghost-hover);
+}
+
+.callDisc {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--action-primary);
+  --icon-accent: currentColor;
+  color: var(--text-on-accent);
+}
+
+.callDisc:hover {
+  color: var(--text-on-accent);
+}
+
+.sheetScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 16px 20px;
+  scroll-behavior: smooth;
+}
+
+.sheetBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-hairline);
+}
+
+.sheetPlayer {
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface-card);
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* Nothing a thumb presses is under 44px. */
+.sheet .play {
+  width: 44px;
+  height: 44px;
+}
+
+.sheet .track {
+  height: 44px;
+}
+
+.sheet .speed {
+  height: 44px;
+  min-width: 44px;
+}
+
+.sheet .factButton {
+  min-height: 44px;
+}
+
+.sheet .factLink {
+  min-height: 44px;
+  padding: 0 6px;
+}
+
+.sheet .turn {
+  max-width: 90%;
+}
+
+/* ------------------------------------------------------------------ motion */
+
+/* A newly opened call settles in on the rising arc. */
+.rise {
+  animation: rise var(--duration-slow) var(--ease-arc) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .scrim,
+  .drawer,
+  .sheet {
+    animation: none;
+  }
+
+  .panelScroll,
+  .sheetScroll {
+    scroll-behavior: auto;
+  }
+
+  .busy,
+  .turn,
+  .event,
+  .disclosure {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------- widths */
+
+/* The rail cannot fit: the list takes the page, a call opens as a drawer. */
+@media (max-width: 1180.98px) {
+  .work {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .work::before {
+    display: none;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .range {
+    flex: 1 1 100%;
+  }
+
+  .range > * {
+    flex: 1;
+  }
+
+  /* One row of chips that scrolls sideways, each a 44px target. */
+  .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 2px 16px;
+    scrollbar-width: none;
+  }
+
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chips > button {
+    min-height: 44px;
+    flex: 0 0 auto;
+  }
+
+  .search {
+    flex: 1 1 100%;
+    margin-left: 0;
+    min-width: 0;
+  }
+
+  .listCard.listCard {
+    padding: 6px 4px;
+  }
+}
