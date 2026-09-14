@@ -694,6 +694,22 @@ An action that is not allowed from the current state is `409` with `code:
 
 ---
 
+### Outside calendars — "Kết nối lịch"
+
+The Lịch hẹn head carries a button that copies the receptionist's bookings to the owner's own
+calendar. Mock: `appointments.mock.ts` connects at once and keeps the list in localStorage.
+
+| Call | Answers | Notes |
+|---|---|---|
+| `GET /appointments/calendars` | `[{ "provider": "google", "account_email": "lan@vietsmile.vn", "connected_at": "…" }]` | `provider`: `"google"` \| `"microsoft"`; both may be connected |
+| `POST /appointments/calendars/{provider}` | `{ "redirect_url": "https://accounts.google.com/…", "connection": null }` | The page follows `redirect_url` to the provider's consent screen; the return lands on `#/app/lich-hen`. A refusal there comes back as `calendar_denied` |
+| `DELETE /appointments/calendars/{provider}` | `204` | Events already copied stay in the owner's calendar |
+
+One-way for now: a booking, a move and a cancellation are written to the outside calendar; nothing
+is read back. Whether busy time there should block Linh's slots is Q26.
+
+---
+
 ## 10. Numbers — the Số điện thoại tab
 
 The clinic buys a fixed-line number from a pool shared by every tenant, and says which
@@ -847,7 +863,111 @@ app says all of that in the confirmation before calling this.
 
 ---
 
-## 11. Specified later — shape only
+## 11. Account — the Cài đặt and Gói dịch vụ pages
+
+The owner's account, the plan and its minutes, paying, sessions and data. Mock:
+`src/api/account.mock.ts` (`VITE_MOCK_USAGE=near|over` reaches the two warning states of the
+minutes meter). The owner's decisions about plan changes, minutes, overage, counting and deletion —
+with the evidence behind each and what would reopen it — are in
+**[`account-billing-decisions.md`](./account-billing-decisions.md)** (D1–D15). Read it before
+building billing or deletion. What is still open is **Q26**.
+
+### `GET /account` → `AccountOverview`
+
+```jsonc
+{
+  "profile": {
+    "display_name": "Nguyễn Lan",
+    "phone": "0914378064",               // digits; the login for a phone account
+    "email": null,                        // or an address; "email_verified" says whether confirmed
+    "email_verified": false,
+    "google_email": null                  // always set for a Google account
+  },
+  "method": "phone",                      // "phone" | "email" | "google"
+  "password_changed_at": null,            // email accounts only
+  "subscription": {
+    "plan_id": "standard",                // "basic" | "standard" | "advanced"
+    "period": "monthly",                  // "monthly" | "annual"
+    "renews_on": "2026-09-22",
+    "next_charge_vnd": 4900000,           // the plan renews_on bills (a held move down has not started), plus this cycle's overage
+    "scheduled": null,                    // or { "plan_id", "period", "starts_on" } — renews_on, or later while a hold runs (D3)
+    "held_until": null,                   // after a monthly move up: last day of the next full cycle; a move down starts the day after at the earliest
+    "numbers_used": 1
+  },
+  "usage": {
+    "start": "2026-08-22", "end": "2026-09-21",
+    "minutes_used": 1640,                 // = sum(by_day), counted as D9 says
+    "by_day": [71, 82, 23, …],            // start → today; the last entry is today so far
+    "projected_minutes": 2270             // null until three days have passed
+  },                                      // no carried_minutes: nothing rolls over (D5)
+  "pay_method": "vietqr",                 // "vietqr" | "card" | "momo" — a demo until billing is automated (Q26)
+  "invoice_profile": { "legal_name": "…", "tax_code": "0109876543", "address": "…", "email": "…" },  // or null
+  "invoices": [{ "id": "…", "issued_on": "2026-08-22", "kind": "plan", "plan_id": "standard", "number": null,
+                 "period": { "start": "2026-08-22", "end": "2026-09-21" }, "overage_minutes": 0,
+                 "amount_vnd": 4900000, "pdf_url": "…" }],
+  "sessions": [{ "id": "…", "device": "desktop", "browser": "Chrome", "os": "Windows",
+                 "city": "Hà Nội", "last_active_at": "…", "current": true }],
+  "export": { "status": "none", "ready_at": null, "expires_at": null, "download_url": null },
+  "deletion": null,                       // or { "scheduled_for": "2026-09-27" }
+  "deletion_grace_days": 14               // decided: 14 (D13); server-owned so it can change without a release
+}
+```
+
+- **Plan names and blurbs are not on the wire.** The app keys its own copy on `plan_id`, like
+  every other machine code. `GET /plans` returns the figures: `price_monthly_vnd`,
+  `price_annual_per_month_vnd`, `price_annual_vnd`, `minutes`, `overage_vnd_per_minute`,
+  `numbers`, `concurrent_calls`, `own_voice`, `account_manager`. Prices include VAT.
+- **The allowance is the plan's `minutes`, reset at every renewal.** Unused minutes do not roll
+  over, and overage counts every minute past the plan's `minutes` (D5). Overage is settled against
+  the plan in force when the cycle closes, so a move up this cycle covers minutes already used (D2).
+- **`minutes_used` is the sum of `by_day`** and both come from the same cut-off, so the figure and
+  the bars cannot disagree (ui-ux-principles §10). The app leaves today out of the daily average.
+- **How a minute is counted (D9).** Per second, summed over the cycle — never rounded up per call.
+  Spam, calls where the caller never speaks, and calls shorter than a threshold (10 s or 15 s, not
+  yet chosen) are not counted. Tổng quan and Cuộc gọi must count the same calls.
+- `invoice_profile` is the same record the Số điện thoại checkout invoices (Q25) — one place to
+  set it.
+- `city` is looked up from the session's IP, already in Vietnamese; `browser` and `os` are proper
+  names shown as sent.
+
+### Writes
+
+| Call | Body | Answers | Errors |
+|---|---|---|---|
+| `PATCH /account/profile` | `{ display_name?, email? }` | `AccountProfile` | `422 name_required`, `invalid_email` · `403 email_from_google` |
+| `POST /account/phone` | `{ phone }` — sends a code to the new number | `204` | `422 invalid_phone` · `409 phone_unchanged`, `phone_in_use` · `429 otp_rate_limited` |
+| `POST /account/phone/verify` | `{ phone, code }` | `AccountProfile` | `422 otp_invalid`, `otp_expired` |
+| `POST /account/google` | — | `{ redirect_url, profile }` — the page follows `redirect_url` to Google's consent screen; the return lands on `#/app/cai-dat` | — |
+| `DELETE /account/google` | — | `AccountProfile` | `409 google_only_method` |
+| `PATCH /account/billing` | `{ pay_method }` or `{ invoice_profile }` | `204` / `{ invoice_profile }` | `422 legal_name_required`, `invalid_tax_code`, `invalid_email` |
+| `POST /account/password` | `{ current, next }` — signs every other session out | `204` | `422 password_wrong`, `weak_password` · `403 no_password` |
+| `DELETE /account/sessions/{id}` | — | `204` | `409 session_current` |
+| `POST /account/sessions/sign-out-others` | — | `204` | — |
+| `POST /account/export` / `GET /account/export` | — | `DataExport`, polled every 2 s while `preparing` | — |
+| `POST /account/deletion` | `{ confirm_name }` — the clinic's name, compared ignoring case and spacing | `{ scheduled_for }` | `422 confirm_mismatch` |
+| `DELETE /account/deletion` | — | `204` | — |
+| `POST /plans/quote` | `{ plan_id, period }` | `PlanQuote` | `409 plan_unchanged` |
+| `POST /subscription/change` | `{ plan_id, period }` — charged to `pay_method` | `Subscription` | `409 plan_unchanged` · `422 payment_failed` |
+| `DELETE /subscription/scheduled` | — | `Subscription` | — |
+
+### `PlanQuote`
+
+```jsonc
+{ "plan_id": "advanced", "period": "monthly",
+  "applies": "now",                 // a monthly move up starts today; anything else waits for renews_on
+  "effective_on": "2026-09-13",     // a move down while a hold runs: the day after held_until
+  "charge_today_vnd": 1452000,      // price difference × days left (today counted) ÷ days in cycle, to 1.000đ; 0 when it waits
+  "next_charge_vnd": 9900000,       // from renews_on: a month, or the year paid at once
+  "held_until": "2026-10-21" }      // a move up that applies now: held to the end of the next full cycle; otherwise null
+```
+
+The drawer shows `charge_today_vnd` (or `next_charge_vnd` when the change waits) and nothing the
+page did not print first — except `held_until`, which the owner must read before the button (D3).
+Every rule behind these figures is D1–D4 in [`account-billing-decisions.md`](./account-billing-decisions.md).
+
+---
+
+## 12. Specified later — shape only
 
 These have interfaces in `src/api/` so the UI can be built against them, but no agreed wire
 format. Do not implement from this section.
@@ -860,7 +980,7 @@ format. Do not implement from this section.
 
 ---
 
-## 12. Open questions
+## 13. Open questions
 
 The decisions above that are genuinely open are collected in
 **[`open-questions.md`](./open-questions.md)**, one per line, written so the list can be sent

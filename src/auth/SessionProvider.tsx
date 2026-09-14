@@ -31,6 +31,8 @@ interface SessionState {
   /** True if this browser completed a sign-in recently. Used only to pick a placeholder. */
   hint: boolean
   signIn: (me: Me) => void
+  /** Cài đặt changed the name, the login number or the plan the sidebar prints. */
+  patchMe: (patch: Partial<Me>) => void
   signOut: () => Promise<void>
   recheck: () => void
 }
@@ -83,6 +85,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     writeSessionHint()
   }, [])
 
+  const patchMe = useCallback((patch: Partial<Me>) => {
+    setMe((m) => (m ? { ...m, ...patch } : m))
+  }, [])
+
   const forget = useCallback(() => {
     setMe(null)
     setStatus('anonymous')
@@ -119,8 +125,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [forget])
 
   const value = useMemo(
-    () => ({ status, me, error, hint, signIn, signOut, recheck }),
-    [status, me, error, hint, signIn, signOut, recheck],
+    () => ({ status, me, error, hint, signIn, patchMe, signOut, recheck }),
+    [status, me, error, hint, signIn, patchMe, signOut, recheck],
   )
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>

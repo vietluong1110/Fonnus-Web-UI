@@ -491,6 +491,7 @@ with "Thử lại" when a save fails, having rolled the record back.
 | [`docs/backend-integration.md`](docs/backend-integration.md) | how to fill in the live half, in order |
 | [`docs/field-catalogue-mapping.md`](docs/field-catalogue-mapping.md) | how `model.ts` maps to the context field catalogue, and the `[ext]` fields it adds |
 | [`docs/open-questions.md`](docs/open-questions.md) | the decisions the backend team still owes an answer to |
+| [`docs/account-billing-decisions.md`](docs/account-billing-decisions.md) | the owner's rules for plans, minutes, overage and deletion — each with its evidence and what would reopen it |
 
 ## Still faked
 

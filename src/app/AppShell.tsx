@@ -23,18 +23,32 @@ export const NAV: NavEntry[] = [
   { key: 'lich-hen', label: 'Lịch hẹn', icon: 'appointment', segment: 'lich-hen' },
   { key: 'le-tan', label: 'Lễ tân', icon: 'caller', segment: 'le-tan' },
   { key: 'so-dien-thoai', label: 'Số điện thoại', icon: 'incoming', segment: 'so-dien-thoai' },
-  { key: 'cai-dat', label: 'Cài đặt', icon: 'settings', segment: 'cai-dat' },
 ]
 
-export function activeNav(path: string[]): NavEntry {
+/*
+ * The owner's own account, not the clinic's day: opened a few times a year, so
+ * it lives behind the user block at the foot of the sidebar (and under "Thêm" on
+ * a phone) rather than in the nav beside the tabs used every morning.
+ */
+export const ACCOUNT_PAGES: NavEntry[] = [
+  { key: 'cai-dat', label: 'Cài đặt', icon: 'settings', segment: 'cai-dat' },
+  { key: 'goi-dich-vu', label: 'Gói dịch vụ', icon: 'price', segment: 'goi-dich-vu' },
+]
+
+/** The nav entry for this path — `null` on an account page, where no tab is lit. */
+export function activeNav(path: string[]): NavEntry | null {
+  if (ACCOUNT_PAGES.some((a) => a.segment === path[0])) return null
   return NAV.find((n) => n.segment === (path[0] ?? '')) ?? NAV[0]
+}
+
+export function pageLabel(path: string[]): string {
+  return (ACCOUNT_PAGES.find((a) => a.segment === path[0]) ?? activeNav(path) ?? NAV[0]).label
 }
 
 /*
  * On a phone the rail becomes a bottom tab bar, and a bar has room for four
  * destinations and a way to the rest. These four are the ones an owner opens
- * on their feet; the two that are configured once — the number and the
- * account — live behind "Thêm" with the sign-out.
+ * on their feet; the number and the account live behind "Thêm" with the sign-out.
  */
 const TAB_KEYS = ['tong-quan', 'cuoc-goi', 'lich-hen', 'le-tan']
 const TAB_NAV = NAV.filter((n) => TAB_KEYS.includes(n.key))
@@ -51,6 +65,7 @@ function initials(name: string): string {
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useAppPath()
   const active = activeNav(path)
+  const account = ACCOUNT_PAGES.find((a) => a.segment === path[0])?.key ?? null
   const { config, status } = useConfig()
   const readiness = computeReadiness(config)
   const phone = useIsNarrow(PHONE_BREAKPOINT)
@@ -73,7 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <nav className={styles.nav}>
           {NAV.map((n) => {
-            const on = n.key === active.key
+            const on = n.key === active?.key
             return (
               <a
                 key={n.key}
@@ -90,37 +105,39 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <UserBlock clinic={config.business_name} />
+        <UserBlock clinic={config.business_name} account={account} />
       </aside>
 
       <main className={styles.content}>
         <div className={styles.contentInner}>{children}</div>
       </main>
 
-      {phone ? <TabBar active={active} attention={attention} clinic={config.business_name} /> : null}
+      {phone ? <TabBar active={active} account={account} attention={attention} clinic={config.business_name} /> : null}
     </div>
   )
 }
 
 /*
  * The phone shell: four destinations pinned to the bottom edge, thumb-height,
- * plus "Thêm" for the two pages that are set up once and then left alone.
+ * plus "Thêm" for the pages that are set up once and then left alone.
  *
  * Rendered instead of the sidebar rather than beside it — one nav in the tree,
- * so a screen reader is not offered the same six links twice.
+ * so a screen reader is not offered the same links twice.
  */
 function TabBar({
   active,
+  account,
   attention,
   clinic,
 }: {
-  active: NavEntry
+  active: NavEntry | null
+  account: string | null
   attention: string | null
   clinic: string
 }) {
   const [more, setMore] = useState(false)
   const { me, signOut } = useSession()
-  const moreOn = MORE_NAV.some((n) => n.key === active.key)
+  const moreOn = account != null || MORE_NAV.some((n) => n.key === active?.key)
 
   // The sheet is the page's whole surface while it is up; letting the page
   // behind it scroll under the thumb is the thing that makes a sheet feel broken.
@@ -149,7 +166,7 @@ function TabBar({
             {MORE_NAV.map((n) => (
               <a
                 key={n.key}
-                className={`${styles.sheetItem} ${n.key === active.key ? styles.sheetItemOn : ''}`}
+                className={`${styles.sheetItem} ${n.key === active?.key ? styles.sheetItemOn : ''}`}
                 href={appHref(n.segment)}
                 onClick={() => setMore(false)}
               >
@@ -164,17 +181,24 @@ function TabBar({
               <span className={styles.avatar}>{initials(me?.display_name ?? '')}</span>
               <span className={styles.userText}>
                 <span className={styles.userName}>{clinic}</span>
-                <span className={styles.userMeta}>
-                  {[me?.display_name, me?.plan].filter(Boolean).join(' · ')}
-                </span>
+                <span className={styles.userMeta}>{[me?.display_name, me?.plan].filter(Boolean).join(' · ')}</span>
               </span>
             </div>
 
-            <button
-              type="button"
-              className={`${styles.sheetItem} ${styles.menuItemDanger}`}
-              onClick={() => void signOut()}
-            >
+            {ACCOUNT_PAGES.map((n) => (
+              <a
+                key={n.key}
+                className={`${styles.sheetItem} ${n.key === account ? styles.sheetItemOn : ''}`}
+                href={appHref(n.segment)}
+                aria-current={n.key === account ? 'page' : undefined}
+                onClick={() => setMore(false)}
+              >
+                <Icon name={n.icon} size={19} />
+                {n.label}
+              </a>
+            ))}
+
+            <button type="button" className={`${styles.sheetItem} ${styles.menuItemDanger}`} onClick={() => void signOut()}>
               <Icon name="sign-out" size={19} />
               Đăng xuất
             </button>
@@ -184,7 +208,7 @@ function TabBar({
 
       <nav className={styles.tabbar} aria-label="Điều hướng">
         {TAB_NAV.map((n) => {
-          const on = n.key === active.key
+          const on = n.key === active?.key
           return (
             <a
               key={n.key}
@@ -218,7 +242,7 @@ function TabBar({
   )
 }
 
-function UserBlock({ clinic }: { clinic: string }) {
+function UserBlock({ clinic, account }: { clinic: string; account: string | null }) {
   const { me, signOut } = useSession()
   const name = me?.display_name ?? ''
   const [open, setOpen] = useState(false)
@@ -248,10 +272,20 @@ function UserBlock({ clinic }: { clinic: string }) {
             <span className={styles.userName}>{name}</span>
             <span className={styles.userMeta}>{me?.identity}</span>
           </div>
-          <a className={styles.menuItem} href={appHref('cai-dat')} role="menuitem" onClick={() => setOpen(false)}>
-            <Icon name="settings" size={16} />
-            Cài đặt tài khoản
-          </a>
+          {ACCOUNT_PAGES.map((n) => (
+            <a
+              key={n.key}
+              className={`${styles.menuItem} ${n.key === account ? styles.menuItemOn : ''}`}
+              href={appHref(n.segment)}
+              role="menuitem"
+              aria-current={n.key === account ? 'page' : undefined}
+              onClick={() => setOpen(false)}
+            >
+              <Icon name={n.icon} size={16} />
+              {n.label}
+            </a>
+          ))}
+          <div className={styles.menuRule} />
           <button type="button" className={`${styles.menuItem} ${styles.menuItemDanger}`} role="menuitem" onClick={() => void signOut()}>
             <Icon name="sign-out" size={16} />
             Đăng xuất
@@ -259,9 +293,10 @@ function UserBlock({ clinic }: { clinic: string }) {
         </div>
       ) : null}
 
+      {/* Lit while an account page is open: the page has no tab, so the block it came from says where the owner is. */}
       <button
         type="button"
-        className={styles.user}
+        className={`${styles.user} ${account ? styles.userOn : ''}`}
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}

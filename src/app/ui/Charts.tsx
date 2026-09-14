@@ -268,6 +268,8 @@ export interface Column {
   now?: boolean
   /** Keep the count on the cap when nothing is pointed at. */
   cap?: boolean
+  /** A day that has not happened yet, drawn at the palest step — a projection, not a count. */
+  ghost?: boolean
   tip: ChartTip
 }
 
@@ -331,7 +333,7 @@ export function Columns({
             aria-label={`${c.tip.head}: ${c.tip.value}`}
             data-i={i}
             data-on={active === i || undefined}
-            className={`${styles.slot} ${c.now ? styles.slotNow : ''} ${c.cap ? styles.slotCap : ''}`}
+            className={`${styles.slot} ${c.now ? styles.slotNow : ''} ${c.cap ? styles.slotCap : ''} ${c.ghost ? styles.slotGhost : ''}`}
           >
             <span
               className={styles.bar}
@@ -487,6 +489,57 @@ export function Band({ segments, label }: { segments: Segment[]; label: string }
         ))}
       </div>
       <TipBox host={bind.ref} active={active} tip={active == null ? null : segments[active].tip} announce={source === 'key'} />
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------- track tips */
+
+/** One stretch of a figure the page draws itself, as fractions of its width. */
+export interface TrackPart {
+  key: string
+  from: number
+  to: number
+  tip: ChartTip
+}
+
+/**
+ * The charts' pointer and tip for a figure this file does not draw — a quota
+ * bar, whose used, projected and free stretches are the page's own marks.
+ *
+ * The page draws the figure as `children`; this lays one invisible part over
+ * each stretch and answers the pointer the way every chart does (`useScrub`):
+ * at once, anywhere along the stretch, gliding between stretches, arrow keys
+ * once focused. The hit area reaches 8px above and below a thin bar, like the
+ * sparkline's. The stretch under the pointer is ringed, not recoloured — on a
+ * meter the colour *is* the reading, as on the hour grid.
+ */
+export function TrackTips({ parts, label, children }: { parts: TrackPart[]; label: string; children: ReactNode }) {
+  const { active, source, bind } = useScrub(parts.length, (e, host) => {
+    const r = (host.querySelector('[data-track]') ?? host).getBoundingClientRect()
+    const x = (e.clientX - r.left) / Math.max(1, r.width)
+    const i = parts.findIndex((p) => x >= p.from && x <= p.to)
+    if (i >= 0) return i
+    return x < 0 ? 0 : x > 1 ? parts.length - 1 : undefined
+  })
+  const tip = active == null ? null : (parts[active]?.tip ?? null)
+
+  return (
+    <div {...bind} className={`${styles.chart} ${styles.trackTips}`} data-scrub={active != null || undefined} role="group" aria-label={label}>
+      <div className={styles.trackTipsTrack} data-track>
+        {children}
+        {parts.map((p, i) => (
+          <span
+            key={p.key}
+            className={styles.trackPart}
+            data-anchor={i}
+            data-on={active === i || undefined}
+            style={{ left: `${p.from * 100}%`, width: `${Math.max(0, p.to - p.from) * 100}%` }}
+            aria-hidden="true"
+          />
+        ))}
+      </div>
+      <TipBox host={bind.ref} active={active} tip={tip} announce={source === 'key'} />
     </div>
   )
 }

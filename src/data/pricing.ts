@@ -118,3 +118,7 @@ export const COMPARISON_MATRIX: MatrixRow[] = [
   },
   { kind: 'row', label: 'Quản lý tài khoản riêng', cells: ['✕', '✕', '✕', '✓'] },
 ]
+
+/** Under both comparison tables — the landing page's and Gói dịch vụ's. */
+export const MATRIX_FOOTNOTE =
+  'Cổng đồng ý, câu công bố trợ lý AI và việc chuyển cho người thật có ở mọi gói, kể cả Dùng thử. Trả tháng và trả năm khác nhau ở giá, không khác ở tính năng.'

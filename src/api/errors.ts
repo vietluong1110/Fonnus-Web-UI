@@ -120,6 +120,20 @@ const BY_CODE: Record<string, string> = {
   hold_expired: 'Hết thời gian giữ số. Bạn chọn lại số này giúp mình nhé.',
   payment_failed: 'Thanh toán chưa thành công. Bạn thử lại hoặc chọn cách trả khác nhé.',
   checkout_expired: 'Hết 5 phút thanh toán. Bạn bấm Thanh toán để lấy mã mới nhé.',
+  name_required: 'Tên không được để trống.',
+  phone_unchanged: 'Đây là số bạn đang dùng.',
+  phone_in_use: 'Số này đã gắn với một tài khoản Fonnus khác.',
+  email_from_google: 'Email này theo tài khoản Google. Bạn đổi ở Google giúp mình nhé.',
+  calendar_denied: 'Chưa kết nối được lịch vì quyền truy cập bị từ chối. Bạn thử lại giúp mình nhé.',
+  google_only_method: 'Bạn đang đăng nhập bằng Google nên chưa huỷ liên kết được.',
+  legal_name_required: 'Cần tên công ty in trên hoá đơn.',
+  invalid_tax_code: 'Mã số thuế gồm 10 hoặc 13 chữ số.',
+  password_wrong: 'Mật khẩu hiện tại chưa đúng.',
+  weak_password: 'Mật khẩu mới cần ít nhất 8 ký tự.',
+  no_password: 'Tài khoản này đăng nhập không cần mật khẩu.',
+  session_current: 'Đây là thiết bị bạn đang dùng.',
+  confirm_mismatch: 'Tên phòng khám chưa khớp. Bạn gõ lại đúng tên giúp mình nhé.',
+  plan_unchanged: 'Bạn đang dùng gói này rồi.',
 }
 
 const BY_KIND: Record<ApiErrorKind, string> = {

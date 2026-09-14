@@ -187,6 +187,16 @@
   opacity: 0.5;
 }
 
+/* A day still to come: the palest step, a step up when pointed at. */
+.slotGhost .bar,
+.slotGhost.slotNow .bar {
+  background: var(--chart-step-1);
+}
+
+.slotGhost[data-on] .bar {
+  background: var(--chart-step-2);
+}
+
 /* The count rides the column's own cap. */
 .cap {
   position: absolute;
@@ -473,6 +483,34 @@
   white-space: nowrap;
 }
 
+/* ------------------------------------------------------------ track tips */
+
+/* The hit area reaches 8px past the bar above and below: a 12px bar is a thin thing to find. */
+.trackTips {
+  margin: -8px 0;
+  padding: 8px 0;
+}
+
+.trackTipsTrack {
+  position: relative;
+}
+
+.trackPart {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* A ring of card, then a ring of ink — picked without being recoloured. */
+.trackPart[data-on] {
+  box-shadow:
+    0 0 0 2px var(--surface-card),
+    0 0 0 3.5px var(--ink);
+}
+
 /* --------------------------------------------------------- the hour grid */
 
 .hours {
@@ -636,6 +674,7 @@
   .average,
   .sparkDot,
   .sparkGuide,
+  .trackPart,
   .tip,
   .tipGlide {
     transition: none;

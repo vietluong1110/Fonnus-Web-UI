@@ -682,6 +682,116 @@ any later screen that takes money — a plan upgrade, an add-on:
 
 ---
 
+## 14. A page about the owner, not the clinic
+
+`Cài đặt` is the first screen about the person signed in rather than the clinic's day. It was
+chosen from three directions (one page beside a rail, a hub with sub-pages, a band over a board
+of cards); the owner picked the one page, because it is the Lễ tân frame and every setting is one
+scroll away on a page opened a few times a year. `Gói dịch vụ` came with it. What they settled:
+
+- **The account is not a tab.** Cài đặt left the sidebar for the user block's menu (and "Thêm" on a
+  phone), next to Gói dịch vụ. The nav is for the clinic's day. On an account page no tab is lit —
+  the user block is, so the owner can still see where they are.
+- **The rail measures, in two cards.** *Gói của bạn* (the name, the price, one action, four figure
+  tiles, the extras as pills) and *Phút kỳ này* (one big number, the bar, one quiet line, the days
+  under a rule) in the 380px rail; below 1181px they come first, side by side when there is room.
+  They were one panel, and the owner called it crowded — the pattern is §15. Same job as the
+  readiness rail on a Lễ tân hub (§9), different quantity. **No page index.** One was drawn under the plan (a scroll-following list, and
+  a sticky chip row on narrow screens); the owner took it out — no other screen has one, and four
+  cards on one scroll do not need it.
+- **A quota is a bar, never a ring.** The ring already means readiness. Minutes left in large type,
+  used of total small; the projection is a paler step of the same bar; past the limit an ink tick
+  marks it and the overage turns deeper terracotta with its cost in đồng. Never red (§10). When the
+  month will run out or has, one line says the receptionist keeps answering and what a minute over
+  costs — the thing owners of other AI receptionists say they could not find out.
+- **Minutes reset at the renewal, and the meter says when.** No rollover — built, then reversed by
+  the owner the same day. The allowance is the plan's minutes and "Làm mới 22/09" sits under the
+  bar; no carry line, no "lost minutes" warning. Expiry is what Vietnamese carriers already do, and
+  tariff research finds unused allowance does not drive churn — a bill bigger than expected does.
+- **A move up gives what it names, today — and says what it holds.** The drawer reads "đủ 6.000 phút
+  ngay kỳ này" and, before the button, how long the new plan is held before a move down can start.
+  A rule that costs the owner something is said where they decide, never only in the terms.
+- **A setting lives where its question comes up.** Copying bookings to Google Lịch or Outlook was
+  first drawn as a switch under the linked Google account in Cài đặt; it moved to a "Kết nối lịch"
+  button in the Lịch hẹn head, because "can I see these on my own calendar?" is asked looking at
+  the calendar, and because it is not about Google sign-in at all.
+- **"Đổi gói" is never loud.** It used to turn primary when another plan would cost less this month;
+  now it is always secondary. In a telecom field experiment, pointing customers at a cheaper plan
+  raised churn from 6% to 10% — it made them shop around. The estimate on each plan card stays:
+  information, not a push.
+- **A setting reads before it edits.** Icon · label · value · action, one row per fact; pressing
+  the action grows the editor under it, with its own Lưu / Huỷ and the error beside the button.
+  One row edits at a time across the whole page. Rows fold on the list's own width (§12), at 480px.
+- **How the owner signs in is a fact, not a form.** "Mã gửi qua SMS · không cần mật khẩu". A
+  password row exists only for an email account; a phone or Google account has nothing to change.
+  The login number changes only through a code sent to the new number.
+- **Missing is dashed and says what it costs.** "Chưa có email — mất số thì không vào lại được" —
+  not "Thêm email", which reads as an add button (§1).
+- **One fact, one place.** The clinic's name shows in Tài khoản and is edited in Lễ tân; the invoice
+  details are the record the Số điện thoại checkout uses.
+- **Signing out every other device keeps this one, and works on a phone.** The list pins "Thiết
+  bị này" first; the confirmation names who has to sign in again and that the receptionist keeps
+  answering.
+- **Deleting is quiet until pressed, then specific.** What goes, in icons, before any button; the
+  offer to take the data first; typing the clinic's name; a date to change one's mind by. Same
+  bargain as giving a number back (§13).
+- **Plans are priced against the clinic's own month.** Each card carries "với mức dùng của bạn ≈
+  X đ/tháng", overage included, and the cheapest one wears "Hợp mức dùng". "So sánh chi tiết" is
+  the landing page's full table — every feature, the trial beside the paid plans, a tint that
+  follows the pointer row by row — with the owner's plan banded instead of the popular one, and the
+  rows the plan catalogue carries read from the API. The change drawer repeats that
+  estimate and adds only what the change itself costs today or from the renewal — no VAT line, no
+  figure the page did not show (§13). A change booked for the renewal can be cancelled from its card.
+
+> **Check:** is anything in the nav lit on Cài đặt? With `VITE_MOCK_USAGE=over`, is anything red,
+> and does "Đổi gói" stay secondary? Move up, then try to move down — does the drawer give the day
+> the hold ends before the button? On a phone, sign
+> out the other devices — does this one stay?
+
+---
+
+## 15. A rail of cards, with room
+
+`Cài đặt`'s rail was one panel holding a plan, a meter, a chart and five perk lines, 16px apart.
+Every fact on it was useful and the owner still called it crowded: nothing was wrong except that
+nothing had air, and a wall of equally quiet lines has no first thing to read. It became two
+cards, and this is the pattern for any rail (or any card) that *reports*.
+
+- **One card, one question.** *What am I paying for* and *how is this month going* are two cards.
+  If a card needs a second eyebrow, it is two cards.
+- **The anatomy is fixed.** An eyebrow naming the card, with one quiet fact or the one action across
+  from it → the hero: one figure, large (44px), or the name → the visual (a bar, tiles) → one quiet
+  line → the detail under a hairline (a chart). Nothing else; a second sentence is a tip.
+- **Air is measured.** Card padding `--pad-card` (24px; 20px on a phone), **20px between blocks**,
+  16px between cards. Something that belongs to the block above it (the price under the plan's
+  name) sits closer, not in a new block. Under 16px between blocks is how it looks crowded again.
+- **Figures are tiles, not sentences.** *6.000 · phút mỗi tháng* on a tile of page-ground reads at a
+  glance; "6.000 phút mỗi tháng" as the third line of five does not. A usage share rides the tile it
+  measures as a 4px bar. Yes-or-no extras are pills under the tiles.
+- **Every drawn stretch answers the pointer — with the charts' one tip.** A figure the page draws
+  itself (a quota bar: used, projected, free, over) goes inside `TrackTips`; days go in `Columns`.
+  Same hover model, same night-paper tip, same "adds exactly one thing the card does not print"
+  rule as §10 — the used stretch says the share of the plan, the free one what is left at the
+  cycle's end. No bespoke hover that swaps a label.
+- **A rail sticks only when it fits.** A sticky column taller than the window hides its own foot
+  until the page runs out; `.railStack` is sticky from 860px of height.
+- **Below the rail breakpoint the cards go first, side by side when their wrapper is ≥ 700px** (a
+  container query on a wrapper, never on the card — §8), stacked on a phone.
+- **A card that only opens something is one button.** "So sánh chi tiết" closed is a strip: the
+  whole strip is the toggle — title on the left, the hint and a chevron on the right, the hover
+  wash across all of it — not a small text link at its end.
+- **A highlighted column in a table is drawn per cell.** A tint and two side rules on each of its
+  cells, rounded at the top in the head and at the bottom in the last row, running through group
+  rows. A band laid under the rows stops at the row's padding and leaves a sliver at the table's
+  edge when the column is the last one.
+
+> **Check:** hold the rail card at arm's length — is there one thing you read first? Is any block
+> closer than 16px to the next? Point at every stretch of every bar — does each one say what it is?
+> Put the owner on each plan in turn — does the highlighted column touch the table's edge in the
+> last column and stay unbroken through the group rows?
+
+---
+
 ## Verifying a change
 
 The pane's screenshots are unreliable on these pages, so do not let a picture be the
@@ -723,6 +833,45 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-14 (evening) — the rail gets room.** The plan panel split into two cards (plan, minutes)
+  with measured air, perks became figure tiles, the quota bar's stretches got the charts' tip through
+  a new `TrackTips`, and the days moved onto Tổng quan's `Columns` (with a `ghost` step for days
+  still to come) instead of a hand-drawn copy with its own hover. On Gói dịch vụ the comparison's
+  highlighted column was redrawn per cell — the band under the rows had stopped 14px short of the
+  table's edge — and the whole "So sánh chi tiết" strip became the toggle. The owner asked for this
+  pass to set the example for every page, so the pattern is written down as §15.
+
+- **2026-09-14 (later) — owner review of Cài đặt and Gói dịch vụ.** Three corrections. The page
+  index under the plan, and its chip row on narrow screens, came out: a navigation pattern no other
+  screen has is a feature introduced at random, however tidy. The numbers perk's usage bar had
+  wrapped onto a right-aligned second line; it now sits under its own text. And the comparison,
+  cut down to the rows where plans differ, went back to the landing page's full table, so the owner
+  meets the table they chose a plan from. The rule to keep: **before drawing a component for one
+  screen, find where the product already solved it — and use that.** → §14.
+
+- **2026-09-14 — Cài đặt's billing rules, researched and decided.** The owner answered the open plan
+  questions in two rounds and asked for the reasons to be kept. Research across ~20 AI receptionist
+  and answering services, ~15 usage-based SaaS products and the tariff literature changed two
+  things: rollover came out (expiry is the norm; bill shock, not unused minutes, drives churn), and
+  "prorated price + full minutes" turned out to have a hole — move up on the cycle's last day for
+  161.000đ and the month's overage disappears — closed by holding the plan to the end of the next
+  full cycle. "Đổi gói" lost its nudge. Every decision, its sources and what would reopen it:
+  `docs/account-billing-decisions.md`. → §14.
+
+- **2026-09-13 (night) — Cài đặt and Gói dịch vụ.** Three clickable directions on a canvas; the
+  owner picked the one page beside a rail, moved Cài đặt out of the nav into the user menu, and
+  asked for a separate Gói dịch vụ page behind "Đổi gói". New API group `account` (one overview
+  read, a write per setting, a quote before a plan change). A second look at the canvas caught
+  what went into the build instead of a second round: an upgrade button that was primary while
+  the current plan was still the cheapest, a checkout total that ignored overage, a booked change
+  with no way back, a VAT line §13 had already removed, and one section with four names. Found on
+  the way: the tablet user menu opened 64px wide, clipped by the icon rail's `overflow: hidden` —
+  the only door to Cài đặt now, so it is fixed. Research behind the page: gauges against bars
+  (Few), forecast-beside-actual usage pages (Vercel, Google Cloud), unforecastable AI-receptionist
+  bills (Rosie reviews), session lists (Linear, GitHub), deletion friction (Notion, GitHub,
+  Atlassian, NN/G), buyer fields and timing for e-invoices (Decree 70/2025), deletion deadlines
+  (Decree 356/2025). Open decisions are Q26. → §14.
 
 - **2026-09-13 (later) — Số điện thoại, the payment clock.** The owner removed the creeping
   "Đang chờ ngân hàng báo về" meter and asked for a five-minute countdown in the pay step's

@@ -1,0 +1,776 @@
+/*
+ * Gói dịch vụ — `#/app/goi-dich-vu`, reached from "Đổi gói" and the user menu.
+ *
+ * This month's minutes first, then the three paid plans each priced against the
+ * clinic's own month ("với mức dùng của bạn"), so the choice is a sum rather
+ * than a feature list. Choosing one opens the change in a drawer — a sheet on a
+ * phone — with Số điện thoại's panel frame: what changes, when, how it is paid,
+ * one total, and no figure the page did not show before it (§13).
+ *
+ *   ≥ 900px    three plans across
+ *   640–900    three across, tighter
+ *   < 640px    one column
+ */
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  align-self: flex-start;
+  min-height: 28px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-accent);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--text-accent);
+  text-decoration: underline;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: -10px;
+}
+
+.spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.save {
+  font-family: var(--font-num);
+  font-size: 11.5px;
+  opacity: 0.8;
+}
+
+@media (max-width: 639.98px) {
+  .back {
+    min-height: 44px;
+  }
+
+  .head > [role='radiogroup'] {
+    flex: 1 1 100%;
+  }
+
+  .head > [role='radiogroup'] > button {
+    flex: 1;
+    min-height: 44px;
+  }
+}
+
+/* ------------------------------------------------------------ the strip */
+
+.strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 12px 20px 12px 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+}
+
+.stripMark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+}
+
+.stripText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.stripTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.stripSub {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.stripBar {
+  flex: 1;
+  min-width: 120px;
+}
+
+@media (max-width: 899.98px) {
+  .strip {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+
+  .stripBar {
+    flex: 1 1 100%;
+    order: 3;
+  }
+}
+
+/* ------------------------------------------------------------- the plans */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 899.98px) {
+  .grid {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 22px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+}
+
+@media (max-width: 1100px) {
+  .plan {
+    padding: 18px 16px;
+  }
+}
+
+.planCurrent {
+  border-color: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.planTop {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.planName {
+  margin: 0 auto 0 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tag {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+.blurb {
+  margin-top: -8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.priceNum {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+@media (max-width: 1100px) and (min-width: 640px) {
+  .priceNum {
+    font-size: 23px;
+  }
+}
+
+.per {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.note {
+  min-height: 19px;
+  margin-top: -10px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* The plan against this clinic's month: the one figure that decides. */
+.fit {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-page);
+}
+
+.fitHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.fitHead b {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.fitBar {
+  position: relative;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+}
+
+.fitFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  transform-origin: left center;
+  animation: grow 900ms 150ms var(--ease-arc) both;
+}
+
+/* The limit, where the month runs past it. */
+.fitCap {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  right: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.fitSub {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.planActs {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 639.98px) {
+  .planActs > button:first-child {
+    min-height: 46px;
+  }
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-accent);
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (max-width: 639.98px) {
+  .link {
+    min-height: 44px;
+  }
+}
+
+/* ----------------------------------------------------- the comparison */
+
+/*
+ * "So sánh chi tiết": a card whose whole strip is the toggle (§15), holding the
+ * landing page's full comparison (`components/sections/ComparisonMatrix`) in the
+ * app's tokens — every feature, the trial beside the paid plans, a tint that
+ * follows the pointer row by row, and the owner's own plan drawn as one
+ * column-card from the head to the last row. Wide on purpose: it scrolls inside
+ * the card, never the page.
+ */
+.compare {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.compareHead {
+  margin: 0;
+}
+
+.compareToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 16px var(--pad-card);
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.compareToggle:hover {
+  background: var(--action-ghost-hover);
+}
+
+.compareToggle:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: -4px;
+  border-radius: var(--radius-lg);
+}
+
+.compareHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+.compareCaret {
+  display: inline-flex;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.compareCaretOpen {
+  transform: rotate(180deg);
+}
+
+.compareBody {
+  padding: 0 var(--pad-card) var(--pad-card);
+  animation: matrixIn var(--duration-base) var(--ease-out);
+}
+
+@keyframes matrixIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.matrixWrap {
+  overflow-x: auto;
+}
+
+.matrix {
+  min-width: 680px;
+}
+
+/*
+ * One track template for the head and every row keeps the columns true. The row has
+ * no side padding — the cells carry it — so the owner's column reaches the table's
+ * edge when it is the last one.
+ */
+.mRow {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.6fr) repeat(4, minmax(92px, 1fr));
+  align-items: stretch;
+  box-shadow: inset 0 -1px 0 var(--border-hairline);
+  font-size: 13px;
+  transition: background 120ms var(--ease-out);
+}
+
+.mRow > * {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 11px 8px;
+}
+
+.mRow > :first-child {
+  padding-left: 14px;
+}
+
+.mRow:last-child {
+  box-shadow: none;
+}
+
+.mRow:hover {
+  background: color-mix(in srgb, var(--terracotta) 5%, transparent);
+}
+
+/* The head and the group rows sit on the page's ground and are not hover targets. */
+.mHead,
+.mHead:hover {
+  border-radius: 12px 12px 0 0;
+  background: var(--surface-page);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+.mHead > * {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.mGroup,
+.mGroup:hover {
+  background: var(--surface-page);
+}
+
+.mGroupLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-accent);
+}
+
+.mLabel {
+  padding-right: 12px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.mCell {
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.mHead .mCell {
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+
+/*
+ * The owner's plan: one column-card from the head to the last row, drawn per cell —
+ * a tint and two side rules, rounded at the top in the head and at the bottom in the
+ * last row. Drawn this way it runs through the group rows and reaches the table's
+ * edge, whichever column it is; a band laid under the rows stopped at the row padding.
+ */
+.mCur {
+  --cur-rule: color-mix(in srgb, var(--terracotta) 32%, transparent);
+  background: var(--action-ghost-hover);
+  box-shadow:
+    inset 1.5px 0 0 var(--cur-rule),
+    inset -1.5px 0 0 var(--cur-rule);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.mHead .mCur {
+  border-radius: 12px 12px 0 0;
+  box-shadow:
+    inset 1.5px 0 0 var(--cur-rule),
+    inset -1.5px 0 0 var(--cur-rule),
+    inset 0 1.5px 0 var(--cur-rule);
+  color: var(--text-accent);
+}
+
+.mRow:last-child .mCur {
+  border-radius: 0 0 12px 12px;
+  box-shadow:
+    inset 1.5px 0 0 var(--cur-rule),
+    inset -1.5px 0 0 var(--cur-rule),
+    inset 0 -1.5px 0 var(--cur-rule);
+}
+
+.mHeadSub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.mNo {
+  opacity: 0.7;
+}
+
+.mFoot {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compareBody {
+    animation: none;
+  }
+
+  .mRow,
+  .compareToggle,
+  .compareCaret {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------- the change itself */
+
+.ck {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.swap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface-page);
+}
+
+.swapSide {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.swapNew {
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+
+.swapLabel {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.swapName {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.swapSub {
+  font-family: var(--font-num);
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.swapArrow {
+  display: inline-flex;
+  justify-content: center;
+  color: var(--terracotta);
+}
+
+.sect {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sectLabel {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.diff,
+.kv {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.diff > svg,
+.kv > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.kvText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kvMain {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.kvSub {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.total {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.totalLabel {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.totalSub {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.totalNum {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 21px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ckActs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loading {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.errorText {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--error);
+}
+
+.doneMark {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--terracotta);
+  color: var(--cream);
+  --icon-accent: currentColor;
+  animation: rise var(--duration-arc) var(--ease-arc) both;
+}
+
+.doneTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.doneSub {
+  margin: -8px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fitFill,
+  .doneMark {
+    animation: none;
+  }
+}

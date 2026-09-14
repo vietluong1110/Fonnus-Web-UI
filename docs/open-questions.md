@@ -396,4 +396,59 @@ are not settled, and the copy changes with each one.
 details once in Cài đặt and let the checkout link there; activation that does not block on
 paperwork.
 
+*Update, 13 Sept:* the invoice details now live in Cài đặt (`invoice_profile`, `api-contract.md`
+§11), and the numbers mock reads the same record for `invoice`.
+
 **Answer:**
+
+---
+
+### Q26 · Account: what does billing look like at the pilot, and what are the rules behind a plan change?
+
+*Why:* Cài đặt and Gói dịch vụ (`api-contract.md` §11) show the plan, its minutes, how the
+clinic pays, invoices, sessions and deletion. The screens are built; several figures and
+promises on them are the mock's guesses, and each one is a sentence an owner will hold Fonnus to.
+
+- **Billing at the pilot.** `CONTEXT.md` puts automated billing out of MVP ("manual invoicing for
+  the first 5–10 tenants"). *14 Sept: "Cách trả" stays on Cài đặt as a demo for now.* Still open:
+  can a plan change be self-serve at the pilot, or is it a request an account manager acts on?
+- **Proration.** *14 Sept (owner): a monthly move up gets the new plan's full minutes at once, and
+  the plan is then held to the end of the next full cycle* — D2 and D3 in
+  [`account-billing-decisions.md`](./account-billing-decisions.md). The price rule (the difference
+  for the days left, rounded to 1.000đ) and "moves down and switches to annual wait for the
+  renewal, no refund" are as drawn (D1, D4). Still open: moving up while paying yearly; whether
+  1.000đ rounding suits the e-invoice; whether a hold survives cancelling or deleting.
+- **Overage.** *14 Sept (owner): she keeps answering and overage goes on the next invoice — no
+  hard stop, no automatic upgrade* (D6). An owner-set cap that forwards calls to the clinic's own
+  number waits until after the pilot (D7); usage alerts at 80% / 100% wait too (D8).
+- **Rollover.** *14 Sept (owner): no.* Unused minutes do not roll over, and there are no top-up
+  packs (D5, D10). This reversed a "yes" given earlier the same day.
+- **Deletion window.** *14 Sept (owner): 14 days* (D13) — inside Decree 356/2025/ND-CP's 20 days (30
+  with a processor involved; check against the decree text). Still open: is the export still
+  downloadable during the window, and are the clinic's numbers held until it ends?
+- **Outside calendars.** *14 Sept: no switch in Cài đặt; Lịch hẹn has a "Kết nối lịch" button for
+  Google Lịch and Microsoft Outlook* (`api-contract.md` §9). `CONTEXT.md` still has no calendar
+  integration in MVP. Is it one-way (bookings copied out, as drawn) or should busy time in the
+  owner's calendar also block the receptionist's slots? Which Google and Microsoft scopes, and who
+  holds the OAuth apps?
+- **Changing the login number.** Does it change anything else — the number Linh transfers to, the
+  number in booking confirmations?
+- **Sessions.** Who does the IP → city lookup, and is a session's city stored?
+- **Usage source.** *14 Sept (owner): counted per second; spam, silent calls and calls under a short
+  threshold are not counted* (D9). Still open: 10 s or 15 s; who classifies spam and silence;
+  whether talk time after a transfer to staff counts; how the cycle total rounds to minutes.
+  `by_day` must count the same calls as Tổng quan and Cuộc gọi; the mock's minutes do not
+  reconcile with the calls mock yet.
+- **Annual plans.** Minutes as a monthly allotment (as drawn, and the norm elsewhere) or one yearly
+  pool? Not decided (D11).
+
+**Recommendation:** plan changes by request at the pilot; a monthly allotment on annual plans; a
+10 s threshold; hold the numbers until the deletion window ends; calendars one-way until the
+booking ledger exists.
+
+**Answer (partial — the owner, 14 Sept 2026):** full minutes on a move up, then held to the end of
+the next full cycle; no rollover; no top-ups; keep answering and bill overage on the next invoice;
+a cap and alerts after the pilot; per-second counting without spam, silence or very short calls; a
+14-day deletion window; "Đổi gói" never primary. Each is written up with its evidence and what
+would reopen it in [`account-billing-decisions.md`](./account-billing-decisions.md). The rest of
+this question stays open.

@@ -60,8 +60,20 @@ The one exception: a **one-shot form submission** with no shared result may call
 need to see the result?* If no, call it directly; wrapping a fire-and-forget POST in a context
 is ceremony.
 
+A page whose data nothing else reads calls its group directly too — Số điện thoại
+(`api.numbers`) and Cài đặt / Gói dịch vụ (`api.account`). When such a page changes something
+the shell shows (the owner's name, the plan under it), it tells `SessionProvider` with
+`patchMe` rather than growing a provider.
+
 Mock and live implementations are typed against the same interface, so `npm run typecheck` is
 what catches contract drift. See `docs/backend-integration.md`.
+
+## Cài đặt is not a tab
+
+The sidebar holds the clinic's day: Tổng quan, Cuộc gọi, Lịch hẹn, Lễ tân, Số điện thoại. The
+owner's own account — `#/app/cai-dat` and `#/app/goi-dich-vu` — lives behind the user block at the
+foot of the sidebar and under "Thêm" on a phone (`ACCOUNT_PAGES` in `AppShell.tsx`). Do not put it
+back in `NAV`. On those pages no tab is lit; the user block is.
 
 ## `npm run typecheck` is the only gate
 

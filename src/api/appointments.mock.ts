@@ -20,8 +20,20 @@
  * the dental template's, hardcoded the way the insights mock hardcodes hours.
  * An action is kept in memory for the life of the tab.
  */
-import type { Appointment, AppointmentAction, AppointmentsApi, AppointmentsWeek } from './contracts'
-import { delay, maybeFail } from './mock-support'
+import type { Appointment, AppointmentAction, AppointmentsApi, AppointmentsWeek, CalendarConnection, CalendarProvider } from './contracts'
+import { delay, maybeFail, storage } from './mock-support'
+
+/** Outside calendars connected in this browser. There is no Google or Microsoft behind the mock. */
+const CALENDARS_KEY = 'fonnus.calendars.v1'
+const CALENDAR_ACCOUNT: Record<CalendarProvider, string> = { google: 'lan@vietsmile.vn', microsoft: 'nguyenlan@outlook.com' }
+
+function readCalendars(): CalendarConnection[] {
+  try {
+    return JSON.parse(storage.read(CALENDARS_KEY) ?? '[]') as CalendarConnection[]
+  } catch {
+    return []
+  }
+}
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
@@ -290,5 +302,24 @@ export const appointmentsMock: AppointmentsApi = {
     })()
     overrides.set(id, { ...overrides.get(id), ...patch })
     return find(id, now)!
+  },
+
+  async calendars(opts) {
+    await delay(0.4, opts?.signal)
+    return readCalendars()
+  },
+
+  async connectCalendar(provider, opts) {
+    await delay(1.2, opts?.signal)
+    maybeFail()
+    const connection: CalendarConnection = { provider, account_email: CALENDAR_ACCOUNT[provider], connected_at: new Date().toISOString() }
+    storage.write(CALENDARS_KEY, JSON.stringify([...readCalendars().filter((c) => c.provider !== provider), connection]))
+    return { redirect_url: null, connection }
+  },
+
+  async disconnectCalendar(provider, opts) {
+    await delay(0.7, opts?.signal)
+    maybeFail()
+    storage.write(CALENDARS_KEY, JSON.stringify(readCalendars().filter((c) => c.provider !== provider)))
   },
 }

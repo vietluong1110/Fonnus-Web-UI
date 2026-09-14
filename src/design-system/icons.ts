@@ -291,6 +291,17 @@ export const ICONS = {
     { d: 'M10 4.5H7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3' },
     { d: 'M13.6 12h7M17.6 8.8l3.2 3.2-3.2 3.2', accent: true },
   ],
+  /** [ext] Máy tính — a screen on its base; the base is the accent. */
+  'device-laptop': [{ r: [4.5, 5, 15, 10.5, 2] }, { d: 'M2.8 19h18.4', accent: true }],
+  /** [ext] Điện thoại — the handset's face; the home dot is the accent. */
+  'device-phone': [{ r: [7, 2.8, 10, 18.4, 2.6] }, { c: [12, 17.2, 1.3], fill: true, accent: true }],
+  /** [ext] Tải về — the arrow dropping into the arc of a tray; the arrow is the accent. */
+  download: [
+    { d: 'M12 4v10.2M7.8 10.2 12 14.4l4.2-4.2', accent: true },
+    { d: 'M4.8 15.8v2a2.2 2.2 0 0 0 2.2 2.2h10a2.2 2.2 0 0 0 2.2-2.2v-2' },
+  ],
+  /** [ext] Mật khẩu — a key: its ring and shaft in ink, the teeth in terracotta. */
+  key: [{ c: [8, 12, 3.6] }, { d: 'M11.6 12h8.8' }, { d: 'M17.4 12v3.2M20.2 12v2.2', accent: true }],
 } satisfies Record<string, IconPrim[]>
 
 export type IconName = keyof typeof ICONS

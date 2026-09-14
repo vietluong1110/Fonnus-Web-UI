@@ -119,6 +119,10 @@ proposals a designer may redraw, not as canon — each is marked `[ext]` in
 | `edit`         | `pencil`                   | a pencil, terracotta tip                           |
 | `sign-out`     | `log-out`                  | a door edge, terracotta arrow leaving              |
 | `grip`         | `grip-vertical`            | six dots, one terracotta — a row that can be dragged |
+| `device-laptop` | `laptop`                  | a screen on its base, the base terracotta — a signed-in computer |
+| `device-phone` | `smartphone`               | a handset's face, terracotta home dot              |
+| `download`     | `download`                 | a terracotta arrow dropping into an ink tray arc   |
+| `key`          | `key-round`                | a key, ink ring and shaft, terracotta teeth — a password |
 
 Lucide is gone from the codebase (`lucide-static` removed, `public/icons/`
 deleted). Do not bring a stock set back for a one-off — draw the icon here and
