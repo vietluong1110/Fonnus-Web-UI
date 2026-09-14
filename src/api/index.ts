@@ -38,6 +38,8 @@ import { accountMock } from './account.mock'
 import { accountLive } from './account.live'
 import { leadsMock } from './leads.mock'
 import { leadsLive } from './leads.live'
+import { shellMock } from './shell.mock'
+import { shellLive } from './shell.live'
 
 export const api: FonnusApi = {
   auth: isLive('auth') ? authLive : authMock,
@@ -51,6 +53,7 @@ export const api: FonnusApi = {
   numbers: isLive('numbers') ? numbersLive : numbersMock,
   account: isLive('account') ? accountLive : accountMock,
   leads: isLive('leads') ? leadsLive : leadsMock,
+  shell: isLive('shell') ? shellLive : shellMock,
 }
 
 // A one-line reminder in the console, so nobody debugs a mock for an hour
@@ -67,7 +70,7 @@ if (import.meta.env.DEV && HAS_MOCKS) {
 export { ApiError, isApiError, isCanceled, messageFor } from './errors'
 export type { ApiErrorKind, FieldError } from './errors'
 export { setUnauthorizedHandler } from './http'
-export { isLive, API_MODE } from './env'
+export { isLive, API_MODE, SUPPORT_GUIDE_URL, SUPPORT_HOTLINE, SUPPORT_ZALO_URL } from './env'
 export { clearMockTenantData } from './tenant.mock'
 export { attachmentKindOf } from './attachments'
 export * from './contracts'

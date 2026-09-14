@@ -8,6 +8,7 @@ import { PHONE_BREAKPOINT, RAIL_BREAKPOINT, useIsNarrow } from '../../../hooks/u
 import { ContentSkeleton, RetryCard } from '../../Boot'
 import { ChipButton, EmptyState, Segmented, TextField, ui } from '../../ui'
 import { useConfig } from '../../letan/store'
+import { markSummaryStale } from '../../summary'
 import { RANGES, fmtDateline } from '../overview/labels'
 import { CallList } from './CallList'
 import { CallPanel } from './CallPanel'
@@ -174,7 +175,11 @@ export function CallsPage({ path }: { path: string[] }) {
     setCallbackError(null)
     api.calls
       .setCallbackDone(call.id, done)
-      .then((s) => applyCallback(s.id, s.callback?.done_at ?? null))
+      .then((s) => {
+        applyCallback(s.id, s.callback?.done_at ?? null)
+        // The sidebar's count of callbacks owed has just changed.
+        markSummaryStale()
+      })
       .catch((e: unknown) => {
         applyCallback(call.id, before)
         setCallbackError(messageFor(e))

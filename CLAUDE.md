@@ -65,6 +65,10 @@ A page whose data nothing else reads calls its group directly too — Số đi�
 the shell shows (the owner's name, the plan under it), it tells `SessionProvider` with
 `patchMe` rather than growing a provider.
 
+The sidebar's counts and minutes come from `api.shell` through `useShellSummary`
+(`app/summary.ts`), read by the shell alone. A page that changes one of them — a callback made,
+a booking confirmed, a plan changed — calls `markSummaryStale()`; it does not reach into the shell.
+
 Mock and live implementations are typed against the same interface, so `npm run typecheck` is
 what catches contract drift. See `docs/backend-integration.md`.
 
@@ -158,8 +162,9 @@ npm run typecheck
 - Blush (`--surface-warm`) means **speech**: the receptionist's own line inside a call
   preview. Never a callout or a badge inside a form — that is what drained the tint
   of meaning last time.
-- **The orb means "talk to her", and nothing else.** It is the header's call button and
-  the try-out panel's face. It is not decoration and not a progress indicator: inside
+- **The orb means "talk to her", and nothing else.** It is the Lễ tân header's call button,
+  the sidebar's "Gọi thử Linh" and the try-out panel's face — the first two are one `CallOrb`
+  (`components/orb`), worded once by `useTryCall`. It is not decoration and not a progress indicator: inside
   a meter it looks pressable and repeats the thing one click away. The hub's readiness
   panel (`ReadinessPanel.tsx`) draws a ring with the number in the hole instead.
 - `design-reference/` is an archive. Nothing imports it and nothing builds it — with one

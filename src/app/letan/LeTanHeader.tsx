@@ -1,8 +1,6 @@
 import { Icon } from '../../design-system'
-import { MiniOrb } from '../../components/orb/MiniOrb'
-import { formatBusinessPhone } from '../../auth/phone'
-import { useConfig } from './store'
-import { useToast } from '../ui'
+import { CallOrb } from '../../components/orb/CallOrb'
+import { useTryCall } from './useTryCall'
 import styles from './LeTanPage.module.css'
 
 /**
@@ -14,10 +12,7 @@ import styles from './LeTanPage.module.css'
  * be where you left it wherever you are in the tab.
  */
 export function LeTanHeader({ compact = false }: { compact?: boolean }) {
-  const { config } = useConfig()
-  const { toast } = useToast()
-  const agent = config.agent_name || 'Linh'
-  const phone = config.assigned_phone
+  const { agent, phone, call } = useTryCall()
 
   return (
     <div className={styles.head}>
@@ -35,7 +30,7 @@ export function LeTanHeader({ compact = false }: { compact?: boolean }) {
         {phone ? (
           <span className={`${styles.phoneBadge} ${compact ? styles.phoneBadgeCompact : ''}`} title="Số khách gọi đến">
             <Icon name="incoming" size={compact ? 13 : 14} />
-            {formatBusinessPhone(phone)}
+            {phone}
           </span>
         ) : (
           <a className={styles.unassigned} href="#/app/so-dien-thoai">
@@ -45,29 +40,13 @@ export function LeTanHeader({ compact = false }: { compact?: boolean }) {
       </div>
 
       {/*
-        The orb is the product's one call affordance — it is what a visitor
-        presses on the landing page to hear Linh, phone glyph and all. Same
-        object here, at 44px, with the label moved into a tooltip so the header
-        stays one row tall.
+        The orb is the product's one call affordance — the same object as the
+        sidebar's "Gọi thử", at 44px, with the label moved into a tooltip so
+        the header stays one row tall.
       */}
-      <button
-        type="button"
-        className={styles.call}
-        aria-label={`Gọi thử ${agent}`}
-        onClick={() =>
-          toast(
-            phone
-              ? `Gọi thử sẽ nối máy tới ${formatBusinessPhone(phone)} khi số được kích hoạt.`
-              : 'Gọi thử sẽ nối máy khi số Fonnus được cấp — xem mục Số điện thoại.',
-            'neutral',
-          )
-        }
-      >
+      <button type="button" className={styles.call} aria-label={`Gọi thử ${agent}`} onClick={call}>
         <span className={styles.orbWrap}>
-          <MiniOrb size={44} />
-          <span className={styles.callIcon} aria-hidden="true">
-            <Icon name="answered" size={17} />
-          </span>
+          <CallOrb size={44} />
         </span>
         <span className={styles.tip} role="tooltip">
           Gọi thử {agent}
