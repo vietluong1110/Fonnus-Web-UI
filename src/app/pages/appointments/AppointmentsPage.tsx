@@ -10,6 +10,7 @@ import { ContentSkeleton, RetryCard } from '../../Boot'
 import { AnchoredPopup, ChipButton, EmptyState, Segmented, ui, useAnchoredPopup, useToast } from '../../ui'
 import { useConfig } from '../../letan/store'
 import { AppointmentDetail } from './AppointmentDetail'
+import { CalendarConnect } from './CalendarConnect'
 import { WeekGrid } from './WeekGrid'
 import {
   WEEKDAY,
@@ -259,6 +260,7 @@ export function AppointmentsPage() {
             ariaLabel="Xem theo"
           />
         )}
+        <CalendarConnect agent={agent} />
       </div>
 
       {phone ? (

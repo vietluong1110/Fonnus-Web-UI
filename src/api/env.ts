@@ -51,5 +51,13 @@ export const MOCK_LATENCY_MS = Math.max(0, num(env.VITE_MOCK_LATENCY_MS, 450))
  */
 export const MOCK_FAILURE_RATE = Math.min(1, Math.max(0, num(env.VITE_MOCK_FAILURE_RATE, 0)))
 
+/**
+ * How busy the mock clinic is this billing cycle. `near` runs out of minutes
+ * before the renewal, `over` has already passed the limit — the two states of
+ * Cài đặt's minutes meter that a normal month never reaches.
+ */
+export const MOCK_USAGE: 'normal' | 'near' | 'over' =
+  env.VITE_MOCK_USAGE === 'near' || env.VITE_MOCK_USAGE === 'over' ? env.VITE_MOCK_USAGE : 'normal'
+
 /** True when at least one group is still faked — used for a dev-only badge and warnings. */
 export const HAS_MOCKS: boolean = API_GROUPS.some((g) => !isLive(g))

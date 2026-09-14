@@ -1,0 +1,1111 @@
+/*
+ * Cài đặt — the plan and its minutes, the account, paying, security, data.
+ *
+ * Direction A of the design canvas (13 Sept 2026): one scroll in the Lễ tân
+ * frame. The four cards are the work column; the plan and its minutes are two
+ * cards in the 380px rail behind the gutter — 40px with a hairline down the
+ * middle — and the rail does what a hub's rail does: it measures
+ * (ui-ux-principles §9, §14, §15). No page index (owner, 14 Sept 2026).
+ *
+ *   ≥ 1181px   cards + rail (sticky when the window is tall enough to hold it)
+ *   < 1181px   the two plan cards first — side by side when there is room — then the cards
+ *   a setting row folds on its list's own width (container `settingrows`), not
+ *   the viewport's — so it folds in the same place on a phone and in a narrow
+ *   column (§12)
+ */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  white-space: nowrap;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------- the frame */
+
+.work {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 40px;
+  /* The rail column runs the full height so its sticky stack has room to move. */
+  align-items: stretch;
+}
+
+.work::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 400px;
+  width: 1px;
+  background: var(--border-hairline);
+  pointer-events: none;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.rail {
+  min-width: 0;
+}
+
+.railStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/*
+ * Sticky only where the two cards fit the window. A sticky column taller than
+ * the viewport hides its own foot until the page runs out (§15).
+ */
+@media (min-height: 860px) {
+  .railStack {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+/* Below the rail breakpoint: the plan first, then the cards, on the cards' own rhythm. No page index. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+}
+
+@media (max-width: 639.98px) {
+  .stack,
+  .col {
+    gap: 14px;
+  }
+}
+
+/* ---------------------------------------------------- one setting, one row */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  container: settingrows / inline-size;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 20px 128px minmax(0, 1fr) auto;
+  column-gap: 14px;
+  row-gap: 10px;
+  align-items: center;
+  min-height: 58px;
+  padding: 10px 0;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.rowIcon {
+  display: inline-flex;
+  justify-content: center;
+  color: var(--ink);
+}
+
+.rowLabel {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.rowValue {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.rowAction {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: end;
+}
+
+.rowEdit {
+  grid-column: 3 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  animation: rise var(--duration-slow) var(--ease-arc) both;
+}
+
+.rowEditing {
+  align-items: start;
+}
+
+.rowEditing > .rowIcon,
+.rowEditing > .rowLabel {
+  padding-top: 12px;
+}
+
+.main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mainSoft {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.sub {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.error {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--error);
+}
+
+@container settingrows (max-width: 480px) {
+  .row {
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    row-gap: 2px;
+    align-items: start;
+  }
+
+  .rowIcon {
+    grid-row: 1 / span 2;
+    padding-top: 2px;
+  }
+
+  .rowLabel {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 12px;
+  }
+
+  .rowValue {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .rowAction {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .rowEdit {
+    grid-column: 2 / -1;
+    grid-row: 3;
+    margin-top: 10px;
+  }
+
+  .rowEditing > .rowIcon,
+  .rowEditing > .rowLabel {
+    padding-top: 2px;
+  }
+
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .span2 {
+    grid-column: auto;
+  }
+}
+
+/* A press that reads as text: Sửa, Đổi số, Đăng xuất. */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-accent);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--text-accent);
+  text-decoration: underline;
+}
+
+.link:disabled {
+  opacity: 0.5;
+  cursor: default;
+  text-decoration: none;
+}
+
+.linkQuiet {
+  color: var(--ink-soft);
+}
+
+.linkQuiet:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 639.98px) {
+  .link {
+    min-height: 44px;
+  }
+}
+
+.verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.pending {
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink-soft);
+}
+
+/* Something the account is missing: content not yet filled in, the only dashed thing here (§1). */
+.gap {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px dashed var(--border-dashed);
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.gap:hover {
+  background: var(--action-ghost-hover);
+  border-style: solid;
+  border-color: var(--terracotta);
+  color: var(--ink);
+}
+
+@media (max-width: 639.98px) {
+  .gap {
+    min-height: 44px;
+  }
+}
+
+.codeField input {
+  letter-spacing: 0.3em;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.span2 {
+  grid-column: 1 / -1;
+}
+
+.fieldStack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.strengthBar {
+  display: flex;
+  gap: 4px;
+  width: 120px;
+}
+
+.strengthSeg {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+  transition: background var(--duration-base) var(--ease-out);
+}
+
+.strengthOn {
+  background: var(--terracotta);
+}
+
+/* A label on a hairline, with its count and the band's own action (§2). */
+.band {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  margin-top: 4px;
+}
+
+.bandCount {
+  font-family: var(--font-num);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.bandLine {
+  flex: 1;
+  min-width: 12px;
+  height: 1px;
+  background: var(--border-hairline);
+}
+
+/* ---------------------------------------------------------------- devices */
+
+.devices {
+  display: flex;
+  flex-direction: column;
+}
+
+.device {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 8px 0;
+  overflow: hidden;
+}
+
+.device + .device {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.deviceMark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+}
+
+.deviceText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.deviceName {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.thisPill {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- invoices */
+
+.invoices {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  container: invoices / inline-size;
+}
+
+.invoice {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto 44px;
+  column-gap: 12px;
+  align-items: center;
+  min-height: 56px;
+  padding: 6px 0;
+}
+
+.invoice + .invoice {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.invDate {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.invText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.invWhat {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.invSubDate {
+  display: none;
+}
+
+.invAmount {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.invGet {
+  justify-self: end;
+}
+
+@container invoices (max-width: 460px) {
+  .invoice {
+    grid-template-columns: minmax(0, 1fr) auto 44px;
+    column-gap: 10px;
+  }
+
+  .invDate {
+    display: none;
+  }
+
+  .invSubDate {
+    display: inline;
+  }
+}
+
+/* ------------------------------------------------------------------ data */
+
+.incl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.inclItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-page);
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Nobody knows how long an export takes: the meter creeps and stops short, it never counts down. */
+.creep {
+  position: relative;
+  max-width: 240px;
+  height: 4px;
+  margin-top: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+  overflow: hidden;
+}
+
+.creepFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  animation: creep 8s var(--ease-arc) forwards;
+}
+
+/* What an irreversible thing costs, said before the button (Numbers.module.css .release). */
+.confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  background: var(--surface-page);
+  animation: rise var(--duration-slow) var(--ease-arc) both;
+}
+
+.confirm > :global(*) {
+  max-width: 100%;
+}
+
+.confirmTitle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.confirmLine {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.confirmLine > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.confirm > div:not(.actions) {
+  align-self: stretch;
+}
+
+/* The one action on the page that cannot be taken back, in the error colour. */
+.danger {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px rgba(178, 58, 46, 0.35);
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  color: var(--error);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.danger:hover {
+  background: var(--surface-rose);
+}
+
+.danger:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------ the plan and its minutes */
+
+/*
+ * Two cards, one question each (§15). The container is the wrapper, never a card
+ * (§8): side by side once it is wide enough for two, stacked in the 380px rail and
+ * on a phone.
+ */
+.planWrap {
+  container: plancards / inline-size;
+  min-width: 0;
+}
+
+.planCards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+@container plancards (min-width: 700px) {
+  .planCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+/* The rail card: the card padding, and 20px of air between every block in it. */
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--pad-card);
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+}
+
+@media (max-width: 639.98px) {
+  .planCard {
+    gap: var(--space-4);
+    padding: var(--space-5);
+  }
+}
+
+/* The eyebrow names the card; one quiet fact sits across from it. */
+.cardTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardTopMeta {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------- the plan */
+
+.planTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.planTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.planName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: var(--tracking-display);
+}
+
+/* Belongs to the name, so it sits closer to it than the blocks sit to each other. */
+.planPrice {
+  margin-top: calc(-1 * var(--space-3));
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.planPrice .num {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* What the plan includes: four figures, each on its own tile, instead of four sentences. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 8px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-page);
+}
+
+.tileValue {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tileLabel {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* How much of the numbers the clinic uses — under the figure it measures. */
+.tileMeter {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+  overflow: hidden;
+}
+
+.tileMeter > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+}
+
+/* The plan's yes-or-no extras, as pills under the tiles. */
+.extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px 0 10px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------- the minutes meter */
+
+/* The one figure an owner opens the page for — read first, from across the room. */
+.hero {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.heroNum {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.heroUnit {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.meterBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.bar {
+  position: relative;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+}
+
+.fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  transform-origin: left center;
+  animation: grow 900ms var(--ease-arc) both;
+}
+
+/* Square where the next segment carries on, so the two read as one bar. */
+.fillJoined {
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+}
+
+.overFill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--terracotta-deep);
+  transform-origin: left center;
+  animation: grow 500ms 800ms var(--ease-arc) both;
+}
+
+.proj {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--chart-step-2);
+  animation: fade 500ms 850ms var(--ease-out) both;
+}
+
+.limit {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.limitTag {
+  position: absolute;
+  top: 18px;
+  transform: translateX(-50%);
+  font-family: var(--font-num);
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.meterTagged .meterFoot {
+  padding-top: 12px;
+}
+
+.meterFoot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.meterFoot .num {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* The one line worth a second look: when the minutes run out, or what running over costs. */
+.meterFlag {
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-page);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.note > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+/* -------------------------------------------------------- the days behind it */
+
+/* Under a rule: the detail behind the number, drawn by Tổng quan's own column chart. */
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.daysHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.daysValue {
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------- what the plan includes */
+
+.perks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perk {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* Centred on the first line of text, so a perk with a second line keeps its icon at the top. */
+.perk > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.perkBody {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+/* How much of the perk is in use, under the perk it measures — never pushed to the far edge. */
+.perkUse {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.mini {
+  position: relative;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+  overflow: hidden;
+}
+
+.miniFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+}
+
+/* ------------------------------------------------------------------ motion */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes creep {
+  from {
+    width: 0;
+  }
+  to {
+    width: 86%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rowEdit,
+  .confirm,
+  .fill,
+  .overFill,
+  .proj {
+    animation: none;
+  }
+
+  .creepFill {
+    animation: none;
+    width: 60%;
+  }
+}

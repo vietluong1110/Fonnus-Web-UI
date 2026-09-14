@@ -1,20 +1,21 @@
 import { useEffect } from 'react'
 import { useSession } from '../auth/SessionProvider'
 import { appHref, navigate, useAppPath } from '../hooks/useRoute'
-import { AppShell, activeNav } from './AppShell'
+import { AppShell, pageLabel } from './AppShell'
 import { ConfigProvider } from './letan/store'
 import { LeTanPage } from './letan/LeTanPage'
 import { OverviewPage } from './pages/overview/OverviewPage'
 import { CallsPage } from './pages/calls/CallsPage'
 import { AppointmentsPage } from './pages/appointments/AppointmentsPage'
 import { NumbersPage } from './pages/numbers/NumbersPage'
-import { PlaceholderPage } from './pages/Placeholder'
+import { SettingsPage } from './pages/settings/SettingsPage'
+import { PlansPage } from './pages/settings/PlansPage'
 import { ConnectionError, ShellSkeleton } from './Boot'
 
 /**
  * Everything under `#/app`. Guards the session, then picks the page from the
- * first path segment. Every tab is built except Cài đặt, which is a
- * placeholder.
+ * first path segment. The five tabs are in the nav; Cài đặt and Gói dịch vụ are
+ * the owner's account and live behind the user block (AppShell).
  *
  * The guard has three answers, not two. "Still checking" is a real state — the
  * session lives in an httpOnly cookie this app cannot read, so the only way to
@@ -31,8 +32,7 @@ export function AppRoot() {
   }, [status, error])
 
   useEffect(() => {
-    const nav = activeNav(path)
-    document.title = `${nav.label} · Fonnus`
+    document.title = `${pageLabel(path)} · Fonnus`
   }, [path])
 
   // Tổng quan lives at `#/app/tong-quan`, like every other page at its own
@@ -66,23 +66,26 @@ export function AppRoot() {
 
   if (status === 'anonymous') return null
 
-  const nav = activeNav(path)
+  const page = path[0]
+  const rest = path.slice(1)
 
   return (
     <ConfigProvider>
       <AppShell>
-        {nav.key === 'le-tan' ? (
-          <LeTanPage path={path.slice(1)} />
-        ) : nav.key === 'tong-quan' ? (
-          <OverviewPage />
-        ) : nav.key === 'cuoc-goi' ? (
-          <CallsPage path={path.slice(1)} />
-        ) : nav.key === 'lich-hen' ? (
+        {page === 'le-tan' ? (
+          <LeTanPage path={rest} />
+        ) : page === 'cuoc-goi' ? (
+          <CallsPage path={rest} />
+        ) : page === 'lich-hen' ? (
           <AppointmentsPage />
-        ) : nav.key === 'so-dien-thoai' ? (
-          <NumbersPage path={path.slice(1)} />
+        ) : page === 'so-dien-thoai' ? (
+          <NumbersPage path={rest} />
+        ) : page === 'cai-dat' ? (
+          <SettingsPage path={rest} />
+        ) : page === 'goi-dich-vu' ? (
+          <PlansPage path={rest} />
         ) : (
-          <PlaceholderPage title={nav.label} />
+          <OverviewPage />
         )}
       </AppShell>
     </ConfigProvider>

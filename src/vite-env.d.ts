@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE_URL?: string
   readonly VITE_MOCK_LATENCY_MS?: string
   readonly VITE_MOCK_FAILURE_RATE?: string
+  readonly VITE_MOCK_USAGE?: 'normal' | 'near' | 'over'
 }
 
 interface ImportMeta {

@@ -23,8 +23,13 @@ import type {
   NumbersApi,
   OwnedNumber,
   PoolNumber,
+  InvoiceProfile,
 } from './contracts'
+import { readMockInvoiceProfile } from './account.mock'
 import { ApiError } from './errors'
+
+/** The checkout invoices whoever Cài đặt says the invoice is made out to — one record, two tabs. */
+const invoiceOf = (p: InvoiceProfile | null) => (p ? { legal_name: p.legal_name, tax_code: p.tax_code } : null)
 import { delay, maybeFail, storage } from './mock-support'
 import { readMockConfig, writeMockConfig } from './tenant.mock'
 
@@ -189,7 +194,7 @@ export const numbersMock: NumbersApi = {
     return {
       numbers: s.owned,
       receptionists: [{ id: MAIN, name: cfg.agent_name.trim() || 'Linh', branch: null }],
-      invoice: { legal_name: cfg.business_name, tax_code: '0312 345 678' },
+      invoice: invoiceOf(readMockInvoiceProfile()),
     }
   },
 

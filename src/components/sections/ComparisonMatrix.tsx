@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../../design-system'
-import { COMPARISON_MATRIX } from '../../data/pricing'
+import { COMPARISON_MATRIX, MATRIX_FOOTNOTE } from '../../data/pricing'
 import styles from './ComparisonMatrix.module.css'
 
 const COLUMNS = ['Dùng thử', 'Cơ bản', 'Tiêu chuẩn', 'Nâng cao']
@@ -74,10 +74,7 @@ export function ComparisonMatrix({ defaultOpen = false }: ComparisonMatrixProps)
                 )}
               </div>
 
-              <p className={styles.footnote}>
-                Cổng đồng ý, câu công bố trợ lý AI và việc chuyển cho người thật có ở mọi gói, kể cả Dùng
-                thử. Trả tháng và trả năm khác nhau ở giá, không khác ở tính năng.
-              </p>
+              <p className={styles.footnote}>{MATRIX_FOOTNOTE}</p>
             </div>
           </div>
         </div>

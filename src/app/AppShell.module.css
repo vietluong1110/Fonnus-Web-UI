@@ -139,6 +139,13 @@
   background: var(--action-ghost-hover);
 }
 
+/* An account page is open. It has no tab, so the block it is reached from holds the place. */
+.userOn,
+.userOn:hover {
+  background: var(--action-ghost-hover);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
 .avatar {
   width: 34px;
   height: 34px;
@@ -235,6 +242,19 @@
   color: var(--ink);
 }
 
+.menuItemOn,
+.menuItemOn:hover {
+  background: var(--action-ghost-hover);
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+.menuRule {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border-hairline);
+}
+
 .menuItemDanger {
   color: var(--error);
 }
@@ -270,6 +290,13 @@
 
   .sidebar {
     padding: 18px 10px 14px;
+    /*
+     * The user menu is 220px wide and opens out of a 64px rail. With the rail's
+     * `overflow: hidden` it was clipped to the rail's width, so on a tablet the
+     * menu — the only way to Cài đặt — opened as a 64px sliver.
+     */
+    overflow: visible;
+    z-index: 30;
   }
 
   .logo {

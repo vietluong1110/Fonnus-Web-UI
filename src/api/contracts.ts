@@ -654,11 +654,27 @@ export type AppointmentAction =
   | 'restore'
   | 'informed'
 
+export type CalendarProvider = 'google' | 'microsoft'
+
+/** An outside calendar the receptionist's bookings are copied to. */
+export interface CalendarConnection {
+  provider: CalendarProvider
+  /** The account the owner signed in to at the provider. */
+  account_email: string
+  connected_at: string
+}
+
 export interface AppointmentsApi {
   /** `GET /appointments?from=YYYY-MM-DD&to=YYYY-MM-DD` */
   list(from: string, to: string, opts?: Signal): Promise<AppointmentsWeek>
   /** `POST /appointments/{id}/actions` — the appointment as it now stands. */
   act(id: string, action: AppointmentAction, opts?: Signal): Promise<Appointment>
+  /** `GET /appointments/calendars` — the outside calendars bookings are copied to. */
+  calendars(opts?: Signal): Promise<CalendarConnection[]>
+  /** `POST /appointments/calendars/{provider}` — live answers with the provider's consent URL; the mock connects at once. */
+  connectCalendar(provider: CalendarProvider, opts?: Signal): Promise<{ redirect_url: string | null; connection: CalendarConnection | null }>
+  /** `DELETE /appointments/calendars/{provider}` */
+  disconnectCalendar(provider: CalendarProvider, opts?: Signal): Promise<void>
 }
 
 // ---------------------------------------------------------------------------
@@ -810,6 +826,198 @@ export interface LeadsApi {
 }
 
 // ---------------------------------------------------------------------------
+// Account — the Cài đặt and Gói dịch vụ pages
+// ---------------------------------------------------------------------------
+
+export type PlanId = 'basic' | 'standard' | 'advanced'
+export type BillingPeriod = 'monthly' | 'annual'
+
+/** One paid plan. Its name and blurb are this app's copy, keyed on `id`; the figures are the server's. */
+export interface Plan {
+  id: PlanId
+  price_monthly_vnd: number
+  /** Per month, when a year is paid at once. */
+  price_annual_per_month_vnd: number
+  /** The one payment for a year. */
+  price_annual_vnd: number
+  minutes: number
+  overage_vnd_per_minute: number
+  numbers: number
+  concurrent_calls: number
+  own_voice: boolean
+  account_manager: boolean
+}
+
+export interface Subscription {
+  plan_id: PlanId
+  period: BillingPeriod
+  /** YYYY-MM-DD — the first day of the next cycle, when the next charge falls. */
+  renews_on: string
+  /** What `renews_on` will charge: the scheduled plan if there is one, plus this cycle's overage. VAT included. */
+  next_charge_vnd: number
+  /**
+   * A booked change. `starts_on` is `renews_on`, or later for a move down while `held_until` runs.
+   */
+  scheduled: { plan_id: PlanId; period: BillingPeriod; starts_on: string } | null
+  /**
+   * After a monthly move up: the last day of the next full cycle. A move down starts no earlier
+   * than the day after (docs/account-billing-decisions.md D3). `null` when no hold runs.
+   */
+  held_until: string | null
+  numbers_used: number
+}
+
+export interface UsageCycle {
+  /** YYYY-MM-DD, both inclusive. */
+  start: string
+  end: string
+  /**
+   * The sum of `by_day` — one source, so the figure and the bars cannot disagree. Counted per
+   * second; spam, silent calls and very short calls are not counted (decisions doc D9).
+   */
+  minutes_used: number
+  /** Minutes answered per day, from `start` to today; the last entry is today so far. */
+  by_day: number[]
+  /** The whole cycle at the current pace. `null` until three days have passed. */
+  projected_minutes: number | null
+  // No `carried_minutes`: unused minutes do not roll over — the allowance is the plan's `minutes`,
+  // reset at each renewal (owner's decision, 14 Sept 2026; docs/account-billing-decisions.md D5).
+}
+
+export interface AccountProfile {
+  display_name: string
+  /** Digits, national format. The login for a phone account, a contact number otherwise. */
+  phone: string
+  email: string | null
+  email_verified: boolean
+  /** The linked Google address — always set for a Google account. */
+  google_email: string | null
+}
+
+/** Who the VAT e-invoice is made out to. Asked for before a payment, never after it (Decree 70/2025). */
+export interface InvoiceProfile {
+  legal_name: string
+  tax_code: string
+  address: string
+  email: string
+}
+
+export interface Invoice {
+  id: string
+  /** YYYY-MM-DD */
+  issued_on: string
+  kind: 'plan' | 'number'
+  plan_id: PlanId | null
+  number: string | null
+  period: { start: string; end: string } | null
+  overage_minutes: number
+  amount_vnd: number
+  pdf_url: string
+}
+
+export interface AccountSession {
+  id: string
+  device: 'desktop' | 'tablet' | 'phone'
+  /** Proper names, shown as they are: `Chrome`, `Safari`, `Cốc Cốc`. */
+  browser: string
+  os: string
+  /** From the IP, in Vietnamese. `null` when the lookup has nothing. */
+  city: string | null
+  last_active_at: string
+  /** The session making this request. It cannot be signed out from here. */
+  current: boolean
+}
+
+export interface DataExport {
+  status: 'none' | 'preparing' | 'ready'
+  ready_at: string | null
+  expires_at: string | null
+  download_url: string | null
+}
+
+export interface AccountOverview {
+  profile: AccountProfile
+  method: AuthMethod
+  /** Email accounts only; `null` for phone and Google, which have no password. */
+  password_changed_at: string | null
+  subscription: Subscription
+  usage: UsageCycle
+  /** Demo for now: automated billing is out of MVP, and the first clinics are invoiced by hand (Q26). */
+  pay_method: PayMethod
+  invoice_profile: InvoiceProfile | null
+  invoices: Invoice[]
+  sessions: AccountSession[]
+  export: DataExport
+  deletion: { scheduled_for: string } | null
+  /**
+   * Days between asking to delete and the deletion — 14, decided 14 Sept 2026 (decisions doc D13). The account is
+   * deactivated at once and the deletion can be cancelled until then. Server-owned so the rule
+   * can change without a release; the confirmation says it before the button.
+   */
+  deletion_grace_days: number
+}
+
+export interface PlanQuote {
+  plan_id: PlanId
+  period: BillingPeriod
+  /**
+   * A monthly move up starts today, with the new plan's **full** minute allowance for the rest
+   * of the cycle (not prorated); everything else waits for the renewal, with no refund.
+   * docs/account-billing-decisions.md D1–D4.
+   */
+  applies: 'now' | 'renewal'
+  /** Today, `renews_on`, or — for a move down while a hold runs — the day after `held_until`. */
+  effective_on: string
+  /** The difference for the days left of this cycle, today counted, rounded to 1.000đ. `0` when the change waits. */
+  charge_today_vnd: number
+  /** From `renews_on`: a month, or the year paid at once. */
+  next_charge_vnd: number
+  /** For a move up that applies now: the last day of the next full cycle, said before the button. Otherwise `null`. */
+  held_until: string | null
+}
+
+export interface AccountApi {
+  /** `GET /account` — the whole Cài đặt page in one read. */
+  overview(opts?: Signal): Promise<AccountOverview>
+  /** `GET /plans` — the paid plans. */
+  plans(opts?: Signal): Promise<Plan[]>
+  /** `PATCH /account/profile` */
+  updateProfile(patch: { display_name?: string; email?: string }, opts?: Signal): Promise<AccountProfile>
+  /** `POST /account/phone` `{ phone }` — sends a code to the new number. `409 phone_in_use`. */
+  requestPhoneChange(phone: string, opts?: Signal): Promise<void>
+  /** `POST /account/phone/verify` `{ phone, code }` */
+  confirmPhoneChange(input: { phone: string; code: string }, opts?: Signal): Promise<AccountProfile>
+  /** `POST /account/google` — live answers with Google's consent URL; the mock links at once. */
+  linkGoogle(opts?: Signal): Promise<{ redirect_url: string | null; profile: AccountProfile }>
+  /** `DELETE /account/google` — `409 google_only_method` for a Google account. */
+  unlinkGoogle(opts?: Signal): Promise<AccountProfile>
+  /** `PATCH /account/billing` `{ pay_method }` */
+  setPayMethod(method: PayMethod, opts?: Signal): Promise<void>
+  /** `PATCH /account/billing` `{ invoice_profile }` */
+  setInvoiceProfile(profile: InvoiceProfile, opts?: Signal): Promise<InvoiceProfile>
+  /** `POST /account/password` `{ current, next }` — signs every other session out. */
+  changePassword(input: { current: string; next: string }, opts?: Signal): Promise<void>
+  /** `DELETE /account/sessions/{id}` */
+  signOutSession(id: string, opts?: Signal): Promise<void>
+  /** `POST /account/sessions/sign-out-others` */
+  signOutOthers(opts?: Signal): Promise<void>
+  /** `POST /account/export` */
+  startExport(opts?: Signal): Promise<DataExport>
+  /** `GET /account/export` — polled while `preparing`. */
+  exportStatus(opts?: Signal): Promise<DataExport>
+  /** `POST /account/deletion` `{ confirm_name }` — `422 confirm_mismatch` unless it is the clinic's name. */
+  scheduleDeletion(confirmName: string, opts?: Signal): Promise<{ scheduled_for: string }>
+  /** `DELETE /account/deletion` */
+  cancelDeletion(opts?: Signal): Promise<void>
+  /** `POST /plans/quote` `{ plan_id, period }` — what a change costs and when it starts. */
+  quotePlan(input: { plan_id: PlanId; period: BillingPeriod }, opts?: Signal): Promise<PlanQuote>
+  /** `POST /subscription/change` `{ plan_id, period }` — charged to `pay_method`. */
+  changePlan(input: { plan_id: PlanId; period: BillingPeriod }, opts?: Signal): Promise<Subscription>
+  /** `DELETE /subscription/scheduled` */
+  cancelScheduledChange(opts?: Signal): Promise<Subscription>
+}
+
+// ---------------------------------------------------------------------------
 // The whole surface
 // ---------------------------------------------------------------------------
 
@@ -823,6 +1031,7 @@ export interface FonnusApi {
   calls: CallsApi
   appointments: AppointmentsApi
   numbers: NumbersApi
+  account: AccountApi
   leads: LeadsApi
 }
 
@@ -837,6 +1046,7 @@ export const API_GROUPS = [
   'calls',
   'appointments',
   'numbers',
+  'account',
   'leads',
 ] as const
 export type ApiGroup = (typeof API_GROUPS)[number]
