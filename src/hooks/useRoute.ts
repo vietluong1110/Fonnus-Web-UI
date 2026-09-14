@@ -8,14 +8,17 @@ import { useEffect, useState } from 'react'
  *
  * Section anchors (`#bang-gia`, `#lien-he`, …) still work: only hashes that
  * start with `#/` are read as routes, everything else is the landing page.
+ * That cuts both ways: on any other page an in-page anchor would *leave* it,
+ * so those pages scroll with JS rather than with an href.
  *
  * The app shell lives under `#/app/...`; `useAppPath` reads the part after it.
  */
-export type Route = 'landing' | 'signup' | 'signin' | 'app'
+export type Route = 'landing' | 'signup' | 'signin' | 'hotline' | 'app'
 
 const PATHS: Record<Exclude<Route, 'landing'>, string> = {
   signup: '#/dang-ky',
   signin: '#/dang-nhap',
+  hotline: '#/cham-diem-hotline',
   app: '#/app',
 }
 
@@ -23,6 +26,7 @@ function read(): Route {
   const hash = window.location.hash
   if (hash.startsWith(PATHS.signup)) return 'signup'
   if (hash.startsWith(PATHS.signin)) return 'signin'
+  if (hash.startsWith(PATHS.hotline)) return 'hotline'
   if (hash.startsWith(PATHS.app)) return 'app'
   return 'landing'
 }

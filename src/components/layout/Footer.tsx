@@ -1,11 +1,13 @@
 import { CONTACT } from '../../data/content'
 import { Pattern } from '../../design-system'
+import { hrefFor } from '../../hooks/useRoute'
 import styles from './Footer.module.css'
 
 const PAGE_LINKS = [
   { href: '#hero', label: 'Nghe thử' },
   { href: '#cach-hoat-dong', label: 'Cách hoạt động' },
   { href: '#bang-gia', label: 'Bảng giá' },
+  { href: hrefFor('hotline'), label: 'Chấm điểm hotline' },
   { href: '#bao-mat', label: 'Bảo mật & dữ liệu' },
 ]
 

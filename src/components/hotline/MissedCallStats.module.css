@@ -1,0 +1,297 @@
+/* First on its page, so it clears the floating pill the way the hero does. */
+.stats {
+  padding-top: clamp(132px, 17vh, 168px);
+}
+
+@media (max-width: 899.98px) {
+  .stats {
+    padding-top: 116px;
+  }
+}
+
+/* ----------------------------------------------------------------- head */
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px 56px;
+  margin-bottom: clamp(36px, 5vw, 56px);
+}
+
+.claim {
+  min-width: 0;
+}
+
+/* One step under the hero's claim: this page's headline, but not the brand's. */
+.title {
+  margin: 0 0 20px;
+  max-width: 19ch;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(36px, 4.4vw, 60px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.titleAccent {
+  color: var(--terracotta);
+}
+
+.lede {
+  max-width: 54ch;
+}
+
+.lede b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.cta {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  /* Sits on the lede's last line rather than under the heading's first. */
+  margin-bottom: 4px;
+}
+
+.ctaNote {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+/* A flex row turned into a column: restate stretch (CLAUDE.md), then left-align the button. */
+@media (max-width: 899.98px) {
+  .head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cta {
+    align-items: flex-start;
+    margin-bottom: 0;
+  }
+}
+
+/* ---------------------------------------------------------------- cards */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-card);
+}
+
+@media (max-width: 899.98px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Label → title → the drawing → a foot under a hairline (ui-ux-principles §15). */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--milk);
+  border-radius: var(--radius-card);
+  padding: clamp(20px, 3.2vw, 40px);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.cardLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(22px, 2.2vw, 28px);
+  line-height: 1.3;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.cardLine {
+  margin: 10px 0 0;
+  font-size: var(--size-body-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.chart {
+  margin-top: 36px;
+}
+
+/* Both cards end on the same line, whatever sits above. */
+.foot {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.chart + .foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.swatchMissed,
+.swatchAnswered {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.swatchMissed {
+  background: var(--action-primary);
+}
+
+.swatchAnswered {
+  background: var(--chart-step-2);
+}
+
+/* ------------------------------------------------------- the 33% figure */
+
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px 36px;
+  margin: 32px 0 28px;
+}
+
+.figure {
+  flex: 1 1 150px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.figureNum {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(64px, 7vw, 96px);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--terracotta);
+}
+
+.figureLabel {
+  font-size: var(--size-body);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.figureRest {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-hairline);
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.figureRest b {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* A hundred calls, ten to a row. The missed ones come first, so the count reads as rows. */
+.dots {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(10, 14px);
+  gap: 7px;
+}
+
+.dot,
+.dotMissed {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.dot {
+  background: var(--chart-step-2);
+}
+
+.dotMissed {
+  background: var(--action-primary);
+  transition: background-color var(--duration-slow) var(--ease-arc) calc(var(--i) * 16ms + 320ms);
+}
+
+/* Until the card has risen every call looks answered; then the missed ones turn, in reading order. */
+:global([data-reveal-armed]) :global([data-reveal]:not([data-revealed])) .dotMissed {
+  background: var(--chart-step-2);
+}
+
+@media (max-width: 379.98px) {
+  .dots {
+    grid-template-columns: repeat(10, 12px);
+    gap: 6px;
+  }
+
+  .dot,
+  .dotMissed {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.footHead {
+  margin: 0 0 12px;
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+}
+
+.reasons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px 7px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  font-size: var(--size-ui);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dotMissed {
+    transition: none;
+  }
+}

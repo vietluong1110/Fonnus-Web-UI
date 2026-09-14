@@ -375,6 +375,110 @@ export function Columns({
   )
 }
 
+/* ----------------------------------------------------------- stacked columns */
+
+export interface StackedColumn {
+  key: string
+  tick: string
+  /** The share drawn solid from the baseline, 0–100. The rest of the column is its complement. */
+  share: number
+  /** Printed inside the solid part. */
+  shareLabel: string
+  /** Printed inside the pale rest. */
+  restLabel: string
+  tip: ChartTip
+}
+
+/**
+ * Columns that are each one whole split in two — the share that matters solid
+ * from the baseline, the rest a pale step of the same hue above it, 2px of card
+ * between them.
+ *
+ * Every column is the same height because every column is 100%; what is
+ * compared is where the solid part stops, so it stands on the baseline and the
+ * reading is a skyline, as on `Columns`. Each part prints its own figure inside
+ * itself — two parts, both labelled on the mark — and the page adds the legend.
+ * The solid part is the primary button's ground rather than `--chart-step-5`,
+ * because it carries cream figures at 12.5px and plain terracotta is 4.0:1.
+ *
+ * `bracket` names a run of columns under the axis — the working day — drawn
+ * the way the hour grid draws the opening window.
+ *
+ * Inside a block that lifts in on scroll (the marketing pages), the solid parts
+ * wait for the block to arrive rather than growing unseen on mount.
+ */
+export function StackedColumns({
+  columns,
+  label,
+  height = 240,
+  bracket,
+}: {
+  columns: StackedColumn[]
+  /** What the chart is, for a screen reader: the card's title. */
+  label: string
+  height?: number
+  bracket?: { from: number; to: number; label: string }
+}) {
+  const n = columns.length
+  const drawn = useDrawn()
+  const { active, source, bind } = useScrub(n, bySlot(n))
+
+  return (
+    <div {...bind} className={styles.chart} data-scrub={active != null || undefined} role="group" aria-label={label}>
+      <div className={styles.stackPlot} style={{ height }} data-track role="list">
+        {columns.map((c, i) => (
+          <div
+            key={c.key}
+            role="listitem"
+            aria-label={`${c.tip.head}: ${c.tip.value}`}
+            data-i={i}
+            data-on={active === i || undefined}
+            className={styles.stackSlot}
+          >
+            <span
+              className={styles.stack}
+              data-anchor={i}
+              style={{ '--to': drawn ? `${c.share}%` : '0%', '--at': `${i * 60}ms` } as CSSProperties}
+            >
+              <span className={styles.stackRest}>
+                <span className={styles.stackLabel}>{c.restLabel}</span>
+              </span>
+              <span className={styles.stackPart}>
+                <span className={styles.stackLabel}>{c.shareLabel}</span>
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.ticks} aria-hidden="true">
+        {columns.map((c, i) => (
+          <span key={c.key} className={styles.tick} data-on={active === i || undefined}>
+            <span className={styles.tickLabel}>{c.tick}</span>
+          </span>
+        ))}
+      </div>
+
+      {bracket ? (
+        <div className={styles.stackBracket} aria-hidden="true">
+          <span
+            className={styles.stackBracketLine}
+            style={{
+              left: `calc(${(bracket.from / n) * 100}% + 10px)`,
+              width: `calc(${((bracket.to - bracket.from + 1) / n) * 100}% - 20px)`,
+            }}
+          />
+          <span className={styles.bracketLabel} style={{ left: `${((bracket.from + bracket.to + 1) / 2 / n) * 100}%` }}>
+            {bracket.label}
+          </span>
+        </div>
+      ) : null}
+
+      <TipBox host={bind.ref} active={active} tip={active == null ? null : columns[active].tip} announce={source === 'key'} />
+    </div>
+  )
+}
+
 /* --------------------------------------------------------------- ranked bars */
 
 export interface Ranked {

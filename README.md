@@ -77,14 +77,20 @@ self-host those before production.
 
 ## Routing
 
-Three pages, three hash routes, no router dependency:
+Five pages, five hash routes, no router dependency:
 
-| Route          | Page                       |
-| -------------- | -------------------------- |
-| `#` (anything) | landing                    |
-| `#/dang-ky`    | sign-up                    |
-| `#/dang-nhap`  | sign-in                    |
-| `#/app/…`      | the app shell (needs a session; bounces to sign-in otherwise) |
+| Route                 | Page                       |
+| --------------------- | -------------------------- |
+| `#` (anything)        | landing                    |
+| `#/cham-diem-hotline` | "Chấm điểm hotline" — the free mystery-shopping report request (`components/hotline/`) |
+| `#/dang-ky`           | sign-up                    |
+| `#/dang-nhap`         | sign-in                    |
+| `#/app/…`             | the app shell (needs a session; bounces to sign-in otherwise) |
+
+The report page wears the landing page's header and footer. Its section links
+(`#bang-gia` from there) switch back to the landing page, which scrolls to the
+section on arrival (`useArrivalScroll` in `App.tsx`); on the report page itself
+an in-page jump is a scroll, never an href, because any hash there is a route.
 
 Hash routing rather than the History API because the build ships with
 `base: './'` and `dist/` is meant to drop on any host — history routes would

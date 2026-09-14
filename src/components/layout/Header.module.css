@@ -102,6 +102,13 @@
   background: rgba(184, 92, 43, 0.11);
 }
 
+/* The page you are on: the open menu's wash, held. Doubled to outrank the base rules below. */
+.navLink.navLinkCurrent,
+.drawerLink.drawerLinkCurrent {
+  color: var(--ink);
+  background: rgba(184, 92, 43, 0.11);
+}
+
 .chevron {
   color: var(--ink-soft);
   transition: transform var(--duration-fast) var(--ease-out);

@@ -313,6 +313,136 @@
   }
 }
 
+/* ------------------------------------------------------- stacked columns */
+
+.stackPlot {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  /* The baseline the solid parts stand on. */
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.stackSlot {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* The hover wash, as on a column: the whole slot, reaching a little past the ends. */
+.stackSlot::before {
+  content: '';
+  position: absolute;
+  inset: -6px 2px 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--action-ghost-hover);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.stackSlot[data-on]::before {
+  opacity: 1;
+}
+
+/* Wider than a count column: fewer columns, each carrying two figures inside itself. */
+.stack {
+  position: relative;
+  width: 64%;
+  max-width: 64px;
+  min-width: 26px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.chart[data-scrub] .stackSlot:not([data-on]) .stack {
+  opacity: 0.5;
+}
+
+.stackRest,
+.stackPart {
+  position: relative;
+  min-height: 0;
+  /* A figure that does not fit its part yet is hidden, not spilled over the next one. */
+  overflow: hidden;
+}
+
+/* Step 2, not 1: at step 1 the rest melts into a milk card, and its figure is still ~5:1 on step 2. */
+.stackRest {
+  flex: 1 1 auto;
+  border-radius: 8px 8px 3px 3px;
+  background: var(--chart-step-2);
+  color: var(--ink-soft);
+}
+
+/* Rounded at the data end, square on the baseline it grows from. */
+.stackPart {
+  flex: 0 0 auto;
+  height: var(--to, 0%);
+  border-radius: 3px 3px 0 0;
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+  transition: height var(--duration-arc) var(--ease-arc) var(--at, 0ms);
+}
+
+:global([data-reveal-armed]) :global([data-reveal]:not([data-revealed])) .stackPart {
+  height: 0%;
+}
+
+.stackLabel {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-num);
+  font-variant-numeric: var(--numeric-tabular);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.stackRest .stackLabel {
+  font-weight: 500;
+}
+
+.stackBracket {
+  position: relative;
+  height: 32px;
+  margin-top: 2px;
+}
+
+/* Open at the top, towards the columns it names. */
+.stackBracketLine {
+  position: absolute;
+  top: 2px;
+  height: 6px;
+  border: 1px solid var(--border-strong);
+  border-top: none;
+  opacity: 0.65;
+}
+
+@media (max-width: 479.98px) {
+  .stackLabel {
+    top: 5px;
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack,
+  .stackPart,
+  .stackSlot::before {
+    transition: none;
+  }
+}
+
 /* ----------------------------------------------------------- ranked bars */
 
 .ranked {

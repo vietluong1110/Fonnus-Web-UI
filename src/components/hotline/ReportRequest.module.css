@@ -1,0 +1,487 @@
+/*
+ * Head and sample report on the left, the form on the right — the Contact
+ * section's split, so the two asks on the site look like one. Stacked below
+ * 1000px in reading order: what it is, what you get, then the form.
+ */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'head form'
+    'preview form';
+  column-gap: clamp(32px, 6vw, 80px);
+  row-gap: 32px;
+  align-items: start;
+}
+
+.head {
+  grid-area: head;
+  min-width: 0;
+}
+
+.preview {
+  grid-area: preview;
+  min-width: 0;
+}
+
+.formCard {
+  grid-area: form;
+  min-width: 0;
+}
+
+@media (max-width: 999.98px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      'head'
+      'preview'
+      'form';
+    row-gap: 28px;
+  }
+}
+
+.heading {
+  margin-bottom: 20px;
+  max-width: 18ch;
+}
+
+.lede {
+  max-width: 46ch;
+}
+
+.lede b {
+  font-family: var(--font-num);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------- the sample report */
+
+.preview {
+  margin: 0;
+}
+
+.report {
+  background: var(--paper);
+  border-radius: var(--radius-card);
+  padding: clamp(20px, 2.6vw, 28px);
+}
+
+.reportHead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.reportIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--milk);
+  color: var(--terracotta-deep);
+}
+
+.reportTitle {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.reportEyebrow {
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--terracotta-deep);
+}
+
+.reportName {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.reportScale {
+  font-size: var(--size-ui);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.metrics {
+  list-style: none;
+  margin: 0;
+  padding: 18px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Name and score on one line, the bar under both (docs/visual-language.md § Charts). */
+.metric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.metricLabel {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--size-body-sm);
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.metricLabel svg {
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+}
+
+.metricValue {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-num);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.metricTrack {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  /* The unfilled part is a paler step of the same hue, never grey. */
+  background: var(--meter-track);
+}
+
+.metricFill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--you);
+  border-radius: inherit;
+  background: var(--chart-step-5);
+  transition: width var(--duration-arc) var(--ease-arc) calc(var(--i) * 90ms + 240ms);
+}
+
+:global([data-reveal-armed]) :global([data-reveal]:not([data-revealed])) .metricFill {
+  width: 0;
+}
+
+/* The national average: an ink tick standing across the bar, a ring of paper so it reads over the fill. */
+.metricAverage {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: var(--avg);
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+.reportKey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.keyYou {
+  width: 16px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--chart-step-5);
+}
+
+.keyAverage {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.caption {
+  margin: 16px 2px 0;
+  font-size: var(--size-body-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------- the form */
+
+/* Paper on milk, like the Contact form. The margin keeps its top clear of the pill when scrolled to. */
+.formCard {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 3vw, 36px);
+  scroll-margin-top: 110px;
+}
+
+/* Measured on the form's own width, which is narrow beside the preview on a laptop as well as on a phone. */
+.form {
+  container: hotline-form / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pair,
+.pairAddress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px 14px;
+  align-items: start;
+}
+
+.pairAddress {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+@container hotline-form (max-width: 519.98px) {
+  .pair,
+  .pairAddress {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.locations {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* The list's action in the list's head, pinned right at every width (ui-ux-principles §2). */
+.locationsHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.locationsTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.count {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  display: inline-grid;
+  place-items: center;
+  background: var(--milk);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry {
+  padding: 12px 16px 18px;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.entryHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  margin-bottom: 6px;
+}
+
+.entryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--size-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.submit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* Inline, not a toast: someone who just typed their details needs the answer to stay on screen. */
+.failure {
+  margin: 0;
+  font-size: var(--size-ui);
+  color: var(--error);
+}
+
+.privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--size-ui);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.privacy svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+/* ---------------------------------------------------------------- the thanks */
+
+.sent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  min-height: 380px;
+}
+
+.sentTick {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-warm);
+  color: var(--terracotta-deep);
+}
+
+.sentTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--size-heading);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.sentBody {
+  margin: 0;
+  font-size: var(--size-body);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.sentBody b {
+  font-weight: 600;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.steps {
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: var(--size-body-sm);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.stepIcon {
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--milk);
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.stepDone .stepIcon {
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+  --icon-accent: currentColor;
+  box-shadow: none;
+}
+
+/* The line from one step's circle down to the next, through the icon column. */
+.step + .step::before {
+  content: '';
+  position: absolute;
+  left: 17.5px;
+  top: -6px;
+  height: 12px;
+  width: 1px;
+  background: var(--border-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metricFill {
+    transition: none;
+  }
+}

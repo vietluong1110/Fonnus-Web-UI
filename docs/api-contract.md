@@ -407,6 +407,31 @@ The landing-page contact form. Unauthenticated.
 Needs bot protection, but **not a CAPTCHA the user must solve** — the form is three fields on
 a marketing page and a challenge there costs more leads than it saves. Rate-limit by IP.
 
+### `POST /leads/hotline-report`
+
+The "Chấm điểm hotline" page (`#/cham-diem-hotline`): a request for the free mystery-shopping
+report. Fonnus rings each location 5–7 times over a few days as a patient would, and emails a
+benchmark report. Unauthenticated, same protection as `POST /leads`.
+
+```jsonc
+{ "contact_name": "Nguyễn Minh Anh", "email": "minhanh@nhakhoa.vn",
+  "clinic_name": "Nha khoa Minh Anh",
+  "locations": [
+    { "address": "12 Nguyễn Trãi, Quận 1, TP.HCM", "phone": "02838221234" },
+    { "address": "45 Cầu Giấy, Hà Nội", "phone": "19001234" }
+  ],
+  "source": "hotline_report" }
+// → 202
+```
+
+- `locations` has at least one entry and the page caps it at 20; a larger chain is a sales
+  conversation, not a form.
+- `phone` arrives in national form, digits only — a landline (11 digits), a mobile (10) or a
+  1800/1900 number. The page validates the shape; the server should not reject a number for
+  being a landline.
+- Errors use the usual codes (§ Errors); the page words them. A `422` should name the field
+  (`email`, `locations[1].phone`) so the message can sit under it.
+
 ---
 
 ## 7. Insights — the Tổng quan tab

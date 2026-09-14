@@ -1,4 +1,5 @@
 import type { IconName } from '../design-system'
+import { hrefFor } from '../hooks/useRoute'
 
 export interface NavItem {
   label: string
@@ -18,8 +19,14 @@ export interface NavGroup {
 }
 
 /*
- * Four entries, two of them menus. Every destination is a real section on this
- * page — the nav never promises a page that does not exist.
+ * Five entries, two of them menus. Every destination but one is a real section
+ * of the landing page — the nav never promises a page that does not exist.
+ *
+ * The exception is "Chấm điểm hotline", its own page (`#/cham-diem-hotline`):
+ * it asks for something different from the landing page — a measurement, not
+ * the receptionist — and a visitor who came for one should not scroll through
+ * the other. It sits just before Liên hệ because it is the other way to talk to
+ * us.
  */
 export const NAV_GROUPS: NavGroup[] = [
   {
@@ -49,6 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Câu hỏi thường gặp', desc: 'Những điều chủ phòng khám hay hỏi', icon: 'list', href: '#faq' },
     ],
   },
+  { label: 'Chấm điểm hotline', href: hrefFor('hotline') },
   { label: 'Liên hệ', href: '#lien-he' },
 ]
 
