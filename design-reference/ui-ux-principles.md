@@ -45,8 +45,8 @@ you read and half were things you pressed to make an empty row.
 preview, and a merge-tag pill standing for words the mailer will say. Never a callout,
 never a badge inside a form.
 
-**The orb means "talk to her".** It is the call button in the header and the face of the
-try-out panel, and it appears nowhere else — not as decoration, not inside a meter. A
+**The orb means "talk to her".** It is the call button in the header, the sidebar's "Gọi thử
+Linh" (§16) and the face of the try-out panel, and it appears nowhere else — not as decoration, not inside a meter. A
 readiness ring once held the orb in its hole; it looked pressable, and it repeated the
 try-out orb one click away on the sub-page.
 
@@ -792,6 +792,51 @@ cards, and this is the pattern for any rail (or any card) that *reports*.
 
 ---
 
+## 16. The nav carries what waits, not what exists
+
+The sidebar was a logo, five tabs and a user block. It was redesigned on a canvas — three directions:
+the milk sidebar refined, a night sidebar with the open page cut out of it, one floating rail at every
+width — and the owner picked the milk sidebar and took the night one's "Gọi thử Linh". What it
+settled, for everything that sits inside the frame:
+
+- **Five tabs, two groups, no headings.** The clinic's day (Tổng quan, Cuộc gọi, Lịch hẹn), a hairline,
+  then her setup (Lễ tân, Số điện thoại). A group heading would be text doing a hairline's job.
+- **A count is something waiting on the owner, never a total.** Callbacks still owed on Cuộc gọi,
+  bookings to confirm on Lịch hẹn — gone at zero, and each equal to the number the tab opens on
+  (`GET /shell/summary`, contract §12). A page that changes one calls `markSummaryStale()`. Lễ tân gets
+  one dot while she is missing something; no percentage — the ring stays on the hub (§9).
+- **The open tab is a terracotta pill that slides** — 200ms on the arc, measured rather than counted,
+  landing in place on first paint and when the sidebar changes shape. The same pill sits behind the
+  icon in the rail and in the phone's tab bar, so the owner learns one mark.
+- **Controls are pills, here too.** The nav items were 10px rectangles. In the rail the item is only a
+  hit area and the pill behind the icon is the control, so the focus ring goes on the pill.
+- **The rail has labels.** Under 900px the sidebar is a 96px rail with the label under each icon. The
+  64px icon-only rail with hover tooltips failed on exactly the devices that land at that width, which
+  have no hover.
+- **The orb is at the foot of every page.** "Gọi thử Linh" is a secondary pill with the orb at its end —
+  the orb with "Gọi thử" under it in the rail, the first row of Thêm on a phone. It is still only a call
+  (§1), it is the same `CallOrb` as the Lễ tân header, and one hook words it (`useTryCall`).
+- **Hỗ trợ is one press from anywhere:** Zalo, the hotline, the guides. A channel not set up yet says
+  "Sắp có" rather than hiding or pointing nowhere.
+- **Minutes appear when they matter.** From 80% of the plan used: a bar above the account, a dot on the
+  avatar in the rail, a dot on Thêm on a phone. The rest of the month, nothing — a meter on screen all
+  month is worry, not information. The account menu always carries the plan tile.
+- **The account block is one line tall, whatever the clinic is called.** The kind of clinic comes off the
+  front of the name — "Nha khoa Việt Smile" reads "Việt Smile" (`clinicName.ts`); what is still too long
+  fades at its edge and glides to its end while pointed at. The menu shows the full name. The block does
+  not wrap (the owner rejected it: it made the foot taller), and the sidebar does not resize (the tabs
+  already fit, and every page's geometry is set against 216px).
+- **Nothing that is not needed from every page.** No search, no notifications, no collapse button, no
+  "what's new", no clinic switcher. Five destinations do not need search, and the counts already say
+  what is waiting.
+- **Signing out is ink, not red.** It is not an error.
+
+> **Check:** is any count on the sidebar a total rather than a thing to do — and does it equal the number
+> on the page it opens? At 834px, can every tab be read without pointing at it? Is the account block the
+> same height for "Nha khoa A" and for "Phòng khám Nha khoa Quốc tế Sài Gòn Smile"?
+
+---
+
 ## Verifying a change
 
 The pane's screenshots are unreliable on these pages, so do not let a picture be the
@@ -833,6 +878,16 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-14 (night) — the sidebar.** Three directions on a canvas; the owner picked the milk sidebar,
+  took "Gọi thử Linh" from the night one, turned down drag-to-resize, and turned down a two-line clinic
+  name ("it increases the height") for "Tên gọn". Research behind it: hidden navigation made people 39%
+  slower on desktop and icon-only nav gets ignored (NN/g); tooltips are not labels; Material 3's rail
+  puts the label under the icon; an indicator should show only when its condition applies; Jobber and
+  Vapi keep status and test calls on the page; Vietnamese SMB software (Haravan, MISA, KiotViet) puts
+  Zalo and a hotline in the product. Built with a new `shell` API group so the badges agree with the
+  tabs behind them, one `CallOrb` for the header and the sidebar, and `useAnchoredPopup` for both
+  menus in place of the user menu's own listeners. → §16.
 
 - **2026-09-14 (evening) — the rail gets room.** The plan panel split into two cards (plan, minutes)
   with measured air, perks became figure tiles, the quota bar's stretches got the charts' tip through

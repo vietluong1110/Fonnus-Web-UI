@@ -59,5 +59,14 @@ export const MOCK_FAILURE_RATE = Math.min(1, Math.max(0, num(env.VITE_MOCK_FAILU
 export const MOCK_USAGE: 'normal' | 'near' | 'over' =
   env.VITE_MOCK_USAGE === 'near' || env.VITE_MOCK_USAGE === 'over' ? env.VITE_MOCK_USAGE : 'normal'
 
+/*
+ * Where an owner reaches Fonnus from the sidebar's "Hỗ trợ": a Zalo link, a hotline, the guides.
+ * Not API settings, but this is the one file that reads the environment. Unset, the row still
+ * shows and says "Sắp có" — pointing nowhere would be worse, and the channels are not decided yet.
+ */
+export const SUPPORT_ZALO_URL: string = (env.VITE_SUPPORT_ZALO_URL ?? '').trim()
+export const SUPPORT_HOTLINE: string = (env.VITE_SUPPORT_HOTLINE ?? '').trim()
+export const SUPPORT_GUIDE_URL: string = (env.VITE_SUPPORT_GUIDE_URL ?? '').trim()
+
 /** True when at least one group is still faked — used for a dev-only badge and warnings. */
 export const HAS_MOCKS: boolean = API_GROUPS.some((g) => !isLive(g))

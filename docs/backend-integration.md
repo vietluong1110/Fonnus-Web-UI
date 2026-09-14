@@ -65,6 +65,9 @@ src/api/
   insights.mock.ts  / insights.live.ts          everything Tổng quan draws
   calls.mock.ts     / calls.live.ts             the Cuộc gọi list, one call, callbacks
   appointments.mock.ts / appointments.live.ts   the Lịch hẹn week, and its actions
+  numbers.mock.ts   / numbers.live.ts           the Số điện thoại tab and its purchase
+  account.mock.ts   / account.live.ts           Cài đặt and Gói dịch vụ
+  shell.mock.ts     / shell.live.ts             the sidebar's counts and minutes, on every page
   leads.mock.ts     / leads.live.ts
 
   mock-support.ts   delay(), maybeFail(), the demo fixtures
@@ -98,7 +101,7 @@ VITE_API_MODE=live
 weeks. A single global on/off would mean nobody could test your first endpoint until every
 other one existed.
 
-Groups: `auth`, `tenant`, `assistant`, `receptionist`, `voice`, `insights`, `calls`, `appointments`, `leads`.
+Groups: `auth`, `tenant`, `assistant`, `receptionist`, `voice`, `insights`, `calls`, `appointments`, `numbers`, `account`, `leads`, `shell`.
 
 The console says which is which on every page load:
 
@@ -139,6 +142,7 @@ Each row is independently shippable and independently testable.
 | 8 | `voice` | the session | Needs the pipeline **and** the cost controls. See open-questions Q21. |
 | 9 | `insights` | `GET /insights/overview` | The Tổng quan tab. Needs call records to exist first, so it is naturally late — but it is one read-only endpoint with no writes and no concurrency, so it is the easiest of the lot once there is data to aggregate. |
 | 10 | `calls` | `GET /calls`, `GET /calls/{id}`, `POST /calls/{id}/callback` | The Cuộc gọi tab. The call log already stores transcripts and recordings; the work is the events, the gaps and the summary (Q24), and making `counts` agree with row 9's figures for the same range. |
+| 11 | `shell` | `GET /shell/summary` | The sidebar, on every page. Read-only, and every figure is one that `calls`, `appointments` and `account` already return — so it comes after those, and its whole job is to agree with them (Q27). Until then the mock reads the other mocks. |
 
 Tick them off in this table as you go.
 

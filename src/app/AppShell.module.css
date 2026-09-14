@@ -1,9 +1,10 @@
 /*
- * The signed-in frame: a 216px milk sidebar on the left, paper content on the
- * right. Below 900px the sidebar narrows to an icon rail so the content keeps
- * its width; the labels come back as tooltips. Below 640px it leaves the side
- * of the screen entirely and becomes a bottom tab bar — see the phone block
- * at the foot of this file.
+ * The signed-in frame. Three shapes of one nav (ui-ux-principles §16):
+ *
+ *   ≥ 900px   a 216px milk sidebar — pill items, the open tab a terracotta pill that slides
+ *   640–899   a 96px rail with the label under every icon; the labels are not tooltips,
+ *             because hover does not exist on the tablets that land here
+ *   < 640px   a bottom tab bar — see the phone block at the foot of this file
  */
 
 .shell {
@@ -14,41 +15,58 @@
 
   /*
    * Height of the bottom tab bar, published here because things pinned to the
-   * bottom of the viewport — the save bar, the assistant's phone button — have
-   * to sit clear of it. Zero until the phone block sets it, so the same
-   * `calc()` is correct on every width.
+   * bottom of the viewport — the save bar — have to sit clear of it. Zero until
+   * the phone block sets it, so the same `calc()` is correct on every width.
    */
   --tabbar-h: 0px;
 }
 
 /*
- * Width of the sidebar, published for the same reason as `--tabbar-h`: the
- * assistant's sheet slides up under the content, not under the window. On
- * the root rather than the shell because the sheet is portalled to <body>,
- * where nothing inside the shell is inherited. Restated in each width below.
+ * Width of the sidebar, published for the same reason as `--tabbar-h`. On the
+ * root rather than the shell because anything portalled to <body> inherits
+ * nothing from inside the shell. Restated in each width below.
  */
 :root {
   --sidebar-w: 216px;
 }
 
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ================================================================ sidebar */
+
 .sidebar {
   position: sticky;
   top: 0;
   height: 100vh;
-  background: var(--surface-card);
-  border-right: 1px solid var(--border-hairline);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  padding: 22px 14px 18px;
-  gap: 3px;
-  box-sizing: border-box;
-  overflow: hidden;
+  padding: 20px 12px 14px;
+  background: var(--surface-card);
+  border-right: 1px solid var(--border-hairline);
+  /* A short window scrolls the sidebar rather than hiding its foot. Pop-ups are portalled, so nothing is clipped. */
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .logo {
-  padding: 0 10px 20px;
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
+  height: 40px;
+  padding-left: 10px;
+  margin-bottom: 18px;
 }
 
 .logoMark {
@@ -56,30 +74,75 @@
 }
 
 .nav {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
+}
+
+/* Between the clinic's day and her setup. A gap, not a heading. */
+.divider {
+  flex: 0 0 auto;
+  height: 1px;
+  margin: 9px 14px;
+  background: var(--border-hairline);
+}
+
+/* The open tab. Measured in AppShell, so it follows the item whatever its size. */
+.indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.indicatorOn {
+  opacity: 1;
+}
+
+/* The rising arc, 200ms: short enough to read as the tab moving, not as an animation. */
+.indicatorLive {
+  transition:
+    transform var(--duration-base) var(--ease-arc),
+    width var(--duration-base) var(--ease-arc),
+    height var(--duration-base) var(--ease-arc),
+    opacity var(--duration-fast) var(--ease-out);
 }
 
 .item {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 10px;
+  gap: 12px;
+  width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 10px 0 15px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  font: inherit;
   font-family: var(--font-ui);
-  font-size: 13.5px;
-  line-height: 1.4;
+  font-size: var(--size-ui);
+  line-height: var(--leading-ui);
   font-weight: 500;
   color: var(--ink-soft);
+  text-align: left;
   text-decoration: none;
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
   white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--duration-base) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
 }
 
-.item:hover {
+.item:hover,
+.itemOpen {
   background: var(--action-ghost-hover);
   color: var(--ink);
   text-decoration: none;
@@ -87,10 +150,21 @@
 
 .itemOn,
 .itemOn:hover {
-  background: var(--terracotta);
-  --icon-accent: currentColor;
-  color: var(--cream);
+  background: transparent;
+  color: var(--text-on-accent);
   font-weight: 600;
+  --icon-accent: currentColor;
+}
+
+.itemIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 .itemLabel {
@@ -100,46 +174,230 @@
   text-overflow: ellipsis;
 }
 
-.itemDot {
+/* A count of what waits on the owner, at the end of the row. */
+.count {
+  min-width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  background: var(--meter-track);
+  color: var(--text-accent);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
+}
+
+.itemOn .count {
+  background: rgba(255, 246, 232, 0.22);
+  color: var(--text-on-accent);
+}
+
+/* Lễ tân is missing something she needs. A dot, no percentage — the ring lives on the hub. */
+.dotRight {
+  flex: 0 0 auto;
   width: 7px;
   height: 7px;
+  margin-right: 6px;
   border-radius: 50%;
-  background: var(--warning);
-  flex: 0 0 auto;
+  background: var(--terracotta);
 }
 
-.itemOn .itemDot {
-  background: var(--cream);
+.itemOn .dotRight {
+  background: var(--text-on-accent);
 }
 
-.footer {
+/* The rail's versions of the same two marks, pinned to the icon. Hidden in the sidebar. */
+.badge,
+.dotMark {
+  display: none;
+}
+
+.foot {
   margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-hairline);
-  position: relative;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
+
+/* "Gọi thử Linh": a secondary button with the orb at its end. */
+.callPill {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  height: 52px;
+  box-sizing: border-box;
+  padding: 0 14px 0 5px;
+  margin-bottom: 6px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  font: inherit;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.callPill:hover {
+  background: var(--action-secondary-hover);
+}
+
+.orbSlot {
+  display: block;
+  flex: 0 0 auto;
+  transition: transform var(--duration-base) var(--ease-arc);
+}
+
+.callPill:hover .orbSlot {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.callPill:active .orbSlot {
+  transform: scale(var(--press-scale));
+}
+
+.callText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.callTitle {
+  font-size: var(--size-ui);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.callMeta {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.callShort {
+  display: none;
+}
+
+.footRule {
+  flex: 0 0 auto;
+  height: 1px;
+  margin: 8px 2px 10px;
+  background: var(--border-hairline);
+}
+
+/* The minutes, when they are about to matter. */
+.nearBar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 2px;
+  padding: 8px 16px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.nearBar:hover {
+  background: var(--action-ghost-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.nearTop {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.nearNum {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nearRenew {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.bar {
+  position: relative;
+  display: block;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--meter-track);
+  overflow: hidden;
+}
+
+.barFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  transition: width 900ms var(--ease-arc);
+}
+
+/* Past the plan: deeper terracotta, never red — a change is a fact, not a verdict. */
+.barOver .barFill {
+  background: var(--terracotta-deep);
+}
+
+/* ----------------------------------------------------------- account block */
 
 .user {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px 10px;
+  height: 50px;
+  box-sizing: border-box;
+  padding: 0 12px 0 7px;
   border: none;
+  border-radius: var(--radius-pill);
   background: none;
-  border-radius: 10px;
-  cursor: pointer;
-  text-align: left;
   font: inherit;
   color: var(--ink);
-  transition: background var(--duration-fast) var(--ease-out);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .user:hover {
   background: var(--action-ghost-hover);
 }
 
-/* An account page is open. It has no tab, so the block it is reached from holds the place. */
+/* An account page is open, or its menu is. It has no tab, so the block it is reached from holds the place. */
 .userOn,
 .userOn:hover {
   background: var(--action-ghost-hover);
@@ -147,6 +405,7 @@
 }
 
 .avatar {
+  position: relative;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -157,7 +416,21 @@
   font-family: var(--font-ui);
   font-weight: 600;
   font-size: 12.5px;
+  line-height: 1;
   flex: 0 0 auto;
+}
+
+/* The minutes are near their end — the rail's stand-in for the bar it has no room for. */
+.avatarDot {
+  display: none;
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  box-shadow: 0 0 0 2px var(--surface-card);
 }
 
 .userText {
@@ -168,78 +441,174 @@
   flex: 1;
 }
 
+/*
+ * One line, whatever the clinic is called. The name has already lost its kind
+ * ("Nha khoa") in clinicName.ts; what is still too long fades at the edge and,
+ * while pointed at, glides until its last word is in view. `--glide` is the
+ * overflow, measured in AppShell.
+ */
 .userName {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
   font-family: var(--font-ui);
   font-weight: 500;
   font-size: 13px;
+  line-height: 1.35;
   color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.userNameRun {
+  display: inline-block;
+  transition: transform 1600ms var(--ease-in-out);
+}
+
+.userNameLong {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+}
+
+.user:hover .userNameLong,
+.user:focus-visible .userNameLong {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px);
+  mask-image: linear-gradient(to right, transparent 0, #000 18px);
+}
+
+.user:hover .userNameLong .userNameRun,
+.user:focus-visible .userNameLong .userNameRun {
+  transform: translateX(var(--glide, 0px));
+  transition-delay: 250ms;
 }
 
 .userMeta {
   font-family: var(--font-ui);
   font-size: 11.5px;
+  line-height: 1.35;
   color: var(--ink-soft);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.userChevron {
-  color: var(--ink-soft);
-  display: inline-flex;
-  flex: 0 0 auto;
-}
+/* ----------------------------------------------------------- pop-ups (portalled) */
 
-.menu {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(100% + 6px);
-  background: var(--surface-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-overlay), inset 0 0 0 1px var(--border-hairline);
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
+/* `[data-popup]` so these win over Pickers' panel padding whatever order the modules load in. */
+.panel[data-popup] {
+  padding: 8px;
   gap: 2px;
-  z-index: 20;
-  animation: fnRise var(--duration-base) var(--ease-arc);
+  overflow: visible;
 }
 
 .menuHead {
-  padding: 8px 10px 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 10px;
+}
+
+.menuWho {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  border-bottom: 1px solid var(--border-hairline);
-  margin-bottom: 4px;
+  min-width: 0;
+}
+
+/* The full name, wrapped if it must — this is where a shortened name is read in full. */
+.menuClinic {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.menuMetaLine {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.planTile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-page);
+  color: var(--ink);
+  text-decoration: none;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.planTile:hover {
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.planTop {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.planRenew {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.planFig {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.planNum {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .menuItem {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: none;
-  background: none;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink);
-  cursor: pointer;
-  text-decoration: none;
-  text-align: left;
   width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 .menuItem:hover {
   background: var(--action-ghost-hover);
-  text-decoration: none;
   color: var(--ink);
+  text-decoration: none;
 }
 
 .menuItemOn,
@@ -249,15 +618,35 @@
   font-weight: 600;
 }
 
+.menuItemSoon,
+.menuItemSoon:hover {
+  background: none;
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+.menuLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuMeta {
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
 .menuRule {
+  display: block;
   height: 1px;
-  margin: 4px 6px;
+  margin: 4px 8px;
   background: var(--border-hairline);
 }
 
-.menuItemDanger {
-  color: var(--error);
-}
+/* ================================================================ content */
 
 .content {
   min-width: 0;
@@ -279,65 +668,204 @@
   min-width: 0;
 }
 
-@media (max-width: 900px) {
+/* ================================================================ rail, 640–899px */
+
+/*
+ * Every rule below is scoped to `.sidebar`. This query also matches a phone, and
+ * the phone's Thêm sheet and the portalled menus reuse `.callPill` and `.avatar`:
+ * unscoped, the rail's rules hid "Gọi thử Linh"'s words inside the sheet.
+ */
+@media (max-width: 899.98px) {
   .shell {
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: 96px minmax(0, 1fr);
   }
 
   :root {
-    --sidebar-w: 64px;
+    --sidebar-w: 96px;
   }
 
   .sidebar {
-    padding: 18px 10px 14px;
-    /*
-     * The user menu is 220px wide and opens out of a 64px rail. With the rail's
-     * `overflow: hidden` it was clipped to the rail's width, so on a tablet the
-     * menu — the only way to Cài đặt — opened as a 64px sliver.
-     */
-    overflow: visible;
-    z-index: 30;
+    padding: 16px 8px 12px;
+    align-items: center;
   }
 
-  .logo {
-    padding: 0 0 16px;
+  .sidebar .logo {
     justify-content: center;
+    height: 36px;
+    padding-left: 0;
+    margin-bottom: 14px;
   }
 
-  .logoFull {
+  .sidebar .logoFull {
     display: none;
   }
 
-  .logoMark {
+  .sidebar .logoMark {
     display: block;
   }
 
-  .item {
-    justify-content: center;
-    padding: 10px 0;
+  .sidebar .nav {
+    width: 80px;
+    gap: 4px;
   }
 
-  /*
-   * Scoped to the sidebar: the same `.userText` renders the clinic and the
-   * signed-in name inside the phone's "Thêm" sheet, where there is all the
-   * room in the world for it.
-   */
-  .sidebar .itemLabel,
-  .sidebar .itemDot,
-  .sidebar .userText,
-  .sidebar .userChevron {
+  .sidebar .divider {
+    width: 32px;
+    margin: 6px auto;
+  }
+
+  /* Icon in its pill, the label under it. */
+  .sidebar .item {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    width: 80px;
+    height: 64px;
+    padding: 4px 0 0;
+    border-radius: var(--radius-lg);
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .sidebar .item:hover,
+  .sidebar .itemOpen {
+    background: transparent;
+  }
+
+  .sidebar .item:hover .itemIcon,
+  .sidebar .itemOpen .itemIcon {
+    background: var(--action-ghost-hover);
+  }
+
+  /* The focus ring goes on the pill, which is the shape of a control; the item is only its hit area. */
+  .sidebar .item:focus-visible {
+    outline: none;
+  }
+
+  .sidebar .item:focus-visible .itemIcon {
+    box-shadow: var(--ring-focus);
+  }
+
+  .sidebar .itemOn,
+  .sidebar .itemOn:hover {
+    color: var(--text-accent);
+    --icon-accent: var(--terracotta);
+  }
+
+  .sidebar .itemOn .itemIcon,
+  .sidebar .itemOn:hover .itemIcon {
+    background: transparent;
+    color: var(--text-on-accent);
+    --icon-accent: currentColor;
+  }
+
+  .sidebar .itemIcon {
+    width: 56px;
+    height: 32px;
+  }
+
+  .sidebar .itemLabel {
+    flex: none;
+    max-width: 80px;
+    text-align: center;
+    letter-spacing: -0.005em;
+  }
+
+  .sidebar .count,
+  .sidebar .dotRight {
     display: none;
   }
 
-  .user {
-    justify-content: center;
-    padding: 6px 0;
+  .sidebar .badge {
+    position: absolute;
+    top: -3px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    min-width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    padding: 0 4px;
+    border-radius: var(--radius-pill);
+    background: var(--action-primary);
+    color: var(--text-on-accent);
+    box-shadow: 0 0 0 2px var(--surface-card);
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
   }
 
-  .menu {
-    left: 0;
-    right: auto;
-    min-width: 220px;
+  .sidebar .dotMark {
+    position: absolute;
+    top: 2px;
+    right: 13px;
+    display: block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    box-shadow: 0 0 0 2px var(--surface-card);
+  }
+
+  .sidebar .itemOn .dotMark {
+    background: var(--text-on-accent);
+    box-shadow: 0 0 0 2px var(--action-primary);
+  }
+
+  .sidebar .foot {
+    width: 80px;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .sidebar .callPill,
+  .sidebar .callPill:hover {
+    flex-direction: column;
+    gap: 6px;
+    width: 80px;
+    height: auto;
+    padding: 6px 0 4px;
+    margin-bottom: 4px;
+    background: none;
+    box-shadow: none;
+  }
+
+  .sidebar .callText {
+    display: none;
+  }
+
+  .sidebar .callShort {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .sidebar .footRule {
+    width: 32px;
+    margin: 6px auto;
+  }
+
+  .sidebar .user {
+    width: auto;
+    height: auto;
+    padding: 4px;
+  }
+
+  .sidebar .userText {
+    display: none;
+  }
+
+  .sidebar .avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
+  }
+
+  .sidebar .avatarDot {
+    display: block;
   }
 
   .content {
@@ -345,7 +873,7 @@
   }
 }
 
-/* ------------------------------------------------------------ phone shell */
+/* ================================================================ phone shell */
 
 /*
  * 639.98 rather than 640: `useIsNarrow(PHONE_BREAKPOINT)` is a strict `<`, and
@@ -377,7 +905,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 60;
+  /* Above the sheet's scrim: "Thêm" stays pressable while the sheet is up. */
+  z-index: 62;
   height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
@@ -387,7 +916,22 @@
   border-top: 1px solid var(--border-hairline);
 }
 
+/* The sidebar's pill, behind the open tab's icon. Five equal slots, so a percentage places it. */
+.tabIndicator {
+  position: absolute;
+  top: 7px;
+  left: calc(var(--tab, 0) * 20% + 10% - 28px);
+  width: 56px;
+  height: 30px;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  pointer-events: none;
+  transition: left var(--duration-base) var(--ease-arc);
+}
+
 .tab {
+  position: relative;
+  z-index: 1;
   flex: 1 1 0;
   min-width: 0;
   appearance: none;
@@ -398,13 +942,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 3px;
+  justify-content: flex-start;
+  gap: 2px;
   font: inherit;
   font-family: var(--font-ui);
   color: var(--ink-soft);
   text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-out);
+  transition: color var(--duration-base) var(--ease-out);
 }
 
 .tab:hover {
@@ -417,39 +961,55 @@
   color: var(--text-accent);
 }
 
-/*
- * The active mark is a filled pill behind the glyph, not a whole-item
- * background: a 60px-tall block of terracotta at the bottom of a cream phone
- * screen is the loudest thing on the page, and it is only telling you where
- * you already are.
- */
 .tabIcon {
   position: relative;
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 26px;
-  border-radius: var(--radius-pill);
-  transition: background var(--duration-fast) var(--ease-out);
+  width: 56px;
+  height: 30px;
+  transition: color var(--duration-base) var(--ease-out);
 }
 
 .tabOn .tabIcon {
-  background: var(--surface-warm);
+  color: var(--text-on-accent);
+  --icon-accent: currentColor;
+}
+
+.tabBadge {
+  position: absolute;
+  top: -1px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+  box-shadow: 0 0 0 2px var(--surface-card);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .tabDot {
   position: absolute;
-  top: 1px;
-  right: 10px;
-  width: 7px;
-  height: 7px;
+  top: 2px;
+  right: 13px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: var(--warning);
+  background: var(--terracotta);
   box-shadow: 0 0 0 2px var(--surface-card);
 }
 
 .tabOn .tabDot {
-  box-shadow: 0 0 0 2px var(--surface-warm);
+  background: var(--text-on-accent);
+  box-shadow: 0 0 0 2px var(--action-primary);
 }
 
 .tabLabel {
@@ -480,12 +1040,15 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
   z-index: 61;
+  max-height: calc(100dvh - var(--tabbar-h) - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface-card);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   box-shadow: var(--shadow-overlay);
-  padding: 8px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+  padding: 8px 12px 12px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -493,6 +1056,7 @@
 }
 
 .sheetGrip {
+  flex: 0 0 auto;
   width: 38px;
   height: 4px;
   border-radius: var(--radius-pill);
@@ -500,14 +1064,22 @@
   margin: 4px auto 10px;
 }
 
+.sheetCall {
+  height: 56px;
+  margin: 0 0 8px;
+  padding-left: 8px;
+}
+
 .sheetItem {
   display: flex;
   align-items: center;
   gap: 14px;
   /* 48px tall: the smallest target a thumb hits reliably. */
-  padding: 14px 12px;
-  border-radius: var(--radius-md);
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 0 14px;
   border: none;
+  border-radius: var(--radius-pill);
   background: none;
   font: inherit;
   font-family: var(--font-ui);
@@ -526,26 +1098,85 @@
   color: var(--ink);
 }
 
+/* The open page. The terracotta tint, not blush — blush means speech (§1). */
 .sheetItemOn,
 .sheetItemOn:hover {
   color: var(--text-accent);
-  background: var(--surface-warm);
+  background: var(--meter-track);
+  font-weight: 600;
 }
 
 .sheetDivider {
+  flex: 0 0 auto;
   height: 1px;
   background: var(--border-hairline);
-  margin: 8px 12px;
+  margin: 8px 14px;
 }
 
 .sheetHead {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 12px 10px;
+  padding: 4px 14px 10px;
+}
+
+.sheet .planTile {
+  margin: 0 2px 6px;
+}
+
+.helpTiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 2px;
+}
+
+.helpTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 76px;
+  padding: 8px 4px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-page);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+  text-align: center;
+  text-decoration: none;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.helpTile:hover {
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.helpTileOff,
+.helpTileOff:hover {
+  color: var(--ink-soft);
+  box-shadow: none;
+}
+
+.helpTileSoon {
+  font-size: 11px;
+  font-weight: 400;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .indicatorLive,
+  .tabIndicator,
+  .orbSlot,
+  .userNameRun,
+  .barFill {
+    transition: none;
+  }
+
   .scrim,
   .sheet {
     animation: none;

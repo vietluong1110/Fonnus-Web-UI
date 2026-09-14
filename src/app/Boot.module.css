@@ -1,5 +1,6 @@
-/* Skeletons mirror the app shell's geometry — 216px rail, paper content column
-   — so the real frame lands in the same place and nothing jumps. */
+/* Skeletons mirror the app shell's geometry — 216px sidebar, a 96px rail under
+   900px, paper content column — so the real frame lands in the same place and
+   nothing jumps. */
 
 .shell {
   display: flex;
@@ -15,10 +16,16 @@
   border-right: 1px solid var(--border-hairline);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 899.98px) {
   .sidebar {
-    width: 64px;
-    flex-basis: 64px;
+    width: 96px;
+    flex-basis: 96px;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .sidebar {
+    display: none;
   }
 }
 

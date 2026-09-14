@@ -452,3 +452,24 @@ a cap and alerts after the pilot; per-second counting without spam, silence or v
 14-day deletion window; "Đổi gói" never primary. Each is written up with its evidence and what
 would reopen it in [`account-billing-decisions.md`](./account-billing-decisions.md). The rest of
 this question stays open.
+
+---
+
+### Q27 · Shell summary: which window counts an owed callback, and can it be cheap?
+
+*Why:* the sidebar (`api-contract.md` §12) shows a count on Cuộc gọi and Lịch hẹn and, near the end
+of a cycle, the minutes — and reads them on every page change.
+
+- **Callbacks owed.** Counted over the last 7 days, because that is the range Cuộc gọi opens on,
+  so the badge equals the chip the owner lands on. A callback promised 8 days ago and never made
+  then drops off the badge without anyone making it. Should an owed callback count with no window
+  at all — on the badge and on Cuộc gọi's `callback` chip alike?
+- **Cost.** Can the backend serve it from counters rather than aggregating calls and appointments
+  on each read? Is a cache of a few seconds acceptable?
+- **Freshness.** Right after `POST /calls/{id}/callback` or `POST /appointments/{id}/actions` the
+  app reads it again. Must that read already reflect the write?
+
+**Recommendation:** no window for owed callbacks, on both the badge and the chip; counters; and
+read-your-writes after the two actions.
+
+**Answer:**

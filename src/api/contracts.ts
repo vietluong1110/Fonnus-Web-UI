@@ -1018,6 +1018,35 @@ export interface AccountApi {
 }
 
 // ---------------------------------------------------------------------------
+// Shell — what the sidebar shows on every page
+// ---------------------------------------------------------------------------
+
+/**
+ * The few figures the sidebar carries on every page: what is waiting on the owner, and the
+ * minutes. The shell reads it on every navigation, so it is one small read rather than three
+ * list endpoints — and each figure must equal the one the tab behind it shows.
+ */
+export interface ShellSummary {
+  /** ISO. */
+  generated_at: string
+  /**
+   * Callbacks she promised that nobody has made yet — `counts.callback` of `GET /calls?range=7d`,
+   * the range Cuộc gọi opens on, so the badge and the chip the owner lands on say the same number.
+   */
+  callbacks_owed: number
+  /** Upcoming appointments waiting on the clinic — the length of `AppointmentsWeek.attention`. */
+  appointments_waiting: number
+  /** This cycle: `usage.minutes_used`, the plan's `minutes`, `subscription.renews_on` — as `GET /account` has them. */
+  minutes: { used: number; included: number; renews_on: string }
+  plan_id: PlanId
+}
+
+export interface ShellApi {
+  /** `GET /shell/summary` */
+  summary(opts?: Signal): Promise<ShellSummary>
+}
+
+// ---------------------------------------------------------------------------
 // The whole surface
 // ---------------------------------------------------------------------------
 
@@ -1033,6 +1062,7 @@ export interface FonnusApi {
   numbers: NumbersApi
   account: AccountApi
   leads: LeadsApi
+  shell: ShellApi
 }
 
 /** The switchable groups. Keep in sync with `FonnusApi`'s keys. */
@@ -1048,5 +1078,6 @@ export const API_GROUPS = [
   'numbers',
   'account',
   'leads',
+  'shell',
 ] as const
 export type ApiGroup = (typeof API_GROUPS)[number]

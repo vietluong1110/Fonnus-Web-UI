@@ -85,6 +85,12 @@ export function useAnchoredPopup(
      * directly underneath.
      */
     side?: 'below' | 'beside'
+    /**
+     * With `beside`: open clear of this element rather than of the trigger. A panel opened from
+     * a button inside the sidebar belongs beside the sidebar — measured from the button, it
+     * covered the sidebar's own edge.
+     */
+    clear?: RefObject<HTMLElement | null>
   },
 ) {
   const [place, setPlace] = useState<Place | null>(null)
@@ -127,7 +133,7 @@ export function useAnchoredPopup(
     const height = Math.min(panelRef.current?.offsetHeight || size.height, window.innerHeight - 2 * EDGE_Y)
     if (size.side === 'beside') {
       const vw = document.documentElement.clientWidth
-      const right = r.right + GAP
+      const right = Math.max(r.right, size.clear?.current?.getBoundingClientRect().right ?? r.right) + GAP
       const leftOf = r.left - GAP - size.width
       const left =
         right + size.width <= vw - EDGE_X ? right : leftOf >= EDGE_X ? leftOf : Math.max(EDGE_X, Math.min(r.left, vw - size.width - EDGE_X))
@@ -146,7 +152,7 @@ export function useAnchoredPopup(
     // Same numbers means the same object, so the effect below settles instead
     // of re-running on an identity that changed but said nothing new.
     setPlace((prev) => (prev && prev.left === left && prev.top === top && prev.width === width ? prev : { left, top, width }))
-  }, [triggerRef, size.width, size.height, size.minWidth, size.side])
+  }, [triggerRef, size.width, size.height, size.minWidth, size.side, size.clear])
 
   useLayoutEffect(() => {
     if (!open) {

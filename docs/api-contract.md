@@ -967,7 +967,42 @@ Every rule behind these figures is D1–D4 in [`account-billing-decisions.md`](.
 
 ---
 
-## 12. Specified later — shape only
+## 12. Shell — what the sidebar shows on every page
+
+Three counts and the minutes. The app reads them on every navigation, when the owner comes back
+to the window, and right after a page changes one of them (a callback made, a booking confirmed, a
+plan changed). Mock: `src/api/shell.mock.ts`, which asks the calls, appointments and account mocks
+rather than inventing numbers, so it cannot disagree with them.
+
+### `GET /shell/summary` → `ShellSummary`
+
+```jsonc
+{
+  "generated_at": "2026-09-14T09:12:00+07:00",
+  "callbacks_owed": 3,          // = counts.callback of GET /calls?range=7d — the chip Cuộc gọi opens on
+  "appointments_waiting": 2,    // = attention.length of GET /appointments — clinic-wide, whatever week
+  "minutes": {
+    "used": 1640,               // = usage.minutes_used of GET /account
+    "included": 2500,           // = the current plan's minutes
+    "renews_on": "2026-09-22"   // = subscription.renews_on
+  },
+  "plan_id": "standard"
+}
+```
+
+- **Every figure is one another endpoint already returns, for the same moment.** The badge and the
+  page it leads to are read seconds apart; if they disagree the owner trusts neither
+  (ui-ux-principles §10).
+- **Cheap on purpose.** No lists, no transcripts: it is read far more often than any page.
+- **No copy.** The app words the badges (`3 cuộc cần gọi lại`) and decides when the minutes come
+  onto the sidebar (from 80% used).
+- `401` is handled as everywhere else. Any other failure is silent — the sidebar keeps what it last
+  showed and reads again on the next page. The window for owed callbacks, cost and freshness are
+  **Q27**.
+
+---
+
+## 13. Specified later — shape only
 
 These have interfaces in `src/api/` so the UI can be built against them, but no agreed wire
 format. Do not implement from this section.
@@ -980,7 +1015,7 @@ format. Do not implement from this section.
 
 ---
 
-## 13. Open questions
+## 14. Open questions
 
 The decisions above that are genuinely open are collected in
 **[`open-questions.md`](./open-questions.md)**, one per line, written so the list can be sent

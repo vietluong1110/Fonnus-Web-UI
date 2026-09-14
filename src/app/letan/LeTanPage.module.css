@@ -109,33 +109,7 @@
   transform: scale(var(--press-scale));
 }
 
-/* Same glyph and the same lit-from-within shadow as the orb's label on the
-   landing page, so the small one reads as the same object. */
-.callIcon {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: var(--cream);
-  pointer-events: none;
-  /*
-   * `Icon` paints a CSS mask, not text, so text-shadow does nothing to it —
-   * drop-shadow is the filter that follows a mask's alpha. The scrim below
-   * does the real work: the orb's pigment drifts through pale phases where a
-   * cream glyph would otherwise vanish.
-   */
-  filter:
-    drop-shadow(0 1px 2px rgba(138, 65, 24, 0.6))
-    drop-shadow(0 0 5px rgba(138, 65, 24, 0.45));
-}
-
-.callIcon::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, rgba(122, 56, 19, 0.46) 0%, rgba(122, 56, 19, 0) 64%);
-}
+/* The orb and its glyph are `CallOrb` (components/orb), shared with the sidebar. */
 
 .tip {
   position: absolute;

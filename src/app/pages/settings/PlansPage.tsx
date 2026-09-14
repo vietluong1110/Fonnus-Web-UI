@@ -7,6 +7,7 @@ import type { IconName } from '../../../design-system'
 import { PHONE_BREAKPOINT, useIsNarrow } from '../../../hooks/useIsNarrow'
 import { appHref, navigateApp } from '../../../hooks/useRoute'
 import { ContentSkeleton, RetryCard } from '../../Boot'
+import { markSummaryStale } from '../../summary'
 import { Card, Segmented, ui, useToast } from '../../ui'
 import { PanelFrame } from '../numbers/parts'
 import { MeterBar, Perks } from './PlanPanel'
@@ -135,6 +136,8 @@ export function PlansPage({ path }: { path: string[] }) {
     const name = PLAN_NAME[plan.id]
     if (quote.applies === 'now') {
       patchMe({ plan: `Gói ${name}` })
+      // A move up brings the new plan's minutes today; the sidebar's minutes and plan tile follow.
+      markSummaryStale()
       setDone({
         title: `Đã nâng lên ${name}`,
         sub: `Từ hôm nay có ${fmtCount(plan.minutes)} phút mỗi tháng.${quote.held_until ? ` Gói giữ ít nhất đến hết ${dm(quote.held_until)}.` : ''}`,

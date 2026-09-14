@@ -9,6 +9,7 @@ import { PHONE_BREAKPOINT, useIsNarrow } from '../../../hooks/useIsNarrow'
 import { ContentSkeleton, RetryCard } from '../../Boot'
 import { AnchoredPopup, ChipButton, EmptyState, Segmented, ui, useAnchoredPopup, useToast } from '../../ui'
 import { useConfig } from '../../letan/store'
+import { markSummaryStale } from '../../summary'
 import { AppointmentDetail } from './AppointmentDetail'
 import { CalendarConnect } from './CalendarConnect'
 import { WeekGrid } from './WeekGrid'
@@ -204,6 +205,8 @@ export function AppointmentsPage() {
     try {
       const next = await api.appointments.act(a.id, action)
       setData((d) => (d ? withResult(d, next, monday) : d))
+      // What is waiting on the clinic may have changed, and the sidebar counts it.
+      markSummaryStale()
       toast(actionToast(action, next))
       // A caller's move accepted: follow the appointment to its new day.
       if (action === 'accept_change') {
