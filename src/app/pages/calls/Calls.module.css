@@ -488,6 +488,53 @@
   scroll-behavior: smooth;
 }
 
+/*
+ * The transcript's own scrollbar: the thin pill on no track that Số điện thoại
+ * and the week planner use, not the system's grey bar with arrows. Chrome
+ * ignores these rules on any element that also sets `scrollbar-width`, so the
+ * standard properties go only to browsers that do not read the webkit ones.
+ */
+.panelScroll::-webkit-scrollbar,
+.sheetScroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.panelScroll::-webkit-scrollbar-track,
+.sheetScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Clear of the player's hairline above and the card's rounded corner below. */
+.panelScroll::-webkit-scrollbar-track {
+  margin: 8px 0 16px;
+}
+
+.panelScroll::-webkit-scrollbar-thumb,
+.sheetScroll::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 3px solid var(--surface-card);
+  background-clip: padding-box;
+}
+
+.panelScroll::-webkit-scrollbar-thumb:hover,
+.sheetScroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-soft);
+}
+
+.panelScroll::-webkit-scrollbar-button,
+.sheetScroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .panelScroll,
+  .sheetScroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}
+
 .panelStatus {
   display: flex;
   flex-direction: column;
