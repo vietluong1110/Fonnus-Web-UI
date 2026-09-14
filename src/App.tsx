@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react'
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { Hero } from './components/sections/Hero'
@@ -33,6 +34,7 @@ export function App({
   const demo = useCallDemo()
   const placement = useOrbPlacement(demo.open)
   useReveal(motion !== 'tắt')
+  useArrivalScroll()
 
   return (
     <div className={styles.page}>
@@ -66,4 +68,32 @@ export function App({
       />
     </div>
   )
+}
+
+/** Where this page was scrolled when another page replaced it. Unset until one has. */
+let leftAt: number | null = null
+
+/**
+ * Coming back to this page from another one.
+ *
+ * A section anchor (`#bang-gia` in the hotline report's header) arrives before
+ * this page exists: the browser looks for the section, finds nothing and leaves
+ * the scroll wherever the other page had it. So the page finds the section on
+ * mount. With no anchor — Back from the report — it returns to where the
+ * visitor left it.
+ *
+ * The offset is kept only when the hash really moved to another route, so a
+ * dev-mode double mount, or a reload the browser restores itself, is left alone.
+ */
+function useArrivalScroll() {
+  useLayoutEffect(() => {
+    const id = window.location.hash.slice(1)
+    const section = id ? document.getElementById(id) : null
+    if (section) section.scrollIntoView({ behavior: 'instant' })
+    else if (leftAt != null) window.scrollTo({ top: leftAt, behavior: 'instant' })
+
+    return () => {
+      leftAt = window.location.hash.startsWith('#/') ? window.scrollY : null
+    }
+  }, [])
 }

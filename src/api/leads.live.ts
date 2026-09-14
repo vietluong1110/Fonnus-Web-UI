@@ -11,4 +11,13 @@ export const leadsLive: LeadsApi = {
       { signal: opts?.signal, expect401: true, parse: 'none' },
     )
   },
+
+  async requestHotlineReport(input, opts) {
+    // Same terms as the contact form: unauthenticated, rate-limited by IP.
+    await http.post<void>(
+      '/leads/hotline-report',
+      { ...input, source: 'hotline_report' },
+      { signal: opts?.signal, expect401: true, parse: 'none' },
+    )
+  },
 }

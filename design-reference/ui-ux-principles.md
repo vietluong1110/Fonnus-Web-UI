@@ -837,6 +837,52 @@ settled, for everything that sits inside the frame:
 
 ---
 
+## 17. A page that asks for a lead
+
+`Chấm điểm hotline` (`#/cham-diem-hotline`) is the first marketing page that is not the landing
+page, and the first whose whole job is a form: a free mystery-shopping report, in exchange for
+where to call and where to send it. The rules above were written for the app; this is what carried
+over to a public page, and what that page added.
+
+- **A separate page wears the landing page's clothes.** The same pill header, footer, 1280px
+  column, section rhythm, eyebrow and heading, reveal. The one thing that says "another page" is the
+  lit link in the header — the open menu's wash, held, with `aria-current`.
+- **On any page but the landing one, a hash is a route.** An in-page jump there is a scroll
+  (`scrollIntoView`), never `href="#…"`, which would leave the page. The landing page's section links
+  switch back to it, and it finds the section on arrival (`useArrivalScroll` in `App.tsx`) — the
+  browser had looked for it before the page existed.
+- **A nav entry costs width, so measure it.** The fifth link pushed the pill's content 145px past its
+  box at 910px; the drawer now takes over below 1100px. The header comment says how to re-measure.
+- **The case is drawn, not argued.** Two cards, each a label → a title → one drawing → a foot under a
+  hairline (§15). A share that varies across the day is `StackedColumns` (`app/ui/Charts.tsx`, with
+  every chart's hover and tip); a single share is a grid of a hundred dots, not a donut — the ring
+  already means readiness (§9), and "33 of these 100" is counted where a third of a ring is guessed.
+  Missed is the primary button's terracotta, because it carries cream figures; answered is a pale step
+  of the same hue. The reference's pink against green is the pair a colour-blind owner cannot separate.
+- **Borrowed figures say whose they are.** The call figures are a North American survey's, and the
+  lede says so. They live in `data/hotlineReport.ts` beside that credit, so the two are replaced
+  together when Fonnus has its own benchmark.
+- **Show the thing they will receive.** The report is a drawn sample card — the four scored criteria,
+  each against an ink tick for the national average — labelled `Báo cáo mẫu`, with the promise as its
+  caption. The four criteria were first drafted as tiles *and* as the report's rows; one of them was
+  the same list twice. The thanks draws what happens next as three steps.
+- **A form's repeated group is the list shape too** (§2, §3, §6). Locations are entries with an ordinal
+  and a delete, `+ Thêm cơ sở` in the list's head, rows on `useAppear`. The reference drew "Add
+  another location" as a dashed row at the foot, which is exactly what §1 forbids.
+- **Errors arrive when a field is left and go the moment it is fixed; submit shows them all and
+  focuses the first.** `noValidate`, so no English browser bubble. Address fields are
+  `autocomplete="off"` so the browser does not offer the owner's home for a clinic. A hotline is a
+  landline or a 1900 number as often as a mobile, so it does not go through `auth/phone`.
+- **On a phone the ask follows the reader.** Once the head's button has scrolled away, a copy of it
+  waits at the bottom edge, and leaves as soon as the form is reached.
+
+> **Check:** at 1100px and 1099px, does the pill's content fit (`scrollWidth === clientWidth`), or has
+> the drawer taken over? From the report page press `Bảng giá` — does the landing page open on the
+> pricing section? Submit the empty form — is the first field focused, and is every message
+> Vietnamese?
+
+---
+
 ## Verifying a change
 
 The pane's screenshots are unreliable on these pages, so do not let a picture be the
@@ -878,6 +924,19 @@ Then the repo's own gate: `npm run typecheck` clean, and the demo login still wo
 ## Lessons log
 
 Newest first. One line per session that taught something; the rule itself goes above.
+
+- **2026-09-14 (late) — Chấm điểm hotline, the first page that is not the landing page.** The owner
+  asked for a separate lead page for a free mystery-shopping report, linked from the nav, and chose
+  the name, the reference's exact figures (credited to their North American survey), email as the
+  only contact field, and a direct build over a canvas. Research behind it: form length and
+  multi-column forms (Baymard, Zuko), inline validation (Wroblewski), placeholder-as-label (NN/g),
+  privacy microcopy that mentions "spam" losing sign-ups, loss framing being weaker than assumed
+  (O'Keefe & Jensen), per-100-call funnels (Patient Prism), and Vietnam's mobile and Zalo share
+  (Statcounter, DataReportal). What it taught: a hash on any other page is a route, so the landing
+  page has to find its section on arrival; a fifth nav entry overflowed the pill by 145px and moved
+  the drawer breakpoint to 1100px; a two-part share over time needed `StackedColumns` in the shared
+  chart kit rather than a page-local chart with its own hover; and the reference's dashed "add
+  another" row had to become the list shape. → §17.
 
 - **2026-09-14 (night) — the sidebar.** Three directions on a canvas; the owner picked the milk sidebar,
   took "Gọi thử Linh" from the night one, turned down drag-to-resize, and turned down a two-line clinic

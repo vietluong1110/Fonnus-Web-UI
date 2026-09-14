@@ -1,0 +1,48 @@
+/*
+ * The phone's bottom-edge button. Hidden from 900px up, where the head's own
+ * button and the form sit a short scroll apart.
+ */
+.floating {
+  display: none;
+}
+
+@media (max-width: 899.98px) {
+  .floating {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    /* Same side inset as the header's rail, so its edges sit under the pill's. */
+    padding: 12px clamp(20px, 5vw, 64px) calc(14px + env(safe-area-inset-bottom, 0px));
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(calc(100% + 8px));
+    transition:
+      transform var(--duration-slow) var(--ease-arc),
+      opacity var(--duration-base) var(--ease-out);
+  }
+
+  .floating[data-shown] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .floating[data-shown] .floatingInner {
+    pointer-events: auto;
+  }
+}
+
+.floatingInner {
+  width: min(520px, 100%);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-overlay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating {
+    transition: none;
+  }
+}

@@ -5,6 +5,7 @@ import { ToastProvider } from './app/ui'
 import { SessionProvider } from './auth/SessionProvider'
 import { SignInPage } from './auth/SignInPage'
 import { SignUpPage } from './auth/SignUpPage'
+import { HotlineReportPage } from './components/hotline/HotlineReportPage'
 import { ErrorBoundary } from './ErrorBoundary'
 import { useRoute } from './hooks/useRoute'
 
@@ -12,6 +13,7 @@ const TITLES: Record<string, string> = {
   landing: 'Fonnus — Không cuộc gọi nào bị bỏ lỡ.',
   signup: 'Dùng thử miễn phí · Fonnus',
   signin: 'Đăng nhập · Fonnus',
+  hotline: 'Chấm điểm hotline miễn phí · Fonnus',
 }
 
 /** The site's pages. See `hooks/useRoute` for why the routes are hashes. */
@@ -24,6 +26,7 @@ function Pages() {
 
   if (route === 'signup') return <SignUpPage />
   if (route === 'signin') return <SignInPage />
+  if (route === 'hotline') return <HotlineReportPage />
   if (route === 'app') return <AppRoot />
   return <App />
 }
