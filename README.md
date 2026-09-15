@@ -493,6 +493,7 @@ with "Thử lại" when a save fails, having rolled the record back.
 
 | | |
 | --- | --- |
+| [`docs/backend-build-list.md`](docs/backend-build-list.md) | what the backend has to build behind each screen, what the pilot needs, and the decisions it waits on |
 | [`docs/api-contract.md`](docs/api-contract.md) | every endpoint, request and response |
 | [`docs/backend-integration.md`](docs/backend-integration.md) | how to fill in the live half, in order |
 | [`docs/field-catalogue-mapping.md`](docs/field-catalogue-mapping.md) | how `model.ts` maps to the context field catalogue, and the `[ext]` fields it adds |

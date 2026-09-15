@@ -308,7 +308,12 @@ be answered **before** the endpoint exists rather than after the first bill.
 **Recommendation:** per-IP budget, hard max call duration, and a kill switch that degrades to
 today's scripted demo.
 
-**Answer:**
+**Answer (partial — the owner, 15 Sept 2026):** unauthenticated, and a call from the browser rather
+than over a phone line, to a receptionist Fonnus configures. Each call lasts at most one minute. A
+visitor who starts calls too many times in a row is frozen for a while. The in-app "Gọi thử" moves
+to the same browser-call stack with the owner's draft config, replacing `POST /receptionist/preview`.
+Thresholds, budget, kill switch and transport are proposed in
+[`backend-build-list.md`](./backend-build-list.md) §1.1 and §13.
 
 ---
 
