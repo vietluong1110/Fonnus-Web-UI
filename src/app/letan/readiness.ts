@@ -267,16 +267,39 @@ export function summarizeHours(cfg: ReceptionistConfig): string {
     .join(' · ')
 }
 
+/*
+ * The clinic's wall clock. Hours, breaks and holiday dates in the record are all
+ * Asia/Ho_Chi_Minh, so "now" is read on that clock too — the date, the time and
+ * the weekday from one reading. Taking the date from UTC and the time from the
+ * browser put 00:00–07:00 on the previous day's holiday.
+ */
+const CLINIC_CLOCK = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Ho_Chi_Minh',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+})
+
+function clinicClock(now: Date): { iso: string; hhmm: string; day: ReceptionistConfig['operating_hours_by_weekday'][number]['day'] } {
+  const parts = CLINIC_CLOCK.formatToParts(now)
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? ''
+  const iso = `${part('year')}-${part('month')}-${part('day')}`
+  // The weekday of that calendar date, whatever zone the browser is in.
+  const day = new Date(`${iso}T00:00:00Z`).getUTCDay() as ReceptionistConfig['operating_hours_by_weekday'][number]['day']
+  return { iso, hhmm: `${part('hour')}:${part('minute')}`, day }
+}
+
 /** `is_open_now` (SD) — derived from hours, breaks and holidays, for the live indicator. */
 export function isOpenNow(cfg: ReceptionistConfig, now = new Date()): boolean {
-  const iso = now.toISOString().slice(0, 10)
+  const { iso, hhmm, day } = clinicClock(now)
   const hol = cfg.holiday_exceptions.find((h) => h.date_from <= iso && iso <= h.date_to)
-  const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
   if (hol) {
     if (hol.closure_type === 'closed') return false
     if (hol.modified_hours) return hol.modified_hours.from <= hhmm && hhmm < hol.modified_hours.to
   }
-  const day = now.getDay() as ReceptionistConfig['operating_hours_by_weekday'][number]['day']
   const row = cfg.operating_hours_by_weekday.find((r) => r.day === day)
   if (!row || !row.open) return false
   if (!(row.from <= hhmm && hhmm < row.to)) return false

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api, isCanceled, messageFor } from '../../../api'
+import { ApiError, api, isCanceled, messageFor } from '../../../api'
 import type { CalendarConnection, CalendarProvider } from '../../../api'
 import { Button, Icon } from '../../../design-system'
 import { GoogleMark, MicrosoftMark } from '../../../design-system/BrandMarks'
@@ -29,6 +29,26 @@ function Mark({ provider, size }: { provider: CalendarProvider; size: number }) 
   return provider === 'google' ? <GoogleMark size={size} /> : <MicrosoftMark size={size} />
 }
 
+/*
+ * The consent screen returns to `#/app/lich-hen`, and a refusal comes back as
+ * the `calendar_denied` code (api-contract §9). It is read as `error=` from
+ * either query — before the hash, or after the route inside it — and removed
+ * once read, so a reload does not report it again. The route does not change,
+ * so this is `replaceState`, not a navigation.
+ */
+function takeConsentRefusal(): boolean {
+  const { pathname, search, hash } = window.location
+  const [route, hashQuery = ''] = hash.split('?')
+  const outer = new URLSearchParams(search)
+  const inner = new URLSearchParams(hashQuery)
+  if (outer.get('error') !== 'calendar_denied' && inner.get('error') !== 'calendar_denied') return false
+  outer.delete('error')
+  inner.delete('error')
+  const query = (p: URLSearchParams) => (p.toString() ? `?${p}` : '')
+  window.history.replaceState(window.history.state, '', `${pathname}${query(outer)}${route}${query(inner)}`)
+  return true
+}
+
 export function CalendarConnect({ agent }: { agent: string }) {
   const phone = useIsNarrow(PHONE_BREAKPOINT)
   const { toast } = useToast()
@@ -49,6 +69,17 @@ export function CalendarConnect({ agent }: { agent: string }) {
       })
     return () => ac.abort()
   }, [])
+
+  // Back from a provider that was refused: say so. "Kết nối lịch" is beside it to try again.
+  // The return is a page load; `hashchange` also catches one landing on this page while open.
+  useEffect(() => {
+    const report = () => {
+      if (takeConsentRefusal()) toast(messageFor(new ApiError({ kind: 'forbidden', code: 'calendar_denied' })), 'error')
+    }
+    report()
+    window.addEventListener('hashchange', report)
+    return () => window.removeEventListener('hashchange', report)
+  }, [toast])
 
   const connect = async (provider: CalendarProvider) => {
     setBusy(provider)

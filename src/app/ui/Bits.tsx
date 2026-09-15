@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { CSSProperties, ReactNode, Ref } from 'react'
 import { Button, Icon, Pattern } from '../../design-system'
 import type { IconName } from '../../design-system'
+import type { SpeakingSpeed, VoiceId } from '../letan/model'
 import { useSpeak } from './speak'
 import styles from './Bits.module.css'
 
@@ -52,8 +53,20 @@ export function Tabs<V extends string>({
 
 /* ----------------------------------------------------------- PlayButton */
 
-export function PlayButton({ text, label = 'Nghe thử' }: { text: string; label?: string }) {
-  const { speaking, toggle, supported } = useSpeak(text)
+export function PlayButton({
+  text,
+  label = 'Nghe thử',
+  voice,
+  speed,
+}: {
+  text: string
+  label?: string
+  /** Defaults to the saved voice. The voice picker gives each row its own. */
+  voice?: VoiceId
+  /** Defaults to the saved pace. */
+  speed?: SpeakingSpeed
+}) {
+  const { speaking, toggle, supported } = useSpeak(text, { voice, speed })
   return (
     <button
       type="button"

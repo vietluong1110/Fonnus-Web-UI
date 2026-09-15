@@ -56,7 +56,10 @@ export function useAppPath(): string[] {
 }
 
 export function parseAppPath(hash: string): string[] {
-  const rest = hash.startsWith(PATHS.app) ? hash.slice(PATHS.app.length) : ''
+  // A return from an outside consent screen can carry `?error=…` after the
+  // route. That is for the page to read, not a path segment.
+  const route = hash.split('?')[0]
+  const rest = route.startsWith(PATHS.app) ? route.slice(PATHS.app.length) : ''
   return rest.split('/').filter(Boolean)
 }
 

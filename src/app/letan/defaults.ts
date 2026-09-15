@@ -139,10 +139,10 @@ export const HOLIDAY_SEED: HolidayException[] = [
     seeded: true,
   },
   {
-    id: 'hol-quoc-khanh-2026',
+    id: 'hol-quoc-khanh-2027',
     holiday_label: 'Quốc khánh',
-    date_from: '2026-09-02',
-    date_to: '2026-09-02',
+    date_from: '2027-09-02',
+    date_to: '2027-09-02',
     closure_type: 'closed',
     modified_hours: null,
     seeded: true,

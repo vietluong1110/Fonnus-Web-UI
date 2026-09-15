@@ -125,6 +125,7 @@ const BY_CODE: Record<string, string> = {
   phone_in_use: 'Số này đã gắn với một tài khoản Fonnus khác.',
   email_from_google: 'Email này theo tài khoản Google. Bạn đổi ở Google giúp mình nhé.',
   calendar_denied: 'Chưa kết nối được lịch vì quyền truy cập bị từ chối. Bạn thử lại giúp mình nhé.',
+  appointment_state: 'Lịch hẹn này vừa có thay đổi. Mình đã tải lại để bạn xem tình trạng mới nhé.',
   google_only_method: 'Bạn đang đăng nhập bằng Google nên chưa huỷ liên kết được.',
   legal_name_required: 'Cần tên công ty in trên hoá đơn.',
   invalid_tax_code: 'Mã số thuế gồm 10 hoặc 13 chữ số.',

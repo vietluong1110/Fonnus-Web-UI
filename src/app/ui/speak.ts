@@ -104,8 +104,14 @@ function useBrowserVoice(): boolean {
   return has
 }
 
-export function useSpeak(text: string) {
+/**
+ * `voice` and `speed` default to the saved record. A row that auditions one
+ * voice among several passes its own; the Giọng nói page passes its draft.
+ */
+export function useSpeak(text: string, overrides?: { voice?: VoiceId; speed?: SpeakingSpeed }) {
   const { config } = useConfig()
+  const voice = overrides?.voice ?? config.voice_selection
+  const speed = overrides?.speed ?? config.speaking_speed
   const [speaking, setSpeaking] = useState(false)
   const stopRef = useRef<(() => void) | null>(null)
   const browserVoice = useBrowserVoice()
@@ -124,8 +130,8 @@ export function useSpeak(text: string) {
       return
     }
     setSpeaking(true)
-    stopRef.current = startSpeech(text, config.voice_selection, config.speaking_speed, () => setSpeaking(false))
-  }, [speaking, stop, text, config.voice_selection, config.speaking_speed])
+    stopRef.current = startSpeech(text, voice, speed, () => setSpeaking(false))
+  }, [speaking, stop, text, voice, speed])
 
   return {
     speaking,

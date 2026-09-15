@@ -108,6 +108,18 @@ export function SignUpPage() {
     setStep(next)
   }
 
+  // A resend that fails says so where the code goes — a 429 is the likely one,
+  // and an owner who sees nothing presses again. It clears any older code error.
+  async function resendCode(send: () => Promise<unknown>, lock: { restart: () => void }) {
+    lock.restart()
+    setCodeError(null)
+    try {
+      await send()
+    } catch (e) {
+      setCodeError(messageFor(e))
+    }
+  }
+
   async function submitPhone() {
     const problem = phoneError(phone)
     if (problem) return setFieldError(problem)
@@ -265,10 +277,7 @@ export function SignUpPage() {
 
           <OtpFooter
             secondsLeft={resend.left}
-            onResend={() => {
-              resend.restart()
-              void api.auth.sendPhoneCode(phone).catch(() => {})
-            }}
+            onResend={() => void resendCode(() => api.auth.sendPhoneCode(phone), resend)}
           />
         </AuthShell>
       )
@@ -396,10 +405,7 @@ export function SignUpPage() {
 
           <OtpFooter
             secondsLeft={emailResend.left}
-            onResend={() => {
-              emailResend.restart()
-              void api.auth.sendEmailCode(email).catch(() => {})
-            }}
+            onResend={() => void resendCode(() => api.auth.sendEmailCode(email), emailResend)}
             note="Không thấy email? Kiểm tra mục Spam."
           />
         </AuthShell>
@@ -484,10 +490,7 @@ export function SignUpPage() {
 
           <OtpFooter
             secondsLeft={resend.left}
-            onResend={() => {
-              resend.restart()
-              void api.auth.sendPhoneCode(phone).catch(() => {})
-            }}
+            onResend={() => void resendCode(() => api.auth.sendPhoneCode(phone), resend)}
           />
         </AuthShell>
       )
