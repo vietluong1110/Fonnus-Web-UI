@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, Icon, Shape } from '../../../design-system'
-import { api, isCanceled, messageFor } from '../../../api'
+import { api, isApiError, isCanceled, messageFor } from '../../../api'
 import type { Appointment, AppointmentAction, AppointmentsWeek } from '../../../api'
 import { appHref } from '../../../hooks/useRoute'
 import { PHONE_BREAKPOINT, useIsNarrow } from '../../../hooks/useIsNarrow'
@@ -216,6 +216,9 @@ export function AppointmentsPage() {
       }
     } catch (e) {
       toast(messageFor(e), 'error')
+      // The appointment moved on without this screen — the caller rang back, or
+      // it started. What is drawn is stale, so fetch the week again (contract §9).
+      if (isApiError(e) && e.code === 'appointment_state') setAttempt((n) => n + 1)
     } finally {
       setActing(false)
     }

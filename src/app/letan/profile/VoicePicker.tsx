@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../../../design-system'
 import { LABELS } from '../defaults'
-import type { VoiceId } from '../model'
+import type { SpeakingSpeed, VoiceId } from '../model'
 import { ControlShell, PlayButton } from '../../ui'
 import styles from './Profile.module.css'
 
@@ -14,8 +14,8 @@ import styles from './Profile.module.css'
  * grouped, one row per voice, each auditionable in place — so an owner who
  * tried the demo meets a control they have already used.
  *
- * Every row auditions the *same sentence*, so what is being compared is the
- * voice and not the script.
+ * Every row auditions the *same sentence*, in its own voice and at the draft's
+ * pace, so what is being compared is the voice and not the script.
  */
 
 const ORDER = ['Nữ', 'Nam'] as const
@@ -23,10 +23,12 @@ const ORDER = ['Nữ', 'Nam'] as const
 export function VoicePicker({
   value,
   onChange,
+  speed,
   sampleText,
 }: {
   value: VoiceId
   onChange: (id: VoiceId) => void
+  speed: SpeakingSpeed
   sampleText: string
 }) {
   const ids = Object.keys(LABELS.voices) as VoiceId[]
@@ -137,7 +139,7 @@ export function VoicePicker({
                       </span>
                       {/* Auditions the voice without choosing it. */}
                       <span onClick={(e) => e.stopPropagation()}>
-                        <PlayButton text={sampleText} label={`Nghe thử giọng ${v.name}`} />
+                        <PlayButton text={sampleText} label={`Nghe thử giọng ${v.name}`} voice={id} speed={speed} />
                       </span>
                     </div>
                   )

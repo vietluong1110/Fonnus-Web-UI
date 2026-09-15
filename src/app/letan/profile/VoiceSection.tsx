@@ -81,7 +81,7 @@ export function VoiceSection() {
       bar={<SaveBar {...d.bar} sub="Giọng nói và cách nói · áp dụng cho cuộc gọi tiếp theo" />}
     >
       <Card title="Giọng nói">
-        <VoicePicker value={draft.voice_selection} onChange={pickVoice} sampleText={audition} />
+        <VoicePicker value={draft.voice_selection} onChange={pickVoice} speed={draft.speaking_speed} sampleText={audition} />
         <span className={ui.hint}>
           Fonnus chọn sẵn giọng theo thành phố của phòng khám ({config.city}). Đổi lúc nào cũng được — mọi giọng đều nghe thử được ngay trong danh sách.
         </span>
@@ -118,7 +118,7 @@ export function VoiceSection() {
                     <span className={styles.tileName}>{LABELS.style[v]}</span>
                     <span className={styles.tileSample}>“{STYLE_SAMPLE[v]}”</span>
                   </button>
-                  <PlayButton text={STYLE_SAMPLE[v]} label={`Nghe câu mẫu ${LABELS.style[v]}`} />
+                  <PlayButton text={STYLE_SAMPLE[v]} label={`Nghe câu mẫu ${LABELS.style[v]}`} voice={draft.voice_selection} speed={draft.speaking_speed} />
                 </div>
               )
             })}
@@ -177,7 +177,7 @@ export function VoiceSection() {
                 value={draft.silence_nudge_script}
                 onChange={(e) => set('silence_nudge_script', e.target.value)}
                 aria-label="Câu hỏi lại"
-                suffix={<PlayButton text={draft.silence_nudge_script} label="Nghe câu hỏi lại" />}
+                suffix={<PlayButton text={draft.silence_nudge_script} label="Nghe câu hỏi lại" voice={draft.voice_selection} speed={draft.speaking_speed} />}
               />
             </>
           ) : null}
@@ -207,7 +207,7 @@ export function VoiceSection() {
                 value={draft.call_closing_script}
                 onChange={(e) => set('call_closing_script', e.target.value)}
                 aria-label="Câu chào trước khi ngắt máy"
-                suffix={<PlayButton text={draft.call_closing_script} label="Nghe câu chào cuối" />}
+                suffix={<PlayButton text={draft.call_closing_script} label="Nghe câu chào cuối" voice={draft.voice_selection} speed={draft.speaking_speed} />}
               />
             </>
           ) : null}

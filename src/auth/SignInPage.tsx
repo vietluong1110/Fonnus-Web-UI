@@ -58,6 +58,18 @@ export function SignInPage() {
     setStep(next)
   }
 
+  // A resend that fails says so where the code goes — a 429 is the likely one,
+  // and an owner who sees nothing presses again. It clears any older code error.
+  async function resendCode(send: () => Promise<unknown>) {
+    resend.restart()
+    setCodeError(null)
+    try {
+      await send()
+    } catch (e) {
+      setCodeError(messageFor(e))
+    }
+  }
+
   // The server has set the session cookie: record who is in and go to the shell.
   const enterApp = useCallback(
     (me: Me) => {
@@ -199,10 +211,7 @@ export function SignInPage() {
 
           <OtpFooter
             secondsLeft={resend.left}
-            onResend={() => {
-              resend.restart()
-              void api.auth.sendPhoneCode(phone).catch(() => {})
-            }}
+            onResend={() => void resendCode(() => api.auth.sendPhoneCode(phone))}
           />
         </AuthShell>
       )
@@ -288,10 +297,7 @@ export function SignInPage() {
 
           <OtpFooter
             secondsLeft={resend.left}
-            onResend={() => {
-              resend.restart()
-              void api.auth.sendEmailCode(email).catch(() => {})
-            }}
+            onResend={() => void resendCode(() => api.auth.sendEmailCode(email))}
             note="Không thấy email? Kiểm tra mục Spam."
           />
         </AuthShell>
